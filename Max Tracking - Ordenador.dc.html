@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Max Tracking · Ordenador</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<style>html,body{margin:0;background:#0B0C0E;overflow:hidden}</style>
+</helmet>
+<dc-import name="Max Tracking" device="desktop" athlete-name="{{ athleteName }}" ai-live="{{ aiLive }}"></dc-import>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;aiLive&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;IA&quot;},&quot;athleteName&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;Martí&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Deportista&quot;}}">
+// Pàgina d'ordinador: tota la lògica és a «Max Tracking.dc.html».
+class Component extends DCLogic {
+  renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

@@ -27,19 +27,19 @@ button{font:inherit;color:inherit}
 @keyframes mtStrike{from{transform:scaleX(0)}to{transform:scaleX(1)}}
 @keyframes mtBreath{0%,100%{opacity:.65}50%{opacity:1}}
 @keyframes mtThink{0%,50%,100%{stroke:rgba(236,238,241,.1)}25%{stroke:rgba(236,238,241,.55)}}
+@keyframes mtPop{from{opacity:0;transform:scale(.2)}to{opacity:1;transform:scale(1)}}
+@keyframes mtGlow{0%,100%{opacity:.22}50%{opacity:.6}}
+@keyframes mtWord{from{opacity:0;transform:translateY(6px);filter:blur(3px)}to{opacity:1;transform:none;filter:none}}
+@keyframes mtSq{from{opacity:0;transform:scaleX(0)}to{opacity:1;transform:scaleX(1)}}
+.mt-pb{opacity:.45;transition:opacity .2s,transform .2s}.mt-pb:hover,.mt-pb[data-open]{opacity:1}.mt-pb:hover{transform:translateY(-1px)}
+.mt-pr{transition:background .15s,color .15s}.mt-pr:hover{background:rgba(255,255,255,.06)!important;color:#ECEEF1!important}
+.mt-hc .mt-dot{opacity:.18;transition:opacity .2s,transform .2s}.mt-hc:hover .mt-dot{opacity:.9;transform:scale(1.4)}
 </style>
 </helmet>
-<div style="min-height:100vh;display:flex;flex-direction:column;background:#141517;color:#ECEEF1">
-<div style="display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px 28px;padding:12px 24px;border-bottom:1px solid rgba(255,255,255,.08)">
-<div style="display:flex;align-items:baseline;gap:14px;font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.14em"><span>MAX TRACKING</span><span style="color:rgba(236,238,241,.5)">PROTOTIPO · APP DEL DEPORTISTA</span></div>
-<div style="display:flex;flex-wrap:wrap;align-items:center;gap:12px 20px">
-<div style="display:flex;align-items:center;gap:10px"><span style="font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.14em;color:rgba(236,238,241,.5)">ESCENARIO</span><div style="display:flex;flex-wrap:wrap;gap:2px;padding:3px;border:1px solid rgba(255,255,255,.12);border-radius:8px"><sc-for list="{{ scnBtns }}" as="b" hint-placeholder-count="5"><button style="{{ b.style }}" onClick="{{ b.onClick }}">{{ b.label }}</button></sc-for></div></div>
-<div style="display:flex;align-items:center;gap:10px"><span style="font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.14em;color:rgba(236,238,241,.5)">DISPOSITIVO</span><div style="display:flex;gap:2px;padding:3px;border:1px solid rgba(255,255,255,.12);border-radius:8px"><sc-for list="{{ devBtns }}" as="b" hint-placeholder-count="2"><button style="{{ b.style }}" onClick="{{ b.onClick }}">{{ b.label }}</button></sc-for></div></div>
-</div>
-</div>
-<div style="flex:1;display:flex;justify-content:center;align-items:flex-start;padding:20px">
+<div style="{{ rootSt }}">
 
 <sc-if value="{{ isMobile }}" hint-placeholder-val="{{ true }}">
+<div style="min-height:100vh;box-sizing:border-box;display:flex;justify-content:center;align-items:center;padding:24px">
 <div style="{{ phoneBox }}"><div style="{{ phoneScale }}">
 <x-import component-from-global-scope="IOSDevice" from="./ios-frame.jsx" dark="{{ true }}" hint-size="402px,874px">
 <div ref="{{ phoneRef }}" style="min-height:100%;display:flex;flex-direction:column;background:#0B0C0E;color:#ECEEF1;font-family:'Schibsted Grotesk',system-ui,sans-serif">
@@ -49,13 +49,13 @@ button{font:inherit;color:inherit}
 <sc-if value="{{ m.avui }}" hint-placeholder-val="{{ true }}">
 <div style="display:flex;flex-direction:column;animation:mtIn .42s cubic-bezier(.2,.7,.2,1) both">
 <div style="padding:12px 24px 0;font-size:22px;font-weight:500;letter-spacing:-.01em">{{ av.greet }}</div>
-<div style="margin:18px 24px 6px;padding:18px;display:flex;align-items:center;gap:18px;background:#121316;border:1px solid rgba(255,255,255,.08);border-radius:18px">
+<div style="position:relative;overflow:hidden;flex:none;margin:18px 24px 6px;padding:18px;display:flex;align-items:center;gap:18px;background:#121316;border:1px solid rgba(255,255,255,.08);border-radius:18px">
 <div style="flex:none">{{ av.ring }}</div>
 <div style="flex:1;min-width:0;display:flex;flex-direction:column">
 <div style="font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.14em;color:rgba(236,238,241,.5)">ESTAT D'AVUI</div>
 <div style="margin-top:8px;font-size:32px;font-weight:600;letter-spacing:-.02em;line-height:1.05">{{ av.word }}</div>
 <div style="margin-top:8px;font-size:14px;line-height:1.4;color:rgba(236,238,241,.65);text-wrap:pretty">{{ av.line }}</div>
-<div style="margin-top:12px;align-self:flex-start;padding:6px 10px;border:1px solid rgba(255,255,255,.1);border-radius:10px;background:rgba(255,255,255,.03);font-family:'IBM Plex Mono',monospace;font-size:11px;line-height:1.35;color:rgba(236,238,241,.8)">{{ av.chip }}</div>
+<div style="margin-top:12px">{{ av.status }}</div>
 </div>
 </div>
 <div style="margin:0 24px;padding:16px 0;border-bottom:1px solid rgba(255,255,255,.08)">
@@ -65,7 +65,7 @@ button{font:inherit;color:inherit}
 <div style="margin-top:12px;font-family:'IBM Plex Mono',monospace;font-size:9px;letter-spacing:.1em;line-height:1.6;color:rgba(236,238,241,.5)">NO ÉS UN DIAGNÒSTIC MÈDIC · SI ALGUNA COSA NO VA BÉ, PARLA-HO AMB L'ENTRENADOR</div>
 </div>
 <div style="margin:0 24px;padding:14px 0 0;font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.14em;color:rgba(236,238,241,.5)">{{ av.basis }}</div>
-<div style="margin:0 24px 28px;display:grid;grid-template-columns:1fr 1fr"><sc-for list="{{ av.cells }}" as="c" hint-placeholder-count="4"><button style="{{ c.box }}" onClick="{{ c.onClick }}"><span style="font-family:'IBM Plex Mono',monospace;font-size:28px;font-weight:500;line-height:1"><span style="{{ c.vc }}">{{ c.v }}</span><span style="margin-left:6px;font-size:11px;font-weight:400;color:rgba(236,238,241,.5)">{{ c.unit }}</span></span><span style="margin-top:8px;font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.12em;color:rgba(236,238,241,.5)">{{ c.label }}</span><span style="margin-top:4px;font-family:'IBM Plex Mono',monospace;font-size:10px"><span style="{{ c.dc }}">{{ c.d }}</span></span></button></sc-for></div>
+<div style="margin:0 24px 28px;display:grid;grid-template-columns:1fr 1fr"><sc-for list="{{ av.cells }}" as="c" hint-placeholder-count="4"><button style="{{ c.box }}" style-hover="background:rgba(255,255,255,.025)" onClick="{{ c.onClick }}"><span style="font-family:'IBM Plex Mono',monospace;font-size:28px;font-weight:500;line-height:1"><span style="{{ c.vc }}">{{ c.v }}</span><span style="margin-left:6px;font-size:11px;font-weight:400;color:rgba(236,238,241,.5)">{{ c.unit }}</span></span><span style="margin-top:8px;font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.12em;color:rgba(236,238,241,.5)">{{ c.label }}</span><span style="margin-top:4px;font-family:'IBM Plex Mono',monospace;font-size:10px"><span style="{{ c.dc }}">{{ c.d }}</span></span><span style="margin-top:12px;display:block">{{ c.spark }}</span></button></sc-for></div>
 </div>
 </sc-if>
 
@@ -88,13 +88,13 @@ button{font:inherit;color:inherit}
 <sc-if value="{{ ev.zoomed }}" hint-placeholder-val="{{ false }}"><div style="display:flex;justify-content:space-between;align-items:center;width:314px;margin-top:12px"><span style="font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.12em">{{ ev.zoomLabel }}</span><button style="background:transparent;border:1px solid rgba(255,255,255,.16);padding:6px 9px;cursor:pointer;font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.1em" style-hover="background:rgba(255,255,255,.06)" onClick="{{ ev.back }}">← 28 DIES</button></div></sc-if>
 </div>
 <div style="margin:16px 24px 0;display:grid;grid-template-columns:repeat(3,1fr);border-top:1px solid rgba(255,255,255,.08);border-bottom:1px solid rgba(255,255,255,.08);font-family:'IBM Plex Mono',monospace">
-<div style="padding:12px 10px 12px 0;border-right:1px solid rgba(255,255,255,.08)"><div style="font-size:16px;font-weight:500;line-height:1">{{ ev.avg }}</div><div style="margin-top:6px;font-size:9px;letter-spacing:.12em;color:rgba(236,238,241,.5)">{{ ev.avgL }}</div></div>
+<div style="padding:12px 10px 12px 0;border-right:1px solid rgba(255,255,255,.08)"><div style="font-size:16px;font-weight:500;line-height:1"><span style="{{ ev.avgC }}">{{ ev.avg }}</span></div><div style="margin-top:6px;font-size:9px;letter-spacing:.12em;color:rgba(236,238,241,.5)">{{ ev.avgL }}</div></div>
 <div style="padding:12px 10px;border-right:1px solid rgba(255,255,255,.08)"><div style="font-size:16px;font-weight:500;line-height:1;white-space:nowrap">{{ ev.bandT }}</div><div style="margin-top:6px;font-size:9px;letter-spacing:.12em;color:rgba(236,238,241,.5)">LA TEVA FRANJA</div></div>
-<div style="padding:12px 0 12px 10px"><div style="font-size:16px;font-weight:500;line-height:1"><span style="{{ ev.outC }}">{{ ev.outT }}</span></div><div style="margin-top:6px;font-size:9px;letter-spacing:.12em;color:rgba(236,238,241,.5)">DIES PER VIGILAR</div></div>
+<div style="padding:12px 0 12px 10px"><div style="font-size:16px;font-weight:500;line-height:1"><span style="{{ ev.outC }}">{{ ev.outT }}</span></div><div style="margin-top:6px;font-size:9px;letter-spacing:.12em;color:rgba(236,238,241,.5)">{{ ev.outL }}</div></div>
 </div>
 <div style="margin:14px 24px 0;display:flex;flex-wrap:wrap;gap:8px 16px;font-family:'IBM Plex Mono',monospace;font-size:9px;letter-spacing:.1em;color:rgba(236,238,241,.5)">
 <div style="display:flex;align-items:center;gap:7px"><span style="width:14px;height:8px;background:rgba(236,238,241,.08);border-top:1px dashed rgba(236,238,241,.4)"></span><span>LA TEVA FRANJA · ÚLTIMES SETMANES</span></div>
-<div style="display:flex;align-items:center;gap:7px"><span style="width:7px;height:7px;border-radius:50%;background:#FF7B61"></span><span>PER VIGILAR</span></div>
+<div style="display:flex;align-items:center;gap:7px"><span style="{{ legendSw }}"></span><span>PER VIGILAR → BÉ</span></div>
 <div style="display:flex;align-items:center;gap:7px"><span style="width:1px;height:10px;border-left:1px dashed rgba(236,238,241,.45)"></span><span>SENSE DADES</span></div>
 </div>
 <div style="margin:10px 24px 0;font-family:'IBM Plex Mono',monospace;font-size:9px;letter-spacing:.1em;color:rgba(236,238,241,.5)">PASSA EL DIT PEL GRÀFIC PER VEURE CADA DIA</div>
@@ -117,11 +117,11 @@ button{font:inherit;color:inherit}
 <div style="margin-top:8px;min-height:16px;font-family:'IBM Plex Mono',monospace;font-size:11px;color:rgba(236,238,241,.65)">{{ se.sub }}</div>
 </div>
 <div style="margin:16px 24px 0;display:flex;flex-wrap:wrap;gap:8px 16px;font-family:'IBM Plex Mono',monospace;font-size:9px;letter-spacing:.1em;color:rgba(236,238,241,.65)">
-<div style="display:flex;align-items:center;gap:7px"><span style="width:16px;height:2px;background:#ECEEF1"></span><span>COM ET SENTS</span></div>
+<div style="display:flex;align-items:center;gap:7px"><span style="{{ seLeg }}"></span><span>COM ET SENTS</span></div>
 <div style="display:flex;align-items:center;gap:7px"><span style="width:16px;border-top:1.5px dashed rgba(236,238,241,.6)"></span><span>QUÈ DIUEN LES DADES</span></div>
-<div style="display:flex;align-items:center;gap:7px"><span style="width:8px;height:10px;background:rgba(217,179,106,.16);border-left:2px solid #D9B36A"></span><span>NO COINCIDEIXEN</span></div>
+<div style="display:flex;align-items:center;gap:7px"><span style="width:8px;height:10px;background:rgba(236,238,241,.08);border-left:2px solid rgba(236,238,241,.8)"></span><span>NO COINCIDEIXEN</span></div>
 </div>
-<div style="margin:12px 24px 0;width:354px">{{ se.chart }}<div style="display:flex;justify-content:space-between;margin-top:8px;font-family:'IBM Plex Mono',monospace;font-size:9px;letter-spacing:.08em;color:rgba(236,238,241,.5)"><span>{{ se.x0 }}</span><span style="color:#ECEEF1">AVUI</span></div></div>
+<div style="margin:12px 24px 0;width:354px">{{ se.chart }}<div style="display:flex;justify-content:space-between;margin-top:8px;padding-right:48px;font-family:'IBM Plex Mono',monospace;font-size:9px;letter-spacing:.08em;color:rgba(236,238,241,.5)"><span>{{ se.x0 }}</span><span style="color:#ECEEF1">AVUI</span></div></div>
 <div style="margin:18px 24px 0;padding-top:14px;border-top:1px solid rgba(255,255,255,.08)">
 <div style="font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.14em;color:rgba(236,238,241,.5)">LA IA, SOBRE AIXÒ</div>
 <sc-if value="{{ se.loading }}" hint-placeholder-val="{{ false }}"><div style="display:flex;flex-direction:column;gap:9px;margin-top:14px"><div style="height:9px;width:100%;background:rgba(255,255,255,.08);animation:mtPulse 1.6s ease-in-out infinite"></div><div style="height:9px;width:70%;background:rgba(255,255,255,.08);animation:mtPulse 1.6s ease-in-out .15s infinite"></div></div></sc-if>
@@ -142,8 +142,8 @@ button{font:inherit;color:inherit}
 <sc-if value="{{ wk.has }}" hint-placeholder-val="{{ true }}">
 <div style="display:flex;flex-direction:column">
 <div style="margin:16px 24px 0;display:flex;justify-content:space-between;align-items:baseline;gap:12px;font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.12em;color:rgba(236,238,241,.5)"><span style="color:#ECEEF1">{{ wk.label }}</span><span>{{ wk.pubShort }}</span></div>
-<div style="margin:12px 24px 0;display:grid;grid-template-columns:repeat(7,1fr);border-top:1px solid rgba(255,255,255,.08);border-bottom:1px solid rgba(255,255,255,.08)"><sc-for list="{{ wk.days }}" as="dd" hint-placeholder-count="7"><div style="display:flex;flex-direction:column;align-items:center;gap:8px;padding:12px 0"><span style="font-family:'IBM Plex Mono',monospace;font-size:9px;letter-spacing:.08em;color:rgba(236,238,241,.5)">{{ dd.wd }}</span><div style="position:relative;width:2px;height:56px;background:rgba(255,255,255,.1)"><span style="{{ dd.dot }}"></span></div><span style="font-family:'IBM Plex Mono',monospace;font-size:10px;color:rgba(236,238,241,.65)">{{ dd.day }}</span></div></sc-for></div>
-<div style="margin:8px 24px 0;display:flex;justify-content:space-between;font-family:'IBM Plex Mono',monospace;font-size:9px;letter-spacing:.1em;color:rgba(236,238,241,.5)"><span>CADA PUNT ÉS L'ESTAT D'UN DIA</span><span>A DALT, A FONS</span></div>
+<div style="margin:12px 24px 0;border-top:1px solid rgba(255,255,255,.08);border-bottom:1px solid rgba(255,255,255,.08)">{{ wk.strip }}</div>
+<div style="margin:8px 24px 0;display:flex;justify-content:space-between;gap:12px;font-family:'IBM Plex Mono',monospace;font-size:9px;letter-spacing:.1em;color:rgba(236,238,241,.5)"><span>L'ESTAT DE CADA DIA</span><span>{{ wk.sum }}</span></div>
 <sc-if value="{{ wk.loading }}" hint-placeholder-val="{{ false }}"><div style="display:flex;flex-direction:column;gap:10px;margin:24px 24px 0"><div style="display:flex;align-items:center;gap:8px;font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.12em;color:rgba(236,238,241,.5)"><span style="width:6px;height:6px;border-radius:50%;background:#ECEEF1;animation:mtPulse 1.1s ease-in-out infinite"></span><span>LA IA ESTÀ REPASSANT LA SETMANA…</span></div><div style="height:22px;width:70%;background:rgba(255,255,255,.08);animation:mtPulse 1.6s ease-in-out infinite"></div><div style="height:9px;width:100%;margin-top:8px;background:rgba(255,255,255,.08);animation:mtPulse 1.6s ease-in-out .15s infinite"></div><div style="height:9px;width:90%;background:rgba(255,255,255,.08);animation:mtPulse 1.6s ease-in-out .3s infinite"></div><div style="height:9px;width:55%;background:rgba(255,255,255,.08);animation:mtPulse 1.6s ease-in-out .45s infinite"></div></div></sc-if>
 <sc-if value="{{ wk.ready }}" hint-placeholder-val="{{ false }}">
 <div style="margin:22px 24px 0;display:flex;flex-direction:column;animation:mtFade .6s both">
@@ -218,21 +218,21 @@ button{font:inherit;color:inherit}
 </div>
 </x-import>
 </div></div>
+</div>
 </sc-if>
 
 <sc-if value="{{ isDesk }}" hint-placeholder-val="{{ false }}">
-<div style="{{ deskBox }}"><div style="{{ deskScale }}">
-<div style="width:1280px;height:800px;display:grid;grid-template-columns:400px minmax(0,1fr);background:#0B0C0E;color:#ECEEF1;border:1px solid rgba(255,255,255,.1);border-radius:14px;overflow:hidden;box-shadow:0 40px 90px rgba(0,0,0,.45);font-family:'Schibsted Grotesk',system-ui,sans-serif">
+<div style="{{ deskApp }}">
 <div style="display:flex;flex-direction:column;padding:0 32px 28px;border-right:1px solid rgba(255,255,255,.08);overflow-y:auto">
 <div style="flex:none;display:flex;justify-content:space-between;align-items:center;height:64px;border-bottom:1px solid rgba(255,255,255,.08);font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.14em;color:rgba(236,238,241,.5)"><span style="color:#ECEEF1">MAX TRACKING</span><span>DIJOUS 24 SET</span></div>
 <div style="padding-top:26px;font-size:24px;font-weight:500;letter-spacing:-.01em">{{ av.greet }}</div>
-<div style="margin:20px 0 4px;padding:18px;display:flex;align-items:center;gap:18px;background:#121316;border:1px solid rgba(255,255,255,.08);border-radius:18px">
+<div style="position:relative;overflow:hidden;flex:none;margin:20px 0 4px;padding:18px;display:flex;align-items:center;gap:18px;background:#121316;border:1px solid rgba(255,255,255,.08);border-radius:18px">
 <div style="flex:none">{{ av.ring }}</div>
 <div style="flex:1;min-width:0;display:flex;flex-direction:column">
 <div style="font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.14em;color:rgba(236,238,241,.5)">ESTAT D'AVUI</div>
 <div style="margin-top:8px;font-size:32px;font-weight:600;letter-spacing:-.02em;line-height:1.05">{{ av.word }}</div>
 <div style="margin-top:8px;font-size:14px;line-height:1.4;color:rgba(236,238,241,.65);text-wrap:pretty">{{ av.line }}</div>
-<div style="margin-top:12px;align-self:flex-start;padding:6px 10px;border:1px solid rgba(255,255,255,.1);border-radius:10px;background:rgba(255,255,255,.03);font-family:'IBM Plex Mono',monospace;font-size:11px;line-height:1.35;color:rgba(236,238,241,.8)">{{ av.chip }}</div>
+<div style="margin-top:12px">{{ av.status }}</div>
 </div>
 </div>
 <div style="padding:18px 0;border-bottom:1px solid rgba(255,255,255,.08)">
@@ -242,42 +242,42 @@ button{font:inherit;color:inherit}
 <div style="margin-top:12px;font-family:'IBM Plex Mono',monospace;font-size:9px;letter-spacing:.1em;line-height:1.6;color:rgba(236,238,241,.5)">NO ÉS UN DIAGNÒSTIC MÈDIC · SI ALGUNA COSA NO VA BÉ, PARLA-HO AMB L'ENTRENADOR</div>
 </div>
 <div style="padding:14px 0 0;font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.14em;color:rgba(236,238,241,.5)">{{ av.basis }}</div>
-<div style="display:grid;grid-template-columns:1fr 1fr"><sc-for list="{{ av.cells }}" as="c" hint-placeholder-count="4"><button style="{{ c.box }}" onClick="{{ c.onClick }}"><span style="font-family:'IBM Plex Mono',monospace;font-size:28px;font-weight:500;line-height:1"><span style="{{ c.vc }}">{{ c.v }}</span><span style="margin-left:6px;font-size:11px;font-weight:400;color:rgba(236,238,241,.5)">{{ c.unit }}</span></span><span style="margin-top:8px;font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.12em;color:rgba(236,238,241,.5)">{{ c.label }}</span><span style="margin-top:4px;font-family:'IBM Plex Mono',monospace;font-size:10px"><span style="{{ c.dc }}">{{ c.d }}</span></span></button></sc-for></div>
+<div style="display:grid;grid-template-columns:1fr 1fr"><sc-for list="{{ av.cells }}" as="c" hint-placeholder-count="4"><button style="{{ c.box }}" style-hover="background:rgba(255,255,255,.025)" onClick="{{ c.onClick }}"><span style="font-family:'IBM Plex Mono',monospace;font-size:28px;font-weight:500;line-height:1"><span style="{{ c.vc }}">{{ c.v }}</span><span style="margin-left:6px;font-size:11px;font-weight:400;color:rgba(236,238,241,.5)">{{ c.unit }}</span></span><span style="margin-top:8px;font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.12em;color:rgba(236,238,241,.5)">{{ c.label }}</span><span style="margin-top:4px;font-family:'IBM Plex Mono',monospace;font-size:10px"><span style="{{ c.dc }}">{{ c.d }}</span></span><span style="margin-top:12px;display:block">{{ c.spark }}</span></button></sc-for></div>
 </div>
 <div ref="{{ deskRef }}" style="display:flex;flex-direction:column;min-width:0;overflow-y:auto">
 <div style="position:sticky;top:0;z-index:3;flex:none;display:flex;justify-content:space-between;align-items:center;height:64px;padding:0 40px;background:#0B0C0E;border-bottom:1px solid rgba(255,255,255,.08)"><div style="display:flex;gap:32px"><sc-for list="{{ navD }}" as="n" hint-placeholder-count="4"><button style="{{ n.style }}" onClick="{{ n.onClick }}">{{ n.label }}</button></sc-for></div><span style="font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.12em;color:rgba(236,238,241,.5)">{{ who.name }} · {{ who.code }}</span></div>
 
 <sc-if value="{{ d.evol }}" hint-placeholder-val="{{ true }}">
-<div style="display:flex;flex-direction:column;padding:22px 40px 40px;animation:mtIn .42s cubic-bezier(.2,.7,.2,1) both">
+<div style="display:flex;flex-direction:column;box-sizing:border-box;width:100%;max-width:{{ dg.maxW }}px;padding:22px 40px 88px;animation:mtIn .42s cubic-bezier(.2,.7,.2,1) both">
 <div style="display:flex;justify-content:space-between;align-items:flex-end;border-bottom:1px solid rgba(255,255,255,.08)"><div style="display:flex;gap:28px"><sc-for list="{{ ev.tabs }}" as="t" hint-placeholder-count="4"><button style="{{ t.style }}" onClick="{{ t.onClick }}">{{ t.label }}</button></sc-for></div><div style="display:flex;gap:2px;padding:2px;margin-bottom:8px;border:1px solid rgba(255,255,255,.12)"><sc-for list="{{ ev.ranges }}" as="r" hint-placeholder-count="2"><button style="{{ r.style }}" onClick="{{ r.onClick }}">{{ r.label }}</button></sc-for></div></div>
 <div style="display:flex;justify-content:space-between;align-items:flex-end;gap:24px;margin-top:22px">
 <div><div style="font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.14em;color:rgba(236,238,241,.5)">{{ ev.label }}</div><div style="display:flex;align-items:baseline;gap:10px;margin-top:10px"><span style="font-family:'IBM Plex Mono',monospace;font-size:56px;font-weight:500;line-height:1;letter-spacing:-.01em"><span style="{{ ev.bigC }}">{{ ev.big }}</span></span><span style="font-family:'IBM Plex Mono',monospace;font-size:13px;letter-spacing:.08em;color:rgba(236,238,241,.5)">{{ ev.unit }}</span></div><div style="margin-top:10px;min-height:16px;font-family:'IBM Plex Mono',monospace;font-size:12px"><span style="{{ ev.subC }}">{{ ev.sub }}</span></div></div>
 <div style="display:flex;font-family:'IBM Plex Mono',monospace">
-<div style="padding:0 24px;border-left:1px solid rgba(255,255,255,.08)"><div style="font-size:20px;font-weight:500;line-height:1">{{ ev.avg }}</div><div style="margin-top:8px;font-size:9px;letter-spacing:.12em;color:rgba(236,238,241,.5)">{{ ev.avgL }}</div></div>
+<div style="padding:0 24px;border-left:1px solid rgba(255,255,255,.08)"><div style="font-size:20px;font-weight:500;line-height:1"><span style="{{ ev.avgC }}">{{ ev.avg }}</span></div><div style="margin-top:8px;font-size:9px;letter-spacing:.12em;color:rgba(236,238,241,.5)">{{ ev.avgL }}</div></div>
 <div style="padding:0 24px;border-left:1px solid rgba(255,255,255,.08)"><div style="font-size:20px;font-weight:500;line-height:1;white-space:nowrap">{{ ev.bandT }}</div><div style="margin-top:8px;font-size:9px;letter-spacing:.12em;color:rgba(236,238,241,.5)">LA TEVA FRANJA</div></div>
-<div style="padding:0 0 0 24px;border-left:1px solid rgba(255,255,255,.08)"><div style="font-size:20px;font-weight:500;line-height:1"><span style="{{ ev.outC }}">{{ ev.outT }}</span></div><div style="margin-top:8px;font-size:9px;letter-spacing:.12em;color:rgba(236,238,241,.5)">DIES PER VIGILAR</div></div>
+<div style="padding:0 0 0 24px;border-left:1px solid rgba(255,255,255,.08)"><div style="font-size:20px;font-weight:500;line-height:1"><span style="{{ ev.outC }}">{{ ev.outT }}</span></div><div style="margin-top:8px;font-size:9px;letter-spacing:.12em;color:rgba(236,238,241,.5)">{{ ev.outL }}</div></div>
 </div>
 </div>
-<div style="margin-top:20px;width:800px">
+<div style="margin-top:20px;width:{{ dg.cw }}px">
 {{ ev.chart }}
-<sc-if value="{{ ev.days }}" hint-placeholder-val="{{ true }}"><div style="display:flex;width:752px;margin-top:10px"><sc-for list="{{ ev.labels }}" as="l" hint-placeholder-count="7"><span style="flex:1;text-align:center;font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.06em;white-space:nowrap"><span style="{{ l.st }}">{{ l.t }}</span></span></sc-for></div></sc-if>
-<sc-if value="{{ ev.weeks }}" hint-placeholder-val="{{ false }}"><div style="display:flex;width:752px;margin-top:8px;border-left:1px solid rgba(255,255,255,.08)"><sc-for list="{{ ev.weeksList }}" as="w" hint-placeholder-count="4"><button style="flex:1;display:flex;justify-content:center;align-items:baseline;gap:12px;padding:10px 0;background:transparent;border:none;border-right:1px solid rgba(255,255,255,.08);cursor:zoom-in;font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.06em;color:rgba(236,238,241,.65);white-space:nowrap" style-hover="background:rgba(255,255,255,.05);color:#ECEEF1" onClick="{{ w.onClick }}"><span>{{ w.t }}</span><span style="{{ w.fc }}">{{ w.f }}</span></button></sc-for></div></sc-if>
-<sc-if value="{{ ev.zoomed }}" hint-placeholder-val="{{ false }}"><div style="display:flex;justify-content:space-between;align-items:center;width:752px;margin-top:14px"><span style="font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.12em">{{ ev.zoomLabel }}</span><button style="background:transparent;border:1px solid rgba(255,255,255,.16);padding:6px 10px;cursor:pointer;font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.1em" style-hover="background:rgba(255,255,255,.06)" onClick="{{ ev.back }}">← 28 DIES</button></div></sc-if>
+<sc-if value="{{ ev.days }}" hint-placeholder-val="{{ true }}"><div style="display:flex;width:{{ dg.lw }}px;margin-top:10px"><sc-for list="{{ ev.labels }}" as="l" hint-placeholder-count="7"><span style="flex:1;text-align:center;font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.06em;white-space:nowrap"><span style="{{ l.st }}">{{ l.t }}</span></span></sc-for></div></sc-if>
+<sc-if value="{{ ev.weeks }}" hint-placeholder-val="{{ false }}"><div style="display:flex;width:{{ dg.lw }}px;margin-top:8px;border-left:1px solid rgba(255,255,255,.08)"><sc-for list="{{ ev.weeksList }}" as="w" hint-placeholder-count="4"><button style="flex:1;display:flex;justify-content:center;align-items:center;gap:12px;padding:10px 0;background:transparent;border:none;border-right:1px solid rgba(255,255,255,.08);cursor:zoom-in;font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.06em;color:rgba(236,238,241,.65);white-space:nowrap" style-hover="background:rgba(255,255,255,.05);color:#ECEEF1" onClick="{{ w.onClick }}"><span>{{ w.t }}</span><span style="{{ w.fc }}">{{ w.f }}</span></button></sc-for></div></sc-if>
+<sc-if value="{{ ev.zoomed }}" hint-placeholder-val="{{ false }}"><div style="display:flex;justify-content:space-between;align-items:center;width:{{ dg.lw }}px;margin-top:14px"><span style="font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.12em">{{ ev.zoomLabel }}</span><button style="background:transparent;border:1px solid rgba(255,255,255,.16);padding:6px 10px;cursor:pointer;font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.1em" style-hover="background:rgba(255,255,255,.06)" onClick="{{ ev.back }}">← 28 DIES</button></div></sc-if>
 </div>
 <div style="margin-top:14px;display:flex;flex-wrap:wrap;gap:8px 20px;font-family:'IBM Plex Mono',monospace;font-size:9px;letter-spacing:.1em;color:rgba(236,238,241,.5)">
 <div style="display:flex;align-items:center;gap:7px"><span style="width:14px;height:8px;background:rgba(236,238,241,.08);border-top:1px dashed rgba(236,238,241,.4)"></span><span>LA TEVA FRANJA · ÚLTIMES SETMANES</span></div>
-<div style="display:flex;align-items:center;gap:7px"><span style="width:7px;height:7px;border-radius:50%;background:#FF7B61"></span><span>PER VIGILAR</span></div>
+<div style="display:flex;align-items:center;gap:7px"><span style="{{ legendSw }}"></span><span>PER VIGILAR → BÉ</span></div>
 <div style="display:flex;align-items:center;gap:7px"><span style="width:1px;height:10px;border-left:1px dashed rgba(236,238,241,.45)"></span><span>SENSE DADES</span></div>
 <span>PASSA EL RATOLÍ PEL GRÀFIC PER VEURE CADA DIA · A 28 DIES, TRIA UNA SETMANA PER AMPLIAR-LA</span>
 </div>
-<div style="display:grid;grid-template-columns:376px 376px;gap:48px;margin-top:30px;padding-top:22px;border-top:1px solid rgba(255,255,255,.08)">
+<div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:48px;margin-top:30px;padding-top:22px;border-top:1px solid rgba(255,255,255,.08)">
 <div style="display:flex;flex-direction:column">
 <div style="display:flex;justify-content:space-between;align-items:baseline;font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.14em;color:rgba(236,238,241,.5)"><span>SENSACIÓ VS DADES</span><sc-if value="{{ se.has }}" hint-placeholder-val="{{ true }}"><span>COINCIDEIXEN <span style="font-size:16px;letter-spacing:0;color:#ECEEF1">{{ se.k }}</span> DE {{ se.n }}</span></sc-if></div>
 <sc-if value="{{ se.has }}" hint-placeholder-val="{{ true }}">
 <div style="display:flex;flex-direction:column">
 <div style="margin-top:8px;min-height:15px;font-family:'IBM Plex Mono',monospace;font-size:11px;color:rgba(236,238,241,.65)">{{ se.sub }}</div>
-<div style="margin-top:12px;display:flex;flex-wrap:wrap;gap:8px 16px;font-family:'IBM Plex Mono',monospace;font-size:9px;letter-spacing:.1em;color:rgba(236,238,241,.65)"><div style="display:flex;align-items:center;gap:7px"><span style="width:16px;height:2px;background:#ECEEF1"></span><span>COM ET SENTS</span></div><div style="display:flex;align-items:center;gap:7px"><span style="width:16px;border-top:1.5px dashed rgba(236,238,241,.6)"></span><span>QUÈ DIUEN LES DADES</span></div><div style="display:flex;align-items:center;gap:7px"><span style="width:8px;height:10px;background:rgba(217,179,106,.16);border-left:2px solid #D9B36A"></span><span>NO COINCIDEIXEN</span></div></div>
-<div style="margin-top:12px">{{ se.chart }}<div style="display:flex;justify-content:space-between;margin-top:8px;font-family:'IBM Plex Mono',monospace;font-size:9px;letter-spacing:.08em;color:rgba(236,238,241,.5)"><span>{{ se.x0 }}</span><span style="color:#ECEEF1">AVUI</span></div></div>
+<div style="margin-top:12px;display:flex;flex-wrap:wrap;gap:8px 16px;font-family:'IBM Plex Mono',monospace;font-size:9px;letter-spacing:.1em;color:rgba(236,238,241,.65)"><div style="display:flex;align-items:center;gap:7px"><span style="{{ seLeg }}"></span><span>COM ET SENTS</span></div><div style="display:flex;align-items:center;gap:7px"><span style="width:16px;border-top:1.5px dashed rgba(236,238,241,.6)"></span><span>QUÈ DIUEN LES DADES</span></div><div style="display:flex;align-items:center;gap:7px"><span style="width:8px;height:10px;background:rgba(236,238,241,.08);border-left:2px solid rgba(236,238,241,.8)"></span><span>NO COINCIDEIXEN</span></div></div>
+<div style="margin-top:12px">{{ se.chart }}<div style="display:flex;justify-content:space-between;margin-top:8px;padding-right:48px;font-family:'IBM Plex Mono',monospace;font-size:9px;letter-spacing:.08em;color:rgba(236,238,241,.5)"><span>{{ se.x0 }}</span><span style="color:#ECEEF1">AVUI</span></div></div>
 <sc-if value="{{ se.loading }}" hint-placeholder-val="{{ false }}"><div style="display:flex;flex-direction:column;gap:9px;margin-top:16px"><div style="height:9px;width:100%;background:rgba(255,255,255,.08);animation:mtPulse 1.6s ease-in-out infinite"></div><div style="height:9px;width:70%;background:rgba(255,255,255,.08);animation:mtPulse 1.6s ease-in-out .15s infinite"></div></div></sc-if>
 <sc-if value="{{ se.ready }}" hint-placeholder-val="{{ false }}"><p style="margin:14px 0 0;font-size:14px;line-height:1.55;text-wrap:pretty;animation:mtFade .6s both"><sc-for list="{{ se.segs }}" as="g" hint-placeholder-count="1"><span style="{{ g.st }}">{{ g.t }}</span></sc-for></p></sc-if>
 </div>
@@ -303,8 +303,8 @@ button{font:inherit;color:inherit}
 </div>
 <div style="padding:30px 48px 48px;max-width:640px">
 <div style="display:flex;justify-content:space-between;gap:16px;font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.12em;color:rgba(236,238,241,.5)"><span style="color:#ECEEF1">{{ wk.label }}</span><span>{{ wk.pubShort }}</span></div>
-<div style="margin-top:16px;display:grid;grid-template-columns:repeat(7,1fr);border-top:1px solid rgba(255,255,255,.08);border-bottom:1px solid rgba(255,255,255,.08)"><sc-for list="{{ wk.days }}" as="dd" hint-placeholder-count="7"><div style="display:flex;flex-direction:column;align-items:center;gap:10px;padding:14px 0"><span style="font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.08em;color:rgba(236,238,241,.5)">{{ dd.wd }}</span><div style="position:relative;width:2px;height:72px;background:rgba(255,255,255,.1)"><span style="{{ dd.dot }}"></span></div><span style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:rgba(236,238,241,.65)">{{ dd.day }}</span></div></sc-for></div>
-<div style="margin-top:8px;display:flex;justify-content:space-between;font-family:'IBM Plex Mono',monospace;font-size:9px;letter-spacing:.1em;color:rgba(236,238,241,.5)"><span>CADA PUNT ÉS L'ESTAT D'UN DIA</span><span>A DALT, A FONS · A BAIX, RECUPERA</span></div>
+<div style="margin-top:16px;border-top:1px solid rgba(255,255,255,.08);border-bottom:1px solid rgba(255,255,255,.08)">{{ wk.strip }}</div>
+<div style="margin-top:8px;display:flex;justify-content:space-between;gap:12px;font-family:'IBM Plex Mono',monospace;font-size:9px;letter-spacing:.1em;color:rgba(236,238,241,.5)"><span>L'ESTAT DE CADA DIA</span><span>{{ wk.sum }}</span></div>
 <sc-if value="{{ wk.loading }}" hint-placeholder-val="{{ false }}"><div style="display:flex;flex-direction:column;gap:10px;margin-top:28px"><div style="display:flex;align-items:center;gap:8px;font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.12em;color:rgba(236,238,241,.5)"><span style="width:6px;height:6px;border-radius:50%;background:#ECEEF1;animation:mtPulse 1.1s ease-in-out infinite"></span><span>LA IA ESTÀ REPASSANT LA SETMANA…</span></div><div style="height:28px;width:60%;background:rgba(255,255,255,.08);animation:mtPulse 1.6s ease-in-out infinite"></div><div style="height:10px;width:100%;margin-top:10px;background:rgba(255,255,255,.08);animation:mtPulse 1.6s ease-in-out .15s infinite"></div><div style="height:10px;width:88%;background:rgba(255,255,255,.08);animation:mtPulse 1.6s ease-in-out .3s infinite"></div><div style="height:10px;width:50%;background:rgba(255,255,255,.08);animation:mtPulse 1.6s ease-in-out .45s infinite"></div></div></sc-if>
 <sc-if value="{{ wk.ready }}" hint-placeholder-val="{{ false }}">
 <div style="margin-top:26px;animation:mtFade .6s both">
@@ -334,7 +334,7 @@ button{font:inherit;color:inherit}
 </sc-if>
 
 <sc-if value="{{ d.priv }}" hint-placeholder-val="{{ false }}">
-<div style="padding:32px 40px 48px;animation:mtIn .42s cubic-bezier(.2,.7,.2,1) both">
+<div style="box-sizing:border-box;max-width:1240px;padding:32px 40px 48px;animation:mtIn .42s cubic-bezier(.2,.7,.2,1) both">
 <div style="font-size:30px;font-weight:500;letter-spacing:-.015em">Qui veu què</div>
 <p style="margin:10px 0 0;max-width:560px;font-size:15px;line-height:1.55;color:rgba(236,238,241,.65);text-wrap:pretty">Les teves dades són teves. Aquí tens, sense lletra petita, qui en veu cada part.</p>
 <div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));margin-top:28px;border-top:1px solid rgba(255,255,255,.08)"><sc-for list="{{ pvCols }}" as="col" hint-placeholder-count="3"><div style="{{ col.box }}"><div style="font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.14em">{{ col.t }}</div><p style="margin:10px 0 0;min-height:84px;font-size:13px;line-height:1.5;color:rgba(236,238,241,.65);text-wrap:pretty">{{ col.d }}</p><div style="margin-top:8px;border-top:1px solid rgba(255,255,255,.08)"><sc-for list="{{ col.items }}" as="p" hint-placeholder-count="5"><div style="display:flex;flex-direction:column;align-items:flex-start;gap:7px;padding:12px 0;border-bottom:1px solid rgba(255,255,255,.08)"><span style="position:relative;display:inline-block;font-size:14px"><span style="{{ p.tc }}">{{ p.t }}</span><span style="{{ p.strike }}"></span></span><span style="{{ p.tagSt }}">{{ p.tag }}</span></div></sc-for></div></div></sc-for></div>
@@ -362,27 +362,38 @@ button{font:inherit;color:inherit}
 
 </div>
 </div>
-</div></div>
 </sc-if>
-
-</div>
+{{ proto }}
 </div>
 </x-dc>
 <script type="text/x-dc" data-dc-script data-props="{&quot;aiLive&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;IA&quot;},&quot;athleteName&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;Martí&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Deportista&quot;}}">
 class Component extends DCLogic {
   state = (() => {
     let ai = {};
-    try { ai = JSON.parse(localStorage.getItem('mt-ai-cache-v2') || '{}') || {}; } catch (e) { ai = {}; }
+    try { ai = JSON.parse(localStorage.getItem('mt-ai-cache-v3') || '{}') || {}; } catch (e) { ai = {}; }
+    let pHidden = false;
+    try { pHidden = localStorage.getItem('mt-proto-hidden') === '1'; } catch (e) {}
     return { scenario: 'normal', device: 'mobile', mTab: 'avui', dTab: 'evolucio', metric: 'rhr', range: 7, zoom: null, evoView: 'metrics',
-      hover: null, sHover: null, week: 0, role: 'coach', lang: 'ca', visit: 0, vw: window.innerWidth, vh: window.innerHeight, ai };
+      hover: null, sHover: null, week: 0, role: 'coach', lang: 'ca', visit: 0, mount: 0, vw: window.innerWidth, vh: window.innerHeight, ai, pOpen: false, pHidden };
   })();
   phoneRef = React.createRef();
   deskRef = React.createRef();
   requested = new Set();
   _data = {};
+  _tc = {};
   MONO = "'IBM Plex Mono', monospace";
-  C = { ink: '#ECEEF1', bg: '#0B0C0E', coral: '#FF7B61', amber: '#D9B36A', green: '#7FCBA0', mut: 'rgba(236,238,241,.65)', dim: 'rgba(236,238,241,.5)', hair: '1px solid rgba(255,255,255,.08)' };
+  C = { ink: '#ECEEF1', bg: '#0B0C0E', mut: 'rgba(236,238,241,.65)', dim: 'rgba(236,238,241,.5)', hair: '1px solid rgba(255,255,255,.08)' };
+  // Escala de to contínua (OKLCH): 0 = vermell (per vigilar) · .5 = groc (al límit) · 1 = verd (molt bé).
+  TONE = [[0, .62, .175, 24], [.18, .67, .165, 32], [.36, .75, .135, 60], [.52, .83, .125, 88], [.66, .82, .105, 118], [.78, .8, .11, 145], [.9, .8, .12, 155], [1, .82, .14, 160]];
+  // Distància a la franja, en mitges franges (positiu = millor) → to. -1 és la vora de la franja; per sota de -2, clarament fora.
+  QH = [[-3.4, 0], [-2.5, .18], [-1.8, .38], [-1.25, .52], [-.9, .66], [0, .84], [1.1, 1]];
+  // Posició del dia (0 = Recupera, 1 = A fons) → to.
+  PH = [[.04, .02], [.3, .32], [.55, .64], [.65, .8], [.96, 1]];
+  LV = { ok: .9, mid: .47, bad: .12 };
   KEYS = ['rhr', 'hrv', 'son', 'estat'];
+  // Cada segment de l'anell ocupa el mateix quadrant que la seva xifra a la graella de sota.
+  RING = { rhr: 315, hrv: 45, estat: 135, son: 225 };
+  RING_ORD = { rhr: 0, hrv: 1, estat: 2, son: 3 };
   WD = ['DL', 'DT', 'DC', 'DJ', 'DV', 'DS', 'DG'];
   WDL = ['DILLUNS', 'DIMARTS', 'DIMECRES', 'DIJOUS', 'DIVENDRES', 'DISSABTE', 'DIUMENGE'];
   DEF = { rhr: { mean: 50, lo: 48, hi: 52, worse: 'up' }, hrv: { mean: 65, lo: 59, hi: 71, worse: 'down' },
@@ -391,21 +402,30 @@ class Component extends DCLogic {
     rhr: { short: 'FC repòs', label: 'FREQÜÈNCIA CARDÍACA EN REPÒS', cell: 'FC EN REPÒS', unit: 'BPM', mode: 'line', name: 'FC en repòs' },
     hrv: { short: 'HRV', label: 'VARIABILITAT CARDÍACA · HRV', cell: 'HRV', unit: 'MS', mode: 'line', name: 'HRV' },
     son: { short: 'Son', label: 'HORES DE SON', cell: 'SON', unit: 'H', mode: 'bars', floor: 4, name: 'Son' },
-    estat: { short: 'Estat', label: 'ESTAT PERCEBUT · DE 1 A 5', cell: 'ESTAT PERCEBUT', unit: '/5', mode: 'bars', floor: 1, ceil: 5, name: 'Estat percebut' },
+    estat: { short: 'Estat', label: 'ESTAT PERCEBUT · DE 1 A 5', cell: 'ESTAT PERCEBUT', unit: '/5', mode: 'bars', floor: 2, ceil: 5, name: 'Estat percebut' },
   };
-  ST = { fons: { w: 'A FONS', c: '#7FCBA0', line: 'Tot a punt: entrena amb normalitat.' },
-    mod: { w: 'MODERA', c: '#D9B36A', line: 'Entrena, però avui sense forçar.' },
-    rec: { w: 'RECUPERA', c: '#FF7B61', line: 'Avui toca prioritzar la recuperació.' } };
+  ST = { fons: { w: 'A FONS', line: 'Tot a punt: entrena amb normalitat.' },
+    mod: { w: 'MODERA', line: 'Entrena, però avui sense forçar.' },
+    rec: { w: 'RECUPERA', line: 'Avui toca prioritzar la recuperació.' } };
   WS = { fons: 'A fons', mod: 'Modera', rec: 'Recupera' };
+  // Sis setmanes inventades (14 AGO – 20 SET): una nit curta, un stage amb més càrrega, la tornada a l'institut i un refredat.
+  BASE = (() => { const hm = (h, m) => h + m / 60; return {
+    rhr: [50, 49, 50, 49, 48, 49, 50, 49, 51, 52, 50, 51, 53, 54, 52, 50, 49, 50, 51, 50, 49, 50, null, 49, 50, 55, 56, 53, 49, 48, 47, 48, 49, 50, 51, 50, 49, 48],
+    hrv: [66, 67, 64, 66, 68, 65, 64, 66, 63, 58, 62, 60, 56, 55, 59, 64, 67, 63, 61, 64, 66, 65, null, 67, 64, 52, 50, 57, 63, 70, 73, 71, 68, 66, 58, 62, 66, 69],
+    son: [hm(7, 40), hm(8, 5), hm(7, 10), hm(7, 30), hm(7, 20), hm(7, 35), hm(7, 15), hm(7, 25), hm(6, 30), hm(7, 50), hm(7, 20), hm(7, 5), hm(7, 15), hm(7, 0),
+      hm(7, 10), hm(8, 0), hm(7, 45), hm(6, 25), hm(6, 40), hm(7, 5), hm(7, 20), hm(7, 30), null, hm(8, 10), hm(7, 15), hm(7, 50), hm(8, 5), hm(7, 40),
+      hm(7, 30), hm(7, 55), hm(7, 35), hm(7, 20), hm(7, 30), hm(7, 10), hm(7, 25), hm(6, 45), hm(7, 50), hm(8, 0)],
+    estat: [4.2, 4.4, 4.0, 4.0, 4.2, 4.0, 3.8, 4.0, 4.2, 3.8, 4.0, 3.8, 3.6, 3.4, 3.8, 4.2, 4.4, 3.8, 3.8, 4.4, 4.2, 4.0, null, 4.2, 4.0, 3.2, 3.0, 3.6, 4.0, null, 4.4, 4.2, 3.4, 4.2, 3.8, 3.8, 4.2, 4.4],
+  }; })();
   TAILS = (() => { const hm = (h, m) => h + m / 60; return {
-    normal: { 38: { rhr: 50, hrv: 66, son: hm(7, 20), estat: 4.0 }, 39: { rhr: 49, hrv: 67, son: hm(7, 40), estat: 4.2 }, 40: { rhr: 50, hrv: 66, son: hm(7, 25), estat: 4.0 }, 41: { rhr: 49, hrv: 68, son: hm(7, 35), estat: 4.2 } },
-    descans: { 38: { rhr: 50, hrv: 64, son: hm(7, 15), estat: 4.0 }, 39: { rhr: 51, hrv: 62, son: hm(7, 5), estat: 3.8 }, 40: { rhr: 53, hrv: 57, son: hm(6, 40), estat: 3.4 }, 41: { rhr: 58, hrv: 48, son: hm(5, 50), estat: 2.4 } },
-    comp: { 37: { rhr: 51, hrv: 63, son: hm(6, 55), estat: 4.2 }, 38: { rhr: 52, hrv: 60, son: hm(6, 45), estat: 4.4 }, 39: { rhr: 53, hrv: 57, son: hm(6, 15), estat: 4.4 }, 40: { rhr: 54, hrv: 55, son: hm(6, 20), estat: 4.2 }, 41: { rhr: 54, hrv: 56, son: hm(6, 40), estat: 4.4 } },
+    normal: { 38: { rhr: 49, hrv: 67, son: hm(7, 30), estat: 4.2 }, 39: { rhr: 50, hrv: 64, son: hm(7, 15), estat: 4.0 }, 40: { rhr: 51, hrv: 61, son: hm(7, 5), estat: 4.0 }, 41: { rhr: 47, hrv: 66, son: hm(6, 45), estat: 4.4 } },
+    descans: { 38: { rhr: 50, hrv: 64, son: hm(7, 15), estat: 4.0 }, 39: { rhr: 52, hrv: 60, son: hm(7, 0), estat: 3.8 }, 40: { rhr: 54, hrv: 55, son: hm(6, 40), estat: 3.4 }, 41: { rhr: 57, hrv: 49, son: hm(7, 5), estat: 2.6 } },
+    comp: { 37: { rhr: 51, hrv: 62, son: hm(7, 0), estat: 4.2 }, 38: { rhr: 52, hrv: 60, son: hm(6, 45), estat: 4.4 }, 39: { rhr: 53, hrv: 57, son: hm(6, 20), estat: 4.4 }, 40: { rhr: 53, hrv: 58, son: hm(6, 30), estat: 4.2 }, 41: { rhr: 55, hrv: 56, son: hm(6, 40), estat: 4.4 } },
     buit: { 36: null, 37: null, 38: { rhr: 51, hrv: 63, son: hm(7, 10), estat: 4.0 }, 39: { rhr: 50, hrv: 65, son: hm(7, 30), estat: 4.2 }, 40: { rhr: 50, hrv: 64, son: hm(7, 20), estat: 4.0 }, 41: null },
   }; })();
   ITEMS = [{ t: 'Cansament', n: '5 = gens cansat' }, { t: 'Rendiment', n: 'com et sents rendint' }, { t: 'Ànim i estrès', n: 'salut mental' }, { t: 'Dolor o molèsties', n: '5 = cap' }, { t: 'Salut general', n: 'com et trobes' }];
   USUAL = [3.8, 4.0, 4.2, 3.9, 4.1];
-  TODAY = { normal: [4, 4, 5, 4, 4], descans: [2, 3, 3, 3, 1], comp: [3, 5, 5, 4, 5], nou: [4, 4, 4, 4, 4], buit: null };
+  TODAY = { normal: [4, 4, 5, 3, 4], descans: [2, 3, 3, 3, 1], comp: [3, 5, 5, 4, 5], nou: [4, 4, 4, 4, 4], buit: null };
   WEEKS = [{ id: 38, a: 31, pub: 'DL 21 SET' }, { id: 37, a: 24, pub: 'DL 14 SET' }, { id: 36, a: 17, pub: 'DL 7 SET' }, { id: 35, a: 10, pub: 'DL 31 AGO' }, { id: 34, a: 3, pub: 'DL 24 AGO' }];
   SCN = [{ k: 'normal', t: 'Día normal' }, { k: 'descans', t: 'Descanso claro' }, { k: 'comp', t: 'Competición' }, { k: 'buit', t: 'Sin datos' }, { k: 'nou', t: 'Deportista nuevo' }];
   PRIV = [
@@ -420,9 +440,9 @@ class Component extends DCLogic {
     study: { t: 'ESTUDI', d: "L'equip de recerca analitza les dades amb un codi en lloc del teu nom. Als resultats no hi surt mai ningú identificat." } };
   LANGS = [{ k: 'ca', t: 'Català', n: "L'app es mostra en català." }, { k: 'es', t: 'Castellano', n: 'La app se mostrará en castellano.' }, { k: 'fr', t: 'Français', n: "L'application s'affichera en français." }];
   FB_DAILY = {
-    normal: "Has dormit [[7 h 35]], dins la teva franja, i la FC en repòs ([[49 bpm]]) i l'HRV ([[68 ms]]) estan en els teus valors habituals. El cos està recuperat: avui pots entrenar amb normalitat. Aprofita-ho!",
-    descans: "Avui les dades són clares: has dormit [[5 h 50|!]], la FC en repòs està [[8 bpm|!]] per sobre del teu normal i l'HRV ha baixat fins a [[48 ms|!]]. A més, dius que no et trobes bé. El cos et demana descans: prioritza la recuperació, dorm més aquesta nit i comenta-ho amb l'entrenador abans d'entrenar.",
-    comp: "Et sents amb ganes ([[4,4]] de 5), però les dades diuen una altra cosa: portes quatre nits dormint menys de l'habitual i la FC en repòs és de [[54 bpm|!]], per sobre de la teva franja. Entrena, però baixa la intensitat i intenta dormir una mica més aquesta nit.",
+    normal: "Has dormit [[6 h 45|~]], una mica menys del teu normal, però la FC en repòs ([[47 bpm|+]]) i l'HRV ([[66 ms]]) diuen que el cos està recuperat. Avui pots entrenar amb normalitat; aquesta nit, intenta anar a dormir una mica abans.",
+    descans: "Avui les dades són clares: la FC en repòs està [[7 bpm|!]] per sobre del teu normal i l'HRV ha baixat fins a [[49 ms|!]]. Has dormit bé ([[7 h 05]]), però dius que no et trobes bé ([[2,6|!]] de 5). El cos et demana descans: prioritza la recuperació i comenta-ho amb l'entrenador abans d'entrenar.",
+    comp: "Et sents amb ganes ([[4,4|+]] de 5), però les dades diuen una altra cosa: portes quatre nits dormint menys de l'habitual ([[6 h 40|~]] aquesta nit) i la FC en repòs és de [[55 bpm|!]], per sobre de la teva franja. Entrena, però baixa la intensitat i intenta dormir una mica més.",
     buit: "Encara no han arribat les dades d'avui. Quan arribin, t'explicaré com estàs. Ahir tot era dins la teva franja, així que si et trobes bé, segueix el pla de l'entrenador.",
     nou: "Benvinguda, Laia! Encara estem aprenent com ets tu: amb [[5 de 14]] dies de dades, aviat podrem comparar cada dia amb el teu normal. De moment, escolta com et sents i segueix el pla de l'entrenador.",
   };
@@ -438,26 +458,123 @@ Normes:
 - Compara la persona NOMÉS amb ella mateixa (la seva franja habitual). Mai amb altres esportistes.
 - Suggereixes, no manes: fes servir fórmules com "et proposo", "pots" o "millor si". No facis diagnòstics mèdics ni parlis de malalties.
 - Si les dades indiquen clarament que cal descansar, o la persona diu que no es troba bé, digues-ho amb claredat però amb calma, sense alarmar, i anima-la a comentar-ho amb l'entrenador.
-- Quan escriguis una xifra de les dades, embolcalla-la amb dobles claudàtors, per exemple [[6 h 30 min]]. Si la xifra és preocupant (fora de la franja en la direcció dolenta), afegeix |! així: [[6 h 30 min|!]].
+- Quan escriguis una xifra de les dades, embolcalla-la amb dobles claudàtors, per exemple [[7 h 20]]. Si la xifra està clarament fora de la franja en la direcció dolenta, afegeix |! així: [[5 h 50|!]]. Si està una mica fora o al límit, afegeix |~ així: [[6 h 45|~]]. Si està millor que l'habitual, afegeix |+ així: [[72 ms|+]]. Si està dins la franja, no hi posis cap marca.
 - No facis servir emojis, markdown, llistes ni cometes. Respon només amb el que et demanen.`;
 
   componentDidMount() {
     this.onResize = () => this.setState({ vw: window.innerWidth, vh: window.innerHeight });
     window.addEventListener('resize', this.onResize);
+    // Tecla E: mostra o amaga el botó d'escenari del prototip.
+    this.onKey = e => {
+      if (e.metaKey || e.ctrlKey || e.altKey || /^(INPUT|TEXTAREA|SELECT)$/.test((e.target && e.target.tagName) || '')) return;
+      if (e.key === 'e' || e.key === 'E') this.setProtoHidden(!this.state.pHidden);
+      else if (e.key === 'Escape' && this.state.pOpen) this.setState({ pOpen: false });
+    };
+    window.addEventListener('keydown', this.onKey);
+    this._ps = this.state;
     this.ensureAI();
   }
-  componentWillUnmount() { window.removeEventListener('resize', this.onResize); }
-  componentDidUpdate(pp, ps) {
+  componentWillUnmount() { window.removeEventListener('resize', this.onResize); window.removeEventListener('keydown', this.onKey); }
+  // El runtime només passa prevProps, així que l'estat anterior el guardem nosaltres.
+  componentDidUpdate() {
     this.ensureAI();
-    const s = this.state;
-    if (ps.mTab !== s.mTab || ps.week !== s.week || ps.scenario !== s.scenario || ps.device !== s.device) {
+    const s = this.state, ps = this._ps || s;
+    this._ps = s;
+    if (ps.mTab !== s.mTab || ps.week !== s.week || ps.scenario !== s.scenario) {
       let el = this.phoneRef.current;
       while (el && el !== document.body) { const oy = getComputedStyle(el).overflowY; if (oy === 'auto' || oy === 'scroll') { el.scrollTop = 0; break; } el = el.parentElement; }
     }
     if ((ps.dTab !== s.dTab || ps.scenario !== s.scenario) && this.deskRef.current) this.deskRef.current.scrollTop = 0;
   }
 
-  rng(seed) { let a = seed >>> 0; return () => { a = (a + 0x6D2B79F5) >>> 0; let t = a; t = Math.imul(t ^ (t >>> 15), t | 1); t ^= t + Math.imul(t ^ (t >>> 7), t | 61); return ((t ^ (t >>> 14)) >>> 0) / 4294967296; }; }
+  // ── To ──────────────────────────────────────────────────────────────
+  oklch(L, Ch, H) {
+    const r = H * Math.PI / 180, a = Ch * Math.cos(r), b = Ch * Math.sin(r);
+    const l = (L + .3963377774 * a + .2158037573 * b) ** 3, m = (L - .1055613458 * a - .0638541728 * b) ** 3, s = (L - .0894841775 * a - 1.291485548 * b) ** 3;
+    const f = x => { x = Math.max(0, Math.min(1, x)); x = x <= .0031308 ? 12.92 * x : 1.055 * x ** (1 / 2.4) - .055; return Math.round(x * 255).toString(16).padStart(2, '0'); };
+    return '#' + f(4.0767416621 * l - 3.3077115913 * m + .2309699292 * s) + f(-1.2684380046 * l + 2.6097574011 * m - .3413193965 * s) + f(-.0041960863 * l - .7034186147 * m + 1.7076956719 * s);
+  }
+  tone(hh) {
+    const q = Math.round(Math.max(0, Math.min(1, hh)) * 400);
+    if (this._tc[q]) return this._tc[q];
+    const x = q / 400, S = this.TONE; let i = 1;
+    while (i < S.length - 1 && S[i][0] < x) i++;
+    const a = S[i - 1], b = S[i], t = (x - a[0]) / (b[0] - a[0] || 1);
+    return (this._tc[q] = this.oklch(a[1] + (b[1] - a[1]) * t, a[2] + (b[2] - a[2]) * t, a[3] + (b[3] - a[3]) * t));
+  }
+  alpha(hex, a) { return hex + Math.round(a * 255).toString(16).padStart(2, '0'); }
+  lerpPts(P, x) {
+    if (x <= P[0][0]) return P[0][1];
+    for (let i = 1; i < P.length; i++) if (x <= P[i][0]) { const a = P[i - 1], b = P[i]; return a[1] + (b[1] - a[1]) * (x - a[0]) / (b[0] - a[0]); }
+    return P[P.length - 1][1];
+  }
+  qOf(k, v, band) { const d = band[k], q = (v - d.mean) / ((d.hi - d.lo) / 2); return d.worse === 'up' ? -q : q; }
+  hOf(k, v, band) { return v == null || !band ? null : this.lerpPts(this.QH, this.qOf(k, v, band)); }
+  lvlOf(k, v, band) { if (v == null || !band) return null; const q = this.qOf(k, v, band); return q >= -1 ? 'ok' : q >= -2 ? 'mid' : 'bad'; }
+  toneOf(k, v, band) { const hh = this.hOf(k, v, band); return hh == null ? (v == null ? this.C.dim : this.C.ink) : this.tone(hh); }
+  dayH(p) { return p == null ? null : this.lerpPts(this.PH, p); }
+  mark(k, v) { const lv = this.lvlOf(k, v, this.DEF); return lv === 'bad' ? '|!' : lv === 'mid' ? '|~' : lv && this.qOf(k, v, this.DEF) > 1 ? '|+' : ''; }
+  gradDef(id, pts, x2) {
+    const h = React.createElement;
+    return h('linearGradient', { key: id, id, gradientUnits: 'userSpaceOnUse', x1: 0, y1: 0, x2, y2: 0 },
+      pts.map((p, j) => h('stop', { key: j, offset: Math.max(0, Math.min(1, p[0] / x2)).toFixed(4), stopColor: p[1] })));
+  }
+
+  // ── Animació: interpola números (i per tant el to) entre valors ────────
+  useTween(target, dur) {
+    const R = React, arr = Array.isArray(target), tgt = arr ? target : [target];
+    const sig = tgt.map(v => v == null ? 'n' : v.toFixed(4)).join('|');
+    const [, force] = R.useReducer(x => x + 1, 0), cur = R.useRef(tgt), raf = R.useRef(0);
+    R.useEffect(() => {
+      const from = cur.current;
+      cancelAnimationFrame(raf.current);
+      if (from.length !== tgt.length) { cur.current = tgt; force(); return; }
+      if (from.every((v, i) => v === tgt[i])) return;
+      const t0 = performance.now();
+      const step = now => {
+        const t = Math.min(1, (now - t0) / dur), e = 1 - Math.pow(1 - t, 3);
+        cur.current = tgt.map((b, i) => { const a = from[i]; return a == null || b == null ? b : a + (b - a) * e; });
+        force();
+        if (t < 1) raf.current = requestAnimationFrame(step);
+      };
+      raf.current = requestAnimationFrame(step);
+      return () => cancelAnimationFrame(raf.current);
+    }, [sig]);
+    return arr ? cur.current : cur.current[0];
+  }
+  Num = p => {
+    const v = this.useTween(p.v == null ? null : p.v, p.dur || 800), hh = v == null ? null : this.hOf(p.k, v, p.band);
+    return React.createElement('span', { style: { color: v == null ? this.C.dim : hh == null ? this.C.ink : this.tone(hh) } }, this.fmtV(p.k, v == null ? null : this.roundM(p.k, v)));
+  };
+  Ring = p => {
+    const h = React.createElement, C = this.C, size = p.size, sw = 8, R = size / 2 - sw / 2 - 1, c = size / 2, rad = a => a * Math.PI / 180;
+    const tw = this.useTween(p.hs.concat([p.dh]), 950), dh = tw[4], dc = dh == null ? null : this.tone(dh);
+    const pt = a => [c + R * Math.sin(rad(a)), c - R * Math.cos(rad(a))];
+    const think = p.hs.every(x => x == null);
+    const segs = this.KEYS.map((k, i) => {
+      const mid = this.RING[k], a = pt(mid - 35), b = pt(mid + 35), hv = tw[i], ord = this.RING_ORD[k];
+      const d = `M${a[0].toFixed(2)},${a[1].toFixed(2)} A${R},${R} 0 0 1 ${b[0].toFixed(2)},${b[1].toFixed(2)}`;
+      if (think || hv == null) return h('path', { key: k + '-t', d, fill: 'none', stroke: 'rgba(236,238,241,.1)', strokeWidth: sw, strokeLinecap: 'round', style: { animation: `mtThink 2s ease-in-out ${(ord * .5).toFixed(1)}s infinite` } });
+      const col = this.tone(hv);
+      return h('g', { key: k },
+        hv < .32 ? h('path', { d, fill: 'none', stroke: col, strokeWidth: sw + 6, strokeLinecap: 'round', filter: 'url(#mtRingBlur)', style: { animation: 'mtGlow 2.6s ease-in-out 1.2s infinite both' } }) : null,
+        h('path', { d, fill: 'none', stroke: this.alpha(col, .2), strokeWidth: sw, strokeLinecap: 'round' }),
+        h('path', { d, fill: 'none', stroke: col, strokeWidth: sw, strokeLinecap: 'round', pathLength: 1, style: { strokeDasharray: 1, animation: `mtDraw .7s cubic-bezier(.3,.7,.2,1) ${(.25 + ord * .16).toFixed(2)}s both` } }));
+    });
+    const center = p.nou ? h('span', { style: { fontFamily: this.MONO, fontSize: 13, letterSpacing: '.04em', color: C.ink, animation: 'mtPulse 2s ease-in-out infinite' } }, '5/14')
+      : dc == null ? h('span', { style: { fontFamily: this.MONO, fontSize: 16, color: C.dim, animation: 'mtPulse 2s ease-in-out infinite' } }, '—')
+      : h('div', { key: 'ic-' + p.st, style: { display: 'flex', color: dc, animation: 'mtPop .55s cubic-bezier(.3,.7,.2,1.35) both' } }, this.icon(p.st === 'rec' ? 'moon' : p.st === 'mod' ? 'half' : 'bolt', Math.round(size * .27)));
+    const g = Math.round(size * .42);
+    return h('div', { style: { position: 'relative', width: size, height: size } },
+      h('div', { style: { position: 'absolute', left: -g, top: -g, width: size + 2 * g, height: size + 2 * g, borderRadius: '50%', pointerEvents: 'none', background: dc ? `radial-gradient(closest-side, ${this.alpha(dc, .2)}, ${this.alpha(dc, 0)})` : 'none', animation: 'mtFade .8s .2s both' } }),
+      h('svg', { width: size, height: size, viewBox: `0 0 ${size} ${size}`, style: { position: 'relative', display: 'block', overflow: 'visible' } },
+        h('defs', null, h('filter', { id: 'mtRingBlur', x: '-50%', y: '-50%', width: '200%', height: '200%' }, h('feGaussianBlur', { stdDeviation: 3.5 }))),
+        h('circle', { cx: c, cy: c, r: R - sw / 2 - 7, fill: dc ? this.alpha(dc, .09) : 'rgba(255,255,255,.04)', style: { animation: dc ? 'mtFade .5s .1s both, mtBreath 3.2s ease-in-out 1.4s infinite' : 'mtFade .5s .1s both' } }),
+        segs),
+      h('div', { style: { position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', animation: 'mtFade .5s .8s both' } }, center));
+  };
+
+  // ── Dades ───────────────────────────────────────────────────────────
   roundM(k, v) { return k === 'son' ? Math.round(v * 12) / 12 : k === 'estat' ? Math.round(v * 5) / 5 : Math.round(v); }
   data(sc) {
     if (this._data[sc]) return this._data[sc];
@@ -468,19 +585,11 @@ Normes:
       K.forEach(k => { vals[k] = Array(N - 5).fill(undefined).concat(t[k]); });
     } else {
       band = this.DEF;
-      const seeds = { rhr: 11, hrv: 23, son: 37, estat: 51 };
-      K.forEach(k => {
-        const r = this.rng(seeds[k]), d = this.DEF[k], half = (d.hi - d.lo) / 2; let x = 0; vals[k] = [];
-        for (let i = 0; i < N; i++) { x = .45 * x + .55 * (r() * 2 - 1) * 1.3; x = Math.max(-1, Math.min(1, x)); vals[k].push(this.roundM(k, d.mean + x * half * .82)); }
-      });
-      vals.rhr[11] = 53; vals.son[19] = hm(6, 35); vals.son[20] = hm(6, 45);
-      for (let i = 24; i <= 30; i++) vals.hrv[i] = Math.min(73, vals.hrv[i] + 3);
-      vals.hrv[34] = 58; vals.son[35] = hm(6, 50);
-      K.forEach(k => { vals[k][22] = null; }); vals.estat[29] = null;
+      K.forEach(k => { vals[k] = this.BASE[k].concat(Array(N - this.BASE[k].length).fill(null)); });
       const T = this.TAILS[sc] || {};
       Object.keys(T).forEach(i => K.forEach(k => { vals[k][+i] = T[i] ? T[i][k] : null; }));
     }
-    const z = (k, i) => { const v = vals[k][i]; if (v == null || !band) return null; const d = band[k], q = (v - d.mean) / ((d.hi - d.lo) / 2); return d.worse === 'up' ? -q : q; };
+    const z = (k, i) => { const v = vals[k][i]; return v == null || !band ? null : this.qOf(k, v, band); };
     const pos = [], feel = [], obj = [];
     for (let i = 0; i < N; i++) {
       const zs = K.map(k => z(k, i)).filter(q => q != null).map(q => Math.max(-3, Math.min(1.5, q)));
@@ -506,25 +615,26 @@ Normes:
   fmtT(k, v) { if (v == null) return '—'; if (k === 'son') { const p = this.fmtV(k, v).split(':'); return `${p[0]} h ${p[1]}`; } if (k === 'estat') return this.fmtV(k, v); return `${Math.round(v)} ${k === 'rhr' ? 'bpm' : 'ms'}`; }
   delta(k, v, mean) { const d = v - mean, s = d >= 0 ? '+' : '−', a = Math.abs(d); if (k === 'son') return `${s}${Math.round(a * 60)} min`; if (k === 'estat') return `${s}${a.toFixed(1).replace('.', ',')}`; return `${s}${Math.round(a)} ${k === 'rhr' ? 'bpm' : 'ms'}`; }
   bandTxt(k, b) { return `${this.fmtV(k, b.lo)}–${this.fmtV(k, b.hi)}`; }
-  flag(k, v, band) { if (v == null || !band) return false; const d = band[k]; return d.worse === 'up' ? v > d.hi : v < d.lo; }
+  flag(k, v, band) { return v != null && !!band && this.qOf(k, v, band) < -1; }
   outAny(k, v, band) { if (v == null || !band) return false; const d = band[k]; return v < d.lo || v > d.hi; }
   stateOf(p) { return p == null ? null : p < .3 ? 'rec' : p < .55 ? 'mod' : 'fons'; }
 
+  // ── IA ──────────────────────────────────────────────────────────────
   live() { return (this.props.aiLive ?? true) && !!(window.claude && window.claude.complete); }
   aiKey(kind, sc, extra) { return [kind, sc, extra ?? '', this.who(sc).name].join('|'); }
   ensureAI() {
     if (!this.live()) return;
     const s = this.state, sc = s.scenario, want = [this.aiKey('daily', sc)];
-    const onEvo = s.device === 'desktop' ? s.dTab === 'evolucio' : (s.mTab === 'evolucio' && s.evoView === 'sents');
+    const onEvo = this.isDesk() ? s.dTab === 'evolucio' : (s.mTab === 'evolucio' && s.evoView === 'sents');
     if (onEvo && sc !== 'nou') want.push(this.aiKey('sents', sc));
-    const onWeek = s.device === 'desktop' ? s.dTab === 'setmana' : s.mTab === 'setmana';
+    const onWeek = this.isDesk() ? s.dTab === 'setmana' : s.mTab === 'setmana';
     if (onWeek && sc !== 'nou') want.push(this.aiKey('week', sc, s.week));
     want.forEach(key => { if (this.state.ai[key] || this.requested.has(key)) return; this.requested.add(key); this.fetchAI(key); });
   }
   setAI(key, entry) {
     this.setState(st => {
       const ai = { ...st.ai, [key]: entry };
-      try { const keep = {}; Object.keys(ai).forEach(k => { if (ai[k].status === 'done') keep[k] = ai[k]; }); localStorage.setItem('mt-ai-cache-v2', JSON.stringify(keep)); } catch (e) {}
+      try { const keep = {}; Object.keys(ai).forEach(k => { if (ai[k].status === 'done') keep[k] = ai[k]; }); localStorage.setItem('mt-ai-cache-v3', JSON.stringify(keep)); } catch (e) {}
       return { ai };
     });
   }
@@ -549,11 +659,12 @@ Normes:
     return { ready: true, loading: false, val: e.status === 'done' ? e.val : fallback };
   }
   segs(text) {
-    const C = this.C, out = [], re = /\[\[([^\]|]+?)(\|!)?\]\]/g, s = String(text || '');
-    const hl = { fontFamily: this.MONO, fontSize: '.88em', color: C.ink, borderBottom: '1px dotted rgba(236,238,241,.5)', whiteSpace: 'nowrap' };
-    const bad = { ...hl, color: C.coral, borderBottom: '1px dotted rgba(255,123,97,.7)' };
+    const C = this.C, out = [], re = /\[\[([^\]|]+?)(?:\|([!~+]))?\]\]/g, s = String(text || '');
+    const mk = (col, line) => ({ fontFamily: this.MONO, fontSize: '.88em', color: col, borderBottom: `1px dotted ${line}`, whiteSpace: 'nowrap' });
+    const tn = x => mk(this.tone(x), this.alpha(this.tone(x), .7));
+    const st = { '': mk(C.ink, 'rgba(236,238,241,.5)'), '!': tn(this.LV.bad), '~': tn(this.LV.mid), '+': tn(.95) };
     let last = 0, m;
-    while ((m = re.exec(s))) { if (m.index > last) out.push({ t: s.slice(last, m.index), st: {} }); out.push({ t: m[1], st: m[2] ? bad : hl }); last = re.lastIndex; }
+    while ((m = re.exec(s))) { if (m.index > last) out.push({ t: s.slice(last, m.index), st: {} }); out.push({ t: m[1], st: st[m[2] || ''] }); last = re.lastIndex; }
     if (last < s.length) out.push({ t: s.slice(last), st: {} });
     return out;
   }
@@ -564,8 +675,8 @@ Normes:
       const y = K.map(k => `${this.META[k].name} ${this.fmtT(k, D.vals[k][40])}`).join(', ');
       return `Persona: ${w.name}, ${w.age} anys. Avui encara no han arribat les dades (no és cap error: arriben quan se sincronitzen). Ahir tot era dins la seva franja habitual (${y}); estat d'ahir: A FONS.\nEscriu 2 frases, màxim 40 paraules: explica amb calma que quan arribin les dades li diràs com està, i dona una orientació suau per avui basada en ahir.`;
     }
-    const lines = K.map(k => { const v = D.vals[k][41], b = D.band[k];
-      const st = this.flag(k, v, D.band) ? (b.worse === 'up' ? 'per sobre de la franja (preocupant)' : 'per sota de la franja (preocupant)') : this.outAny(k, v, D.band) ? 'fora de la franja però en la bona direcció' : 'dins la franja';
+    const lines = K.map(k => { const v = D.vals[k][41], b = D.band[k], lv = this.lvlOf(k, v, D.band), dir = b.worse === 'up' ? 'per sobre' : 'per sota';
+      const st = lv === 'bad' ? `clarament ${dir} de la franja (per vigilar)` : lv === 'mid' ? `una mica ${dir} de la franja (al límit)` : this.qOf(k, v, D.band) > 1 ? 'millor que la seva franja habitual' : 'dins la franja';
       return `- ${this.META[k].name}: ${this.fmtT(k, v)}${k === 'estat' ? ' sobre 5' : ''}. Franja habitual: ${this.fmtT(k, b.lo)} a ${this.fmtT(k, b.hi)}. ${st}; ${this.delta(k, v, b.mean)} respecte a la seva mitjana.`; });
     const it = this.TODAY[sc];
     if (it) lines.push(`- Qüestionari d'avui (1 a 5, 5 = millor): ${this.ITEMS.map((x, i) => `${x.t.toLowerCase()} ${it[i]}`).join(', ')}.`);
@@ -582,8 +693,8 @@ Normes:
   promptWeek(sc, wi) {
     const W = this.WEEKS[wi], ws = this.weekStats(sc, W.a), w = this.who(sc), m = ws.m, f = (k, v) => this.fmtT(k, v);
     const L = [`- Dies amb dades: ${ws.nDays} de 7. Estat per dies: ${ws.cnt.fons} A FONS, ${ws.cnt.mod} MODERA, ${ws.cnt.rec} RECUPERA.`];
-    this.KEYS.forEach(k => { const x = m[k], b = this.DEF[k]; L.push(`- ${this.META[k].name}: mitjana ${f(k, x.avg)} (franja ${f(k, b.lo)} a ${f(k, b.hi)}). Dies fora de la franja en la direcció dolenta: ${x.flags}${x.worst != null ? ` (el pitjor, ${f(k, x.worst)})` : ''}. Setmana anterior: ${x.prev != null ? f(k, x.prev) : 'sense dades'}.`); });
-    return `Resum de la setmana ${W.id} (${this.weekLabel(wi).toLowerCase()}) de ${w.name}, ${w.age} anys:\n${L.join('\n')}\nRespon NOMÉS amb un objecte JSON vàlid, sense cap text abans ni després, amb aquestes claus: "titol" (títol curt, màxim 6 paraules), "com_ha_anat" (2 frases), "millorat" (1 frase), "vigilar" (1 frase; si no hi ha res a vigilar, digues-ho en positiu), "recomanacio" (1 o 2 frases per a la setmana que ve). Fes servir [[...]] i [[...|!]] per a les xifres.`;
+    this.KEYS.forEach(k => { const x = m[k], b = this.DEF[k]; L.push(`- ${this.META[k].name}: mitjana ${f(k, x.avg)} (franja ${f(k, b.lo)} a ${f(k, b.hi)}). Dies fora de la franja en la direcció dolenta: ${x.flags}, dels quals ${x.bad} clarament fora${x.worst != null ? ` (el pitjor, ${f(k, x.worst)})` : ''}. Setmana anterior: ${x.prev != null ? f(k, x.prev) : 'sense dades'}.`); });
+    return `Resum de la setmana ${W.id} (${this.weekLabel(wi).toLowerCase()}) de ${w.name}, ${w.age} anys:\n${L.join('\n')}\nRespon NOMÉS amb un objecte JSON vàlid, sense cap text abans ni després, amb aquestes claus: "titol" (títol curt, màxim 6 paraules), "com_ha_anat" (2 frases), "millorat" (1 frase), "vigilar" (1 frase; si no hi ha res a vigilar, digues-ho en positiu), "recomanacio" (1 o 2 frases per a la setmana que ve). Fes servir [[...]], [[...|!]], [[...|~]] i [[...|+]] per a les xifres.`;
   }
   weekLabel(wi) { const a = this.WEEKS[wi].a, d0 = this.day(a), d6 = this.day(a + 6); return d0.mo === d6.mo ? `${d0.n}–${d6.n} ${d6.mo}` : `${d0.n} ${d0.mo} – ${d6.n} ${d6.mo}`; }
   weekStats(sc, a) {
@@ -593,7 +704,7 @@ Normes:
       const vs = idx.map(i => D.vals[k][i]).filter(v => v != null);
       const pv = a >= 7 ? idx.map(i => D.vals[k][i - 7]).filter(v => v != null) : [];
       const fl = vs.filter(v => this.flag(k, v, D.band));
-      m[k] = { avg: avg(vs), flags: fl.length, worst: fl.length ? (this.DEF[k].worse === 'up' ? Math.max(...fl) : Math.min(...fl)) : null, prev: avg(pv) };
+      m[k] = { avg: avg(vs), flags: fl.length, bad: fl.filter(v => this.lvlOf(k, v, D.band) === 'bad').length, worst: fl.length ? (this.DEF[k].worse === 'up' ? Math.max(...fl) : Math.min(...fl)) : null, prev: avg(pv) };
     });
     const cnt = { fons: 0, mod: 0, rec: 0, none: 0 };
     idx.forEach(i => { cnt[this.stateOf(D.pos[i]) || 'none']++; });
@@ -603,25 +714,25 @@ Normes:
     const { m, cnt, nDays } = ws, f = (k, v) => this.fmtT(k, v), pl = (n, a, b) => `${n} ${n === 1 ? a : b}`;
     const fl = this.KEYS.filter(k => m[k].flags > 0).sort((x, y) => m[y].flags - m[x].flags);
     const titol = cnt.rec ? 'Una setmana exigent' : !fl.length ? 'Una setmana sòlida' : fl[0] === 'son' ? 'Bona setmana, però amb poc son' : 'Bona setmana, amb un avís';
-    let com = `De [[${pl(nDays, 'dia', 'dies')}]] amb dades, [[${cnt.fons}]] han estat A fons${cnt.mod ? ` i [[${cnt.mod}]] Modera` : ''}${cnt.rec ? ` i [[${cnt.rec}|!]] Recupera` : ''}. Has dormit de mitjana [[${f('son', m.son.avg)}]] per nit i la FC en repòs ha estat de [[${f('rhr', m.rhr.avg)}]].`;
+    let com = `De [[${pl(nDays, 'dia', 'dies')}]] amb dades, [[${cnt.fons}|+]] han estat A fons${cnt.mod ? ` i [[${cnt.mod}|~]] Modera` : ''}${cnt.rec ? ` i [[${cnt.rec}|!]] Recupera` : ''}. Has dormit de mitjana [[${f('son', m.son.avg)}${this.mark('son', m.son.avg)}]] per nit i la FC en repòs ha estat de [[${f('rhr', m.rhr.avg)}${this.mark('rhr', m.rhr.avg)}]].`;
     if (cnt.none) com += ` Hi ha [[${pl(cnt.none, 'dia', 'dies')}]] sense dades, que no compten.`;
     let best = null, bs = 0;
     this.KEYS.forEach(k => { if (m[k].prev == null || m[k].avg == null) return; const d0 = this.DEF[k]; let q = (m[k].avg - m[k].prev) / ((d0.hi - d0.lo) / 2); if (d0.worse === 'up') q = -q; if (q > bs) { bs = q; best = k; } });
     let mill = "Has mantingut la regularitat: les mitjanes s'han quedat dins la teva franja.";
     if (best && bs > .25) {
       const d = Math.abs(m[best].avg - m[best].prev);
-      mill = best === 'hrv' ? `L'HRV, que indica com de recuperat està el teu cos, ha pujat fins a [[${f('hrv', m.hrv.avg)}]] de mitjana: [[${Math.round(d)} ms]] més que la setmana anterior.`
-        : best === 'rhr' ? `La FC en repòs ha baixat fins a [[${f('rhr', m.rhr.avg)}]] de mitjana, un bon senyal de recuperació.`
-        : best === 'son' ? `Has dormit [[${Math.round(d * 60)} min]] més per nit que la setmana anterior.`
-        : `T'has sentit millor: [[${f('estat', m.estat.avg)}]] de mitjana, per [[${f('estat', m.estat.prev)}]] la setmana anterior.`;
+      mill = best === 'hrv' ? `L'HRV, que indica com de recuperat està el teu cos, ha pujat fins a [[${f('hrv', m.hrv.avg)}|+]] de mitjana: [[${Math.round(d)} ms]] més que la setmana anterior.`
+        : best === 'rhr' ? `La FC en repòs ha baixat fins a [[${f('rhr', m.rhr.avg)}|+]] de mitjana, un bon senyal de recuperació.`
+        : best === 'son' ? `Has dormit [[${Math.round(d * 60)} min|+]] més per nit que la setmana anterior.`
+        : `T'has sentit millor: [[${f('estat', m.estat.avg)}|+]] de mitjana, per [[${f('estat', m.estat.prev)}]] la setmana anterior.`;
     }
     let vig = 'Res destacable: cap dada ha sortit de la teva franja.';
     if (fl.length) {
-      const k = fl[0], n = m[k].flags, wv = m[k].worst;
-      vig = k === 'son' ? `El son: [[${pl(n, 'nit', 'nits')}]] per sota de la teva franja; la més curta, de [[${f('son', wv)}|!]].`
-        : k === 'rhr' ? `La FC en repòs: [[${pl(n, 'dia', 'dies')}]] per sobre de la teva franja, amb un màxim de [[${f('rhr', wv)}|!]].`
-        : k === 'hrv' ? `L'HRV: [[${pl(n, 'dia', 'dies')}]] per sota de la teva franja, amb un mínim de [[${f('hrv', wv)}|!]].`
-        : `Com et sents: [[${pl(n, 'dia', 'dies')}]] per sota del teu normal.`;
+      const k = fl[0], n = m[k].flags, wv = m[k].worst, mk = m[k].bad ? '|!' : '|~';
+      vig = k === 'son' ? `El son: [[${pl(n, 'nit', 'nits')}]] per sota de la teva franja; la més curta, de [[${f('son', wv)}${mk}]].`
+        : k === 'rhr' ? `La FC en repòs: [[${pl(n, 'dia', 'dies')}]] per sobre de la teva franja, amb un màxim de [[${f('rhr', wv)}${mk}]].`
+        : k === 'hrv' ? `L'HRV: [[${pl(n, 'dia', 'dies')}]] per sota de la teva franja, amb un mínim de [[${f('hrv', wv)}${mk}]].`
+        : `Com et sents: [[${pl(n, 'dia', 'dies')}]] per sota del teu normal, amb un mínim de [[${f('estat', wv)}${mk}]].`;
     }
     const rec = !fl.length ? "Mantén la rutina: està funcionant. Si alguna cosa canvia, t'ho diré." : fl[0] === 'son' ? "Intenta avançar 20 o 30 minuts l'hora d'anar a dormir, sobretot abans dels dies d'entrenament fort." : fl[0] === 'estat' ? "Si et notes cansat uns quants dies seguits, comenta-ho amb l'entrenador." : 'Després de les sessions més intenses, deixa un dia més suau per recuperar.';
     return { titol, com_ha_anat: com, millorat: mill, vigilar: vig, recomanacio: rec };
@@ -632,41 +743,43 @@ Normes:
     return { n, k, better, worse, mis };
   }
 
-  dot(c) {
-    const h = React.createElement;
-    return h('div', { style: { position: 'relative', width: 14, height: 14 } },
-      h('div', { style: { position: 'absolute', inset: 0, borderRadius: '50%', background: c, animation: 'mtRing 2.8s ease-out 1.7s infinite' } }),
-      h('div', { style: { position: 'absolute', inset: 0, borderRadius: '50%', background: c, boxShadow: `0 0 14px ${c}` } }));
-  }
-  scaleEl(key, sc, D) {
-    const h = React.createElement, C = this.C, lab = { fontFamily: this.MONO, fontSize: 9, letterSpacing: '.12em', color: C.dim, whiteSpace: 'nowrap' };
-    if (sc === 'nou') {
-      const segs = Array.from({ length: 14 }, (_, i) => h('div', { key: i, style: { flex: 1, height: 4, background: 'rgba(255,255,255,.12)', ...(i < 5 ? { animation: `mtSeg .35s ease-out ${(.3 + i * .12).toFixed(2)}s both` } : {}) } }));
-      return h('div', { key }, h('div', { style: { display: 'flex', gap: 3 } }, segs),
-        h('div', { style: { ...lab, marginTop: 12, display: 'flex', justifyContent: 'space-between' } }, h('span', null, '5 DE 14 DIES'), h('span', null, 'LA TEVA FRANJA ES CALCULA AMB 14')));
-    }
-    const today = D.pos[41], ahir = D.pos[40], st = this.stateOf(today), col = st ? this.ST[st].c : C.ink, T = 22, kids = [];
-    kids.push(h('div', { key: 'tr', style: { position: 'absolute', left: 0, right: 0, top: T, height: 2, background: 'rgba(255,255,255,.12)' } }));
-    [.3, .55].forEach((p, i) => kids.push(h('div', { key: 'k' + i, style: { position: 'absolute', left: `${p * 100}%`, top: T - 4, width: 1, height: 10, background: 'rgba(255,255,255,.22)' } })));
-    if (ahir != null) kids.push(h('div', { key: 'ah', style: { position: 'absolute', left: `${(ahir * 100).toFixed(1)}%`, top: 0, transform: 'translateX(-50%)', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 3 } },
-      h('span', { style: lab }, 'AHIR'), h('span', { style: { width: 1, height: 7, background: 'rgba(236,238,241,.5)' } })));
-    if (today != null) {
-      const from = `${((ahir ?? 0) * 100).toFixed(1)}%`, to = `${(today * 100).toFixed(1)}%`, ease = 'cubic-bezier(.3,.7,.2,1) .35s both';
-      kids.push(h('div', { key: 'fi', style: { position: 'absolute', left: 0, top: T, height: 2, width: to, background: col, opacity: .55, '--from': from, '--to': to, animation: `mtFill 1.3s ${ease}` } }));
-      kids.push(h('div', { key: 'dt', style: { position: 'absolute', top: T + 1, left: to, transform: 'translate(-50%,-50%)', '--from': from, '--to': to, animation: `mtSlide 1.3s ${ease}` } }, this.dot(col)));
-    }
-    const zl = (t, zz, x) => h('span', { key: t, style: { ...lab, position: 'absolute', top: T + 16, color: st === zz ? col : C.dim, ...x } }, t);
-    kids.push(zl('RECUPERA', 'rec', { left: 0 }), zl('MODERA', 'mod', { left: '42.5%', transform: 'translateX(-50%)' }), zl('A FONS', 'fons', { right: 0 }));
-    return h('div', { key, style: { position: 'relative', height: T + 30 } }, kids);
+  // ── Gràfics ─────────────────────────────────────────────────────────
+  spark(o) {
+    const h = React.createElement, C = this.C, W = o.W, H = 30, pd = 4, n = o.vals.length, b = o.band ? o.band[o.k] : null;
+    const pres = o.vals.filter(v => v != null); if (!pres.length) return null;
+    let lo = Math.min(...pres), hi = Math.max(...pres);
+    if (b) { const half = (b.hi - b.lo) / 2; lo = Math.min(lo, b.mean - 2.2 * half); hi = Math.max(hi, b.mean + 2.2 * half); }
+    else { const sp = (hi - lo) || 1; lo -= sp * .6; hi += sp * .6; }
+    const X = i => pd + i * (W - 2 * pd) / (n - 1), Y = v => pd + (1 - (v - lo) / (hi - lo)) * (H - 2 * pd), kids = [];
+    if (b) kids.push(h('rect', { key: 'bd', x: 0, y: Y(b.hi), width: W, height: Math.max(1, Y(b.lo) - Y(b.hi)), fill: 'rgba(236,238,241,.05)' }));
+    const pts = [], runs = []; let cur = [];
+    o.vals.forEach((v, i) => {
+      if (v == null) { if (cur.length) runs.push(cur); cur = []; if (v === null) kids.push(h('line', { key: 'g' + i, x1: X(i), x2: X(i), y1: pd + 5, y2: H - pd - 5, stroke: 'rgba(236,238,241,.25)', strokeDasharray: '2 3' })); return; }
+      const p = [X(i), Y(v), this.toneOf(o.k, v, o.band), i]; pts.push(p); cur.push(p);
+    });
+    if (cur.length) runs.push(cur);
+    runs.forEach((r, ri) => { if (r.length > 1) kids.push(h('path', { key: 'l' + ri, d: 'M' + r.map(p => `${p[0].toFixed(1)},${p[1].toFixed(1)}`).join('L'), fill: 'none', stroke: `url(#${o.gid})`, strokeOpacity: .6, strokeWidth: 1.5, strokeLinejoin: 'round', strokeLinecap: 'round', pathLength: 1, style: { strokeDasharray: 1, animation: 'mtDraw .9s cubic-bezier(.4,0,.2,1) .35s both' } })); });
+    pts.forEach(p => {
+      const today = p[3] === n - 1;
+      if (today) kids.push(h('circle', { key: 'hr', cx: p[0], cy: p[1], r: 6.5, fill: 'none', stroke: p[2], strokeOpacity: .35, style: { animation: 'mtFade .5s 1.1s both' } }));
+      kids.push(h('circle', { key: 'd' + p[3], cx: p[0], cy: p[1], r: today ? 3.4 : 2.1, fill: p[2], style: { transformBox: 'fill-box', transformOrigin: 'center', transition: 'fill .6s', animation: `mtPop .35s cubic-bezier(.3,.7,.2,1.4) ${(.35 + p[3] * .07).toFixed(2)}s both` } }));
+    });
+    return h('svg', { key: o.key, width: W, height: H, viewBox: `0 0 ${W} ${H}`, style: { display: 'block', overflow: 'visible' } },
+      h('defs', { key: 'df' }, this.gradDef(o.gid, pts.map(p => [p[0], p[2]]), W)), kids);
   }
   chart(o) {
     const h = React.createElement, C = this.C, meta = this.META[o.k], W = o.W, H = o.H, padR = o.padR, padT = 12, padB = 2;
-    const iw = W - padR, ih = H - padT - padB, base = padT + ih, n = o.vals.length, b = o.b, fl = o.flag;
+    const iw = W - padR, ih = H - padT - padB, base = padT + ih, n = o.vals.length, b = o.b;
+    const tc = v => v == null ? C.dim : this.toneOf(o.k, v, o.band);
     let pres = o.vals.filter(v => v != null); if (!pres.length) pres = [b ? b.mean : (meta.floor ?? 0) + 1];
     let lo, hi;
     if (meta.mode === 'bars') { lo = meta.floor; hi = meta.ceil ?? Math.max(...pres, b ? b.hi : 0) + .6; }
-    else { const pool = pres.concat(b ? [b.lo, b.hi] : []); lo = Math.min(...pool); hi = Math.max(...pool); const sp = (hi - lo) || 1; lo -= sp * .3; hi += sp * .3; }
-    const slot = iw / n, X = i => (i + .5) * slot, Y = v => padT + (1 - (v - lo) / (hi - lo)) * ih, lab = { fontFamily: this.MONO, fontSize: 10 }, kids = [];
+    else {
+      // Rang mínim d'eix: el soroll normal es veu tranquil i el que surt de la franja destaca.
+      const half = b ? (b.hi - b.lo) / 2 : 0, pool = pres.concat(b ? [b.mean - 2.4 * half, b.mean + 2.4 * half] : []);
+      lo = Math.min(...pool); hi = Math.max(...pool); const sp = (hi - lo) || 1, pd = b ? .1 : .3; lo -= sp * pd; hi += sp * pd;
+    }
+    const slot = iw / n, X = i => (i + .5) * slot, Y = v => padT + (1 - (v - lo) / (hi - lo)) * ih, lab = { fontFamily: this.MONO, fontSize: 10 }, kids = [], defs = [];
     if (b) {
       kids.push(h('rect', { key: 'bd', x: 0, y: Y(b.hi), width: iw, height: Math.max(1, Y(b.lo) - Y(b.hi)), fill: 'rgba(236,238,241,.06)' }));
       kids.push(h('line', { key: 'bh', x1: 0, x2: iw, y1: Y(b.hi), y2: Y(b.hi), stroke: 'rgba(236,238,241,.16)' }));
@@ -679,64 +792,100 @@ Normes:
     kids.push(h('line', { key: 'base', x1: 0, x2: iw, y1: base, y2: base, stroke: 'rgba(255,255,255,.12)' }));
     o.vals.forEach((v, i) => { if (v === null) kids.push(h('line', { key: 'g' + i, x1: X(i), x2: X(i), y1: padT + 6, y2: base, stroke: 'rgba(236,238,241,.28)', strokeDasharray: '2 4' })); });
     let last = -1; for (let i = n - 1; i >= 0; i--) if (o.vals[i] != null) { last = i; break; }
+    const faded = i => o.hover != null && o.hover !== i;
     if (meta.mode === 'bars') {
       const bw = Math.min(slot * .56, 26);
-      o.vals.forEach((v, i) => { if (v == null) return; const f = fl(v);
-        kids.push(h('rect', { key: 'b' + i, x: X(i) - bw / 2, y: Y(v), width: bw, height: Math.max(1, base - Y(v)), fill: f ? C.coral : (i === last && o.isToday ? C.ink : 'rgba(236,238,241,.42)'), opacity: o.hover != null && o.hover !== i ? .5 : 1,
-          style: { transformBox: 'fill-box', transformOrigin: 'bottom', animation: `mtGrow .6s cubic-bezier(.2,.7,.2,1) ${i * (n > 7 ? 16 : 45)}ms both` } })); });
+      o.vals.forEach((v, i) => { if (v == null) return;
+        kids.push(h('rect', { key: 'b' + i, x: X(i) - bw / 2, y: Y(v), width: bw, height: Math.max(1, base - Y(v)), rx: 1.5, fill: tc(v), opacity: faded(i) ? .32 : i === last && o.isToday ? 1 : .8,
+          style: { transformBox: 'fill-box', transformOrigin: 'bottom', transition: 'opacity .2s', animation: `mtGrow .6s cubic-bezier(.2,.7,.2,1) ${i * (n > 7 ? 16 : 45)}ms both` } })); });
     } else {
       const runs = []; let cur = [];
       o.vals.forEach((v, i) => { if (v == null) { if (cur.length) runs.push(cur); cur = []; } else cur.push([X(i), Y(v)]); }); if (cur.length) runs.push(cur);
+      // El traç canvia de to al llarg del temps: cada dia aporta el seu color al degradat.
+      defs.push(this.gradDef(o.gid, o.vals.map((v, i) => v == null ? null : [X(i), tc(v)]).filter(Boolean), iw));
+      defs.push(h('linearGradient', { key: 'fv', id: o.gid + 'v', x1: 0, y1: 0, x2: 0, y2: 1 }, h('stop', { offset: 0, stopColor: '#fff', stopOpacity: .24 }), h('stop', { offset: 1, stopColor: '#fff', stopOpacity: 0 })));
+      defs.push(h('mask', { key: 'mk', id: o.gid + 'm', maskUnits: 'userSpaceOnUse', x: 0, y: 0, width: iw, height: H }, h('rect', { x: 0, y: padT, width: iw, height: ih, fill: `url(#${o.gid}v)` })));
       const tot = runs.reduce((a, r) => a + r.length, 0) || 1; let acc = 0;
       runs.forEach((r, ri) => {
         const pts = r.map(p => `${p[0].toFixed(1)},${p[1].toFixed(1)}`).join('L'), dl = 1.1 * acc / tot, du = Math.max(.15, 1.1 * r.length / tot); acc += r.length;
-        kids.push(h('path', { key: 'a' + ri, d: `M${r[0][0].toFixed(1)},${base}L${pts}L${r[r.length - 1][0].toFixed(1)},${base}Z`, fill: `url(#${o.gid})`, style: { animation: 'mtFade .8s .5s both' } }));
-        kids.push(r.length === 1 ? h('circle', { key: 'l' + ri, cx: r[0][0], cy: r[0][1], r: 2.5, fill: C.ink })
-          : h('path', { key: 'l' + ri, d: 'M' + pts, fill: 'none', stroke: C.ink, strokeWidth: 2, strokeLinejoin: 'round', strokeLinecap: 'round', pathLength: 1, style: { strokeDasharray: 1, animation: `mtDraw ${du.toFixed(2)}s linear ${dl.toFixed(2)}s both` } }));
+        kids.push(h('path', { key: 'a' + ri, d: `M${r[0][0].toFixed(1)},${base}L${pts}L${r[r.length - 1][0].toFixed(1)},${base}Z`, fill: `url(#${o.gid})`, mask: `url(#${o.gid}m)`, style: { animation: 'mtFade .8s .5s both' } }));
+        if (r.length > 1) kids.push(h('path', { key: 'l' + ri, d: 'M' + pts, fill: 'none', stroke: `url(#${o.gid})`, strokeWidth: 2.2, strokeLinejoin: 'round', strokeLinecap: 'round', pathLength: 1, style: { strokeDasharray: 1, animation: `mtDraw ${du.toFixed(2)}s linear ${dl.toFixed(2)}s both` } }));
       });
-      o.vals.forEach((v, i) => { if (fl(v) && i !== last) kids.push(h('circle', { key: 'f' + i, cx: X(i), cy: Y(v), r: 3.5, fill: C.coral, style: { animation: 'mtFade .4s 1s both' } })); });
-      if (last >= 0) { const v = o.vals[last], c = fl(v) ? C.coral : C.ink;
+      o.vals.forEach((v, i) => { if (v == null || i === last) return;
+        kids.push(h('circle', { key: 'p' + i, cx: X(i), cy: Y(v), r: n > 7 ? 2.3 : 3.4, fill: tc(v), stroke: C.bg, strokeWidth: n > 7 ? 1 : 1.5, opacity: faded(i) ? .45 : 1,
+          style: { transformBox: 'fill-box', transformOrigin: 'center', animation: `mtPop .35s cubic-bezier(.3,.7,.2,1.4) ${(.3 + 1.1 * i / n).toFixed(2)}s both` } })); });
+      if (last >= 0) { const v = o.vals[last], c = tc(v);
+        kids.push(h('circle', { key: 'lp', cx: X(last), cy: Y(v), r: 4.5, fill: c, style: { transformBox: 'fill-box', transformOrigin: 'center', animation: 'mtRing 2.8s ease-out 1.8s infinite' } }));
         kids.push(h('circle', { key: 'lr', cx: X(last), cy: Y(v), r: 9, fill: 'none', stroke: c, strokeOpacity: .35, style: { animation: 'mtFade .5s 1.1s both' } }));
-        kids.push(h('circle', { key: 'ld', cx: X(last), cy: Y(v), r: 4, fill: c, style: { animation: 'mtFade .5s 1.1s both' } })); }
+        kids.push(h('circle', { key: 'ld', cx: X(last), cy: Y(v), r: 4.5, fill: c, stroke: C.bg, strokeWidth: 1.5, style: { transformBox: 'fill-box', transformOrigin: 'center', animation: 'mtPop .45s cubic-bezier(.3,.7,.2,1.4) 1.1s both' } })); }
     }
     if (o.hover != null && o.vals[o.hover] !== undefined) { const i = o.hover, v = o.vals[i];
       kids.push(h('line', { key: 'cur', x1: X(i), x2: X(i), y1: padT - 6, y2: base, stroke: 'rgba(236,238,241,.45)' }));
-      if (v != null && meta.mode === 'line') kids.push(h('circle', { key: 'cd', cx: X(i), cy: Y(v), r: 5, fill: C.bg, stroke: fl(v) ? C.coral : C.ink, strokeWidth: 2 })); }
+      if (v != null && meta.mode === 'line') kids.push(h('circle', { key: 'cd', cx: X(i), cy: Y(v), r: 5.5, fill: C.bg, stroke: tc(v), strokeWidth: 2.2 })); }
     kids.push(h('rect', { key: 'ov', x: 0, y: 0, width: iw, height: H, fill: 'transparent', style: { cursor: 'crosshair', touchAction: 'pan-y' },
       onPointerMove: e => { const r = e.currentTarget.getBoundingClientRect(); const i = Math.max(0, Math.min(n - 1, Math.floor((e.clientX - r.left) / r.width * n))); const j = o.vals[i] === undefined ? null : i; if (j !== o.hover) o.setHover(j); },
       onPointerLeave: () => o.setHover(null) }));
-    return h('svg', { key: o.key, width: W, height: H, viewBox: `0 0 ${W} ${H}`, style: { display: 'block', overflow: 'visible' } },
-      h('defs', { key: 'df' }, h('linearGradient', { id: o.gid, x1: 0, y1: 0, x2: 0, y2: 1 }, h('stop', { offset: 0, stopColor: C.ink, stopOpacity: .1 }), h('stop', { offset: 1, stopColor: C.ink, stopOpacity: 0 }))), kids);
+    return h('svg', { key: o.key, width: W, height: H, viewBox: `0 0 ${W} ${H}`, style: { display: 'block', overflow: 'visible' } }, h('defs', { key: 'df' }, defs), kids);
   }
   sentsChart(o) {
-    const h = React.createElement, C = this.C, n = o.feel.length, W = o.W, H = o.H, padT = 6, padB = 6, ih = H - padT - padB, lo = -2.8, hi = 2.2;
-    const slot = W / n, X = i => (i + .5) * slot, Y = v => padT + (1 - (v - lo) / (hi - lo)) * ih, lab = { fontFamily: this.MONO, fontSize: 9, letterSpacing: '.1em' }, kids = [];
-    kids.push(h('rect', { key: 'nb', x: 0, y: Y(1), width: W, height: Y(-1) - Y(1), fill: 'rgba(236,238,241,.05)' }));
-    kids.push(h('line', { key: 'z', x1: 0, x2: W, y1: Y(0), y2: Y(0), stroke: 'rgba(236,238,241,.3)', strokeDasharray: '3 5' }));
-    kids.push(h('text', { key: 't1', x: 0, y: padT + 9, fill: C.dim, style: lab }, 'MILLOR'));
-    kids.push(h('text', { key: 't2', x: 0, y: H - padB - 2, fill: C.dim, style: lab }, 'PITJOR'));
-    kids.push(h('text', { key: 't0', x: W, y: Y(0) - 6, textAnchor: 'end', fill: C.dim, style: lab }, 'EL TEU NORMAL'));
+    const h = React.createElement, C = this.C, n = o.feel.length, W = o.W, H = o.H, iw = W - o.padR, padT = 8, padB = 8, ih = H - padT - padB;
+    const all = o.feel.concat(o.obj).filter(v => v != null), lo = Math.min(-1.6, ...all) - .35, hi = Math.max(1.4, ...all) + .35;
+    const slot = iw / n, X = i => (i + .5) * slot, Y = v => padT + (1 - (v - lo) / (hi - lo)) * ih, lab = { fontFamily: this.MONO, fontSize: 9, letterSpacing: '.1em' }, kids = [];
+    kids.push(h('rect', { key: 'nb', x: 0, y: Y(1), width: iw, height: Y(-1) - Y(1), fill: 'rgba(236,238,241,.05)' }));
+    kids.push(h('line', { key: 'z', x1: 0, x2: iw, y1: Y(0), y2: Y(0), stroke: 'rgba(236,238,241,.3)', strokeDasharray: '3 5' }));
+    kids.push(h('text', { key: 't1', x: iw + 8, y: Y(1) + 3, fill: C.dim, style: lab }, 'MILLOR'));
+    kids.push(h('text', { key: 't0', x: iw + 8, y: Y(0) + 3, fill: C.dim, style: lab }, 'NORMAL'));
+    kids.push(h('text', { key: 't2', x: iw + 8, y: Y(-1) + 3, fill: C.dim, style: lab }, 'PITJOR'));
     for (let i = 0; i < n; i++) {
       const f = o.feel[i], b = o.obj[i];
       if (f == null || b == null) { kids.push(h('line', { key: 'g' + i, x1: X(i), x2: X(i), y1: padT + 14, y2: H - padB - 14, stroke: 'rgba(236,238,241,.2)', strokeDasharray: '2 4' })); continue; }
       if (Math.abs(f - b) < 1.2) continue;
-      kids.push(h('rect', { key: 'mb' + i, x: X(i) - slot / 2, y: padT, width: slot, height: ih, fill: 'rgba(217,179,106,.09)', style: { animation: 'mtFade .5s 1s both' } }));
-      kids.push(h('line', { key: 'mc' + i, x1: X(i), x2: X(i), y1: Y(f), y2: Y(b), stroke: C.amber, strokeWidth: 2, style: { animation: 'mtFade .5s 1.1s both' } }));
+      kids.push(h('rect', { key: 'mb' + i, x: X(i) - slot / 2, y: padT, width: slot, height: ih, fill: 'rgba(236,238,241,.06)', style: { animation: 'mtFade .5s 1s both' } }));
+      kids.push(h('line', { key: 'mc' + i, x1: X(i), x2: X(i), y1: Y(f), y2: Y(b), stroke: 'rgba(236,238,241,.8)', strokeWidth: 1.5, style: { animation: 'mtFade .5s 1.1s both' } }));
     }
-    const runsOf = arr => { const runs = []; let cur = []; arr.forEach((v, i) => { if (v == null) { if (cur.length) runs.push(cur); cur = []; } else cur.push([X(i), Y(v)]); }); if (cur.length) runs.push(cur); return runs; };
+    const runsOf = arr => { const runs = []; let cur = []; arr.forEach((v, i) => { if (v == null) { if (cur.length) runs.push(cur); cur = []; } else cur.push([X(i), Y(v), i]); }); if (cur.length) runs.push(cur); return runs; };
     const P = r => 'M' + r.map(p => `${p[0].toFixed(1)},${p[1].toFixed(1)}`).join('L');
+    const fc = v => this.tone(this.lerpPts(this.QH, v));
     runsOf(o.obj).forEach((r, ri) => kids.push(r.length === 1 ? h('circle', { key: 'oc' + ri, cx: r[0][0], cy: r[0][1], r: 2.5, fill: 'rgba(236,238,241,.6)' })
-      : h('path', { key: 'o' + ri, d: P(r), fill: 'none', stroke: 'rgba(236,238,241,.6)', strokeWidth: 1.5, strokeDasharray: '4 4', style: { animation: 'mtFade .7s .4s both' } })));
-    runsOf(o.feel).forEach((r, ri) => kids.push(r.length === 1 ? h('circle', { key: 'fc' + ri, cx: r[0][0], cy: r[0][1], r: 3, fill: C.ink })
-      : h('path', { key: 'f' + ri, d: P(r), fill: 'none', stroke: C.ink, strokeWidth: 2, strokeLinejoin: 'round', strokeLinecap: 'round', pathLength: 1, style: { strokeDasharray: 1, animation: 'mtDraw 1.1s cubic-bezier(.4,0,.2,1) both' } })));
+      : h('path', { key: 'o' + ri, d: P(r), fill: 'none', stroke: 'rgba(236,238,241,.55)', strokeWidth: 1.5, strokeDasharray: '4 4', style: { animation: 'mtFade .7s .4s both' } })));
+    runsOf(o.feel).forEach((r, ri) => kids.push(r.length === 1 ? null
+      : h('path', { key: 'f' + ri, d: P(r), fill: 'none', stroke: `url(#${o.gid})`, strokeWidth: 2.2, strokeLinejoin: 'round', strokeLinecap: 'round', pathLength: 1, style: { strokeDasharray: 1, animation: 'mtDraw 1.1s cubic-bezier(.4,0,.2,1) both' } })));
+    o.feel.forEach((v, i) => { if (v != null) kids.push(h('circle', { key: 'fd' + i, cx: X(i), cy: Y(v), r: n > 7 ? 2 : 3, fill: fc(v), style: { transformBox: 'fill-box', transformOrigin: 'center', animation: `mtPop .35s cubic-bezier(.3,.7,.2,1.4) ${(.3 + 1.1 * i / n).toFixed(2)}s both` } })); });
     if (o.hover != null) { const i = o.hover;
       kids.push(h('line', { key: 'cur', x1: X(i), x2: X(i), y1: 0, y2: H, stroke: 'rgba(236,238,241,.4)' }));
-      if (o.feel[i] != null) kids.push(h('circle', { key: 'cf', cx: X(i), cy: Y(o.feel[i]), r: 4.5, fill: C.bg, stroke: C.ink, strokeWidth: 2 }));
+      if (o.feel[i] != null) kids.push(h('circle', { key: 'cf', cx: X(i), cy: Y(o.feel[i]), r: 4.5, fill: C.bg, stroke: fc(o.feel[i]), strokeWidth: 2 }));
       if (o.obj[i] != null) kids.push(h('circle', { key: 'co', cx: X(i), cy: Y(o.obj[i]), r: 4, fill: C.bg, stroke: 'rgba(236,238,241,.7)', strokeWidth: 1.5 })); }
-    kids.push(h('rect', { key: 'ov', x: 0, y: 0, width: W, height: H, fill: 'transparent', style: { cursor: 'crosshair', touchAction: 'pan-y' },
+    kids.push(h('rect', { key: 'ov', x: 0, y: 0, width: iw, height: H, fill: 'transparent', style: { cursor: 'crosshair', touchAction: 'pan-y' },
       onPointerMove: e => { const r = e.currentTarget.getBoundingClientRect(); const i = Math.max(0, Math.min(n - 1, Math.floor((e.clientX - r.left) / r.width * n))); if (i !== o.hover) o.setHover(i); },
       onPointerLeave: () => o.setHover(null) }));
-    return h('svg', { key: o.key, width: W, height: H, viewBox: `0 0 ${W} ${H}`, style: { display: 'block', overflow: 'visible' } }, kids);
+    const gp = o.feel.map((v, i) => v == null ? null : [X(i), fc(v)]).filter(Boolean);
+    return h('svg', { key: o.key, width: W, height: H, viewBox: `0 0 ${W} ${H}`, style: { display: 'block', overflow: 'visible' } }, h('defs', { key: 'df' }, this.gradDef(o.gid, gp, iw)), kids);
+  }
+  weekStrip(o) {
+    const h = React.createElement, C = this.C, M = this.MONO, W = o.W, cw = W - o.gut, n = 7, col = cw / n, top = 26, ch = o.ch, H = top + ch + 28;
+    const X = j => (j + .5) * col, Y = p => top + (1 - p) * ch, kids = [];
+    [[1, .55, this.LV.ok, 'A FONS'], [.55, .3, this.LV.mid, 'MODERA'], [.3, 0, this.LV.bad, 'RECUPERA']].forEach(([a, b, t, lb], z) => {
+      const c = this.tone(t);
+      kids.push(h('rect', { key: 'z' + z, x: 0, y: Y(a), width: cw, height: Y(b) - Y(a), fill: c, fillOpacity: .05 }));
+      kids.push(h('text', { key: 'zl' + z, x: cw + 10, y: (Y(a) + Y(b)) / 2 + 3, fill: c, fillOpacity: .85, style: { fontFamily: M, fontSize: 9, letterSpacing: '.1em' } }, lb));
+      if (z) kids.push(h('line', { key: 'zs' + z, x1: 0, x2: cw, y1: Y(a), y2: Y(a), stroke: 'rgba(236,238,241,.08)', strokeDasharray: '2 4' }));
+    });
+    o.days.forEach((d, j) => {
+      kids.push(h('line', { key: 't' + j, x1: X(j), x2: X(j), y1: top, y2: top + ch, stroke: 'rgba(236,238,241,.07)' }));
+      kids.push(h('text', { key: 'wd' + j, x: X(j), y: 14, textAnchor: 'middle', fill: C.dim, style: { fontFamily: M, fontSize: 9, letterSpacing: '.08em' } }, d.wd));
+      kids.push(h('text', { key: 'dn' + j, x: X(j), y: H - 8, textAnchor: 'middle', fill: C.mut, style: { fontFamily: M, fontSize: 10 } }, d.n));
+    });
+    const pts = o.days.map((d, j) => d.p == null ? null : [X(j), Y(d.p), this.tone(this.dayH(d.p)), j]);
+    const runs = []; let cur = [];
+    pts.forEach(p => { if (!p) { if (cur.length) runs.push(cur); cur = []; } else cur.push(p); }); if (cur.length) runs.push(cur);
+    runs.forEach((r, ri) => { if (r.length > 1) kids.push(h('path', { key: 'l' + ri, d: 'M' + r.map(p => `${p[0].toFixed(1)},${p[1].toFixed(1)}`).join('L'), fill: 'none', stroke: `url(#${o.gid})`, strokeOpacity: .7, strokeWidth: 1.6, strokeLinejoin: 'round', pathLength: 1, style: { strokeDasharray: 1, animation: 'mtDraw 1s cubic-bezier(.4,0,.2,1) .3s both' } })); });
+    pts.forEach((p, j) => {
+      if (!p) { kids.push(h('circle', { key: 'e' + j, cx: X(j), cy: Y(.5), r: 4.5, fill: 'none', stroke: 'rgba(236,238,241,.45)', strokeDasharray: '2 2' })); return; }
+      kids.push(h('circle', { key: 'gw' + j, cx: p[0], cy: p[1], r: 9, fill: p[2], fillOpacity: .18, style: { animation: `mtFade .5s ${(.2 + j * .08).toFixed(2)}s both` } }));
+      kids.push(h('circle', { key: 'd' + j, cx: p[0], cy: p[1], r: 5, fill: p[2], stroke: C.bg, strokeWidth: 1.5, style: { transformBox: 'fill-box', transformOrigin: 'center', animation: `mtPop .45s cubic-bezier(.3,.7,.2,1.4) ${(.15 + j * .08).toFixed(2)}s both` } }));
+    });
+    const gp = pts.filter(Boolean).map(p => [p[0], p[2]]);
+    return h('svg', { key: o.key, width: W, height: H, viewBox: `0 0 ${W} ${H}`, style: { display: 'block', overflow: 'visible' } }, h('defs', { key: 'df' }, this.gradDef(o.gid, gp, cw)), kids);
   }
 
   icon(name, size) {
@@ -748,91 +897,104 @@ Normes:
       shield: ['M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z', 'm9 12 2 2 4-4'].map(P),
       sliders: ['M4 8h16', 'M15 5v6', 'M4 16h16', 'M9 13v6'].map(P),
       moon: ['M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z'].map(P),
+      flask: ['M10 2v7.527a2 2 0 0 1-.211.896L4.72 20.55a1 1 0 0 0 .9 1.45h12.76a1 1 0 0 0 .9-1.45l-5.069-10.127A2 2 0 0 1 14 9.527V2', 'M8.5 2h7', 'M7 16h10'].map(P),
       half: [h('circle', { key: 'c', cx: 12, cy: 12, r: 9 }), h('path', { key: 'f', d: 'M12 3a9 9 0 0 1 0 18z', fill: 'currentColor' })],
       bolt: ['M4 14a1 1 0 0 1-.78-1.63l9.9-10.2a.5.5 0 0 1 .86.46l-1.92 6.02A1 1 0 0 0 13 10h7a1 1 0 0 1 .78 1.63l-9.9 10.2a.5.5 0 0 1-.86-.46l1.92-6.02A1 1 0 0 0 11 14z'].map(P),
     }[name];
     return h('svg', { width: size, height: size, viewBox: '0 0 24 24', fill: 'none', stroke: 'currentColor', strokeWidth: 1.75, strokeLinecap: 'round', strokeLinejoin: 'round', style: { display: 'block' } }, kids);
   }
-  ringEl(key, sc, D, size) {
-    const h = React.createElement, C = this.C, p = D.pos[41], st = this.stateOf(p), col = st ? this.ST[st].c : null;
-    const sw = 8, R = size / 2 - sw / 2 - 1, c = size / 2, rad = a => a * Math.PI / 180;
-    const pt = a => [c + R * Math.sin(rad(a)), c - R * Math.cos(rad(a))];
-    const think = !col;
-    const segs = this.KEYS.map((k, i) => {
-      const mid = 45 + i * 90, a = pt(mid - 35), b = pt(mid + 35), v = D.vals[k][41], lit = this.flag(k, v, D.band);
-      const d = `M${a[0].toFixed(2)},${a[1].toFixed(2)} A${R},${R} 0 0 1 ${b[0].toFixed(2)},${b[1].toFixed(2)}`;
-      if (think) return h('path', { key: k, d, fill: 'none', stroke: 'rgba(236,238,241,.1)', strokeWidth: sw, strokeLinecap: 'round', style: { animation: `mtThink 2s ease-in-out ${(i * .5).toFixed(1)}s infinite` } });
-      return h('g', { key: k },
-        h('path', { d, fill: 'none', stroke: col + '26', strokeWidth: sw, strokeLinecap: 'round' }),
-        h('path', { d, fill: 'none', stroke: col, strokeWidth: sw, strokeLinecap: 'round', pathLength: 1,
-          style: { strokeDasharray: 1, animation: `mtDraw .7s cubic-bezier(.3,.7,.2,1) ${(.25 + i * .18).toFixed(2)}s both`, filter: lit ? `drop-shadow(0 0 6px ${col}66)` : undefined } }));
-    });
-    const center = sc === 'nou' ? h('span', { style: { fontFamily: this.MONO, fontSize: 13, letterSpacing: '.04em', color: C.ink, animation: 'mtPulse 2s ease-in-out infinite' } }, '5/14')
-      : !st ? h('span', { style: { fontFamily: this.MONO, fontSize: 16, color: C.dim, animation: 'mtPulse 2s ease-in-out infinite' } }, '—')
-      : h('div', { style: { display: 'flex', color: col } }, this.icon(st === 'rec' ? 'moon' : st === 'mod' ? 'half' : 'bolt', Math.round(size * .27)));
-    return h('div', { key, style: { position: 'relative', width: size, height: size } },
-      h('svg', { width: size, height: size, viewBox: `0 0 ${size} ${size}`, style: { display: 'block', overflow: 'visible' } },
-        h('circle', { key: 'disc', cx: c, cy: c, r: R - sw / 2 - 7, fill: col ? col + '14' : 'rgba(255,255,255,.04)', style: { animation: col ? 'mtFade .5s .1s both, mtBreath 3.2s ease-in-out 1.4s infinite' : 'mtFade .5s .1s both' } }), segs),
-      h('div', { style: { position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', animation: 'mtFade .5s .8s both' } }, center));
+
+  // ── Vistes ──────────────────────────────────────────────────────────
+  statusEl(sc, lvs, hs, p) {
+    const h = React.createElement;
+    const row = (key, col, n, t, j) => h('div', { key, style: { display: 'flex', alignItems: 'center', gap: 7, animation: `mtIn .45s cubic-bezier(.2,.7,.2,1) ${(.45 + j * .09).toFixed(2)}s both` } },
+      h('span', { style: { width: 7, height: 7, borderRadius: '50%', flex: 'none', background: col, boxShadow: col[0] === '#' ? `0 0 8px ${this.alpha(col, .55)}` : 'none' } }),
+      h('span', null, n != null ? h('span', { style: { color: col, fontWeight: 600 } }, String(n) + ' ') : null, t));
+    const grey = 'rgba(236,238,241,.35)';
+    let rows;
+    if (sc === 'nou') rows = [row('n', grey, null, 'Franja en càlcul · 5/14', 0)];
+    else if (p == null) rows = [row('x', grey, null, "Sense dades d'avui", 0)];
+    else {
+      const g = { bad: [], mid: [], ok: [] }, avg = a => a.reduce((s, x) => s + x, 0) / a.length; let j = 0;
+      lvs.forEach((l, i) => { if (l) g[l].push(hs[i]); });
+      rows = [];
+      if (g.bad.length) rows.push(row('b', this.tone(Math.min(...g.bad)), g.bad.length, 'per vigilar', j++));
+      if (g.mid.length) rows.push(row('m', this.tone(avg(g.mid)), g.mid.length, 'al límit', j++));
+      if (g.ok.length) rows.push(row('o', this.tone(avg(g.ok)), g.ok.length === 4 ? null : g.ok.length, g.ok.length === 4 ? 'Tot dins la franja' : 'dins la franja', j++));
+    }
+    return h('div', { key: 'st-' + sc, style: { display: 'flex', flexWrap: 'wrap', gap: '5px 14px', fontFamily: this.MONO, fontSize: 11, lineHeight: 1.35, color: 'rgba(236,238,241,.75)' } }, rows);
   }
   cellsVM(sc, D, desk) {
-    const C = this.C;
+    const C = this.C, s = this.state, idx = Array.from({ length: 7 }, (_, j) => 35 + j);
     return this.KEYS.map((k, i) => {
-      const v = D.vals[k][41], b = D.band ? D.band[k] : null, f = this.flag(k, v, D.band);
-      let d, dc = C.mut;
+      const v = D.vals[k][41], b = D.band ? D.band[k] : null, lv = this.lvlOf(k, v, D.band);
+      let d;
       if (v == null) d = 'sense dades';
       else if (!b) d = 'franja en càlcul';
-      else if (f) { d = `${this.delta(k, v, b.mean)} · franja ${this.bandTxt(k, b)}`; dc = C.coral; }
-      else if (this.outAny(k, v, D.band)) d = `${this.delta(k, v, b.mean)} · millor que l'habitual`;
+      else if (lv === 'bad') d = `${this.delta(k, v, b.mean)} · per vigilar`;
+      else if (lv === 'mid') d = `${this.delta(k, v, b.mean)} · al límit`;
+      else if (this.qOf(k, v, D.band) > 1) d = `${this.delta(k, v, b.mean)} · molt bé`;
       else d = `dins · franja ${this.bandTxt(k, b)}`;
-      return { v: this.fmtV(k, v), unit: this.META[k].unit, label: this.META[k].cell, d, vc: { color: f ? C.coral : v == null ? C.dim : C.ink }, dc: { color: dc },
-        box: { background: 'transparent', border: 'none', textAlign: 'left', cursor: 'pointer', display: 'flex', flexDirection: 'column', padding: i % 2 === 0 ? '16px 14px 16px 0' : '16px 0 16px 16px', borderRight: i % 2 === 0 ? C.hair : 'none', borderBottom: i < 2 ? C.hair : 'none' },
+      return { v: React.createElement(this.Num, { k, v, band: D.band, dur: 900 }), unit: this.META[k].unit, label: this.META[k].cell, d, vc: {},
+        dc: { color: v == null || !b ? C.mut : this.toneOf(k, v, D.band), transition: 'color .6s ease' },
+        spark: this.spark({ key: `sp-${k}-${sc}-${desk ? 'd' : 'm'}-${s.mount}`, gid: `sp${k}${desk ? 'd' : 'm'}`, k, vals: idx.map(j => D.vals[k][j]), band: D.band, W: desk ? (this.geom().side < 400 ? 118 : 136) : 150 }),
+        box: { background: 'transparent', border: 'none', textAlign: 'left', cursor: 'pointer', display: 'flex', flexDirection: 'column', transition: 'background .2s', padding: i % 2 === 0 ? '16px 14px 16px 0' : '16px 0 16px 16px', borderRight: i % 2 === 0 ? C.hair : 'none', borderBottom: i < 2 ? C.hair : 'none' },
         onClick: () => this.setState(desk ? { dTab: 'evolucio', metric: k, hover: null } : { mTab: 'evolucio', evoView: 'metrics', metric: k, hover: null }) };
     });
   }
   avuiVM(sc, D, desk) {
-    const C = this.C, w = this.who(sc), p = D.pos[41], st = this.stateOf(p);
-    let word, color, line;
-    if (sc === 'nou') { word = 'Calculant'; color = C.ink; line = 'Encara estem aprenent com ets tu.'; }
-    else if (p == null) { word = 'Pendent'; color = C.mut; line = "Encara no han arribat les dades d'avui."; }
-    else { word = this.WS[st]; color = this.ST[st].c; line = this.ST[st].line; }
-    const nOut = this.KEYS.filter(k => this.flag(k, D.vals[k][41], D.band)).length;
-    const chip = sc === 'nou' ? 'Franja en càlcul · 5 de 14 dies' : p == null ? "Encara sense dades d'avui" : nOut ? `${nOut} de 4 senyals fora de franja` : 'Cap senyal fora de franja';
-    const ai = this.aiGet(this.aiKey('daily', sc), this.FB_DAILY[sc]);
-    return { greet: `Bon dia, ${w.name}.`, word, wordC: { color }, line, sq: { width: 6, height: 6, flex: 'none', background: color },
-      ring: this.ringEl(`rg-${sc}-${this.state.visit}-${desk ? 'd' : 'm'}`, sc, D, desk ? 104 : 112), chip, loading: ai.loading, ready: ai.ready, segs: ai.ready ? this.segs(ai.val) : [],
+    const h = React.createElement, C = this.C, s = this.state, w = this.who(sc), p = D.pos[41], st = this.stateOf(p), dh = sc === 'nou' ? null : this.dayH(p);
+    let word, line;
+    if (sc === 'nou') { word = 'Calculant'; line = 'Encara estem aprenent com ets tu.'; }
+    else if (p == null) { word = 'Pendent'; line = "Encara no han arribat les dades d'avui."; }
+    else { word = this.WS[st]; line = this.ST[st].line; }
+    const hs = this.KEYS.map(k => this.hOf(k, D.vals[k][41], D.band)), lvs = this.KEYS.map(k => this.lvlOf(k, D.vals[k][41], D.band));
+    const ai = this.aiGet(this.aiKey('daily', sc), this.FB_DAILY[sc]), anim = d => ({ display: 'inline-block', animation: `mtWord .5s cubic-bezier(.2,.7,.2,1) ${d}s both` });
+    return { greet: `Bon dia, ${w.name}.`, word: h('span', { key: 'w-' + word, style: anim(0) }, word), line: h('span', { key: 'l-' + word, style: anim(.06) }, line),
+      sq: { width: 6, height: 6, flex: 'none', background: dh == null ? C.mut : this.tone(dh), transition: 'background .6s' },
+      ring: h(this.Ring, { key: `rg-${s.mount}-${desk ? 'd' : 'm'}`, size: desk ? (this.geom().side < 400 ? 94 : 104) : 112, hs, dh, st, nou: sc === 'nou' }),
+      status: this.statusEl(sc, lvs, hs, p), loading: ai.loading, ready: ai.ready, segs: ai.ready ? this.segs(ai.val) : [],
       basis: p == null && sc !== 'nou' ? "EN QUÈ ES BASA · ENCARA SENSE DADES D'AVUI" : "EN QUÈ ES BASA · 4 DADES D'AVUI", cells: this.cellsVM(sc, D, desk) };
   }
   evoVM(sc, D, desk) {
-    const s = this.state, C = this.C, M = this.MONO, k = s.metric, meta = this.META[k], b = D.band ? D.band[k] : null;
+    const h = React.createElement, s = this.state, C = this.C, M = this.MONO, k = s.metric, meta = this.META[k], b = D.band ? D.band[k] : null;
     const range = sc === 'nou' ? 7 : s.range, zoomed = range === 28 && s.zoom != null;
     const from = zoomed ? 14 + s.zoom * 7 : 42 - range, n = zoomed ? 7 : range;
-    const idx = Array.from({ length: n }, (_, j) => from + j), vals = idx.map(i => D.vals[k][i]), flag = v => this.flag(k, v, D.band);
-    const hv = s.hover != null && s.hover < n ? s.hover : null, ri = hv != null ? idx[hv] : 41, rv = D.vals[k][ri];
+    const idx = Array.from({ length: n }, (_, j) => from + j), vals = idx.map(i => D.vals[k][i]);
+    const hv = s.hover != null && s.hover < n ? s.hover : null, ri = hv != null ? idx[hv] : 41, rv = D.vals[k][ri], lv = this.lvlOf(k, rv, D.band);
     const dd = this.day(ri), when = ri === 41 ? 'AVUI' : `${this.WDL[dd.wd]} ${dd.n} ${dd.mo}`;
-    let sub, subC = C.mut;
+    let sub;
     if (rv === undefined) sub = `${when} · encara no hi eres`;
     else if (rv === null) sub = `${when} · sense dades`;
     else if (!b) sub = `${when} · franja en càlcul`;
-    else if (flag(rv)) { sub = `${when} · ${this.delta(k, rv, b.mean)} vs la teva mitjana · per vigilar`; subC = C.coral; }
-    else if (this.outAny(k, rv, D.band)) sub = `${when} · ${this.delta(k, rv, b.mean)} · millor que l'habitual`;
+    else if (lv === 'bad') sub = `${when} · ${this.delta(k, rv, b.mean)} vs la teva mitjana · per vigilar`;
+    else if (lv === 'mid') sub = `${when} · ${this.delta(k, rv, b.mean)} vs la teva mitjana · al límit`;
+    else if (this.qOf(k, rv, D.band) > 1) sub = `${when} · ${this.delta(k, rv, b.mean)} · molt bé`;
     else sub = `${when} · dins la teva franja`;
-    const pres = vals.filter(v => v != null), avg = pres.length ? pres.reduce((a, x) => a + x, 0) / pres.length : null, nF = pres.filter(flag).length;
+    const pres = vals.filter(v => v != null), avg = pres.length ? pres.reduce((a, x) => a + x, 0) / pres.length : null;
+    const cnt = { ok: 0, mid: 0, bad: 0 }; pres.forEach(v => { const l = this.lvlOf(k, v, D.band); if (l) cnt[l]++; });
     const tb = { background: 'none', border: 'none', borderBottom: '1px solid transparent', marginBottom: -1, padding: desk ? '12px 0 14px' : '10px 0 12px', fontFamily: M, fontSize: desk ? 12 : 11, letterSpacing: '.1em', textTransform: 'uppercase', cursor: 'pointer', color: C.dim, transition: 'color .25s, border-color .25s' };
     const tabs = this.KEYS.map(q => ({ label: this.META[q].short, style: q === k ? { ...tb, color: C.ink, borderBottomColor: C.ink } : tb, onClick: () => this.setState({ metric: q, hover: null }) }));
-    const rB = { border: 'none', padding: '6px 10px', fontFamily: M, fontSize: 11, letterSpacing: '.08em', cursor: 'pointer', background: 'transparent', color: C.mut };
+    const rB = { border: 'none', padding: '6px 10px', fontFamily: M, fontSize: 11, letterSpacing: '.08em', cursor: 'pointer', background: 'transparent', color: C.mut, transition: 'background .25s, color .25s' };
     const ranges = [7, 28].map(r => { const dis = sc === 'nou' && r === 28;
       return { label: `${r} D`, style: r === range ? { ...rB, background: C.ink, color: C.bg } : dis ? { ...rB, opacity: .35, cursor: 'not-allowed' } : rB, onClick: () => { if (!dis) this.setState({ range: r, zoom: null, hover: null }); } }; });
     const labels = idx.map(i => { const d = this.day(i); return { t: i === 41 ? 'AVUI' : `${this.WD[d.wd]} ${d.n}`, st: { color: i === 41 ? C.ink : C.dim } }; });
-    const weeksList = [0, 1, 2, 3].map(q => { const i0 = 14 + q * 7, d0 = this.day(i0), d6 = this.day(i0 + 6), nf = Array.from({ length: 7 }, (_, j) => D.vals[k][i0 + j]).filter(flag).length;
-      return { t: d0.mo === d6.mo ? `${d0.n}–${d6.n} ${d6.mo}` : `${d0.n} ${d0.mo}–${d6.n} ${d6.mo}`, f: nf ? (desk ? `● ${nf} per vigilar` : `● ${nf}`) : (desk ? 'tot dins la franja' : 'dins'), fc: { color: nf ? C.coral : C.dim }, onClick: () => this.setState({ zoom: q, hover: null }) }; });
+    const sq = v => ({ width: 7, height: 7, borderRadius: 1.5, boxSizing: 'border-box', background: v == null ? 'transparent' : this.toneOf(k, v, D.band), border: v == null ? '1px dashed rgba(236,238,241,.35)' : 'none', transition: 'background .4s' });
+    const weeksList = [0, 1, 2, 3].map(q => { const i0 = 14 + q * 7, d0 = this.day(i0), d6 = this.day(i0 + 6);
+      return { t: d0.mo === d6.mo ? `${d0.n}–${d6.n} ${d6.mo}` : `${d0.n} ${d0.mo}–${d6.n} ${d6.mo}`, fc: { display: 'inline-flex', gap: 2 },
+        f: Array.from({ length: 7 }, (_, j) => h('span', { key: j, style: sq(D.vals[k][i0 + j]) })), onClick: () => this.setState({ zoom: q, hover: null }) }; });
     let zoomLabel = '';
     if (zoomed) { const d0 = this.day(from), d6 = this.day(from + 6); zoomLabel = `SETMANA ${d0.n} ${d0.mo} – ${d6.n} ${d6.mo}`; }
-    const chart = this.chart({ key: `c-${desk ? 'd' : 'm'}-${sc}-${k}-${range}-${zoomed ? s.zoom : 'x'}-${s.visit}`, k, vals, b, flag, W: desk ? 800 : 354, H: desk ? 230 : 190, padR: desk ? 48 : 40,
+    const chart = this.chart({ key: `c-${desk ? 'd' : 'm'}-${sc}-${k}-${range}-${zoomed ? s.zoom : 'x'}-${s.visit}`, k, vals, b, band: D.band, W: desk ? this.geom().cw : 354, H: desk ? this.geom().ch : 190, padR: desk ? 48 : 40,
       hover: hv, setHover: v => this.setState({ hover: v }), gid: desk ? 'mtgd' : 'mtgm', isToday: !zoomed });
-    return { label: meta.label, big: this.fmtV(k, rv), bigC: { color: rv == null ? C.dim : flag(rv) ? C.coral : C.ink }, unit: meta.unit, sub, subC: { color: subC },
+    const dist = b ? h('span', { style: { display: 'inline-flex', alignItems: 'baseline', gap: 5 } },
+      [['ok', cnt.ok], ['mid', cnt.mid], ['bad', cnt.bad]].map(([l, c], j) => h('span', { key: l, style: { display: 'inline-flex', gap: 5 } },
+        j ? h('span', { style: { color: 'rgba(236,238,241,.25)' } }, '·') : null, h('span', { style: { color: c ? this.tone(this.LV[l]) : 'rgba(236,238,241,.3)', transition: 'color .4s' } }, String(c))))) : '—';
+    return { label: meta.label, big: h(this.Num, { key: k, k, v: rv, band: D.band, dur: 260 }), bigC: {}, unit: meta.unit, sub,
+      subC: { color: rv == null || !b ? C.mut : this.toneOf(k, rv, D.band), transition: 'color .25s' },
       tabs, ranges, chart, days: !(range === 28 && !zoomed), weeks: range === 28 && !zoomed, zoomed, labels, weeksList, zoomLabel, back: () => this.setState({ zoom: null, hover: null }),
-      avg: this.fmtV(k, avg), avgL: zoomed ? 'MITJANA SETMANA' : `MITJANA ${range} D`, bandT: b ? this.bandTxt(k, b) : 'EN CÀLCUL', outT: b ? `${nF} de ${pres.length}` : '—', outC: { color: nF ? C.coral : C.ink }, isEstat: k === 'estat' };
+      avg: this.fmtV(k, avg), avgC: { color: avg == null || !b ? C.ink : this.toneOf(k, avg, D.band), transition: 'color .4s' }, avgL: zoomed ? 'MITJANA SETMANA' : `MITJANA ${range} D`,
+      bandT: b ? this.bandTxt(k, b) : 'EN CÀLCUL', outT: dist, outL: b ? (desk ? 'BÉ · LÍMIT · VIGILAR' : 'BÉ·LÍMIT·VIGILAR') : 'DIES PER ESTAT', outC: {}, isEstat: k === 'estat' };
   }
   sentsVM(sc, D, desk) {
     const s = this.state;
@@ -843,33 +1005,36 @@ Normes:
     let sub;
     if (hv != null) { const i = idx[hv], d = this.day(i); sub = `${this.WD[d.wd]} ${d.n} ${d.mo} · et sents ${word(D.feel[i])} · dades ${word(D.obj[i])}`; }
     else sub = !st.mis.length ? 'El que sents i les dades diuen el mateix' : st.better >= st.worse ? `${st.better} ${st.better === 1 ? 'dia' : 'dies'} et sents millor del que diuen les dades` : `${st.worse} ${st.worse === 1 ? 'dia' : 'dies'} et sents pitjor del que diuen les dades`;
-    const chart = this.sentsChart({ key: `s-${desk ? 'd' : 'm'}-${sc}-${range}-${s.visit}`, feel: idx.map(i => D.feel[i]), obj: idx.map(i => D.obj[i]), W: desk ? 376 : 354, H: desk ? 150 : 170, hover: hv, setHover: v => this.setState({ sHover: v }) });
+    const chart = this.sentsChart({ key: `s-${desk ? 'd' : 'm'}-${sc}-${range}-${s.visit}`, feel: idx.map(i => D.feel[i]), obj: idx.map(i => D.obj[i]), W: desk ? this.geom().sw : 354, H: 150, padR: 48,
+      hover: hv, setHover: v => this.setState({ sHover: v }), gid: desk ? 'sgd' : 'sgm' });
     const d0 = this.day(idx[0]), ai = this.aiGet(this.aiKey('sents', sc), this.FB_SENTS[sc]);
     return { empty: false, has: true, k: String(st.k), n: String(st.n), sub, chart, x0: `${d0.n} ${d0.mo}`, loading: ai.loading, ready: ai.ready, segs: ai.ready ? this.segs(ai.val) : [] };
   }
   itemsVM(sc) {
     const it = this.TODAY[sc], C = this.C;
     if (!it) return { has: false, none: true, list: [] };
-    return { has: true, none: false, list: this.ITEMS.map((x, i) => { const v = it[i], u = this.USUAL[i], low = sc !== 'nou' && v <= u - 1.5;
-      return { t: x.t, n: sc === 'nou' ? x.n : `habitual ${u.toFixed(1).replace('.', ',')} · ${x.n}`, v: `${v}/5`, vc: { color: low ? C.coral : C.ink },
-        sq: [1, 2, 3, 4, 5].map(q => ({ width: 16, height: 6, background: q <= v ? (low ? C.coral : C.ink) : 'rgba(255,255,255,.12)' })) }; }) };
+    return { has: true, none: false, list: this.ITEMS.map((x, i) => {
+      const v = it[i], u = this.USUAL[i], nou = sc === 'nou', col = nou ? C.ink : this.tone(this.lerpPts(this.QH, (v - u) / .6));
+      return { t: x.t, n: nou ? x.n : `habitual ${u.toFixed(1).replace('.', ',')} · ${x.n}`, v: `${v}/5`, vc: { color: col, transition: 'color .5s' },
+        sq: [1, 2, 3, 4, 5].map(q => ({ width: 16, height: 6, borderRadius: 1, background: q <= v ? col : 'rgba(255,255,255,.1)', transformOrigin: 'left center', transition: 'background .5s',
+          ...(q <= v ? { animation: `mtSq .35s cubic-bezier(.3,.7,.2,1) ${(.1 + (i * 5 + q) * .025).toFixed(3)}s both` } : {}) })) }; }) };
   }
   weekVM(sc, D, desk) {
-    const s = this.state, C = this.C;
-    if (sc === 'nou') return { has: false, none: true, loading: false, ready: false, days: [], all: [], hist: [], com: [], mill: [], vig: [], rec: [] };
+    const h = React.createElement, s = this.state;
+    if (sc === 'nou') return { has: false, none: true, loading: false, ready: false, strip: null, sum: '', all: [], hist: [], com: [], mill: [], vig: [], rec: [] };
     const wi = Math.min(s.week, this.WEEKS.length - 1), W = this.WEEKS[wi], ws = this.weekStats(sc, W.a), fb = this.weekFallback(ws);
     const ai = this.aiGet(this.aiKey('week', sc, wi), fb), val = ai.ready ? ai.val : null;
-    const days = ws.idx.map((i, j) => { const d = this.day(i), p = D.pos[i], st = this.stateOf(p), col = st ? this.ST[st].c : null;
-      return { wd: this.WD[d.wd], day: String(d.n), dot: p == null
-        ? { position: 'absolute', left: '50%', top: '50%', width: 9, height: 9, boxSizing: 'border-box', borderRadius: '50%', border: '1px dashed rgba(236,238,241,.45)', transform: 'translate(-50%,-50%)' }
-        : { position: 'absolute', left: '50%', top: `${((1 - p) * 100).toFixed(1)}%`, width: 10, height: 10, borderRadius: '50%', background: col, boxShadow: `0 0 10px ${col}88`, transform: 'translate(-50%,-50%)', transition: 'top .6s cubic-bezier(.3,.7,.2,1), background .4s', animation: `mtFade .4s ${(.15 + j * .06).toFixed(2)}s both` } }; });
-    const comp = cnt => [['fons', C.green], ['mod', C.amber], ['rec', C.coral], ['none', 'rgba(255,255,255,.14)']].filter(e => cnt[e[0]]).map(e => ({ flex: cnt[e[0]], height: 4, background: e[1] }));
+    const days = ws.idx.map(i => { const d = this.day(i); return { wd: this.WD[d.wd], n: String(d.n), p: D.pos[i] }; });
+    const strip = this.weekStrip({ key: `ws-${desk ? 'd' : 'm'}-${sc}-${wi}-${s.visit}`, gid: desk ? 'wsd' : 'wsm', days, W: desk ? 544 : 354, gut: desk ? 76 : 62, ch: desk ? 84 : 66 });
+    const AN = { fons: this.tone(this.LV.ok), mod: this.tone(this.LV.mid), rec: this.tone(this.LV.bad) };
+    const sum = h('span', { style: { display: 'inline-flex', gap: 6, whiteSpace: 'nowrap' } }, ['fons', 'mod', 'rec'].filter(q => ws.cnt[q]).map((q, j) => h('span', { key: q }, j ? '· ' : '', h('span', { style: { color: AN[q] } }, String(ws.cnt[q])), ' ' + this.ST[q].w)));
+    const comp = cnt => [['fons', AN.fons], ['mod', AN.mod], ['rec', AN.rec], ['none', 'rgba(255,255,255,.14)']].filter(e => cnt[e[0]]).map(e => ({ flex: cnt[e[0]], height: 4, background: e[1] }));
     const all = this.WEEKS.map((w2, j) => { const st2 = this.weekStats(sc, w2.a), f2 = this.weekFallback(st2), c2 = this.state.ai[this.aiKey('week', sc, j)], on = j === wi;
-      const t = c2 && c2.status === 'done' && this.live() ? String(c2.val.titol).replace(/\[\[|\]\]|\|!/g, '') : f2.titol;
+      const t = c2 && c2.status === 'done' && this.live() ? String(c2.val.titol).replace(/\[\[|\]\]|\|[!~+]/g, '') : f2.titol;
       return { id: `S${w2.id}`, dates: this.weekLabel(j), t, comp: comp(st2.cnt), onClick: () => this.setState({ week: j }), on,
-        rowSt: { display: 'flex', flexDirection: 'column', gap: 6, width: '100%', padding: '14px 24px 14px 22px', background: on ? 'rgba(255,255,255,.05)' : 'transparent', border: 'none', borderLeft: `2px solid ${on ? C.ink : 'transparent'}`, textAlign: 'left', cursor: 'pointer', transition: 'background .2s' } }; });
-    return { has: true, none: false, label: `SETMANA ${W.id} · ${this.weekLabel(wi)}`, pubShort: `PUBLICAT ${W.pub}`, days, loading: ai.loading, ready: ai.ready,
-      titol: val ? String(val.titol).replace(/\[\[|\]\]|\|!/g, '') : '', com: val ? this.segs(val.com_ha_anat) : [], mill: val ? this.segs(val.millorat) : [], vig: val ? this.segs(val.vigilar) : [], rec: val ? this.segs(val.recomanacio) : [],
+        rowSt: { display: 'flex', flexDirection: 'column', gap: 6, width: '100%', padding: '14px 24px 14px 22px', background: on ? 'rgba(255,255,255,.05)' : 'transparent', border: 'none', borderLeft: `2px solid ${on ? this.C.ink : 'transparent'}`, textAlign: 'left', cursor: 'pointer', transition: 'background .2s' } }; });
+    return { has: true, none: false, label: `SETMANA ${W.id} · ${this.weekLabel(wi)}`, pubShort: `PUBLICAT ${W.pub}`, strip, sum, loading: ai.loading, ready: ai.ready,
+      titol: val ? String(val.titol).replace(/\[\[|\]\]|\|[!~+]/g, '') : '', com: val ? this.segs(val.com_ha_anat) : [], mill: val ? this.segs(val.millorat) : [], vig: val ? this.segs(val.vigilar) : [], rec: val ? this.segs(val.recomanacio) : [],
       all, hist: all.filter(x => !x.on) };
   }
   privItems(role, sc) {
@@ -881,19 +1046,49 @@ Normes:
         tagSt: { display: 'inline-block', fontFamily: this.MONO, fontSize: 10, letterSpacing: '.1em', whiteSpace: 'nowrap', padding: '4px 7px', border: `1px solid ${hid ? 'rgba(255,255,255,.1)' : r === 'code' ? 'rgba(236,238,241,.35)' : 'rgba(236,238,241,.6)'}`, color: hid ? C.dim : C.ink, transition: 'color .35s, border-color .35s' } }; });
   }
 
+  // ── Pàgina: cada pestanya importa aquest component amb device="mobile" o device="desktop" ──
+  isDesk() { return (this.props.device || this.state.device) === 'desktop'; }
+  geom() {
+    const vw = this.state.vw, vh = this.state.vh, side = vw < 1200 ? 360 : 400, cw = Math.round(Math.max(520, Math.min(Math.min(vw, 1680) - side - 80, 1200)));
+    return { side, cw, lw: cw - 48, maxW: cw + 80, sw: Math.floor((cw - 48) / 2), ch: cw > 960 ? 260 : 230, sM: Math.min(1, Math.max(420, vh - 48) / 874) };
+  }
+  pickScn(k) { this.setState(st => ({ scenario: k, hover: null, sHover: null, zoom: null, week: 0, visit: st.visit + 1, range: k === 'nou' ? 7 : st.range })); }
+  setProtoHidden(v) { try { localStorage.setItem('mt-proto-hidden', v ? '1' : '0'); } catch (e) {} this.setState({ pHidden: v, pOpen: false }); }
+  // Control temporal del prototip: botó flotant per canviar d'escenari. Es pot amagar (tecla E per recuperar-lo).
+  protoEl(sc, desk) {
+    const h = React.createElement, s = this.state, C = this.C, M = this.MONO, SANS = "'Schibsted Grotesk', system-ui, sans-serif";
+    if (s.pHidden) return h('div', { key: 'proto-h', className: 'mt-hc', title: 'Mostrar escenario (tecla E)', onClick: () => this.setProtoHidden(false),
+      style: { position: 'fixed', right: 0, bottom: 0, width: 36, height: 36, zIndex: 60, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' } },
+      h('span', { className: 'mt-dot', style: { width: 6, height: 6, borderRadius: '50%', background: C.ink } }));
+    const dotOf = k => { const p = k === 'nou' ? null : this.data(k).pos[41]; return p == null ? 'rgba(236,238,241,.3)' : this.tone(this.dayH(p)); };
+    const rows = this.SCN.map(x => { const on = x.k === sc;
+      return h('button', { key: x.k, className: 'mt-pr', onClick: () => this.pickScn(x.k),
+        style: { display: 'flex', alignItems: 'center', gap: 10, width: '100%', padding: '8px 10px', border: 'none', borderRadius: 7, cursor: 'pointer', textAlign: 'left', fontFamily: SANS, fontSize: 13, background: on ? 'rgba(255,255,255,.08)' : 'transparent', color: on ? C.ink : C.mut } },
+        h('span', { style: { width: 7, height: 7, flex: 'none', borderRadius: '50%', background: dotOf(x.k) } }), h('span', { style: { flex: 1 } }, x.t),
+        on ? h('span', { style: { fontFamily: M, fontSize: 11, color: C.ink } }, '✓') : null); });
+    const other = desk ? ['./Max%20Tracking%20-%20M%C3%B3vil.dc.html', 'Abrir versión móvil'] : ['./Max%20Tracking%20-%20Ordenador.dc.html', 'Abrir versión ordenador'];
+    const foot = { display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%', boxSizing: 'border-box', padding: '8px 10px', border: 'none', borderRadius: 7, background: 'transparent', cursor: 'pointer', fontFamily: SANS, fontSize: 12.5, color: C.mut, textDecoration: 'none' };
+    const kbd = t => h('span', { style: { fontFamily: M, fontSize: 10, padding: '2px 5px', border: '1px solid rgba(255,255,255,.16)', borderRadius: 4, color: C.dim } }, t);
+    const panel = s.pOpen ? h('div', { key: 'pp', style: { position: 'absolute', right: 0, bottom: 50, width: 236, padding: 6, boxSizing: 'border-box', borderRadius: 12, background: 'rgba(20,21,24,.94)', backdropFilter: 'blur(14px)', WebkitBackdropFilter: 'blur(14px)', border: '1px solid rgba(255,255,255,.1)', boxShadow: '0 18px 50px rgba(0,0,0,.5)', animation: 'mtIn .2s cubic-bezier(.2,.7,.2,1) both' } },
+      h('div', { style: { display: 'flex', justifyContent: 'space-between', padding: '6px 10px 8px', fontFamily: M, fontSize: 10, letterSpacing: '.14em', color: C.dim } }, h('span', null, 'ESCENARIO'), h('span', null, 'PROTOTIPO')),
+      rows,
+      h('div', { style: { height: 1, margin: '6px 4px', background: 'rgba(255,255,255,.08)' } }),
+      h('a', { className: 'mt-pr', href: other[0], target: '_blank', rel: 'noopener', style: foot }, h('span', null, other[1]), h('span', { style: { fontFamily: M, fontSize: 11 } }, '↗')),
+      h('button', { className: 'mt-pr', onClick: () => this.setProtoHidden(true), style: foot }, h('span', null, 'Ocultar botón'), kbd('E'))) : null;
+    const btn = h('button', { key: 'pb', className: 'mt-pb', 'data-open': s.pOpen ? '' : undefined, title: 'Escenario del prototipo · E para ocultar', onClick: () => this.setState({ pOpen: !s.pOpen }),
+      style: { width: 40, height: 40, borderRadius: '50%', border: '1px solid rgba(255,255,255,.14)', background: 'rgba(20,21,24,.86)', backdropFilter: 'blur(10px)', WebkitBackdropFilter: 'blur(10px)', color: C.ink, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', boxShadow: '0 8px 24px rgba(0,0,0,.35)', padding: 0 } },
+      this.icon('flask', 17));
+    return [s.pOpen ? h('div', { key: 'pbd', onClick: () => this.setState({ pOpen: false }), style: { position: 'fixed', inset: 0, zIndex: 59 } }) : null,
+      h('div', { key: 'proto', style: { position: 'fixed', right: 20, bottom: 20, zIndex: 60 } }, panel, btn)];
+  }
+
   renderVals() {
-    const s = this.state, sc = s.scenario, D = this.data(sc), desk = s.device === 'desktop', C = this.C, M = this.MONO, w = this.who(sc);
-    const sb = { border: 'none', padding: '7px 12px', fontFamily: "'Schibsted Grotesk', system-ui, sans-serif", fontSize: 12.5, cursor: 'pointer', background: 'transparent', color: C.mut, borderRadius: 5, whiteSpace: 'nowrap' };
-    const scnBtns = this.SCN.map(x => ({ label: x.t, style: x.k === sc ? { ...sb, background: C.ink, color: C.bg } : sb,
-      onClick: () => this.setState(st => ({ scenario: x.k, hover: null, sHover: null, zoom: null, week: 0, visit: st.visit + 1, range: x.k === 'nou' ? 7 : st.range })) }));
-    const devBtns = [['mobile', 'Móvil'], ['desktop', 'iPad · Mac']].map(e => ({ label: e[1], style: e[0] === s.device ? { ...sb, background: C.ink, color: C.bg } : sb,
-      onClick: () => this.setState(st => ({ device: e[0], hover: null, sHover: null, visit: st.visit + 1 })) }));
-    const barH = s.vw < 1100 ? 108 : 60, availH = Math.max(420, s.vh - barH - 40);
-    const sM = Math.min(1, availH / 874), sD = Math.min(1, (s.vw - 40) / 1282, availH / 802);
+    const s = this.state, sc = s.scenario, D = this.data(sc), desk = this.isDesk(), C = this.C, M = this.MONO, w = this.who(sc), g = this.geom();
     const mt = [['avui', 'Avui', 'sun'], ['evolucio', 'Evolució', 'chart'], ['setmana', 'Setmana', 'cal'], ['priv', 'Privacitat', 'shield'], ['ajustos', 'Ajustos', 'sliders']];
     const mi = Math.max(0, mt.findIndex(x => x[0] === s.mTab));
-    const navM = mt.map(e => ({ label: e[1], icon: this.icon(e[2], 22), st: { display: 'flex', color: s.mTab === e[0] ? C.coral : C.dim, transition: 'color .25s' },
-      onClick: () => this.setState(st => ({ mTab: e[0], hover: null, sHover: null, visit: e[0] === 'avui' && st.mTab !== 'avui' ? st.visit + 1 : st.visit })) }));
+    // El menú és neutre: el color queda reservat per a les dades.
+    const navM = mt.map(e => ({ label: e[1], icon: this.icon(e[2], 22), st: { display: 'flex', color: s.mTab === e[0] ? C.ink : C.dim, transition: 'color .25s' },
+      onClick: () => this.setState(st => { const back = e[0] === 'avui' && st.mTab !== 'avui'; return { mTab: e[0], hover: null, sHover: null, visit: back ? st.visit + 1 : st.visit, mount: back ? st.mount + 1 : st.mount }; }) }));
     const navD = [['evolucio', 'EVOLUCIÓ'], ['setmana', 'SETMANA'], ['priv', 'PRIVACITAT'], ['ajustos', 'AJUSTOS']].map(e => ({ label: e[1], onClick: () => this.setState({ dTab: e[0], hover: null, sHover: null }),
       style: { background: 'none', border: 'none', borderBottom: `2px solid ${s.dTab === e[0] ? C.ink : 'transparent'}`, height: 64, padding: 0, fontFamily: M, fontSize: 11, letterSpacing: '.14em', color: s.dTab === e[0] ? C.ink : C.dim, cursor: 'pointer', transition: 'color .25s, border-color .25s' } }));
     const vB = { border: 'none', padding: '10px 0', fontFamily: M, fontSize: 10, letterSpacing: '.12em', cursor: 'pointer', background: 'transparent', color: C.dim, transition: 'background .25s, color .25s' };
@@ -904,15 +1099,20 @@ Normes:
     const langs = this.LANGS.map(l => { const on = l.k === s.lang;
       return { t: l.t, code: l.k.toUpperCase(), onClick: () => this.setState({ lang: l.k }), tc: { color: on ? C.ink : C.mut },
         ind: { width: 10, height: 10, flex: 'none', boxSizing: 'border-box', border: `1px solid ${on ? C.ink : 'rgba(236,238,241,.4)'}`, background: on ? C.ink : 'transparent', transition: 'all .25s' } }; });
+    const scale = [0, .2, .4, .55, .7, .85, 1].map(t => this.tone(t)).join(', ');
     return {
-      scnBtns, devBtns, isMobile: !desk, isDesk: desk, phoneRef: this.phoneRef, deskRef: this.deskRef,
-      phoneBox: { width: Math.round(402 * sM), height: Math.round(874 * sM), flex: 'none' }, phoneScale: { width: 402, height: 874, transform: `scale(${sM})`, transformOrigin: 'top left' },
-      deskBox: { width: Math.round(1282 * sD), height: Math.round(802 * sD), flex: 'none' }, deskScale: { width: 1282, height: 802, transform: `scale(${sD})`, transformOrigin: 'top left' },
+      isMobile: !desk, isDesk: desk, phoneRef: this.phoneRef, deskRef: this.deskRef, proto: this.protoEl(sc, desk),
+      rootSt: { minHeight: '100vh', color: C.ink, background: desk ? C.bg : 'radial-gradient(ellipse 80% 70% at 50% 35%, #1b1c20 0%, #141517 55%, #0e0f11 100%)' },
+      phoneBox: { width: Math.round(402 * g.sM), height: Math.round(874 * g.sM), flex: 'none' }, phoneScale: { width: 402, height: 874, transform: `scale(${g.sM})`, transformOrigin: 'top left' },
+      deskApp: { width: '100%', maxWidth: 1680, height: '100vh', margin: '0 auto', display: 'grid', gridTemplateColumns: `${g.side}px minmax(0,1fr)`, background: C.bg, color: C.ink, overflow: 'hidden', fontFamily: "'Schibsted Grotesk', system-ui, sans-serif", ...(s.vw > 1680 ? { borderLeft: C.hair, borderRight: C.hair } : {}) },
+      dg: { cw: g.cw, lw: g.lw, maxW: g.maxW },
       m: { avui: s.mTab === 'avui', evol: s.mTab === 'evolucio', setm: s.mTab === 'setmana', priv: s.mTab === 'priv', ajus: s.mTab === 'ajustos' },
       d: { evol: s.dTab === 'evolucio', setm: s.dTab === 'setmana', priv: s.dTab === 'priv', ajus: s.dTab === 'ajustos' },
-      navM, navD, navInd: { position: 'absolute', top: -1, left: `calc(${mi * 20 + 10}% - 20px)`, width: 40, height: 2, background: C.coral, transition: 'left .38s cubic-bezier(.3,.7,.2,1)' },
+      navM, navD, navInd: { position: 'absolute', top: -1, left: `calc(${mi * 20 + 10}% - 20px)`, width: 40, height: 2, background: C.ink, transition: 'left .38s cubic-bezier(.3,.7,.2,1)' },
       av: this.avuiVM(sc, D, desk), ev: this.evoVM(sc, D, desk), se: this.sentsVM(sc, D, desk), wk: this.weekVM(sc, D, desk), it: this.itemsVM(sc),
       evoViews, evoMetrics: s.evoView === 'metrics', evoSents: s.evoView === 'sents',
+      legendSw: { width: 40, height: 6, borderRadius: 3, background: `linear-gradient(90deg, ${scale})` },
+      seLeg: { width: 16, height: 2, background: `linear-gradient(90deg, ${this.tone(.1)}, ${this.tone(.5)}, ${this.tone(.95)})` },
       pv: { roles, desc: this.ROLES[s.role].d, items: this.privItems(s.role, sc), name: w.name, code: w.code }, pvCols,
       langs, langNote: (this.LANGS.find(l => l.k === s.lang) || this.LANGS[0]).n, who: { name: w.name, age: `${w.age} anys`, code: w.code },
     };
