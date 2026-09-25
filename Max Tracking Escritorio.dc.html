@@ -86,7 +86,7 @@ function niceStep(span, count) { const raw = span / Math.max(1, count), p = Math
 class Component extends DCLogic {
   state = (() => {
     let ai = {};
-    try { ai = JSON.parse(localStorage.getItem('mt-desk-ai-v1') || '{}') || {}; } catch (e) { ai = {}; }
+    try { ai = JSON.parse(localStorage.getItem('mt-desk-ai-v2') || '{}') || {}; } catch (e) { ai = {}; }
     let pHidden = false;
     try { pHidden = localStorage.getItem('mt-proto-hidden') === '1'; } catch (e) {}
     return { scenario: 'normal', page: 'avui', metric: 'rhr', range: 7, evoRange: 28, week: 0, month: 0, hoverF: null, pinF: null,
@@ -180,101 +180,108 @@ class Component extends DCLogic {
   SCN = [{ k: 'normal', t: 'Día normal' }, { k: 'descans', t: 'Descanso claro' }, { k: 'comp', t: 'Competición' }, { k: 'buit', t: 'Sin datos' }, { k: 'nou', t: 'Deportista nuevo' }];
 
   // ── Textos de reserva (quan la IA en directe no està disponible) ─────────
+  // La xifra de cada troballa la posa l'app (evidence); aquí només hi ha frases curtes i les accions.
   FB_DAILY = {
-    normal: { titular: 'Recuperat, tot i dormir una mica menys', troballes: [
-      { k: 'rhr', t: 'La FC en repòs és de [[47 bpm|+]], [[3 bpm|+]] per sota de la teva mitjana: el cos està descansat.' },
-      { k: 'hrv', t: "L'HRV ([[66 ms]]) és dins la teva franja, en la línia dels últims dies." },
-      { k: 'son', t: 'Has dormit [[6 h 45|~]], [[40 min|~]] menys del teu normal. És la nit més curta de la setmana.' }],
-      recomanacio: 'Pots entrenar amb normalitat. Aquesta nit, intenta anar a dormir mitja hora abans.' },
-    descans: { titular: 'El cos et demana un dia de recuperació', troballes: [
-      { k: 'rhr', t: 'La FC en repòs ha pujat fins a [[57 bpm|!]], [[7 bpm|!]] per sobre del teu normal. Puja cada dia des de dilluns.', d: [38, 39, 40, 41] },
-      { k: 'hrv', t: "L'HRV ha baixat a [[49 ms|!]], el valor més baix de les últimes sis setmanes." },
-      { k: 'estat', t: "Dius que estàs a [[2 de 5|!]] i a l'entrenador li has dit que et trobes malament: el que sents i les dades coincideixen." }],
-      recomanacio: "Avui prioritza la recuperació: descans o una sessió molt suau. Parla-ho amb l'entrenador abans d'entrenar." },
-    comp: { titular: 'Et sents a punt, però el cos va més just', troballes: [
-      { k: 'son', t: 'Portes quatre nits dormint menys del teu normal; aquesta nit, [[6 h 40|~]].' },
-      { k: 'rhr', t: 'La FC en repòs és de [[55 bpm|!]], per sobre de la teva franja per tercer dia seguit.' },
-      { k: 'coach', t: "Et sents a [[5 de 5|+]] i cada dia li dius a l'entrenador que estàs bé, però des de dilluns les dades marquen Modera.", d: [38, 39, 40, 41] }],
-      recomanacio: "Entrena, però baixa una mica la intensitat. Explica-li a l'entrenador que aquests dies dorms poc." },
-    buit: { titular: "Encara no has fet el registre d'avui", troballes: [
-      { k: 'reg', t: "Quan registris la FC, l'HRV, el son i com estàs, aquest informe s'actualitzarà." },
-      { k: 'ahir', t: 'Ahir totes les dades eren dins la teva franja: FC [[50 bpm]], HRV [[64 ms]] i [[7 h 20]] de son.', d: [40] }],
-      recomanacio: "Si et trobes bé, segueix el pla de l'entrenador. Recorda fer el registre abans d'entrenar." },
-    nou: { titular: 'Benvinguda. Encara estem aprenent com ets', troballes: [
-      { k: 'band', t: 'Tens [[5 de 14]] dies de dades. Amb 14 dies podrem calcular la teva franja personal i comparar cada dia amb el teu normal.' },
-      { k: 'son', t: 'De moment dorms una mitjana de [[8 h 12]] per nit: un bon punt de partida.', d: [37, 38, 39, 40, 41] }],
-      recomanacio: "Continua fent el registre cada matí i segueix el pla de l'entrenador." },
+    normal: { titular: 'Recuperat, tot i dormir una mica menys', resum: 'Les dades del cor diuen que el cos està descansat; només el son queda una mica curt.', troballes: [
+      { k: 'rhr', to: 'be', t: 'Més baixa que el teu normal: el cos està descansat.' },
+      { k: 'hrv', to: 'be', t: 'Dins la teva franja, en la línia dels últims dies.' },
+      { k: 'son', to: 'vigilar', t: 'La nit més curta de la setmana.' }],
+      accions: ['Entrena amb normalitat.', 'Aquesta nit, intenta anar a dormir mitja hora abans.'] },
+    descans: { titular: 'El cos et demana un dia de recuperació', resum: "La FC en repòs puja, l'HRV baixa i tu també dius que no et trobes bé.", troballes: [
+      { k: 'rhr', to: 'vigilar', t: 'Puja cada dia des de dilluns i avui queda ben per sobre del teu normal.', d: [38, 39, 40, 41] },
+      { k: 'hrv', to: 'vigilar', t: 'El valor més baix de les últimes sis setmanes.' },
+      { k: 'estat', to: 'vigilar', t: "No et trobes bé, i així li has dit a l'entrenador." }],
+      accions: ['Avui, descans o una sessió molt suau.', "Parla-ho amb l'entrenador abans d'entrenar."] },
+    comp: { titular: 'Et sents a punt, però el cos va més just', resum: 'Tu et trobes molt bé, però el son i la FC en repòs porten uns dies fora del teu normal.', troballes: [
+      { k: 'son', to: 'vigilar', t: 'Quarta nit seguida dormint menys del teu normal.' },
+      { k: 'rhr', to: 'vigilar', t: 'Per sobre de la teva franja per tercer dia seguit.' },
+      { k: 'estat', to: 'be', t: 'Et trobes molt bé i amb ganes.' },
+      { k: 'coach', to: 'vigilar', t: 'Li dius que estàs bé, però des de dilluns les dades marquen Modera.', d: [38, 39, 40, 41] }],
+      accions: ['Entrena, però baixa una mica la intensitat.', "Explica-li a l'entrenador que aquests dies dorms poc."] },
+    buit: { titular: "Encara no has fet el registre d'avui", resum: "Quan el facis, l'informe s'actualitzarà. Mentrestant, et pots guiar per ahir.", troballes: [
+      { k: 'reg', to: 'info', t: "Falten la FC, l'HRV, el son i com estàs." },
+      { k: 'ahir', to: 'be', t: 'Totes les dades eren dins la teva franja.', d: [40] }],
+      accions: ["Fes el registre abans d'entrenar.", "Si et trobes bé, segueix el pla de l'entrenador."] },
+    nou: { titular: 'Benvinguda. Encara estem aprenent com ets', resum: 'Amb 14 dies de dades podrem comparar cada dia amb el teu normal.', troballes: [
+      { k: 'band', to: 'info', t: 'Quan arribis a 14 dies, calcularem la teva franja personal.' },
+      { k: 'son', to: 'be', t: 'Dorms força hores: un bon punt de partida.', d: [37, 38, 39, 40, 41] }],
+      accions: ['Continua fent el registre cada matí.', "Segueix el pla de l'entrenador."] },
   };
   FB_WEEK = {
-    38: { titular: 'Setmana de recuperació completa', troballes: [
-      { k: 'salut', t: 'La salut passa de [[4|!]] a [[8|+]]: el refredat de la setmana passada ha quedat enrere.' },
-      { k: 'fatiga', t: 'La fatiga baixa de [[7|!]] a [[4]] i el descans puja de [[5|~]] a [[8|+]].' },
-      { k: 'hrv', t: "L'HRV torna a la teva franja, amb una mitjana de [[66 ms]]. Només dijous va baixar a [[58 ms|~]].", d: [34] }],
-      recomanacio: "Mantén la rutina de son d'aquesta setmana: està funcionant. Després de la sessió més intensa, deixa un dia més suau." },
-    37: { titular: 'Un refredat a mitja setmana', troballes: [
-      { k: 'ostrc', t: 'Des de dimarts [[8 de setembre|!]] has entrenat menys del normal per un problema de salut.' },
-      { k: 'rhr', t: "Dimarts i dimecres la FC en repòs va pujar fins a [[56 bpm|!]] i l'HRV va baixar a [[50 ms|!]].", d: [25, 26] },
-      { k: 'son', t: 'Tot i això, has dormit bé: [[7 h 41]] de mitjana, per sobre del teu normal.' }],
-      recomanacio: "Torna a la càrrega habitual de mica en mica i comenta amb l'entrenador com et trobes." },
-    36: { titular: 'Bona setmana, amb dues nits curtes', troballes: [
-      { k: 'organitzacio', t: "L'organització puja de [[6|~]] a [[8|+]] i el rendiment es manté en [[8|+]]." },
-      { k: 'son', t: "Dilluns i dimarts vas dormir [[6 h 25|~]] i [[6 h 40|~]]; aquells dos dies l'estat va ser Modera.", d: [17, 18] },
-      { k: 'descans', t: 'El descans que valores, un [[6|~]], encaixa amb aquestes nits curtes.' }],
-      recomanacio: 'Intenta anar a dormir a una hora semblant cada dia, també el cap de setmana.' },
-    35: { titular: 'Stage exigent, però ben assimilat', troballes: [
-      { k: 'fatiga', t: 'La fatiga puja fins a [[7|!]], tres punts més que la setmana anterior.' },
-      { k: 'hrv', t: "Dimecres i dijous l'HRV va baixar a [[55 ms|~]] i la FC en repòs va pujar a [[54 bpm|~]]. El cap de setmana ja eren dins la franja.", d: [12, 13] },
-      { k: 'ostrc', t: "Has entrenat tota la setmana, però amb molèsties al genoll des del [[26 d'agost|~]]." }],
-      recomanacio: "Després d'un stage, deixa un o dos dies més suaus i vigila com evolucionen les molèsties." },
-    34: { titular: 'Una setmana regular i tranquil·la', troballes: [
-      { k: 'salut', t: 'Valores la salut amb un [[8|+]] i el rendiment amb un [[7]].' },
-      { k: 'son', t: 'Només dissabte vas dormir menys del teu normal: [[6 h 30|~]].', d: [8] },
-      { k: 'rhr', t: 'La FC en repòs ha estat dins la teva franja tota la setmana, amb una mitjana de [[50 bpm]].' }],
-      recomanacio: 'Mantén aquesta regularitat: és la millor base per a les setmanes de més càrrega.' },
+    38: { titular: 'Setmana de recuperació completa', resum: 'Després del refredat, el formulari i les dades tornen a estar on toca.', troballes: [
+      { k: 'salut', to: 'be', t: 'El refredat de la setmana passada ha quedat enrere.' },
+      { k: 'fatiga', to: 'be', t: 'Molt menys cansament que la setmana anterior.' },
+      { k: 'descans', to: 'be', t: 'El millor descans de les últimes cinc setmanes.' },
+      { k: 'hrv', to: 'be', t: 'Torna a la teva franja; només dijous va baixar una mica.', d: [34] }],
+      accions: ["Mantén la rutina de son d'aquesta setmana: està funcionant.", 'Després de la sessió més intensa, deixa un dia més suau.'] },
+    37: { titular: 'Un refredat a mitja setmana', resum: "Un problema de salut t'ha fet entrenar menys, però el son s'ha mantingut bé.", troballes: [
+      { k: 'ostrc', to: 'vigilar', t: 'Has entrenat menys del normal per un problema de salut.' },
+      { k: 'rhr', to: 'vigilar', t: 'Dimarts i dimecres va pujar molt, coincidint amb el refredat.', d: [25, 26] },
+      { k: 'salut', to: 'vigilar', t: 'La nota de salut més baixa de les últimes setmanes.' },
+      { k: 'son', to: 'be', t: 'Tot i això, has dormit bé tota la setmana.' }],
+      accions: ['Torna a la càrrega habitual de mica en mica.', "Comenta amb l'entrenador com et trobes."] },
+    36: { titular: 'Bona setmana, amb dues nits curtes', resum: "T'has organitzat i has rendit bé; el que ha fallat és el son a principi de setmana.", troballes: [
+      { k: 'organitzacio', to: 'be', t: 'La millor organització de les últimes setmanes.' },
+      { k: 'rendiment', to: 'be', t: 'Es manté alt, com la setmana anterior.' },
+      { k: 'son', to: 'vigilar', t: "Dilluns i dimarts vas dormir poc; aquells dos dies l'estat va ser Modera.", d: [17, 18] }],
+      accions: ['Intenta anar a dormir a una hora semblant cada dia, també el cap de setmana.'] },
+    35: { titular: 'Stage exigent, però ben assimilat', resum: "Molta càrrega i més cansament, però el cos s'ha recuperat abans del cap de setmana.", troballes: [
+      { k: 'fatiga', to: 'vigilar', t: 'La setmana amb més cansament fins ara.' },
+      { k: 'hrv', to: 'vigilar', t: 'Va baixar dimecres i dijous; el cap de setmana ja tornava a ser a la franja.', d: [12, 13] },
+      { k: 'ostrc', to: 'vigilar', t: 'Has entrenat tota la setmana, però amb molèsties al genoll.' },
+      { k: 'rendiment', to: 'be', t: 'Tot i la càrrega, has rendit bé.' }],
+      accions: ["Després d'un stage, deixa un o dos dies més suaus.", 'Vigila com evolucionen les molèsties al genoll.'] },
+    34: { titular: 'Una setmana regular i tranquil·la', resum: 'Tot dins del teu normal: és una bona setmana de referència.', troballes: [
+      { k: 'salut', to: 'be', t: 'Et trobes bé de salut.' },
+      { k: 'rhr', to: 'be', t: 'Dins la teva franja tota la setmana.' },
+      { k: 'son', to: 'vigilar', t: 'Només dissabte vas dormir menys del teu normal.', d: [8] }],
+      accions: ['Mantén aquesta regularitat: és la millor base per a les setmanes de més càrrega.'] },
   };
   FB_MONTH = {
-    ago: { titular: 'Benestar bo, amb una mica menys de calma', troballes: [
-      { k: 'wemwbs', t: 'La puntuació total és de [[27 de 35]], dos punts menys que al juliol.' },
-      { k: 'wemwbs_3', t: 'El canvi ve de dues respostes: sentir-te relaxat i sentir-te útil passen de [[Sovint]] a [[Algunes vegades|~]].', rows: [2, 3] },
-      { k: 'wemwbs_6', t: "Sentir-te a prop d'altres persones continua a [[Sempre|+]], com els mesos anteriors." }],
-      recomanacio: "Reserva alguna estona de la setmana per a coses que et relaxin fora de l'esport, sobretot quan hi hagi més càrrega." },
-    jul: { titular: 'El millor mes dels que portes', troballes: [
-      { k: 'wemwbs', t: 'Arribes a [[29 de 35]], un punt més que al juny.' },
-      { k: 'wemwbs_3', t: 'Sentir-te relaxat passa de [[Algunes vegades|~]] a [[Sovint]].' },
-      { k: 'wemwbs_6', t: "Sentir-te a prop d'altres persones es manté a [[Sempre|+]]." }],
-      recomanacio: "Continua amb el que t'ha funcionat aquest mes. Si alguna cosa canvia, ho veurem al proper informe." },
-    jun: { titular: 'El teu primer registre de benestar', troballes: [
-      { k: 'wemwbs', t: "Comences amb [[28 de 35]]. A partir d'ara, cada mes el compararem amb aquest." },
-      { k: 'wemwbs_6', t: "El punt més fort és sentir-te a prop d'altres persones: [[Sempre|+]]." },
-      { k: 'wemwbs_3', t: 'El que queda més avall és sentir-te relaxat: [[Algunes vegades|~]].' }],
-      recomanacio: 'Respon el formulari cada final de mes: amb uns quants mesos podrem veure tendències.' },
+    ago: { titular: 'Benestar bo, amb una mica menys de calma', resum: "Baixa una mica respecte al juliol, sobretot perquè t'has sentit menys relaxat i menys útil.", troballes: [
+      { k: 'wemwbs', to: 'vigilar', t: 'Continua sent un bon nivell per a tu, però baixa respecte al juliol.' },
+      { k: 'wemwbs_3', to: 'vigilar', t: "T'has sentit relaxat menys sovint que al juliol." },
+      { k: 'wemwbs_2', to: 'vigilar', t: 'Sentir-te útil també baixa un punt.' },
+      { k: 'wemwbs_6', to: 'be', t: 'El teu punt més fort, com cada mes.' }],
+      accions: ["Reserva alguna estona de la setmana per a coses que et relaxin fora de l'esport."] },
+    jul: { titular: 'El millor mes dels que portes', resum: 'Puja respecte al juny, gràcies a sentir-te més relaxat.', troballes: [
+      { k: 'wemwbs', to: 'be', t: 'La puntuació més alta fins ara.' },
+      { k: 'wemwbs_3', to: 'be', t: 'Et sents relaxat més sovint que al juny.' },
+      { k: 'wemwbs_6', to: 'be', t: 'Continues sentint-te sempre a prop dels altres.' }],
+      accions: ["Continua amb el que t'ha funcionat aquest mes."] },
+    jun: { titular: 'El teu primer registre de benestar', resum: "A partir d'ara, cada mes el compararem amb aquest.", troballes: [
+      { k: 'wemwbs', to: 'info', t: 'El teu punt de partida.' },
+      { k: 'wemwbs_6', to: 'be', t: 'El teu punt més fort: et sents sempre a prop dels altres.' },
+      { k: 'wemwbs_3', to: 'vigilar', t: 'El que queda més avall: sentir-te relaxat.' }],
+      accions: ['Respon el formulari cada final de mes per poder veure tendències.'] },
   };
   FB_TREND = {
-    normal: { titular: 'Tendència estable i sensacions encertades', troballes: [
-      { k: 'sents', t: 'El que sents i el que diuen les dades coincideixen [[21 de 26]] dies: et coneixes bé.' },
-      { k: 'hrv', t: "L'HRV d'aquesta setmana, [[65 ms]] de mitjana, és una mica més alta que la de les tres anteriors ([[63 ms]]).", d: [35, 36, 37, 38, 39, 40, 41] },
-      { k: 'son', t: 'El son baixa lleugerament: [[7 h 19]] de mitjana aquesta setmana, per [[7 h 28]] abans.', d: [35, 36, 37, 38, 39, 40, 41] }],
-      recomanacio: "Continua així i vigila que les nits no s'escurcin gaire més." },
-    descans: { titular: 'Tres dies de baixada seguida', troballes: [
-      { k: 'rhr', t: 'La FC en repòs puja cada dia des de dilluns: de [[50]] a [[57 bpm|!]].', d: [38, 39, 40, 41] },
-      { k: 'hrv', t: "L'HRV fa el camí contrari: de [[64]] a [[49 ms|!]].", d: [38, 39, 40, 41] },
-      { k: 'sents', t: 'Avui el que sents i les dades diuen el mateix: toca recuperar.', d: [41] }],
-      recomanacio: "Si demà les dades no milloren, parla-ho amb l'entrenador per ajustar la setmana." },
-    comp: { titular: 'Et sents millor del que diuen les dades', troballes: [
-      { k: 'sents', t: "Aquest mes, [[6 dies|~]] t'has sentit millor del que indicaven les dades, i quatre són d'aquesta setmana.", d: [38, 39, 40, 41] },
-      { k: 'son', t: 'Dorms menys: [[6 h 50|~]] de mitjana aquesta setmana, per [[7 h 28]] les tres anteriors.', d: [35, 36, 37, 38, 39, 40, 41] },
-      { k: 'rhr', t: 'La FC en repòs també puja: [[52 bpm|~]] de mitjana, per [[50 bpm]] abans.', d: [35, 36, 37, 38, 39, 40, 41] }],
-      recomanacio: 'La motivació ajuda, però el cos necessita recuperar: prioritza el son fins que les dades tornin a la teva franja.' },
-    buit: { titular: 'Tendència estable, amb dies sense registre', troballes: [
-      { k: 'reg', t: 'Aquesta setmana falten [[3 dies]] de registre. Els dies sense dades no compten per a les tendències.', d: [36, 37, 41] },
-      { k: 'sents', t: 'Els dies que tenim, el que sents i les dades coincideixen [[18 de 23]] vegades.' },
-      { k: 'hrv', t: "L'HRV es manté dins la teva franja: [[64 ms]] de mitjana aquesta setmana.", d: [35, 36, 37, 38, 39, 40, 41] }],
-      recomanacio: 'Intenta fer el registre cada matí: com més dies tinguem, més fiable serà la lectura.' },
-    nou: { titular: 'Encara no hi ha prou dies per veure tendències', troballes: [
-      { k: 'band', t: 'Amb [[5 de 14]] dies, encara no podem calcular la teva franja personal.' },
-      { k: 'hrv', t: 'De moment, la teva HRV va de [[70]] a [[78 ms]].', d: [37, 38, 39, 40, 41] }],
-      recomanacio: "Continua registrant cada matí: d'aquí a nou dies veuràs les primeres tendències." },
+    normal: { titular: 'Tendència estable i sensacions encertades', resum: 'El que sents i el que diuen les dades van de la mà, i els valors es mantenen dins del teu normal.', troballes: [
+      { k: 'sents', to: 'be', t: 'Et coneixes bé: gairebé sempre el que sents coincideix amb les dades.' },
+      { k: 'hrv', to: 'be', t: 'Aquesta setmana, una mica més alta que les tres anteriors.', d: [35, 36, 37, 38, 39, 40, 41] },
+      { k: 'son', to: 'vigilar', t: 'Baixa lleugerament respecte a les setmanes anteriors.', d: [35, 36, 37, 38, 39, 40, 41] }],
+      accions: ["Continua així i vigila que les nits no s'escurcin gaire més."] },
+    descans: { titular: 'Tres dies de baixada seguida', resum: "Des de dilluns, la FC en repòs puja i l'HRV baixa cada dia.", troballes: [
+      { k: 'rhr', to: 'vigilar', m: 'run', t: 'Puja cada dia des de dilluns.', d: [38, 39, 40, 41] },
+      { k: 'hrv', to: 'vigilar', m: 'run', t: 'Fa el camí contrari: baixa cada dia.', d: [38, 39, 40, 41] },
+      { k: 'sents', to: 'be', t: 'Avui el que sents i les dades diuen el mateix: toca recuperar.', d: [41] }],
+      accions: ["Si demà les dades no milloren, parla-ho amb l'entrenador per ajustar la setmana."] },
+    comp: { titular: 'Et sents millor del que diuen les dades', resum: 'Aquesta setmana et trobes molt bé, però dorms menys i la FC en repòs puja.', troballes: [
+      { k: 'sents', to: 'vigilar', t: 'Et sents millor del que diuen les dades, sobretot aquesta setmana.', d: [38, 39, 40, 41] },
+      { k: 'son', to: 'vigilar', t: 'Dorms menys que les tres setmanes anteriors.', d: [35, 36, 37, 38, 39, 40, 41] },
+      { k: 'rhr', to: 'vigilar', t: 'Més alta que les setmanes anteriors.', d: [35, 36, 37, 38, 39, 40, 41] }],
+      accions: ['Prioritza el son fins que les dades tornin a la teva franja.'] },
+    buit: { titular: 'Tendència estable, amb dies sense registre', resum: 'Els dies que tenim són bons, però en falten uns quants.', troballes: [
+      { k: 'reg', to: 'vigilar', t: 'Els dies sense dades no compten per a les tendències.', d: [36, 37, 41] },
+      { k: 'sents', to: 'be', t: 'Els dies amb dades, el que sents i les dades coincideixen gairebé sempre.' },
+      { k: 'hrv', to: 'be', t: 'Es manté dins la teva franja.', d: [35, 36, 37, 38, 39, 40, 41] }],
+      accions: ['Intenta fer el registre cada matí: com més dies, més fiable és la lectura.'] },
+    nou: { titular: 'Encara no hi ha prou dies per veure tendències', resum: "D'aquí a nou dies podrem calcular la teva franja i veure com evolucionen les dades.", troballes: [
+      { k: 'band', to: 'info', t: 'Quan arribis a 14 dies, calcularem la teva franja personal.' },
+      { k: 'hrv', to: 'info', t: 'De moment, els teus valors són estables.', d: [37, 38, 39, 40, 41] }],
+      accions: ['Continua registrant cada matí.'] },
   };
+  WEM_SHORT = ['Optimisme', 'Sentir-te útil', 'Calma', 'Afrontar problemes', 'Claredat', 'Relacions', 'Autonomia'];
   AI_KEYS = { daily: ['rhr', 'hrv', 'son', 'estat', 'coach'], week: ['rendiment', 'fatiga', 'descans', 'salut', 'organitzacio', 'ostrc', 'rhr', 'hrv', 'son', 'estat'],
     month: ['wemwbs', 'wemwbs_1', 'wemwbs_2', 'wemwbs_3', 'wemwbs_4', 'wemwbs_5', 'wemwbs_6', 'wemwbs_7'], trend: ['sents', 'rhr', 'hrv', 'son', 'estat'] };
   SYSTEM = `Ets el mòdul d'anàlisi de Max Tracking, una aplicació que retorna a esportistes de competició joves (de 14 a 20 anys) les seves pròpies dades de salut i recuperació.
@@ -424,7 +431,7 @@ Normes:
   setAI(key, entry) {
     this.setState(st => {
       const ai = { ...st.ai, [key]: entry };
-      try { const keep = {}; Object.keys(ai).forEach(k => { if (ai[k].status === 'done') keep[k] = ai[k]; }); localStorage.setItem('mt-desk-ai-v1', JSON.stringify(keep)); } catch (e) {}
+      try { const keep = {}; Object.keys(ai).forEach(k => { if (ai[k].status === 'done') keep[k] = ai[k]; }); localStorage.setItem('mt-desk-ai-v2', JSON.stringify(keep)); } catch (e) {}
       return { ai };
     });
   }
@@ -436,10 +443,11 @@ Normes:
       const raw = String(await window.claude.complete({ system: this.SYSTEM, max_tokens: 900, messages: [{ role: 'user', content: user }] }));
       const mm = raw.match(/\{[\s\S]*\}/); if (!mm) throw new Error('json');
       const o = JSON.parse(mm[0]), allow = this.AI_KEYS[kind];
-      if (typeof o.titular !== 'string' || typeof o.recomanacio !== 'string' || !Array.isArray(o.troballes)) throw new Error('camps');
-      const tr = o.troballes.filter(t => t && typeof t.text === 'string' && allow.includes(t.dada)).slice(0, 3).map(t => ({ k: t.dada, t: t.text.trim() }));
-      if (!tr.length || !o.titular.trim()) throw new Error('buit');
-      this.setAI(key, { status: 'done', val: { titular: o.titular.replace(/\[\[|\]\]|\|[!~+]/g, '').trim(), troballes: tr, recomanacio: o.recomanacio.trim() } });
+      if (typeof o.titular !== 'string' || !Array.isArray(o.troballes)) throw new Error('camps');
+      const tr = o.troballes.filter(t => t && typeof t.text === 'string' && allow.includes(t.dada)).slice(0, 4).map(t => ({ k: t.dada, t: t.text.trim(), to: ['be', 'vigilar', 'info'].includes(t.to) ? t.to : undefined }));
+      const ac = (Array.isArray(o.accions) ? o.accions : [o.accions]).filter(x => typeof x === 'string' && x.trim()).slice(0, 2).map(x => x.trim());
+      if (!tr.length || !ac.length || !o.titular.trim()) throw new Error('buit');
+      this.setAI(key, { status: 'done', val: { titular: o.titular.replace(/\[\[|\]\]|\|[!~+]/g, '').trim(), resum: typeof o.resum === 'string' ? o.resum.trim() : '', troballes: tr, accions: ac } });
     } catch (e) { this.setAI(key, { status: 'error' }); }
   }
   fallback(kind, sc, extra) {
@@ -453,7 +461,8 @@ Normes:
     const fb = this.fallback(kind, sc, extra);
     let st = { loading: false, val: fb };
     if (this.canLive(kind, sc)) { const e = this.state.ai[this.aiKey(kind, sc, extra)]; st = !e || e.status === 'loading' ? { loading: true, val: null } : { loading: false, val: e.status === 'done' ? e.val : fb }; }
-    const findings = st.val ? st.val.troballes.map((t, i) => ({ n: i + 1, k: t.k, text: t.t, days: t.d || this.daysFor(kind, t.k, sc, extra), rows: t.rows || (/^wemwbs_\d$/.test(t.k) ? [+t.k.slice(7)] : []) })) : [];
+    const findings = st.val ? st.val.troballes.map((t0, i) => { const t = { ...t0, to: t0.to || this.toFor(kind, t0.k, sc, extra) };
+      return { n: i + 1, k: t.k, text: t.t, to: t.to, ev: this.evidence(kind, t, sc, extra), days: t.d || this.daysFor(kind, t.k, sc, extra), rows: t.rows || (/^wemwbs_\d$/.test(t.k) ? [+t.k.slice(7)] : []) }; }) : [];
     return { loading: st.loading, val: st.val, findings };
   }
   daysFor(kind, k, sc, extra) {
@@ -464,9 +473,9 @@ Normes:
     for (let i = 41; i >= 0; i--) { const v = D.vals[k][i]; if (i === 41) { if (v == null) break; out.unshift(i); continue; } if (this.flag(k, v, D.band)) out.unshift(i); else break; }
     return out;
   }
-  jsonAsk(keys, n) { return `Respon amb aquest JSON: {"titular": "màxim 8 paraules, sense xifres", "troballes": [{"dada": "una de: ${keys.join(', ')}", "text": "1 frase"}], "recomanacio": "1 o 2 frases"}. Dona ${n} troballes, de la més important a la menys.`; }
+  jsonAsk(keys, when) { return `Respon amb aquest JSON: {"titular": "màxim 8 paraules, sense xifres", "resum": "1 frase curta, màxim 20 paraules", "troballes": [{"dada": "una de: ${keys.join(', ')}", "to": "be | vigilar | info", "text": "frase curta, màxim 14 paraules; no repeteixis la xifra, l'app ja la mostra al costat"}], "accions": ["1 o 2 accions curtes i concretes ${when || 'per a avui'}"]}. Dona de 2 a 4 troballes, de la més important a la menys, i inclou també el que va bé.`; }
   promptDaily(sc) {
-    const D = this.data(sc), w = this.who(sc), K = this.KEYS, ask = this.jsonAsk(this.AI_KEYS.daily, '2 o 3');
+    const D = this.data(sc), w = this.who(sc), K = this.KEYS, ask = this.jsonAsk(this.AI_KEYS.daily);
     const head = `Persona: ${w.name}, ${w.age} anys (${w.sexe.toLowerCase()}). Avui és dijous 24 de setembre.`;
     if (sc === 'nou') return `${head}\nPorta 5 dies de dades; la franja personal es calcula amb 14 dies, així que encara no en té. Dades d'avui: FC en repòs ${this.fmtT('rhr', D.vals.rhr[41])}, HRV ${this.fmtT('hrv', D.vals.hrv[41])}, son ${this.fmtT('son', D.vals.son[41])}, com està ${this.fmtT('estat', D.vals.estat[41])}.\nNo comparis amb cap franja. Dona-li la benvinguda i explica que l'app encara està aprenent com és.\n${ask}`;
     if (sc === 'buit') return `${head}\nAvui encara no ha fet el registre del matí. Ahir tot era dins la seva franja (${K.map(k => `${this.META[k].name} ${this.fmtT(k, D.vals[k][40])}`).join(', ')}); estat d'ahir: A fons.\nExplica amb calma que quan faci el registre l'informe s'actualitzarà i dona una orientació suau basada en ahir.\n${ask}`;
@@ -481,7 +490,7 @@ Normes:
     return `${head} Dades d'avui comparades amb la seva franja habitual de les últimes setmanes:\n${lines.join('\n')}\nEstat del dia calculat per l'app: ${this.ST[st].w} (ahir: ${sy ? this.ST[sy].w : 'sense dades'}).\n${ask}`;
   }
   promptWeek(sc, wi) {
-    const W = this.WEEKS[wi], P = this.WEEKS[wi + 1], w = this.who(sc), ws = this.weekStats(sc, W.a), ask = this.jsonAsk(this.AI_KEYS.week, '3');
+    const W = this.WEEKS[wi], P = this.WEEKS[wi + 1], w = this.who(sc), ws = this.weekStats(sc, W.a), ask = this.jsonAsk(this.AI_KEYS.week, 'per a la setmana que ve');
     const L = this.SCALES.map(q => `- ${q.t}: ${W.v[q.k]} de 10${q.inv ? ' (escala invertida: 10 = extremadament cansat, més baix és millor)' : ' (més alt és millor)'}${P ? `; setmana anterior ${P.v[q.k]}` : ''}.`);
     L.push(`- Paraules: rendiment «${W.w.rendiment}», descans «${W.w.descans}», salut «${W.w.salut}».`);
     if (W.com) L.push(`- Comentari: ${W.com}`);
@@ -491,13 +500,13 @@ Normes:
     return `Resum de la setmana ${W.id} (${this.weekLabel(W.a)}) de ${w.name}, ${w.age} anys. Dades del formulari setmanal i del registre diari:\n${L.join('\n')}\n${ask}`;
   }
   promptMonth(sc, mi) {
-    const M = this.MONTHS[mi], P = this.MONTHS[mi + 1], w = this.who(sc), items = this.wemItems(sc), ask = this.jsonAsk(this.AI_KEYS.month, '3');
+    const M = this.MONTHS[mi], P = this.MONTHS[mi + 1], w = this.who(sc), items = this.wemItems(sc), ask = this.jsonAsk(this.AI_KEYS.month, 'per al mes que ve');
     const L = items.map((t, i) => `- wemwbs_${i + 1} «${t}»: ${this.SCALE5[M.wem[i] - 1]} (${M.wem[i]} de 5)${P ? `; mes anterior ${this.SCALE5[P.wem[i] - 1]}` : ''}.`);
     L.push(`- wemwbs (total, de 7 a 35, més alt és millor): ${this.sum(M.wem)}${P ? `; mes anterior ${this.sum(P.wem)}` : ' (primer mes)'}.`);
     return `Formulari mensual de benestar mental (WEMWBS, 7 ítems d'1 a 5) de ${w.name}, ${w.age} anys, corresponent a ${M.name}:\n${L.join('\n')}\nParla només d'aquestes dades.\n${ask}`;
   }
   promptTrend(sc) {
-    const D = this.data(sc), w = this.who(sc), a = this.sentsStats(sc, 28), ask = this.jsonAsk(this.AI_KEYS.trend, '3');
+    const D = this.data(sc), w = this.who(sc), a = this.sentsStats(sc, 28), ask = this.jsonAsk(this.AI_KEYS.trend, 'per als propers dies');
     const avg = xs => { const p = xs.filter(v => v != null); return p.length ? p.reduce((s, x) => s + x, 0) / p.length : null; };
     const L = this.KEYS.map(k => `- ${this.META[k].name} (dada "${k}"): mitjana dels últims 7 dies ${this.fmtT(k, avg(D.vals[k].slice(35)))}, dels 21 dies anteriors ${this.fmtT(k, avg(D.vals[k].slice(14, 35)))}.`);
     L.push(`- Com se sent vs què diuen les dades (dada "sents"): coincideixen ${a.k} de ${a.n} dies amb dades; ${a.better} dies se sent millor del que diuen les dades i ${a.worse} pitjor.`);
@@ -610,26 +619,6 @@ Normes:
         pos != null ? h('span', { style: { position: 'absolute', left: pct(pos), top: 0, width: 14, height: 14, marginLeft: -7, borderRadius: '50%', background: this.toneOf(k, pos, band), boxShadow: `0 0 0 2px ${ring || C.s1}` } }) : null),
       h('div', { style: { position: 'relative', height: 13, marginTop: 5, fontSize: 11, color: C.ink3, fontVariantNumeric: 'tabular-nums' } },
         edge.map(([x, t, tr], j) => h('span', { key: j, style: { position: 'absolute', left: pct(x), transform: tr, whiteSpace: 'nowrap' } }, t))));
-  };
-  // Veredicte del dia: on cau avui entre Recupera, Modera i A fons.
-  StateScale = p => {
-    const C = this.C, pp = p.p, none = pp == null, target = none ? (p.yp != null ? p.yp : .5) : pp;
-    const pos = useTween(target, 1100, .04);
-    const lab = { fontSize: 13, color: C.ink3 }, word = { marginTop: 10, fontSize: 40, fontWeight: 600, letterSpacing: '-.025em', lineHeight: 1 }, line = { marginTop: 10, fontSize: 15, lineHeight: 1.45, color: C.ink2, textWrap: 'pretty' };
-    if (p.sc === 'nou') return h('div', null, h('div', { style: lab }, "Estat d'avui"), h('div', { style: word }, 'Calculant'), h('div', { style: line }, 'Amb 14 dies de dades podrem comparar cada dia amb el teu normal.'),
-      h('div', { style: { marginTop: 26, display: 'flex', gap: 4 } }, Array.from({ length: 14 }, (_, j) => h('span', { key: j, style: { flex: 1, height: 8, borderRadius: 3, background: j < 5 ? C.ink2 : 'rgba(255,255,255,.08)', transformOrigin: 'left', animation: j < 5 ? `mtGrowX .4s ${(.2 + j * .08).toFixed(2)}s both` : 'none' } }))),
-      h('div', { style: { marginTop: 10, fontSize: 12, color: C.ink3 } }, '5 de 14 dies'));
-    const st = this.stateOf(pp), zones = [['rec', 30, this.LV.bad, 'Recupera'], ['mod', 25, this.LV.mid, 'Modera'], ['fons', 45, this.LV.ok, 'A fons']];
-    return h('div', null,
-      h('div', { style: lab }, "Estat d'avui"),
-      h('div', { key: 'w' + (st || 'x'), style: { ...word, animation: 'mtIn .5s .1s both', color: none ? C.ink2 : C.ink } }, none ? 'Pendent' : this.ST[st].w),
-      h('div', { style: line }, none ? "Encara no has fet el registre d'avui. Ahir vas estar A fons." : this.ST[st].line),
-      h('div', { style: { position: 'relative', marginTop: 28 } },
-        h('div', { style: { display: 'flex', gap: 4 } }, zones.map(z => h('span', { key: z[0], style: { flex: z[1], height: 8, borderRadius: 4, background: st === z[0] ? this.tone(z[2]) : 'rgba(255,255,255,.08)', transition: 'background .5s' } }))),
-        (p.hist || []).map((x, j) => (x == null ? null : h('span', { key: 'h' + j, title: 'Dies anteriors', style: { position: 'absolute', left: `${x * 100}%`, top: 16, width: 4, height: 4, marginLeft: -2, borderRadius: '50%', background: 'rgba(236,237,239,.3)' } }))),
-        h('span', { style: { position: 'absolute', left: `${pos * 100}%`, top: -5, width: 18, height: 18, marginLeft: -9, borderRadius: '50%', boxSizing: 'border-box', background: none ? C.s1 : this.tone(this.dayH(pos)), border: none ? `2px dashed ${C.ink3}` : 'none', boxShadow: `0 0 0 3px #141519` } })),
-      h('div', { style: { display: 'flex', gap: 4, marginTop: 26 } }, zones.map(z => h('span', { key: z[0], style: { flex: z[1], fontSize: 12, color: st === z[0] ? C.ink : C.ink3, fontWeight: st === z[0] ? 600 : 400 } }, z[3]))),
-      h('div', { style: { marginTop: 14, fontSize: 12, color: C.ink3, display: 'flex', alignItems: 'center', gap: 7 } }, h('span', { style: { width: 4, height: 4, borderRadius: '50%', background: 'rgba(236,237,239,.35)' } }), none ? 'Sis dies anteriors · el cercle buit és ahir' : 'Els sis dies anteriors'));
   };
   // Fila de qüestionari: valor anterior (cercle buit) → valor actual (cercle ple), animat.
   DumbRow = p => {
@@ -875,25 +864,12 @@ Normes:
     if (/^wemwbs_\d$/.test(k)) return `Pregunta ${k.slice(7)}`;
     return { coach: 'Entrenador', sents: 'Sensació vs dades', ostrc: 'Participació', wemwbs: 'Total', ahir: 'Ahir', reg: 'Registre', band: 'Franja' }[k] || '';
   }
-  findingEl(fd, i, o) {
-    const C = this.C, on = this.focusN() === fd.n, chip = this.chipFor(fd.k);
-    return h('button', { key: fd.n, className: 'mt-f', 'data-on': on ? '' : undefined, 'aria-pressed': this.state.pinF === fd.n,
-      onMouseEnter: () => this.setState({ hoverF: fd.n }), onMouseLeave: () => this.setState({ hoverF: null }), onFocus: () => this.setState({ hoverF: fd.n }), onBlur: () => this.setState({ hoverF: null }),
-      onClick: () => { this.setState(st => ({ pinF: st.pinF === fd.n ? null : fd.n })); if (o.onPick) o.onPick(fd); },
-      style: { display: 'grid', gridTemplateColumns: '22px minmax(0,1fr) auto', gap: 14, alignItems: 'start', width: 'calc(100% + 24px)', margin: '0 -12px', padding: '10px 12px', border: 'none', borderRadius: 10, background: 'transparent', textAlign: 'left', cursor: 'pointer', animation: `mtIn .4s cubic-bezier(.2,.7,.2,1) ${(.15 + i * .08).toFixed(2)}s both` } },
-      h('span', { style: { paddingTop: 1 } }, this.badge(fd.n, on)), h('span', { style: { fontSize: 15, lineHeight: 1.55, color: C.ink2, textWrap: 'pretty' } }, this.segs(fd.text)),
-      chip ? h('span', { style: { paddingTop: 3, fontSize: 12, color: on ? C.ink2 : C.ink3, whiteSpace: 'nowrap' } }, chip) : h('span'));
-  }
   reportEl(o) {
     const C = this.C, g = this.geom(), R = o.R;
     const sk = (w, hh, d) => h('div', { key: w + d, style: { height: hh, width: w, borderRadius: 6, background: 'linear-gradient(90deg, rgba(255,255,255,.04), rgba(255,255,255,.09), rgba(255,255,255,.04))', backgroundSize: '1200px 100%', animation: `mtShim 1.6s linear ${d}s infinite` } });
     const analysis = R.loading
       ? h('div', { style: { display: 'flex', flexDirection: 'column', gap: 12 } }, h('div', { style: { fontSize: 13, color: C.ink3 } }, 'Llegint les teves dades…'), sk('62%', 22, 0), sk('100%', 12, .1), sk('92%', 12, .2), sk('84%', 12, .3), sk('70%', 12, .4))
-      : h(React.Fragment, null,
-        h('div', { style: { fontSize: 22, fontWeight: 600, letterSpacing: '-.015em', lineHeight: 1.25, textWrap: 'balance', animation: 'mtIn .45s cubic-bezier(.2,.7,.2,1) .05s both' } }, R.val.titular),
-        h('div', { style: { marginTop: 12, display: 'flex', flexDirection: 'column', gap: 2 } }, R.findings.map((fd, i) => this.findingEl(fd, i, o))),
-        h('div', { style: { marginTop: 14, paddingTop: 16, borderTop: `1px solid ${C.line}`, display: 'grid', gridTemplateColumns: '112px minmax(0,1fr)', gap: 14, animation: 'mtIn .45s cubic-bezier(.2,.7,.2,1) .45s both' } },
-          h('div', { style: { fontSize: 13, color: C.ink3, paddingTop: 2 } }, 'Recomanació'), h('div', { style: { fontSize: 16, lineHeight: 1.5, textWrap: 'pretty' } }, this.segs(R.val.recomanacio))));
+      : this.aiCards(R, o);
     return h('div', { style: { background: '#141519', border: `1px solid ${C.line}`, borderRadius: 16, boxShadow: 'inset 0 1px 0 rgba(255,255,255,.035)', overflow: 'hidden' } },
       h('div', { style: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 16, padding: '15px 28px', borderBottom: `1px solid ${C.line}` } },
         h('div', { style: { display: 'flex', alignItems: 'baseline', gap: 12, minWidth: 0, flexWrap: 'wrap' } }, h('span', { style: { fontSize: 15, fontWeight: 600 } }, o.title), h('span', { style: { fontSize: 13, color: C.ink3 } }, o.meta)),
@@ -905,13 +881,131 @@ Normes:
         h('span', null, `Basat en: ${o.basis.join(' · ')}`), h('span', null, o.note || "Orientatiu, no és un diagnòstic mèdic. Si alguna cosa no va bé, parla-ho amb l'entrenador.")));
   }
 
+  // ── Informe: la xifra de cada troballa, el veredicte del dia (anell) i les fitxes de l'anàlisi ──
+  toFor(kind, k, sc, extra) {
+    if (kind === 'daily' && this.KEYS.includes(k)) { const D = this.data(sc), st = this.status(k, D.vals[k][41], D.band); return st.lv === 'top' || st.lv === 'ok' ? 'be' : st.lv ? 'vigilar' : 'info'; }
+    const q = kind === 'week' ? this.SCALES.find(x => x.k === k) : null;
+    if (q) return this.sH(this.WEEKS[extra].v[k], 1, 10, q.inv) >= .6 ? 'be' : 'vigilar';
+    return 'info';
+  }
+  // La xifra la calcula l'app a partir de les dades, perquè sempre coincideixi amb el que es veu als gràfics.
+  evidence(kind, t, sc, extra) {
+    const D = this.data(sc), C = this.C, k = t.k, meta = this.META[k], avg = xs => { const p = xs.filter(v => v != null); return p.length ? this.sum(p) / p.length : null; };
+    const val = (v, ctx, col) => ({ label: meta.name, value: this.fmtV(k, v), unit: v == null ? '' : meta.unit, ctx, col: col || (v == null ? C.ink3 : D.band ? this.toneOf(k, v, D.band) : C.ink) });
+    if (k === 'band') return { label: 'Franja personal', value: '5', unit: 'de 14 dies', ctx: 'En càlcul', col: C.ink };
+    if (kind === 'daily') {
+      if (meta) {
+        const v = D.vals[k][41], b = D.band;
+        if (v == null) return val(null, 'Sense registre avui');
+        if (!b) { const ps = D.vals[k].filter(x => x != null); return val(v, `Mitjana de ${ps.length} dies: ${this.fmtT(k, this.sum(ps) / ps.length)}`); }
+        return val(v, Math.abs(v - b[k].mean) < .05 ? 'Igual que el teu normal' : `${this.delta(k, v, b[k].mean)} vs el teu normal`);
+      }
+      if (k === 'coach') { const c = D.coach[41]; return { label: 'Entrenador', value: c ? this.COACH[c].t : '—', unit: '', ctx: "El que li has dit avui", col: C.ink }; }
+      if (k === 'ahir') { const p = D.pos[40], st = this.stateOf(p); return { label: 'Ahir', value: st ? this.ST[st].w : '—', unit: '', ctx: 'Estat del dia', col: p == null ? C.ink3 : this.tone(this.dayH(p)) }; }
+      if (k === 'reg') return { label: "Registre d'avui", value: 'Pendent', unit: '', ctx: 'Encara no fet', col: C.ink2 };
+    }
+    if (kind === 'week') {
+      const W = this.WEEKS[extra], P = this.WEEKS[extra + 1], q = this.SCALES.find(x => x.k === k);
+      if (q) { const v = W.v[k], pv = P ? P.v[k] : null; return { label: q.t, value: String(v), unit: '/10', ctx: pv == null ? 'Primer registre' : v === pv ? `Igual que la setmana ${P.id}` : `${v > pv ? '+' : '−'}${Math.abs(v - pv)} vs setmana ${P.id}`, col: this.sTone(v, 1, 10, q.inv) }; }
+      if (k === 'ostrc') return { label: 'Participació', value: this.OST_S[W.ostrc], unit: '', ctx: W.inici != null ? `Des del ${this.dLong(W.inici)}` : 'Sense problemes', col: this.tone(this.OST_H[W.ostrc]) };
+      if (meta) {
+        const idx = Array.from({ length: 7 }, (_, j) => W.a + j), fl = idx.filter(i => this.flag(k, D.vals[k][i], D.band));
+        // Si la troballa avisa d'alguna cosa, es mostra el pitjor dia; si no, la mitjana de la setmana.
+        if (t.to === 'vigilar' && fl.length) { const up = this.DEF[k].worse === 'up'; let wi = fl[0]; fl.forEach(i => { if (up ? D.vals[k][i] > D.vals[k][wi] : D.vals[k][i] < D.vals[k][wi]) wi = i; }); return val(D.vals[k][wi], `El pitjor dia: ${this.dLong(wi)}`); }
+        return val(avg(idx.map(i => D.vals[k][i])), 'Mitjana de la setmana');
+      }
+    }
+    if (kind === 'month') {
+      const M = this.MONTHS[extra], P = this.MONTHS[extra + 1], mm = /^wemwbs_(\d)$/.exec(k);
+      if (k === 'wemwbs') { const tt = this.sum(M.wem), pt = P ? this.sum(P.wem) : null; return { label: 'Benestar total', value: String(tt), unit: '/35', ctx: pt == null ? 'Primer mes' : tt === pt ? `Igual que al ${P.name}` : `${tt > pt ? '+' : '−'}${Math.abs(tt - pt)} vs ${P.name}`, col: this.sTone(tt, 7, 35) }; }
+      if (mm) { const j = +mm[1] - 1, v = M.wem[j], pv = P ? P.wem[j] : null; return { label: this.WEM_SHORT[j], value: String(v), unit: '/5', ctx: this.SCALE5[v - 1] + (pv != null && pv !== v ? ` · abans ${this.SCALE5[pv - 1].toLowerCase()}` : ''), col: this.sTone(v, 1, 5) }; }
+    }
+    if (kind === 'trend') {
+      if (k === 'sents') { const st = this.sentsStats(sc, 28); return t.to === 'vigilar' ? { label: 'Sensació vs dades', value: String(st.n - st.k), unit: 'dies', ctx: `No coincideixen, de ${st.n}`, col: C.ink } : { label: 'Sensació vs dades', value: String(st.k), unit: `de ${st.n} dies`, ctx: 'Coincideixen', col: C.ink }; }
+      if (k === 'reg') { const miss = D.pos.slice(35).filter(p => p == null).length; return { label: 'Registre', value: String(miss), unit: miss === 1 ? 'dia' : 'dies', ctx: 'Sense registre aquesta setmana', col: C.ink2 }; }
+      if (meta) {
+        if (t.m === 'run' && t.d && t.d.length > 1) { const a = t.d[0], z = t.d[t.d.length - 1]; return val(D.vals[k][z], `${this.cap(this.WDL[this.day(a).wd])}: ${this.fmtT(k, D.vals[k][a])}`); }
+        const a7 = avg(D.vals[k].slice(35)), p21 = avg(D.vals[k].slice(14, 35)), n7 = D.vals[k].slice(35).filter(v => v != null).length;
+        return val(a7, p21 == null ? `Mitjana de ${n7} dies` : `Aquesta setmana · abans ${this.fmtT(k, p21)}`);
+      }
+    }
+    return { label: this.chipFor(k), value: '', unit: '', ctx: '', col: C.ink };
+  }
+  verdictHead(sc, D) {
+    const C = this.C, st = this.stateOf(D.pos[41]), nou = sc === 'nou', word = nou ? 'Calculant' : st ? this.ST[st].w : 'Pendent';
+    const line = nou ? 'Amb 14 dies de dades podrem comparar cada dia amb el teu normal.' : st ? this.ST[st].line : "Encara no has fet el registre d'avui.";
+    return h(React.Fragment, null, this.lab("Estat d'avui", 'vl'),
+      h('div', { key: 'vw' + word, style: { marginTop: 10, fontSize: 40, fontWeight: 600, letterSpacing: '-.025em', lineHeight: 1, color: st || nou ? C.ink : C.ink2, animation: 'mtIn .5s .1s both' } }, word),
+      h('div', { key: 'vs', style: { marginTop: 10, fontSize: 15, lineHeight: 1.45, color: C.ink2, textWrap: 'pretty' } }, line));
+  }
+  // Veredicte del dia: un anell amb un tram per dada, amb el to que li correspon; al centre, quantes són dins la franja.
+  RingV = p => {
+    const C = this.C, { sc, D } = p, band = D.band, ORD = ['rhr', 'hrv', 'estat', 'son'], LBL = { rhr: 'FC', hrv: 'HRV', estat: 'Com estàs', son: 'Son' };
+    const vals = ORD.map(k => D.vals[k][41]), sts = ORD.map((k, i) => this.status(k, vals[i], band)), [hv, setHv] = React.useState(null);
+    const hs = useTween(ORD.map((k, i) => (vals[i] == null || !band ? null : this.hOf(k, vals[i], band))), 900, ORD.map(() => .84));
+    const S = 128, sw = 12, R = S / 2 - sw / 2 - 1, c = S / 2, pt = a => { const r = (a - 90) * Math.PI / 180; return [c + R * Math.cos(r), c + R * Math.sin(r)]; };
+    const nou = sc === 'nou', none = vals[0] == null && !nou, good = sts.filter(x => x.lv === 'ok' || x.lv === 'top').length;
+    const lp = [[c, -12, 'middle'], [S + 10, c + 4, 'start'], [c, S + 20, 'middle'], [-10, c + 4, 'end']];
+    const arcs = ORD.map((k, i) => {
+      const P0 = pt(i * 90 - 37), P1 = pt(i * 90 + 37), d = `M${P0[0].toFixed(2)},${P0[1].toFixed(2)} A${R},${R} 0 0 1 ${P1[0].toFixed(2)},${P1[1].toFixed(2)}`;
+      const col = hs[i] != null ? this.tone(hs[i]) : vals[i] != null ? C.ink2 : null;
+      return h('g', { key: k, onMouseEnter: () => setHv(i), onMouseLeave: () => setHv(null), opacity: hv != null && hv !== i ? .28 : 1, style: { transition: 'opacity .2s', cursor: 'default' } },
+        h('path', { d, fill: 'none', stroke: 'rgba(255,255,255,.07)', strokeWidth: sw, strokeLinecap: 'round' }),
+        col ? h('path', { d, fill: 'none', stroke: col, strokeWidth: sw, strokeLinecap: 'round', pathLength: 1, style: { strokeDasharray: 1, animation: `mtDraw .7s cubic-bezier(.3,.7,.2,1) ${(.2 + i * .12).toFixed(2)}s both` } }) : null,
+        h('text', { x: lp[i][0], y: lp[i][1], textAnchor: lp[i][2], fill: hv === i ? C.ink : C.ink3, style: { fontSize: 11.5 } }, LBL[k]));
+    });
+    const center = h('div', { style: { position: 'absolute', left: 0, top: 0, width: S, height: S, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', animation: 'mtFade .5s .6s both' } },
+      h('div', { style: { fontSize: 24, fontWeight: 600, letterSpacing: '-.02em', lineHeight: 1, color: none ? C.ink3 : C.ink } }, nou ? '5/14' : none ? '—' : `${good}/4`),
+      h('div', { style: { marginTop: 5, maxWidth: 74, fontSize: 11, lineHeight: 1.25, textAlign: 'center', color: C.ink3 } }, nou ? 'dies de dades' : none ? 'sense registre' : 'dins la franja'));
+    const legend = h('div', { style: { flex: '1 1 140px', minWidth: 0 } }, ORD.map((k, i) => { const v = vals[i], st = sts[i];
+      return h('div', { key: k, onMouseEnter: () => setHv(i), onMouseLeave: () => setHv(null), style: { display: 'grid', gridTemplateColumns: '8px minmax(0,1fr) auto', alignItems: 'center', gap: 10, padding: '8px 0', borderTop: i ? `1px solid ${C.line}` : 'none', opacity: hv != null && hv !== i ? .45 : 1, transition: 'opacity .2s' } },
+        this.dot(v == null ? 'transparent' : band ? st.col : C.ink2, 8, v == null ? `1.5px solid ${C.ink3}` : null),
+        h('span', { style: { fontSize: 13, color: C.ink2, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' } }, LBL[k]),
+        h('span', { style: { fontSize: 14, fontWeight: 600, whiteSpace: 'nowrap', color: v == null ? C.ink3 : band ? st.col : C.ink } }, this.fmtV(k, v), v != null ? h('span', { style: { marginLeft: 3, fontSize: 11.5, fontWeight: 400, color: C.ink3 } }, this.META[k].unit) : null)); }));
+    return h('div', null, this.verdictHead(sc, D),
+      h('div', { style: { marginTop: 18, display: 'flex', alignItems: 'center', gap: 20, flexWrap: 'wrap' } },
+        h('div', { style: { position: 'relative', width: S, height: S, flex: 'none', margin: '18px 34px 24px 34px' } }, h('svg', { width: S, height: S, viewBox: `0 0 ${S} ${S}`, style: { display: 'block', overflow: 'visible', fontFamily: this.SANS } }, arcs), center), legend),
+      h('div', { style: { marginTop: 6, display: 'flex', flexWrap: 'wrap', gap: '6px 14px', fontSize: 12, color: C.ink3 } }, h('span', { key: 'tt', style: { width: '100%' } }, "Cada tram de l'anell és una dada d'avui:"), this.lgStatus()));
+  };
+  // Peces comunes de les fitxes.
+  aiHead(v) {
+    const C = this.C;
+    return h(React.Fragment, null,
+      h('div', { key: 'tt', style: { fontSize: 22, fontWeight: 600, letterSpacing: '-.015em', lineHeight: 1.25, textWrap: 'balance', animation: 'mtIn .45s cubic-bezier(.2,.7,.2,1) .05s both' } }, v.titular),
+      v.resum ? h('div', { key: 'rs', style: { marginTop: 7, fontSize: 15, lineHeight: 1.5, color: C.ink2, textWrap: 'pretty', animation: 'mtIn .45s cubic-bezier(.2,.7,.2,1) .1s both' } }, this.segs(v.resum)) : null);
+  }
+  fProps(fd, o) {
+    return { 'aria-pressed': this.state.pinF === fd.n, onMouseEnter: () => this.setState({ hoverF: fd.n }), onMouseLeave: () => this.setState({ hoverF: null }), onFocus: () => this.setState({ hoverF: fd.n }), onBlur: () => this.setState({ hoverF: null }),
+      onClick: () => { this.setState(st => ({ pinF: st.pinF === fd.n ? null : fd.n })); if (o && o.onPick) o.onPick(fd); } };
+  }
+  actionsList(ac) {
+    const C = this.C, list = (Array.isArray(ac) ? ac : [ac]).filter(Boolean);
+    return h('div', { style: { display: 'flex', flexDirection: 'column', gap: 8 } }, list.map((t, i) => h('div', { key: i, style: { display: 'grid', gridTemplateColumns: '16px minmax(0,1fr)', gap: 8, alignItems: 'baseline', fontSize: 15.5, lineHeight: 1.45 } }, h('span', { style: { color: C.ink3 } }, '→'), h('span', { style: { textWrap: 'pretty' } }, this.segs(t)))));
+  }
+  actionsBox(ac, label) {
+    const C = this.C;
+    return h('div', { key: 'ac', style: { marginTop: 16, padding: '14px 18px', borderRadius: 12, background: 'rgba(255,255,255,.035)', display: 'grid', gridTemplateColumns: '128px minmax(0,1fr)', gap: 14, animation: 'mtIn .45s cubic-bezier(.2,.7,.2,1) .4s both' } },
+      h('div', { style: { fontSize: 13, color: C.ink3, paddingTop: 3 } }, label || 'Què fer avui'), this.actionsList(ac));
+  }
+  // Anàlisi de la IA: una fitxa per troballa, amb la dada i el valor primer, i a sota les accions.
+  aiCards(R, o) {
+    const C = this.C, f = this.focusN(), n = R.findings.length, g = this.geom(), rw = g.stack ? g.cw - 56 : g.cw * 2 / 3 - 56, fit = Math.max(1, Math.floor((rw + 10) / 180)), cols = n <= fit ? n : n === 4 ? 2 : fit;
+    return h(React.Fragment, null, this.aiHead(R.val),
+      h('div', { style: { marginTop: 18, display: 'grid', gridTemplateColumns: `repeat(${cols}, minmax(0,1fr))`, gap: 10 } }, R.findings.map((fd, i) => { const ev = fd.ev, on = f === fd.n;
+        return h('button', { key: fd.n, ...this.fProps(fd, o), style: { display: 'flex', flexDirection: 'column', minWidth: 0, padding: '14px 16px 16px', borderRadius: 12, border: `1px solid ${on ? 'rgba(255,255,255,.24)' : C.line}`, background: on ? 'rgba(255,255,255,.05)' : 'rgba(255,255,255,.02)', textAlign: 'left', font: 'inherit', color: 'inherit', cursor: 'pointer', transition: 'background .15s, border-color .15s', animation: `mtIn .4s cubic-bezier(.2,.7,.2,1) ${(.15 + i * .08).toFixed(2)}s both` } },
+          h('div', { style: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 8 } }, h('span', { style: { fontSize: 12.5, fontWeight: 500, color: C.ink2 } }, ev.label), this.badge(fd.n, on, 18)),
+          h('div', { style: { marginTop: 10, display: 'flex', alignItems: 'baseline', flexWrap: 'wrap', gap: '0 5px' } }, h('span', { style: { fontSize: 26, fontWeight: 600, letterSpacing: '-.02em', lineHeight: 1.05, color: ev.col } }, ev.value), ev.unit ? h('span', { style: { fontSize: 13, color: C.ink3 } }, ev.unit) : null),
+          h('div', { style: { marginTop: 6, fontSize: 12, color: C.ink3 } }, ev.ctx),
+          h('div', { style: { marginTop: 12, paddingTop: 12, borderTop: `1px solid ${C.line}`, fontSize: 14, lineHeight: 1.45, textWrap: 'pretty' } }, this.segs(fd.text))); })),
+      this.actionsBox(R.val.accions, o.actLabel));
+  }
   // ── Pàgina: Avui ─────────────────────────────────────────────────────
   pageAvui(sc, D, g) {
     const C = this.C, reg = this.REG[sc], R = this.reportData('daily', sc);
     const right = h('span', { style: { display: 'inline-flex', alignItems: 'center', gap: 8, fontSize: 13, color: C.ink2 } }, this.dot(reg ? C.ink2 : 'transparent', 7, reg ? null : `1px solid ${C.ink3}`), reg ? `Registre d'avui fet a les ${reg}` : "Registre d'avui pendent");
-    const left = h(this.StateScale, { key: 'ss', sc, p: D.pos[41], yp: D.pos[40], hist: [35, 36, 37, 38, 39, 40].map(i => D.pos[i]) });
-    const rep = this.reportEl({ title: 'Informe del dia', meta: reg ? `Dijous 24 set · registre de les ${reg}` : 'Dijous 24 set · a partir de les dades d\'ahir', left, R,
-      basis: ['FC en repòs', 'HRV', 'Son', 'Com estàs', "Comunicació amb l'entrenador", 'Historial de 28 dies'], onPick: f => { if (this.KEYS.includes(f.k)) this.setState({ metric: f.k }); } });
+    const o = { title: 'Informe del dia', meta: reg ? `Dijous 24 set · registre de les ${reg}` : "Dijous 24 set · a partir de les dades d'ahir", left: h(this.RingV, { key: 'rv-' + sc, sc, D }), R,
+      basis: ['FC en repòs', 'HRV', 'Son', 'Com estàs', "Comunicació amb l'entrenador", 'Historial de 28 dies'], onPick: f => { if (this.KEYS.includes(f.k)) this.setState({ metric: f.k }); } };
+    const rep = this.reportEl(o);
     const tiles = h('div', { style: { display: 'grid', gridTemplateColumns: `repeat(${g.cols}, minmax(0,1fr))`, gap: 12 } }, this.KEYS.map(k => this.tileEl(k, sc, D, R.findings)));
     return this.stack([this.headEl('Avui', 'Dijous, 24 de setembre de 2026', right), rep, tiles, this.mainCardEl(sc, D, R.findings), this.grid2(this.weekNowEl(sc, D), this.formsEl(sc), 'minmax(0,7fr) minmax(0,5fr)')]);
   }
@@ -974,7 +1068,7 @@ Normes:
     if (sc === 'nou') return this.stack([this.headEl('Setmana', 'Formulari de rendiment i salut'), this.emptyEl('El teu primer formulari setmanal arribarà diumenge', "Cada diumenge respondràs cinc preguntes curtes sobre rendiment, fatiga, descans, salut i organització, més una paraula per a cada àmbit. Aquí veuràs l'informe de la setmana i com evoluciona.")]);
     const C = this.C, s = this.state, n = this.WEEKS.length, wi = Math.min(s.week, n - 1), W = this.WEEKS[wi], P = this.WEEKS[wi + 1] || null, R = this.reportData('week', sc, wi), f = this.focusN();
     const right = this.stepper(`Setmana ${W.id} · ${this.weekLabel(W.a)}`, wi < n - 1 ? () => this.setWeek(wi + 1) : null, wi > 0 ? () => this.setWeek(wi - 1) : null);
-    const rep = this.reportEl({ title: 'Informe de la setmana', meta: `Setmana ${W.id} · formulari enviat ${W.sent}`, left: this.weekLeftEl(sc, D, W), R,
+    const rep = this.reportEl({ title: 'Informe de la setmana', actLabel: 'La setmana que ve', meta: `Setmana ${W.id} · formulari enviat ${W.sent}`, left: this.weekLeftEl(sc, D, W), R,
       basis: ['Formulari de rendiment i salut', 'Paraules i comentari', 'Participació (OSTRC)', 'Dades diàries de la setmana'] });
     const on = k => R.findings.filter(x => x.k === k).map(x => x.n);
     const form = h('div', { style: this.card({ padding: '20px 24px 12px' }) },
@@ -1069,7 +1163,7 @@ Normes:
     if (sc === 'nou') return this.stack([this.headEl('Mes', 'Formulari de benestar i salut mental'), this.emptyEl('El teu primer formulari mensual arribarà el 30 de setembre', "Un cop al mes respondràs set afirmacions sobre com t'has sentit (WEMWBS) i unes preguntes sobre l'esforç psicològic de l'esport. Aquí veuràs l'informe del mes i l'evolució del teu benestar.")]);
     const C = this.C, s = this.state, n = this.MONTHS.length, mi = Math.min(s.month, n - 1), M = this.MONTHS[mi], P = this.MONTHS[mi + 1] || null, R = this.reportData('month', sc, mi), f = this.focusN(), items = this.wemItems(sc);
     const right = this.stepper(M.Name, mi < n - 1 ? () => this.setMonth(mi + 1) : null, mi > 0 ? () => this.setMonth(mi - 1) : null);
-    const rep = this.reportEl({ title: 'Informe del mes', meta: `${M.Name} · formulari enviat el ${M.sent}`, left: this.monthLeftEl(M, P, mi, R), R, basis: ['Benestar mental (WEMWBS)'], note: "L'APSQ i la informació complementària no entren a l'anàlisi. Orientatiu, no és un diagnòstic mèdic." });
+    const rep = this.reportEl({ title: 'Informe del mes', actLabel: 'El mes que ve', meta: `${M.Name} · formulari enviat el ${M.sent}`, left: this.monthLeftEl(M, P, mi, R), R, basis: ['Benestar mental (WEMWBS)'], note: "L'APSQ i la informació complementària no entren a l'anàlisi. Orientatiu, no és un diagnòstic mèdic." });
     const rowsOn = j => R.findings.filter(x => x.rows.includes(j + 1)).map(x => x.n);
     const wem = h('div', { style: this.card({ padding: '20px 24px 12px' }) },
       this.cardHead('Benestar mental (WEMWBS)', P ? `Set afirmacions sobre les últimes setmanes · el cercle buit és ${P.name}` : 'Set afirmacions sobre les últimes setmanes'),
@@ -1119,7 +1213,7 @@ Normes:
   pageEvol(sc, D, g) {
     const C = this.C, s = this.state, nou = sc === 'nou', range = nou ? 7 : s.evoRange, idx = Array.from({ length: range }, (_, j) => 42 - range + j), R = this.reportData('trend', sc), f = this.focusN();
     const right = this.seg([{ k: 7, t: '7 dies' }, { k: 28, t: '28 dies', dis: nou }, { k: 42, t: '6 setmanes', dis: nou }], range, v => this.setState({ evoRange: v }));
-    const rep = this.reportEl({ title: 'Lectura de tendències', meta: nou ? '5 dies de dades' : 'Últims 28 dies', left: this.trendLeftEl(sc), R, basis: ['FC en repòs', 'HRV', 'Son', 'Com estàs', "Comunicació amb l'entrenador"] });
+    const rep = this.reportEl({ title: 'Lectura de tendències', actLabel: 'Els propers dies', meta: nou ? '5 dies de dades' : 'Últims 28 dies', left: this.trendLeftEl(sc), R, basis: ['FC en repòs', 'HRV', 'Son', 'Com estàs', "Comunicació amb l'entrenador"] });
     const marks = R.findings.filter(x => this.KEYS.includes(x.k) || x.k === 'reg').map(x => ({ k: x.k === 'reg' ? 'state' : x.k, n: x.n, days: x.days }));
     const multi = h('div', { style: this.card({ padding: '20px 24px 18px' }) },
       this.cardHead('Dades diàries', `${range === 42 ? '6 setmanes' : `${range} dies`} · cada punt té el to que li correspon respecte a la teva franja`),
