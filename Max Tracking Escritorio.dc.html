@@ -1,0 +1,1249 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet data-dc-atomics>
+<style>
+html,body{margin:0;background:#0C0D0F}
+body{color:#ECEDEF;font-family:-apple-system,BlinkMacSystemFont,'SF Pro Text','Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale}
+button{font:inherit;color:inherit}
+@keyframes mtIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+@keyframes mtFade{from{opacity:0}to{opacity:1}}
+@keyframes mtDraw{from{stroke-dashoffset:1}to{stroke-dashoffset:0}}
+@keyframes mtGrowY{from{transform:scaleY(0)}to{transform:scaleY(1)}}
+@keyframes mtGrowX{from{transform:scaleX(0)}to{transform:scaleX(1)}}
+@keyframes mtPop{from{opacity:0;transform:scale(.3)}to{opacity:1;transform:scale(1)}}
+@keyframes mtShim{0%{background-position:-600px 0}100%{background-position:600px 0}}
+.mt-in{animation:mtIn .45s cubic-bezier(.2,.7,.2,1) both}
+.mt-rb{transition:background .15s,color .15s}.mt-rb:hover{background:rgba(255,255,255,.05);color:#ECEDEF!important}.mt-rb[data-on]{background:rgba(255,255,255,.08)}
+.mt-btn{transition:background .15s,color .15s}.mt-btn:hover{background:rgba(255,255,255,.06)!important;color:#ECEDEF!important}
+.mt-sg:hover{color:#ECEDEF!important}
+.mt-tile{transition:border-color .2s,background .2s}.mt-tile:hover{border-color:rgba(255,255,255,.18)!important}
+.mt-f{transition:background .15s}.mt-f:hover,.mt-f[data-on]{background:rgba(255,255,255,.04)!important}
+.mt-row{transition:background .2s}
+.mt-cell{transition:filter .15s,box-shadow .2s}.mt-cell:hover{filter:brightness(1.25)}
+.mt-pr{transition:background .15s,color .15s}.mt-pr:hover{background:rgba(255,255,255,.06)!important;color:#ECEDEF!important}
+.mt-pb{opacity:.5;transition:opacity .2s}.mt-pb:hover,.mt-pb[data-open]{opacity:1}
+.mt-hc .mt-dot{opacity:.18;transition:opacity .2s}.mt-hc:hover .mt-dot{opacity:.9}
+.mt-scroll::-webkit-scrollbar{width:12px}.mt-scroll::-webkit-scrollbar-thumb{background:rgba(255,255,255,.08);border-radius:12px;border:4px solid #0C0D0F}.mt-scroll::-webkit-scrollbar-track{background:transparent}
+:focus-visible{outline:2px solid rgba(236,237,239,.7);outline-offset:2px}
+@media (prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.001ms!important;animation-delay:0s!important;transition-duration:.001ms!important}}
+</style>
+</helmet>
+<div style="{{ rootSt }}">{{ rail }}<main ref="{{ mainRef }}" class="mt-scroll" style="{{ mainSt }}">{{ page }}</main>{{ proto }}</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;aiLive&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;IA&quot;},&quot;athleteName&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;Martí&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Deportista&quot;}}">
+// Max Tracking · versió ordinador i iPad.
+// Estructura: rail d'icones a l'esquerra + pàgina a tota amplada. Cada pàgina comença amb l'informe de la IA.
+const h = React.createElement;
+const REDUCED = () => { try { return !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches); } catch (e) { return false; } };
+
+// Amplada real d'un contenidor (els gràfics es dibuixen en píxels, sense deformar-se).
+function useWidth() {
+  const ref = React.useRef(null), [w, setW] = React.useState(0);
+  React.useLayoutEffect(() => {
+    const el = ref.current; if (!el) return undefined;
+    const upd = () => { const nw = Math.floor(el.getBoundingClientRect().width); setW(o => (o === nw ? o : nw)); };
+    upd();
+    if (typeof ResizeObserver === 'undefined') { window.addEventListener('resize', upd); return () => window.removeEventListener('resize', upd); }
+    const ro = new ResizeObserver(upd); ro.observe(el);
+    return () => ro.disconnect();
+  }, []);
+  return [ref, w];
+}
+
+// Interpola números (i per tant posicions i tons) entre el valor anterior i el nou. `init` fa que el primer render també animi.
+function useTween(target, dur, init) {
+  const arr = Array.isArray(target), tgt = arr ? target : [target];
+  const sig = tgt.map(v => (v == null ? 'n' : (+v).toFixed(3))).join('|');
+  const [, force] = React.useReducer(x => x + 1, 0);
+  const cur = React.useRef(init === undefined ? tgt : (Array.isArray(init) ? init : [init]));
+  const raf = React.useRef(0);
+  React.useEffect(() => {
+    const from = cur.current;
+    cancelAnimationFrame(raf.current);
+    if (REDUCED() || from.length !== tgt.length) { cur.current = tgt; force(); return undefined; }
+    if (from.every((v, i) => v === tgt[i])) return undefined;
+    const t0 = performance.now();
+    const step = now => {
+      const t = Math.min(1, (now - t0) / dur), e = 1 - Math.pow(1 - t, 3);
+      cur.current = tgt.map((b, i) => { const a = from[i]; return a == null || b == null ? b : a + (b - a) * e; });
+      force();
+      if (t < 1) raf.current = requestAnimationFrame(step);
+    };
+    raf.current = requestAnimationFrame(step);
+    return () => cancelAnimationFrame(raf.current);
+  }, [sig]);
+  return arr ? cur.current : cur.current[0];
+}
+function niceStep(span, count) { const raw = span / Math.max(1, count), p = Math.pow(10, Math.floor(Math.log10(raw || 1))), f = raw / p; return (f < 1.5 ? 1 : f < 3 ? 2 : f < 7 ? 5 : 10) * p; }
+
+class Component extends DCLogic {
+  state = (() => {
+    let ai = {};
+    try { ai = JSON.parse(localStorage.getItem('mt-desk-ai-v1') || '{}') || {}; } catch (e) { ai = {}; }
+    let pHidden = false;
+    try { pHidden = localStorage.getItem('mt-proto-hidden') === '1'; } catch (e) {}
+    return { scenario: 'normal', page: 'avui', metric: 'rhr', range: 7, evoRange: 28, week: 0, month: 0, hoverF: null, pinF: null,
+      lang: 'ca', visit: 0, vw: window.innerWidth, vh: window.innerHeight, ai, pOpen: false, pHidden };
+  })();
+  mainRef = React.createRef();
+  requested = new Set();
+  _data = {};
+  _tc = {};
+  SANS = "-apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif";
+  MONO = "ui-monospace, 'SF Mono', Menlo, Consolas, monospace";
+  // Superfícies neutres: el color queda reservat per a les dades.
+  C = { bg: '#0C0D0F', s1: '#131417', s2: '#17181C', s3: '#1F2025', ink: '#ECEDEF', ink2: '#A6A9B0', ink3: '#7D8189', line: 'rgba(255,255,255,.07)', line2: 'rgba(255,255,255,.12)', grid: 'rgba(255,255,255,.05)' };
+  // Escala de to contínua (OKLCH): 0 = vermell (per vigilar) · .5 = groc (al límit) · 1 = verd (molt bé).
+  TONE = [[0, .64, .15, 25], [.18, .68, .145, 35], [.36, .75, .125, 62], [.52, .82, .11, 88], [.66, .81, .095, 118], [.78, .79, .1, 145], [.9, .79, .11, 155], [1, .8, .125, 160]];
+  // Distància a la franja personal, en mitges franges (positiu = millor) → to.
+  QH = [[-3.4, 0], [-2.5, .18], [-1.8, .38], [-1.25, .52], [-.9, .66], [0, .84], [1.1, 1]];
+  // Posició del dia (0 = Recupera, 1 = A fons) → to.
+  PH = [[.04, .02], [.3, .32], [.55, .64], [.65, .8], [.96, 1]];
+  // Posició dins una escala de qüestionari (0 = pitjor extrem, 1 = millor extrem) → to.
+  SQ = [[0, 0], [.3, .14], [.5, .44], [.65, .7], [.8, .9], [1, 1]];
+  LV = { ok: .9, mid: .47, bad: .12 };
+
+  // ── Dades ─────────────────────────────────────────────────────────────
+  KEYS = ['rhr', 'hrv', 'son', 'estat'];
+  DEF = { rhr: { mean: 50, lo: 48, hi: 52, worse: 'up' }, hrv: { mean: 65, lo: 59, hi: 71, worse: 'down' },
+    son: { mean: 7 + 25 / 60, lo: 6 + 55 / 60, hi: 7 + 55 / 60, worse: 'down' }, estat: { mean: 4, lo: 3.5, hi: 4.5, worse: 'down' } };
+  META = {
+    rhr: { name: 'FC en repòs', long: 'Freqüència cardíaca en repòs', unit: 'bpm', form: 'line' },
+    hrv: { name: 'HRV', long: 'Variabilitat de la freqüència cardíaca', unit: 'ms', form: 'line' },
+    son: { name: 'Son', long: 'Hores de son', unit: 'h', form: 'bars' },
+    estat: { name: 'Com estàs', long: 'Com estàs', unit: '/5', form: 'cells' },
+  };
+  ST = { fons: { w: 'A fons', line: 'Tot a punt: pots entrenar amb normalitat.' }, mod: { w: 'Modera', line: 'Entrena, però avui sense forçar.' }, rec: { w: 'Recupera', line: 'Avui toca prioritzar la recuperació.' } };
+  WD = ['Dl', 'Dt', 'Dc', 'Dj', 'Dv', 'Ds', 'Dg'];
+  WDL = ['dilluns', 'dimarts', 'dimecres', 'dijous', 'divendres', 'dissabte', 'diumenge'];
+  // Sis setmanes inventades (14 ago – 20 set): un stage amb més càrrega, dues nits curtes, la tornada a l'institut i un refredat.
+  BASE = (() => { const hm = (h, m) => h + m / 60; return {
+    rhr: [50, 49, 50, 49, 48, 49, 50, 49, 51, 52, 50, 51, 53, 54, 52, 50, 49, 50, 51, 50, 49, 50, null, 49, 50, 55, 56, 53, 49, 48, 47, 48, 49, 50, 51, 50, 49, 48],
+    hrv: [66, 67, 64, 66, 68, 65, 64, 66, 63, null, 62, 60, 56, 55, 59, 64, 67, 63, 61, 64, 66, 65, null, 67, 64, 52, 50, 57, 63, 70, 73, 71, 68, null, 58, 62, 66, 69],
+    son: [hm(7, 40), hm(8, 5), hm(7, 10), hm(7, 30), hm(7, 20), hm(7, 35), hm(7, 15), hm(7, 25), hm(6, 30), hm(7, 50), hm(7, 20), hm(7, 5), hm(7, 15), hm(7, 0),
+      hm(7, 10), hm(8, 0), hm(7, 45), hm(6, 25), hm(6, 40), hm(7, 5), hm(7, 20), hm(7, 30), null, hm(8, 10), hm(7, 15), hm(7, 50), hm(8, 5), hm(7, 40),
+      hm(7, 30), hm(7, 55), hm(7, 35), hm(7, 20), hm(7, 30), hm(7, 10), hm(7, 25), hm(6, 45), hm(7, 50), hm(8, 0)],
+    estat: [4, 5, 4, 4, 4, 4, 4, 4, 4, 3, 4, 4, 3, 3, 4, 4, 5, 3, 4, 5, 4, 4, null, 4, 4, 3, 2, 3, 4, null, 5, 4, 3, 4, 4, 4, 4, 5],
+    coach: ['be', 'be', 'res', 'be', 'be', 'res', 'be', 'be', 'be', 'reg', 'be', 'be', 'reg', 'reg', 'be', 'be', 'be', 'res', 'be', 'be', 'be', 'res', null, 'be', 'be', 'mal', 'mal', 'reg', 'be', 'res', 'be', 'be', 'reg', 'be', 'be', 'res', 'be', 'be'],
+  }; })();
+  // Últims dies de cada escenari: [fc_repos, hrv, hores_son, com_estas, comunicacio_entrenador].
+  TAILS = (() => { const hm = (h, m) => h + m / 60; return {
+    normal: { 38: [49, 67, hm(7, 30), 4, 'be'], 39: [50, 64, hm(7, 15), 4, 'be'], 40: [51, 61, hm(7, 5), 4, 'res'], 41: [47, 66, hm(6, 45), 4, 'be'] },
+    descans: { 38: [50, 64, hm(7, 15), 4, 'be'], 39: [52, 60, hm(7, 0), 4, 'be'], 40: [54, 55, hm(6, 40), 3, 'reg'], 41: [57, 49, hm(7, 5), 2, 'mal'] },
+    comp: { 37: [51, 62, hm(7, 0), 4, 'be'], 38: [52, 60, hm(6, 45), 5, 'be'], 39: [53, 57, hm(6, 20), 5, 'be'], 40: [53, 58, hm(6, 30), 4, 'be'], 41: [55, 56, hm(6, 40), 5, 'be'] },
+    buit: { 36: null, 37: null, 38: [51, 63, hm(7, 10), 4, 'be'], 39: [50, 65, hm(7, 30), 4, 'be'], 40: [50, 64, hm(7, 20), 4, 'be'], 41: null },
+  }; })();
+  COACH = { be: { t: 'Bé', h: .9 }, reg: { t: 'Regular', h: .47 }, mal: { t: 'Malament', h: .12 }, res: { t: 'No li he dit res', h: null } };
+  REG = { normal: '7:42', descans: '7:15', comp: '6:58', buit: null, nou: '8:05' };
+  // Formulari setmanal de rendiment i salut (el més recent primer). `a` = índex del dilluns.
+  SCALES = [{ k: 'rendiment', t: 'Rendiment', hint: 'Com has rendit' }, { k: 'fatiga', t: 'Fatiga', hint: '10 = extremadament cansat', inv: true },
+    { k: 'descans', t: 'Descans', hint: 'Qualitat del descans' }, { k: 'salut', t: 'Salut', hint: 'Com et trobes de salut' }, { k: 'organitzacio', t: 'Organització', hint: 'Logística i entorn' }];
+  WEEKS = [
+    { id: 38, a: 31, sent: 'diumenge 20 set', v: { rendiment: 8, fatiga: 4, descans: 8, salut: 8, organitzacio: 7 }, w: { rendiment: 'sòlid', descans: 'bé', salut: 'recuperat' }, com: '', ostrc: 0, inici: null, hrvSet: 69 },
+    { id: 37, a: 24, sent: 'diumenge 13 set', v: { rendiment: 5, fatiga: 7, descans: 5, salut: 4, organitzacio: 5 }, w: { rendiment: 'irregular', descans: 'poc', salut: 'refredat' }, com: "Refredat dimarts i dimecres. Primera setmana d'institut i horaris nous.", ostrc: 2, inici: 25, hrvSet: 57 },
+    { id: 36, a: 17, sent: 'diumenge 6 set', v: { rendiment: 8, fatiga: 4, descans: 6, salut: 8, organitzacio: 8 }, w: { rendiment: 'fort', descans: 'irregular', salut: 'bé' }, com: 'Dues nits vaig anar a dormir tard.', ostrc: 0, inici: null, hrvSet: 64 },
+    { id: 35, a: 10, sent: 'diumenge 30 ago', v: { rendiment: 8, fatiga: 7, descans: 6, salut: 7, organitzacio: 6 }, w: { rendiment: 'intens', descans: 'curt', salut: 'cansat' }, com: 'Stage amb dobles sessions. He rendit bé, però he acabat amb molèsties al genoll.', ostrc: 1, inici: 12, hrvSet: 58 },
+    { id: 34, a: 3, sent: 'diumenge 23 ago', v: { rendiment: 7, fatiga: 4, descans: 7, salut: 8, organitzacio: 7 }, w: { rendiment: 'constant', descans: 'bo', salut: 'bé' }, com: '', ostrc: 0, inici: null, hrvSet: 66 },
+  ];
+  OST = ['Completa, sense problemes', 'Completa, amb problemes', 'Reduïda', "No ha pogut participar"];
+  OST_S = ['Completa', 'Amb problemes', 'Reduïda', 'No ha participat'];
+  OST_H = [.92, .55, .28, .06];
+  // Formulari mensual de benestar i salut mental (el més recent primer).
+  SCALE5 = ['Cap vegada', 'Rarament', 'Algunes vegades', 'Sovint', 'Sempre'];
+  APSQ_ITEMS = ["M'ha costat estar amb els companys d'equip", "M'ha costat fer el que havia de fer", 'He estat menys motivat', 'He estat irritable, enfadat o agressiu', 'No he pogut deixar de pensar en lesions o en el rendiment',
+    "Els entrenaments m'han estressat més", "M'ha costat gestionar la pressió de les convocatòries", "M'ha preocupat la vida després de l'esport", 'He necessitat alcohol o altres substàncies per relaxar-me', "He assumit més riscos fora de l'esport"];
+  MONTHS = [
+    { k: 'ago', name: 'agost', Name: 'Agost', ab: 'Ago', sent: '31 ago', wem: [4, 3, 3, 4, 4, 5, 4], apsq: [1, 2, 2, 1, 3, 2, 2, 1, 1, 1], info: "Aquest mes he tingut el stage i m'ha costat desconnectar. Res greu." },
+    { k: 'jul', name: 'juliol', Name: 'Juliol', ab: 'Jul', sent: '31 jul', wem: [4, 4, 4, 4, 4, 5, 4], apsq: [1, 1, 1, 1, 2, 1, 1, 1, 1, 1], info: '' },
+    { k: 'jun', name: 'juny', Name: 'Juny', ab: 'Jun', sent: '30 jun', wem: [4, 4, 3, 4, 4, 5, 4], apsq: [1, 2, 1, 1, 2, 1, 2, 1, 1, 1], info: "Final de curs i exàmens: una mica d'estrès." },
+  ];
+  PAGES = [['avui', 'Avui', 'sun'], ['setmana', 'Setmana', 'week'], ['mes', 'Mes', 'month'], ['evolucio', 'Evolució', 'chart']];
+  PAGES2 = [['priv', 'Privacitat', 'shield'], ['ajustos', 'Ajustos', 'sliders']];
+  PRIV = [
+    { t: 'El teu nom', s: "Qui ets dins de l'equip", r: ['yes', 'yes', 'no'] },
+    { t: 'Estat del dia', s: 'A fons · Modera · Recupera', r: ['yes', 'yes', 'code'] },
+    { t: 'Dades diàries', s: 'FC en repòs, HRV, son i com estàs', r: ['yes', 'yes', 'code'] },
+    { t: "Comunicació amb l'entrenador", s: 'El que li dius cada dia', r: ['yes', 'yes', 'code'] },
+    { t: 'Formulari setmanal', s: 'Rendiment, fatiga, descans, salut, organització i participació', r: ['yes', 'no', 'code'] },
+    { t: 'Formulari mensual', s: 'Benestar mental (WEMWBS) i esforç psicològic (APSQ)', r: ['yes', 'no', 'code'] },
+    { t: 'Informes de la IA', s: "El que l'app t'explica", r: ['yes', 'no', 'no'] },
+  ];
+  ROLES = [{ t: 'Tu', d: 'Ho veus tot, sempre.' }, { t: 'Entrenador', d: "Veu la teva evolució per planificar els entrenaments." }, { t: 'Estudi', d: 'Analitza les dades amb un codi, mai amb el teu nom.' }];
+  LANGS = [{ k: 'ca', t: 'Català' }, { k: 'es', t: 'Castellano' }, { k: 'fr', t: 'Français' }];
+  SCN = [{ k: 'normal', t: 'Día normal' }, { k: 'descans', t: 'Descanso claro' }, { k: 'comp', t: 'Competición' }, { k: 'buit', t: 'Sin datos' }, { k: 'nou', t: 'Deportista nuevo' }];
+
+  // ── Textos de reserva (quan la IA en directe no està disponible) ─────────
+  FB_DAILY = {
+    normal: { titular: 'Recuperat, tot i dormir una mica menys', troballes: [
+      { k: 'rhr', t: 'La FC en repòs és de [[47 bpm|+]], [[3 bpm|+]] per sota de la teva mitjana: el cos està descansat.' },
+      { k: 'hrv', t: "L'HRV ([[66 ms]]) és dins la teva franja, en la línia dels últims dies." },
+      { k: 'son', t: 'Has dormit [[6 h 45|~]], [[40 min|~]] menys del teu normal. És la nit més curta de la setmana.' }],
+      recomanacio: 'Pots entrenar amb normalitat. Aquesta nit, intenta anar a dormir mitja hora abans.' },
+    descans: { titular: 'El cos et demana un dia de recuperació', troballes: [
+      { k: 'rhr', t: 'La FC en repòs ha pujat fins a [[57 bpm|!]], [[7 bpm|!]] per sobre del teu normal. Puja cada dia des de dilluns.', d: [38, 39, 40, 41] },
+      { k: 'hrv', t: "L'HRV ha baixat a [[49 ms|!]], el valor més baix de les últimes sis setmanes." },
+      { k: 'estat', t: "Dius que estàs a [[2 de 5|!]] i a l'entrenador li has dit que et trobes malament: el que sents i les dades coincideixen." }],
+      recomanacio: "Avui prioritza la recuperació: descans o una sessió molt suau. Parla-ho amb l'entrenador abans d'entrenar." },
+    comp: { titular: 'Et sents a punt, però el cos va més just', troballes: [
+      { k: 'son', t: 'Portes quatre nits dormint menys del teu normal; aquesta nit, [[6 h 40|~]].' },
+      { k: 'rhr', t: 'La FC en repòs és de [[55 bpm|!]], per sobre de la teva franja per tercer dia seguit.' },
+      { k: 'coach', t: "Et sents a [[5 de 5|+]] i cada dia li dius a l'entrenador que estàs bé, però des de dilluns les dades marquen Modera.", d: [38, 39, 40, 41] }],
+      recomanacio: "Entrena, però baixa una mica la intensitat. Explica-li a l'entrenador que aquests dies dorms poc." },
+    buit: { titular: "Encara no has fet el registre d'avui", troballes: [
+      { k: 'reg', t: "Quan registris la FC, l'HRV, el son i com estàs, aquest informe s'actualitzarà." },
+      { k: 'ahir', t: 'Ahir totes les dades eren dins la teva franja: FC [[50 bpm]], HRV [[64 ms]] i [[7 h 20]] de son.', d: [40] }],
+      recomanacio: "Si et trobes bé, segueix el pla de l'entrenador. Recorda fer el registre abans d'entrenar." },
+    nou: { titular: 'Benvinguda. Encara estem aprenent com ets', troballes: [
+      { k: 'band', t: 'Tens [[5 de 14]] dies de dades. Amb 14 dies podrem calcular la teva franja personal i comparar cada dia amb el teu normal.' },
+      { k: 'son', t: 'De moment dorms una mitjana de [[8 h 12]] per nit: un bon punt de partida.', d: [37, 38, 39, 40, 41] }],
+      recomanacio: "Continua fent el registre cada matí i segueix el pla de l'entrenador." },
+  };
+  FB_WEEK = {
+    38: { titular: 'Setmana de recuperació completa', troballes: [
+      { k: 'salut', t: 'La salut passa de [[4|!]] a [[8|+]]: el refredat de la setmana passada ha quedat enrere.' },
+      { k: 'fatiga', t: 'La fatiga baixa de [[7|!]] a [[4]] i el descans puja de [[5|~]] a [[8|+]].' },
+      { k: 'hrv', t: "L'HRV torna a la teva franja, amb una mitjana de [[66 ms]]. Només dijous va baixar a [[58 ms|~]].", d: [34] }],
+      recomanacio: "Mantén la rutina de son d'aquesta setmana: està funcionant. Després de la sessió més intensa, deixa un dia més suau." },
+    37: { titular: 'Un refredat a mitja setmana', troballes: [
+      { k: 'ostrc', t: 'Des de dimarts [[8 de setembre|!]] has entrenat menys del normal per un problema de salut.' },
+      { k: 'rhr', t: "Dimarts i dimecres la FC en repòs va pujar fins a [[56 bpm|!]] i l'HRV va baixar a [[50 ms|!]].", d: [25, 26] },
+      { k: 'son', t: 'Tot i això, has dormit bé: [[7 h 41]] de mitjana, per sobre del teu normal.' }],
+      recomanacio: "Torna a la càrrega habitual de mica en mica i comenta amb l'entrenador com et trobes." },
+    36: { titular: 'Bona setmana, amb dues nits curtes', troballes: [
+      { k: 'organitzacio', t: "L'organització puja de [[6|~]] a [[8|+]] i el rendiment es manté en [[8|+]]." },
+      { k: 'son', t: "Dilluns i dimarts vas dormir [[6 h 25|~]] i [[6 h 40|~]]; aquells dos dies l'estat va ser Modera.", d: [17, 18] },
+      { k: 'descans', t: 'El descans que valores, un [[6|~]], encaixa amb aquestes nits curtes.' }],
+      recomanacio: 'Intenta anar a dormir a una hora semblant cada dia, també el cap de setmana.' },
+    35: { titular: 'Stage exigent, però ben assimilat', troballes: [
+      { k: 'fatiga', t: 'La fatiga puja fins a [[7|!]], tres punts més que la setmana anterior.' },
+      { k: 'hrv', t: "Dimecres i dijous l'HRV va baixar a [[55 ms|~]] i la FC en repòs va pujar a [[54 bpm|~]]. El cap de setmana ja eren dins la franja.", d: [12, 13] },
+      { k: 'ostrc', t: "Has entrenat tota la setmana, però amb molèsties al genoll des del [[26 d'agost|~]]." }],
+      recomanacio: "Després d'un stage, deixa un o dos dies més suaus i vigila com evolucionen les molèsties." },
+    34: { titular: 'Una setmana regular i tranquil·la', troballes: [
+      { k: 'salut', t: 'Valores la salut amb un [[8|+]] i el rendiment amb un [[7]].' },
+      { k: 'son', t: 'Només dissabte vas dormir menys del teu normal: [[6 h 30|~]].', d: [8] },
+      { k: 'rhr', t: 'La FC en repòs ha estat dins la teva franja tota la setmana, amb una mitjana de [[50 bpm]].' }],
+      recomanacio: 'Mantén aquesta regularitat: és la millor base per a les setmanes de més càrrega.' },
+  };
+  FB_MONTH = {
+    ago: { titular: 'Benestar bo, amb una mica menys de calma', troballes: [
+      { k: 'wemwbs', t: 'La puntuació total és de [[27 de 35]], dos punts menys que al juliol.' },
+      { k: 'wemwbs_3', t: 'El canvi ve de dues respostes: sentir-te relaxat i sentir-te útil passen de [[Sovint]] a [[Algunes vegades|~]].', rows: [2, 3] },
+      { k: 'wemwbs_6', t: "Sentir-te a prop d'altres persones continua a [[Sempre|+]], com els mesos anteriors." }],
+      recomanacio: "Reserva alguna estona de la setmana per a coses que et relaxin fora de l'esport, sobretot quan hi hagi més càrrega." },
+    jul: { titular: 'El millor mes dels que portes', troballes: [
+      { k: 'wemwbs', t: 'Arribes a [[29 de 35]], un punt més que al juny.' },
+      { k: 'wemwbs_3', t: 'Sentir-te relaxat passa de [[Algunes vegades|~]] a [[Sovint]].' },
+      { k: 'wemwbs_6', t: "Sentir-te a prop d'altres persones es manté a [[Sempre|+]]." }],
+      recomanacio: "Continua amb el que t'ha funcionat aquest mes. Si alguna cosa canvia, ho veurem al proper informe." },
+    jun: { titular: 'El teu primer registre de benestar', troballes: [
+      { k: 'wemwbs', t: "Comences amb [[28 de 35]]. A partir d'ara, cada mes el compararem amb aquest." },
+      { k: 'wemwbs_6', t: "El punt més fort és sentir-te a prop d'altres persones: [[Sempre|+]]." },
+      { k: 'wemwbs_3', t: 'El que queda més avall és sentir-te relaxat: [[Algunes vegades|~]].' }],
+      recomanacio: 'Respon el formulari cada final de mes: amb uns quants mesos podrem veure tendències.' },
+  };
+  FB_TREND = {
+    normal: { titular: 'Tendència estable i sensacions encertades', troballes: [
+      { k: 'sents', t: 'El que sents i el que diuen les dades coincideixen [[21 de 26]] dies: et coneixes bé.' },
+      { k: 'hrv', t: "L'HRV d'aquesta setmana, [[65 ms]] de mitjana, és una mica més alta que la de les tres anteriors ([[63 ms]]).", d: [35, 36, 37, 38, 39, 40, 41] },
+      { k: 'son', t: 'El son baixa lleugerament: [[7 h 19]] de mitjana aquesta setmana, per [[7 h 28]] abans.', d: [35, 36, 37, 38, 39, 40, 41] }],
+      recomanacio: "Continua així i vigila que les nits no s'escurcin gaire més." },
+    descans: { titular: 'Tres dies de baixada seguida', troballes: [
+      { k: 'rhr', t: 'La FC en repòs puja cada dia des de dilluns: de [[50]] a [[57 bpm|!]].', d: [38, 39, 40, 41] },
+      { k: 'hrv', t: "L'HRV fa el camí contrari: de [[64]] a [[49 ms|!]].", d: [38, 39, 40, 41] },
+      { k: 'sents', t: 'Avui el que sents i les dades diuen el mateix: toca recuperar.', d: [41] }],
+      recomanacio: "Si demà les dades no milloren, parla-ho amb l'entrenador per ajustar la setmana." },
+    comp: { titular: 'Et sents millor del que diuen les dades', troballes: [
+      { k: 'sents', t: "Aquest mes, [[6 dies|~]] t'has sentit millor del que indicaven les dades, i quatre són d'aquesta setmana.", d: [38, 39, 40, 41] },
+      { k: 'son', t: 'Dorms menys: [[6 h 50|~]] de mitjana aquesta setmana, per [[7 h 28]] les tres anteriors.', d: [35, 36, 37, 38, 39, 40, 41] },
+      { k: 'rhr', t: 'La FC en repòs també puja: [[52 bpm|~]] de mitjana, per [[50 bpm]] abans.', d: [35, 36, 37, 38, 39, 40, 41] }],
+      recomanacio: 'La motivació ajuda, però el cos necessita recuperar: prioritza el son fins que les dades tornin a la teva franja.' },
+    buit: { titular: 'Tendència estable, amb dies sense registre', troballes: [
+      { k: 'reg', t: 'Aquesta setmana falten [[3 dies]] de registre. Els dies sense dades no compten per a les tendències.', d: [36, 37, 41] },
+      { k: 'sents', t: 'Els dies que tenim, el que sents i les dades coincideixen [[18 de 23]] vegades.' },
+      { k: 'hrv', t: "L'HRV es manté dins la teva franja: [[64 ms]] de mitjana aquesta setmana.", d: [35, 36, 37, 38, 39, 40, 41] }],
+      recomanacio: 'Intenta fer el registre cada matí: com més dies tinguem, més fiable serà la lectura.' },
+    nou: { titular: 'Encara no hi ha prou dies per veure tendències', troballes: [
+      { k: 'band', t: 'Amb [[5 de 14]] dies, encara no podem calcular la teva franja personal.' },
+      { k: 'hrv', t: 'De moment, la teva HRV va de [[70]] a [[78 ms]].', d: [37, 38, 39, 40, 41] }],
+      recomanacio: "Continua registrant cada matí: d'aquí a nou dies veuràs les primeres tendències." },
+  };
+  AI_KEYS = { daily: ['rhr', 'hrv', 'son', 'estat', 'coach'], week: ['rendiment', 'fatiga', 'descans', 'salut', 'organitzacio', 'ostrc', 'rhr', 'hrv', 'son', 'estat'],
+    month: ['wemwbs', 'wemwbs_1', 'wemwbs_2', 'wemwbs_3', 'wemwbs_4', 'wemwbs_5', 'wemwbs_6', 'wemwbs_7'], trend: ['sents', 'rhr', 'hrv', 'son', 'estat'] };
+  SYSTEM = `Ets el mòdul d'anàlisi de Max Tracking, una aplicació que retorna a esportistes de competició joves (de 14 a 20 anys) les seves pròpies dades de salut i recuperació.
+Normes:
+- Escriu en català, en segona persona (tu), amb un to proper, clar i seriós. Frases curtes, sense tecnicismes, sense exclamacions.
+- Compara la persona NOMÉS amb ella mateixa (la seva franja habitual o els seus registres anteriors). Mai amb altres esportistes.
+- Suggereixes, no manes. No facis diagnòstics mèdics ni parlis de malalties.
+- Si les dades indiquen clarament que cal descansar, o la persona diu que no es troba bé, digues-ho amb calma i anima-la a parlar-ne amb l'entrenador.
+- Cada xifra de les dades va entre dobles claudàtors, per exemple [[7 h 20]]. Afegeix |! si està clarament fora de la franja en la direcció dolenta, |~ si està una mica fora o al límit, i |+ si és millor que l'habitual. Dins la franja, sense marca.
+- No facis servir emojis, markdown ni cometes.
+- Respon NOMÉS amb un objecte JSON vàlid, sense cap text abans ni després.`;
+
+  componentDidMount() {
+    this.onResize = () => this.setState({ vw: window.innerWidth, vh: window.innerHeight });
+    window.addEventListener('resize', this.onResize);
+    // Tecla E: mostra o amaga el botó d'escenari del prototip.
+    this.onKey = e => {
+      if (e.metaKey || e.ctrlKey || e.altKey || /^(INPUT|TEXTAREA|SELECT)$/.test((e.target && e.target.tagName) || '')) return;
+      if (e.key === 'e' || e.key === 'E') this.setProtoHidden(!this.state.pHidden);
+      else if (e.key === 'Escape') this.setState({ pOpen: false, pinF: null });
+    };
+    window.addEventListener('keydown', this.onKey);
+    this._ps = this.state;
+    this.ensureAI();
+  }
+  componentWillUnmount() { window.removeEventListener('resize', this.onResize); window.removeEventListener('keydown', this.onKey); }
+  componentDidUpdate() {
+    this.ensureAI();
+    const s = this.state, ps = this._ps || s;
+    this._ps = s;
+    if ((ps.page !== s.page || ps.scenario !== s.scenario) && this.mainRef.current) this.mainRef.current.scrollTop = 0;
+  }
+
+  // ── To ──────────────────────────────────────────────────────────────
+  oklch(L, Ch, H) {
+    const r = H * Math.PI / 180, a = Ch * Math.cos(r), b = Ch * Math.sin(r);
+    const l = (L + .3963377774 * a + .2158037573 * b) ** 3, m = (L - .1055613458 * a - .0638541728 * b) ** 3, s = (L - .0894841775 * a - 1.291485548 * b) ** 3;
+    const f = x => { x = Math.max(0, Math.min(1, x)); x = x <= .0031308 ? 12.92 * x : 1.055 * x ** (1 / 2.4) - .055; return Math.round(x * 255).toString(16).padStart(2, '0'); };
+    return '#' + f(4.0767416621 * l - 3.3077115913 * m + .2309699292 * s) + f(-1.2684380046 * l + 2.6097574011 * m - .3413193965 * s) + f(-.0041960863 * l - .7034186147 * m + 1.7076956719 * s);
+  }
+  tone(hh) {
+    const q = Math.round(Math.max(0, Math.min(1, hh)) * 400);
+    if (this._tc[q]) return this._tc[q];
+    const x = q / 400, S = this.TONE; let i = 1;
+    while (i < S.length - 1 && S[i][0] < x) i++;
+    const a = S[i - 1], b = S[i], t = (x - a[0]) / (b[0] - a[0] || 1);
+    return (this._tc[q] = this.oklch(a[1] + (b[1] - a[1]) * t, a[2] + (b[2] - a[2]) * t, a[3] + (b[3] - a[3]) * t));
+  }
+  alpha(hex, a) { return hex + Math.round(a * 255).toString(16).padStart(2, '0'); }
+  lerpPts(P, x) {
+    if (x <= P[0][0]) return P[0][1];
+    for (let i = 1; i < P.length; i++) if (x <= P[i][0]) { const a = P[i - 1], b = P[i]; return a[1] + (b[1] - a[1]) * (x - a[0]) / (b[0] - a[0]); }
+    return P[P.length - 1][1];
+  }
+  qOf(k, v, band) { const d = band[k], q = (v - d.mean) / ((d.hi - d.lo) / 2); return d.worse === 'up' ? -q : q; }
+  hOf(k, v, band) { return v == null || !band ? null : this.lerpPts(this.QH, this.qOf(k, v, band)); }
+  lvlOf(k, v, band) { if (v == null || !band) return null; const q = this.qOf(k, v, band); return q >= -1 ? 'ok' : q >= -2 ? 'mid' : 'bad'; }
+  toneOf(k, v, band) { const hh = this.hOf(k, v, band); return hh == null ? (v == null ? this.C.ink3 : this.C.ink2) : this.tone(hh); }
+  dayH(p) { return p == null ? null : this.lerpPts(this.PH, p); }
+  sH(v, min, max, inv) { let x = (v - min) / (max - min); if (inv) x = 1 - x; return this.lerpPts(this.SQ, x); }
+  sTone(v, min, max, inv) { return this.tone(this.sH(v, min, max, inv)); }
+  status(k, v, band) {
+    const C = this.C;
+    if (v === undefined) return { lv: null, label: 'Sense dades', col: C.ink3 };
+    if (v === null) return { lv: null, label: 'Sense registre', col: C.ink3 };
+    if (!band) return { lv: null, label: 'Franja en càlcul', col: C.ink2 };
+    const q = this.qOf(k, v, band), col = this.toneOf(k, v, band);
+    return q > 1 ? { lv: 'top', label: 'Millor que el teu normal', col } : q >= -1 ? { lv: 'ok', label: 'Dins la franja', col } : q >= -2 ? { lv: 'mid', label: 'Al límit', col } : { lv: 'bad', label: 'Per vigilar', col };
+  }
+  flag(k, v, band) { return v != null && !!band && this.qOf(k, v, band) < -1; }
+  stateOf(p) { return p == null ? null : p < .3 ? 'rec' : p < .55 ? 'mod' : 'fons'; }
+
+  // ── Dades i format ──────────────────────────────────────────────────
+  data(sc) {
+    if (this._data[sc]) return this._data[sc];
+    const N = 42, K = this.KEYS, hm = (h, m) => h + m / 60, vals = {};
+    let band = null, coach;
+    if (sc === 'nou') {
+      const t = { rhr: [56, 55, 57, 56, 55], hrv: [72, 78, 70, 75, 74], son: [hm(8, 20), hm(8, 5), hm(8, 30), hm(7, 55), hm(8, 10)], estat: [4, 5, 4, 4, 4] };
+      K.forEach(k => { vals[k] = Array(N - 5).fill(undefined).concat(t[k]); });
+      coach = Array(N - 5).fill(undefined).concat(['be', 'res', 'be', 'be', 'be']);
+    } else {
+      band = this.DEF;
+      K.forEach(k => { vals[k] = this.BASE[k].concat(Array(N - this.BASE[k].length).fill(null)); });
+      coach = this.BASE.coach.concat(Array(N - this.BASE.coach.length).fill(null));
+      const T = this.TAILS[sc] || {};
+      Object.keys(T).forEach(i => { const r = T[i]; K.forEach((k, j) => { vals[k][+i] = r ? r[j] : null; }); coach[+i] = r ? r[4] : null; });
+    }
+    const z = (k, i) => { const v = vals[k][i]; return v == null || !band ? null : this.qOf(k, v, band); };
+    const pos = [], feel = [], obj = [];
+    for (let i = 0; i < N; i++) {
+      const zs = K.map(k => z(k, i)).filter(q => q != null).map(q => Math.max(-3, Math.min(1.5, q)));
+      if (!zs.length) pos.push(null); else { const a = zs.reduce((s, q) => s + q, 0) / zs.length, mn = Math.min(...zs); pos.push(Math.max(.04, Math.min(.96, .7 + .2 * (.6 * a + .4 * mn)))); }
+      const fe = z('estat', i); feel.push(fe == null ? null : Math.max(-2.5, Math.min(2, fe)));
+      const os = ['rhr', 'hrv', 'son'].map(k => z(k, i)).filter(q => q != null);
+      obj.push(os.length ? Math.max(-2.5, Math.min(2, os.reduce((s, q) => s + q, 0) / os.length)) : null);
+    }
+    return (this._data[sc] = { vals, coach, band, pos, feel, obj });
+  }
+  who(sc) {
+    if (sc === 'nou') return { name: 'Laia', age: 15, code: 'MT-19', fem: true, sexe: 'Dona' };
+    const n = String(this.props.athleteName ?? 'Martí').trim() || 'Martí';
+    return { name: n, age: 17, code: 'MT-07', fem: false, sexe: 'Home' };
+  }
+  day(i) { const d = 14 + i, s = d > 31; return { n: s ? d - 31 : d, mo: s ? 'set' : 'ago', wd: (4 + i) % 7 }; }
+  dShort(i) { const d = this.day(i); return `${this.WD[d.wd]} ${d.n}`; }
+  dLong(i) { const d = this.day(i); return `${this.WDL[d.wd]} ${d.n} ${d.mo}`; }
+  cap(t) { return t ? t[0].toUpperCase() + t.slice(1) : t; }
+  weekLabel(a) { const d0 = this.day(a), d6 = this.day(a + 6); return d0.mo === d6.mo ? `${d0.n}–${d6.n} ${d6.mo}` : `${d0.n} ${d0.mo} – ${d6.n} ${d6.mo}`; }
+  roundM(k, v) { return k === 'son' ? Math.round(v * 12) / 12 : Math.round(v); }
+  fmtV(k, v) {
+    if (v == null) return '—';
+    if (k === 'son') { let hh = Math.floor(v + 1e-6), m = Math.round((v - hh) * 60); if (m === 60) { hh++; m = 0; } return `${hh}:${String(m).padStart(2, '0')}`; }
+    return String(Math.round(v));
+  }
+  fmtT(k, v) { if (v == null) return '—'; if (k === 'son') { const p = this.fmtV(k, v).split(':'); return `${p[0]} h ${p[1]}`; } if (k === 'estat') return `${Math.round(v)} de 5`; return `${Math.round(v)} ${k === 'rhr' ? 'bpm' : 'ms'}`; }
+  delta(k, v, mean) { const d = v - mean, s = d >= 0 ? '+' : '−', a = Math.abs(d); if (k === 'son') return `${s}${Math.round(a * 60)} min`; if (k === 'estat') return `${s}${String(Math.round(a * 10) / 10).replace('.', ',')}`; return `${s}${Math.round(a)} ${k === 'rhr' ? 'bpm' : 'ms'}`; }
+  bandTxt(k, b) { return `${this.fmtV(k, b.lo)}–${this.fmtV(k, b.hi)}`; }
+  coachTxt(c) { return c == null ? 'sense registre' : this.COACH[c].t; }
+  sum(a) { return a.reduce((s, x) => s + x, 0); }
+  sentsStats(sc, range) {
+    const D = this.data(sc); let n = 0, k = 0, better = 0, worse = 0; const mis = [];
+    for (let i = 42 - range; i < 42; i++) { const f = D.feel[i], o = D.obj[i]; if (f == null || o == null) continue; n++; if (Math.abs(f - o) < 1.2) k++; else { mis.push(i); if (f > o) better++; else worse++; } }
+    return { n, k, better, worse, mis };
+  }
+  weekStats(sc, a) {
+    const D = this.data(sc), idx = Array.from({ length: 7 }, (_, j) => a + j), m = {};
+    const avg = xs => (xs.length ? xs.reduce((s, x) => s + x, 0) / xs.length : null);
+    this.KEYS.forEach(k => { const vs = idx.map(i => D.vals[k][i]).filter(v => v != null), fl = vs.filter(v => this.flag(k, v, D.band)); m[k] = { avg: avg(vs), flags: fl.length }; });
+    const cnt = { fons: 0, mod: 0, rec: 0, none: 0 };
+    idx.forEach(i => { cnt[this.stateOf(D.pos[i]) || 'none']++; });
+    return { m, cnt, idx };
+  }
+
+  // ── IA ──────────────────────────────────────────────────────────────
+  live() { return (this.props.aiLive ?? true) && !!(window.claude && window.claude.complete); }
+  aiKey(kind, sc, extra) { return [kind, sc, extra ?? '', this.who(sc).name].join('|'); }
+  canLive(kind, sc) { return this.live() && !(sc === 'nou' && kind !== 'daily'); }
+  ensureAI() {
+    const s = this.state, sc = s.scenario, want = [];
+    if (s.page === 'avui' && this.canLive('daily', sc)) want.push(this.aiKey('daily', sc));
+    if (s.page === 'setmana' && this.canLive('week', sc)) want.push(this.aiKey('week', sc, s.week));
+    if (s.page === 'mes' && this.canLive('month', sc)) want.push(this.aiKey('month', sc, s.month));
+    if (s.page === 'evolucio' && this.canLive('trend', sc)) want.push(this.aiKey('trend', sc));
+    want.forEach(key => { if (this.state.ai[key] || this.requested.has(key)) return; this.requested.add(key); this.fetchAI(key); });
+  }
+  setAI(key, entry) {
+    this.setState(st => {
+      const ai = { ...st.ai, [key]: entry };
+      try { const keep = {}; Object.keys(ai).forEach(k => { if (ai[k].status === 'done') keep[k] = ai[k]; }); localStorage.setItem('mt-desk-ai-v1', JSON.stringify(keep)); } catch (e) {}
+      return { ai };
+    });
+  }
+  async fetchAI(key) {
+    const [kind, sc, extra] = key.split('|');
+    this.setAI(key, { status: 'loading' });
+    try {
+      const user = kind === 'daily' ? this.promptDaily(sc) : kind === 'week' ? this.promptWeek(sc, +extra) : kind === 'month' ? this.promptMonth(sc, +extra) : this.promptTrend(sc);
+      const raw = String(await window.claude.complete({ system: this.SYSTEM, max_tokens: 900, messages: [{ role: 'user', content: user }] }));
+      const mm = raw.match(/\{[\s\S]*\}/); if (!mm) throw new Error('json');
+      const o = JSON.parse(mm[0]), allow = this.AI_KEYS[kind];
+      if (typeof o.titular !== 'string' || typeof o.recomanacio !== 'string' || !Array.isArray(o.troballes)) throw new Error('camps');
+      const tr = o.troballes.filter(t => t && typeof t.text === 'string' && allow.includes(t.dada)).slice(0, 3).map(t => ({ k: t.dada, t: t.text.trim() }));
+      if (!tr.length || !o.titular.trim()) throw new Error('buit');
+      this.setAI(key, { status: 'done', val: { titular: o.titular.replace(/\[\[|\]\]|\|[!~+]/g, '').trim(), troballes: tr, recomanacio: o.recomanacio.trim() } });
+    } catch (e) { this.setAI(key, { status: 'error' }); }
+  }
+  fallback(kind, sc, extra) {
+    if (kind === 'daily') return this.FB_DAILY[sc];
+    if (kind === 'week') return this.FB_WEEK[this.WEEKS[extra].id];
+    if (kind === 'month') return this.FB_MONTH[this.MONTHS[extra].k];
+    return this.FB_TREND[sc];
+  }
+  // Informe resolt: text + a quins dies (o files) es refereix cada troballa, perquè els gràfics les puguin marcar.
+  reportData(kind, sc, extra) {
+    const fb = this.fallback(kind, sc, extra);
+    let st = { loading: false, val: fb };
+    if (this.canLive(kind, sc)) { const e = this.state.ai[this.aiKey(kind, sc, extra)]; st = !e || e.status === 'loading' ? { loading: true, val: null } : { loading: false, val: e.status === 'done' ? e.val : fb }; }
+    const findings = st.val ? st.val.troballes.map((t, i) => ({ n: i + 1, k: t.k, text: t.t, days: t.d || this.daysFor(kind, t.k, sc, extra), rows: t.rows || (/^wemwbs_\d$/.test(t.k) ? [+t.k.slice(7)] : []) })) : [];
+    return { loading: st.loading, val: st.val, findings };
+  }
+  daysFor(kind, k, sc, extra) {
+    const D = this.data(sc);
+    if (kind === 'month' || !this.KEYS.includes(k)) return k === 'coach' ? [41] : k === 'ahir' ? [40] : [];
+    if (kind === 'week') { const a = this.WEEKS[extra].a; return Array.from({ length: 7 }, (_, j) => a + j).filter(i => this.flag(k, D.vals[k][i], D.band)); }
+    const out = [];
+    for (let i = 41; i >= 0; i--) { const v = D.vals[k][i]; if (i === 41) { if (v == null) break; out.unshift(i); continue; } if (this.flag(k, v, D.band)) out.unshift(i); else break; }
+    return out;
+  }
+  jsonAsk(keys, n) { return `Respon amb aquest JSON: {"titular": "màxim 8 paraules, sense xifres", "troballes": [{"dada": "una de: ${keys.join(', ')}", "text": "1 frase"}], "recomanacio": "1 o 2 frases"}. Dona ${n} troballes, de la més important a la menys.`; }
+  promptDaily(sc) {
+    const D = this.data(sc), w = this.who(sc), K = this.KEYS, ask = this.jsonAsk(this.AI_KEYS.daily, '2 o 3');
+    const head = `Persona: ${w.name}, ${w.age} anys (${w.sexe.toLowerCase()}). Avui és dijous 24 de setembre.`;
+    if (sc === 'nou') return `${head}\nPorta 5 dies de dades; la franja personal es calcula amb 14 dies, així que encara no en té. Dades d'avui: FC en repòs ${this.fmtT('rhr', D.vals.rhr[41])}, HRV ${this.fmtT('hrv', D.vals.hrv[41])}, son ${this.fmtT('son', D.vals.son[41])}, com està ${this.fmtT('estat', D.vals.estat[41])}.\nNo comparis amb cap franja. Dona-li la benvinguda i explica que l'app encara està aprenent com és.\n${ask}`;
+    if (sc === 'buit') return `${head}\nAvui encara no ha fet el registre del matí. Ahir tot era dins la seva franja (${K.map(k => `${this.META[k].name} ${this.fmtT(k, D.vals[k][40])}`).join(', ')}); estat d'ahir: A fons.\nExplica amb calma que quan faci el registre l'informe s'actualitzarà i dona una orientació suau basada en ahir.\n${ask}`;
+    const lines = K.map(k => { const v = D.vals[k][41], b = D.band[k], lv = this.lvlOf(k, v, D.band), dir = b.worse === 'up' ? 'per sobre' : 'per sota';
+      const st = lv === 'bad' ? `clarament ${dir} de la franja` : lv === 'mid' ? `una mica ${dir} de la franja (al límit)` : this.qOf(k, v, D.band) > 1 ? 'millor que la seva franja' : 'dins la franja';
+      if (k === 'estat') return `- Com està (dada "estat", d'1 a 5): ${v} de 5. El seu valor habitual és 4 de 5; avui està ${st}.`;
+      return `- ${this.META[k].name}: ${this.fmtT(k, v)}. Franja habitual: ${this.fmtT(k, b.lo)} a ${this.fmtT(k, b.hi)}. ${st}; ${this.delta(k, v, b.mean)} respecte a la seva mitjana.`; });
+    lines.push(`- Què li ha dit a l'entrenador (dada "coach"): avui ${this.coachTxt(D.coach[41])}; els tres dies anteriors ${[38, 39, 40].map(i => this.coachTxt(D.coach[i])).join(', ')}.`);
+    const runs = K.map(k => { let n = 0; for (let i = 41; i >= 0 && this.flag(k, D.vals[k][i], D.band); i--) n++; return n > 1 ? `${this.META[k].name}: ${n} dies seguits fora de la franja` : null; }).filter(Boolean);
+    if (runs.length) lines.push(`- Tendència: ${runs.join('; ')}.`);
+    const st = this.stateOf(D.pos[41]), sy = this.stateOf(D.pos[40]);
+    return `${head} Dades d'avui comparades amb la seva franja habitual de les últimes setmanes:\n${lines.join('\n')}\nEstat del dia calculat per l'app: ${this.ST[st].w} (ahir: ${sy ? this.ST[sy].w : 'sense dades'}).\n${ask}`;
+  }
+  promptWeek(sc, wi) {
+    const W = this.WEEKS[wi], P = this.WEEKS[wi + 1], w = this.who(sc), ws = this.weekStats(sc, W.a), ask = this.jsonAsk(this.AI_KEYS.week, '3');
+    const L = this.SCALES.map(q => `- ${q.t}: ${W.v[q.k]} de 10${q.inv ? ' (escala invertida: 10 = extremadament cansat, més baix és millor)' : ' (més alt és millor)'}${P ? `; setmana anterior ${P.v[q.k]}` : ''}.`);
+    L.push(`- Paraules: rendiment «${W.w.rendiment}», descans «${W.w.descans}», salut «${W.w.salut}».`);
+    if (W.com) L.push(`- Comentari: ${W.com}`);
+    L.push(`- Participació (OSTRC, dada "ostrc"): ${this.OST[W.ostrc].toLowerCase()}${W.inici != null ? `; problema des del ${this.dLong(W.inici)}` : ''}.`);
+    L.push(`- Estat dels dies: ${ws.cnt.fons} A fons, ${ws.cnt.mod} Modera, ${ws.cnt.rec} Recupera${ws.cnt.none ? `, ${ws.cnt.none} sense registre` : ''}.`);
+    this.KEYS.forEach(k => { const x = ws.m[k], b = this.DEF[k]; L.push(`- ${this.META[k].name} (dada "${k}"): mitjana ${this.fmtT(k, x.avg)} (franja ${this.fmtT(k, b.lo)} a ${this.fmtT(k, b.hi)}); ${x.flags} dies fora de la franja en la direcció dolenta.`); });
+    return `Resum de la setmana ${W.id} (${this.weekLabel(W.a)}) de ${w.name}, ${w.age} anys. Dades del formulari setmanal i del registre diari:\n${L.join('\n')}\n${ask}`;
+  }
+  promptMonth(sc, mi) {
+    const M = this.MONTHS[mi], P = this.MONTHS[mi + 1], w = this.who(sc), items = this.wemItems(sc), ask = this.jsonAsk(this.AI_KEYS.month, '3');
+    const L = items.map((t, i) => `- wemwbs_${i + 1} «${t}»: ${this.SCALE5[M.wem[i] - 1]} (${M.wem[i]} de 5)${P ? `; mes anterior ${this.SCALE5[P.wem[i] - 1]}` : ''}.`);
+    L.push(`- wemwbs (total, de 7 a 35, més alt és millor): ${this.sum(M.wem)}${P ? `; mes anterior ${this.sum(P.wem)}` : ' (primer mes)'}.`);
+    return `Formulari mensual de benestar mental (WEMWBS, 7 ítems d'1 a 5) de ${w.name}, ${w.age} anys, corresponent a ${M.name}:\n${L.join('\n')}\nParla només d'aquestes dades.\n${ask}`;
+  }
+  promptTrend(sc) {
+    const D = this.data(sc), w = this.who(sc), a = this.sentsStats(sc, 28), ask = this.jsonAsk(this.AI_KEYS.trend, '3');
+    const avg = xs => { const p = xs.filter(v => v != null); return p.length ? p.reduce((s, x) => s + x, 0) / p.length : null; };
+    const L = this.KEYS.map(k => `- ${this.META[k].name} (dada "${k}"): mitjana dels últims 7 dies ${this.fmtT(k, avg(D.vals[k].slice(35)))}, dels 21 dies anteriors ${this.fmtT(k, avg(D.vals[k].slice(14, 35)))}.`);
+    L.push(`- Com se sent vs què diuen les dades (dada "sents"): coincideixen ${a.k} de ${a.n} dies amb dades; ${a.better} dies se sent millor del que diuen les dades i ${a.worse} pitjor.`);
+    const miss = D.pos.slice(35).filter(p => p == null).length;
+    if (miss) L.push(`- Dies sense registre en l'última setmana: ${miss}.`);
+    return `Tendències dels últims 28 dies de ${w.name}, ${w.age} anys:\n${L.join('\n')}\n${ask}`;
+  }
+  wemItems(sc) { const f = this.who(sc).fem; return ["M'he sentit optimista respecte al futur", "M'he sentit útil", `M'he sentit ${f ? 'relaxada' : 'relaxat'}`, 'He afrontat bé els problemes', 'He pensat amb claredat', "M'he sentit a prop d'altres persones", `He pogut decidir per ${f ? 'mi mateixa' : 'mi mateix'}`]; }
+  // [[xifra|marca]] → xifra destacada amb el to que li correspon.
+  segs(text) {
+    const C = this.C, out = [], re = /\[\[([^\]|]+?)(?:\|([!~+]))?\]\]/g, s = String(text || '');
+    const col = { '': C.ink, '!': this.tone(this.LV.bad), '~': this.tone(this.LV.mid), '+': this.tone(.97) };
+    let last = 0, m, i = 0;
+    while ((m = re.exec(s))) { if (m.index > last) out.push(h('span', { key: i++ }, s.slice(last, m.index))); out.push(h('span', { key: i++, style: { color: col[m[2] || ''], fontWeight: 600, whiteSpace: 'nowrap' } }, m[1])); last = re.lastIndex; }
+    if (last < s.length) out.push(h('span', { key: i++ }, s.slice(last)));
+    return out;
+  }
+
+  // ── Peces petites ────────────────────────────────────────────────────
+  icon(name, size) {
+    const P = d => h('path', { key: d, d });
+    const kids = {
+      sun: [h('circle', { key: 'c', cx: 12, cy: 12, r: 4 }), ...['M12 2v2', 'M12 20v2', 'm4.93 4.93 1.41 1.41', 'm17.66 17.66 1.41 1.41', 'M2 12h2', 'M20 12h2', 'm6.34 17.66-1.41 1.41', 'm19.07 4.93-1.41 1.41'].map(P)],
+      week: [h('rect', { key: 'r', x: 3, y: 4, width: 18, height: 17, rx: 2.5 }), ...['M16 2v4', 'M8 2v4', 'M3 10h18', 'M7 15h10'].map(P)],
+      month: [h('rect', { key: 'r', x: 3, y: 4, width: 18, height: 17, rx: 2.5 }), ...['M16 2v4', 'M8 2v4', 'M3 10h18', 'M8 14h.01', 'M12 14h.01', 'M16 14h.01', 'M8 18h.01', 'M12 18h.01'].map(P)],
+      chart: ['M3 3v16a2 2 0 0 0 2 2h16', 'm19 9-5 5-4-4-3 3'].map(P),
+      shield: ['M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z'].map(P),
+      sliders: ['M4 8h16', 'M15 5v6', 'M4 16h16', 'M9 13v6'].map(P),
+      flask: ['M10 2v7.527a2 2 0 0 1-.211.896L4.72 20.55a1 1 0 0 0 .9 1.45h12.76a1 1 0 0 0 .9-1.45l-5.069-10.127A2 2 0 0 1 14 9.527V2', 'M8.5 2h7', 'M7 16h10'].map(P),
+      left: ['m15 18-6-6 6-6'].map(P), right: ['m9 18 6-6-6-6'].map(P), check: ['M20 6 9 17l-5-5'].map(P), minus: ['M5 12h14'].map(P),
+    }[name];
+    return h('svg', { width: size, height: size, viewBox: '0 0 24 24', fill: 'none', stroke: 'currentColor', strokeWidth: 1.7, strokeLinecap: 'round', strokeLinejoin: 'round', style: { display: 'block', flex: 'none' } }, kids);
+  }
+  dot(col, size, border) { return h('span', { style: { width: size, height: size, borderRadius: '50%', background: col, border: border || 'none', boxSizing: 'border-box', flex: 'none', display: 'inline-block' } }); }
+  badge(n, on, size) { const s = size || 22, C = this.C; return h('span', { key: 'bg' + n, style: { width: s, height: s, flex: 'none', borderRadius: '50%', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', boxSizing: 'border-box', fontSize: s < 20 ? 10.5 : 12, fontWeight: 600, fontVariantNumeric: 'tabular-nums', border: `1px solid ${on ? C.ink : 'rgba(255,255,255,.2)'}`, background: on ? C.ink : 'transparent', color: on ? C.bg : C.ink2, transition: 'background .15s, color .15s, border-color .15s' } }, String(n)); }
+  tag(t, key) { const C = this.C; return h('span', { key: key || 'tg', style: { display: 'inline-flex', alignItems: 'center', fontSize: 12, color: C.ink3, padding: '3px 8px', border: `1px solid ${C.line2}`, borderRadius: 6, whiteSpace: 'nowrap', flex: 'none' } }, t); }
+  lab(t, key, extra) { return h('div', { key: key || 'lb', style: { fontSize: 13, color: this.C.ink3, ...extra } }, t); }
+  card(extra) { return { background: this.C.s1, border: `1px solid ${this.C.line}`, borderRadius: 14, boxSizing: 'border-box', minWidth: 0, ...extra }; }
+  cardHead(title, sub, right) {
+    const C = this.C;
+    return h('div', { key: 'ch', style: { display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 16 } },
+      h('div', { style: { minWidth: 0 } }, h('div', { style: { fontSize: 15, fontWeight: 600, letterSpacing: '-.005em' } }, title), sub ? h('div', { style: { marginTop: 4, fontSize: 13, color: C.ink3, textWrap: 'pretty' } }, sub) : null),
+      right || null);
+  }
+  seg(opts, val, on, key) {
+    const C = this.C;
+    return h('div', { key: key || 'seg', role: 'tablist', style: { display: 'inline-flex', padding: 3, gap: 2, background: C.bg, border: `1px solid ${C.line}`, borderRadius: 9, flex: 'none' } },
+      opts.map(o => { const a = o.k === val, dis = !!o.dis;
+        return h('button', { key: o.k, role: 'tab', 'aria-selected': a, disabled: dis, onClick: () => { if (!dis) on(o.k); }, className: a || dis ? '' : 'mt-sg',
+          style: { border: 'none', borderRadius: 6, padding: '5px 11px', fontSize: 13, fontWeight: 500, cursor: dis ? 'not-allowed' : 'pointer', background: a ? C.s3 : 'transparent', color: a ? C.ink : dis ? 'rgba(236,237,239,.25)' : C.ink2, boxShadow: a ? '0 1px 2px rgba(0,0,0,.4), inset 0 0 0 1px rgba(255,255,255,.07)' : 'none', transition: 'background .2s, color .2s' } }, o.t); }));
+  }
+  stepper(label, onPrev, onNext) {
+    const C = this.C, btn = (dir, fn) => h('button', { key: dir, disabled: !fn, onClick: fn || undefined, className: fn ? 'mt-btn' : '', 'aria-label': dir === 'p' ? 'Anterior' : 'Següent',
+      style: { width: 32, height: 32, display: 'flex', alignItems: 'center', justifyContent: 'center', border: `1px solid ${C.line2}`, borderRadius: 8, background: 'transparent', color: fn ? C.ink2 : 'rgba(236,237,239,.2)', cursor: fn ? 'pointer' : 'default', padding: 0 } }, this.icon(dir === 'p' ? 'left' : 'right', 16));
+    return h('div', { key: 'stp', style: { display: 'flex', alignItems: 'center', gap: 10 } }, btn('p', onPrev), h('span', { style: { minWidth: 170, textAlign: 'center', fontSize: 14, fontWeight: 500 } }, label), btn('n', onNext));
+  }
+  coachGlyph(c, x, y, r, key) {
+    if (c == null) return null;
+    if (c === 'res') return h('line', { key, x1: x - r, x2: x + r, y1: y, y2: y, stroke: this.C.ink3, strokeWidth: 1.5, strokeLinecap: 'round' });
+    const col = this.tone(this.COACH[c].h);
+    if (c === 'be') return h('circle', { key, cx: x, cy: y, r, fill: col });
+    if (c === 'reg') return h('g', { key }, h('circle', { cx: x, cy: y, r: r - .75, fill: 'none', stroke: col, strokeWidth: 1.5 }), h('path', { d: `M${x},${y - r + .75}A${r - .75},${r - .75} 0 0 0 ${x},${y + r - .75}Z`, fill: col }));
+    return h('circle', { key, cx: x, cy: y, r: r - .85, fill: 'none', stroke: col, strokeWidth: 1.7 });
+  }
+  coachIcon(c, size) { const s = size || 12; return h('svg', { width: s, height: s, style: { display: 'block', flex: 'none', overflow: 'visible' } }, c == null ? h('circle', { cx: s / 2, cy: s / 2, r: 1.5, fill: 'rgba(236,237,239,.25)' }) : this.coachGlyph(c, s / 2, s / 2, s / 2 - 1)); }
+  lgItem(key, sw, t) { return h('span', { key, style: { display: 'inline-flex', alignItems: 'center', gap: 7, whiteSpace: 'nowrap' } }, sw, t); }
+  legendEl(items) { return h('div', { key: 'lg', style: { display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: '8px 18px', marginTop: 14, fontSize: 12, color: this.C.ink3 } }, items); }
+  lgBand() { return this.lgItem('lb', h('span', { style: { width: 16, height: 10, background: 'rgba(255,255,255,.09)', borderTop: '1px solid rgba(255,255,255,.22)', borderBottom: '1px solid rgba(255,255,255,.22)', boxSizing: 'border-box' } }), 'La teva franja'); }
+  lgMean() { return this.lgItem('lm', h('span', { style: { width: 16, borderTop: '1px dashed rgba(255,255,255,.4)' } }), 'La teva mitjana'); }
+  lgStatus() { return [['ok', 'Dins la franja', this.LV.ok], ['mid', 'Al límit', this.LV.mid], ['bad', 'Per vigilar', this.LV.bad]].map(([k, t, x]) => this.lgItem('ls' + k, this.dot(this.tone(x), 8), t)); }
+  lgCoach() { return h('span', { key: 'lc', style: { display: 'inline-flex', alignItems: 'center', gap: 12, flexWrap: 'wrap' } }, h('span', null, 'Entrenador:'), ['be', 'reg', 'mal', 'res'].map(c => this.lgItem('c' + c, this.coachIcon(c, 11), this.COACH[c].t))); }
+  focusN() { const s = this.state; return s.hoverF != null ? s.hoverF : s.pinF; }
+  // Dies consecutius agrupats en trams [inici, fi] (en posicions del gràfic), per marcar només els dies que toca.
+  dayRuns(days, idx) { const js = days.map(i => idx.indexOf(i)).filter(j => j >= 0).sort((x, y) => x - y), out = []; js.forEach(j => { const r = out[out.length - 1]; if (r && j === r[1] + 1) r[1] = j; else out.push([j, j]); }); return out; }
+  geom() { const vw = this.state.vw, avail = Math.max(640, vw - 76), pad = avail > 1100 ? 40 : 28, cw = Math.min(1280, avail - pad * 2); return { pad, cw, cols: cw >= 880 ? 4 : 2, stack: cw < 900 }; }
+  grid2(a, b, ratio, key) { const g = this.geom(); return h('div', { key: key || 'g2', style: { display: 'grid', gridTemplateColumns: g.stack ? 'minmax(0,1fr)' : ratio, gap: 16, alignItems: 'stretch' } }, a, b); }
+  stack(items) { return items.filter(Boolean).map((el, i) => h('div', { key: 's' + i, className: 'mt-in', style: { animationDelay: `${i * 55}ms`, marginTop: i > 1 ? 16 : 0 } }, el)); }
+  headEl(title, sub, right) {
+    const C = this.C;
+    return h('header', { style: { display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', gap: 24, padding: '34px 0 22px', flexWrap: 'wrap' } },
+      h('div', null, h('h1', { style: { margin: 0, fontSize: 28, fontWeight: 600, letterSpacing: '-.02em', lineHeight: 1.1 } }, title), sub ? h('div', { style: { marginTop: 7, fontSize: 14, color: C.ink2 } }, sub) : null),
+      right ? h('div', { style: { display: 'flex', alignItems: 'center', gap: 12 } }, right) : null);
+  }
+  emptyEl(title, text) {
+    const C = this.C;
+    return h('div', { style: this.card({ padding: '28px 32px', borderStyle: 'dashed', borderColor: 'rgba(255,255,255,.14)', background: 'transparent' }) },
+      h('div', { style: { fontSize: 20, fontWeight: 600, letterSpacing: '-.01em' } }, title),
+      h('p', { style: { margin: '10px 0 0', maxWidth: 620, fontSize: 15, lineHeight: 1.55, color: C.ink2, textWrap: 'pretty' } }, text),
+      h('div', { style: { marginTop: 22, display: 'flex', flexDirection: 'column', gap: 10 } }, [86, 70, 78].map((w, i) => h('div', { key: i, style: { height: 8, width: `${w}%`, maxWidth: 560, borderRadius: 4, background: 'rgba(255,255,255,.05)' } }))));
+  }
+
+  // ── Components animats ───────────────────────────────────────────────
+  Num = p => {
+    const v = useTween(p.v == null ? null : p.v, p.dur || 900, p.init), hh = v == null ? null : this.hOf(p.k, v, p.band);
+    return h('span', { style: { color: v == null ? this.C.ink3 : hh == null ? this.C.ink : this.tone(hh) } }, this.fmtV(p.k, v == null ? null : this.roundM(p.k, v)));
+  };
+  NumS = p => { const v = useTween(p.v, 900, p.init); return h('span', { style: { color: this.sTone(v, p.min, p.max, p.inv) } }, String(Math.round(v))); };
+  // Posició d'avui dins la franja personal (on cau el valor respecte al teu normal).
+  Bullet = p => {
+    const C = this.C, { k, v, band, ring } = p, b = band ? band[k] : null;
+    const pos = useTween(v == null ? null : v, 1000, b ? b.mean : undefined);
+    if (!b) return h('div', null, h('div', { style: { display: 'flex', gap: 3 } }, Array.from({ length: 14 }, (_, j) => h('span', { key: j, style: { flex: 1, height: 4, borderRadius: 2, background: j < 5 ? C.ink2 : 'rgba(255,255,255,.08)' } }))), h('div', { style: { marginTop: 8, fontSize: 11.5, color: C.ink3 } }, 'Franja personal · 5 de 14 dies'));
+    const half = (b.hi - b.lo) / 2, lo = k === 'estat' ? 1 : b.mean - 3.2 * half, hi = k === 'estat' ? 5 : b.mean + 3.2 * half;
+    const pct = x => `${Math.max(0, Math.min(1, (x - lo) / (hi - lo))) * 100}%`;
+    const edge = k === 'estat' ? [[1, '1', 'translateX(0)'], [5, '5', 'translateX(-100%)']] : [[b.lo, this.fmtV(k, b.lo), 'translateX(-50%)'], [b.hi, this.fmtV(k, b.hi), 'translateX(-50%)']];
+    return h('div', null,
+      h('div', { style: { position: 'relative', height: 14 } },
+        h('span', { style: { position: 'absolute', left: 0, right: 0, top: 5, height: 4, borderRadius: 2, background: 'rgba(255,255,255,.07)' } }),
+        h('span', { style: { position: 'absolute', left: pct(b.lo), width: `calc(${pct(b.hi)} - ${pct(b.lo)})`, top: 3, height: 8, borderRadius: 3, background: 'rgba(255,255,255,.17)' } }),
+        pos != null ? h('span', { style: { position: 'absolute', left: pct(pos), top: 0, width: 14, height: 14, marginLeft: -7, borderRadius: '50%', background: this.toneOf(k, pos, band), boxShadow: `0 0 0 2px ${ring || C.s1}` } }) : null),
+      h('div', { style: { position: 'relative', height: 13, marginTop: 5, fontSize: 11, color: C.ink3, fontVariantNumeric: 'tabular-nums' } },
+        edge.map(([x, t, tr], j) => h('span', { key: j, style: { position: 'absolute', left: pct(x), transform: tr, whiteSpace: 'nowrap' } }, t))));
+  };
+  // Veredicte del dia: on cau avui entre Recupera, Modera i A fons.
+  StateScale = p => {
+    const C = this.C, pp = p.p, none = pp == null, target = none ? (p.yp != null ? p.yp : .5) : pp;
+    const pos = useTween(target, 1100, .04);
+    const lab = { fontSize: 13, color: C.ink3 }, word = { marginTop: 10, fontSize: 40, fontWeight: 600, letterSpacing: '-.025em', lineHeight: 1 }, line = { marginTop: 10, fontSize: 15, lineHeight: 1.45, color: C.ink2, textWrap: 'pretty' };
+    if (p.sc === 'nou') return h('div', null, h('div', { style: lab }, "Estat d'avui"), h('div', { style: word }, 'Calculant'), h('div', { style: line }, 'Amb 14 dies de dades podrem comparar cada dia amb el teu normal.'),
+      h('div', { style: { marginTop: 26, display: 'flex', gap: 4 } }, Array.from({ length: 14 }, (_, j) => h('span', { key: j, style: { flex: 1, height: 8, borderRadius: 3, background: j < 5 ? C.ink2 : 'rgba(255,255,255,.08)', transformOrigin: 'left', animation: j < 5 ? `mtGrowX .4s ${(.2 + j * .08).toFixed(2)}s both` : 'none' } }))),
+      h('div', { style: { marginTop: 10, fontSize: 12, color: C.ink3 } }, '5 de 14 dies'));
+    const st = this.stateOf(pp), zones = [['rec', 30, this.LV.bad, 'Recupera'], ['mod', 25, this.LV.mid, 'Modera'], ['fons', 45, this.LV.ok, 'A fons']];
+    return h('div', null,
+      h('div', { style: lab }, "Estat d'avui"),
+      h('div', { key: 'w' + (st || 'x'), style: { ...word, animation: 'mtIn .5s .1s both', color: none ? C.ink2 : C.ink } }, none ? 'Pendent' : this.ST[st].w),
+      h('div', { style: line }, none ? "Encara no has fet el registre d'avui. Ahir vas estar A fons." : this.ST[st].line),
+      h('div', { style: { position: 'relative', marginTop: 28 } },
+        h('div', { style: { display: 'flex', gap: 4 } }, zones.map(z => h('span', { key: z[0], style: { flex: z[1], height: 8, borderRadius: 4, background: st === z[0] ? this.tone(z[2]) : 'rgba(255,255,255,.08)', transition: 'background .5s' } }))),
+        (p.hist || []).map((x, j) => (x == null ? null : h('span', { key: 'h' + j, title: 'Dies anteriors', style: { position: 'absolute', left: `${x * 100}%`, top: 16, width: 4, height: 4, marginLeft: -2, borderRadius: '50%', background: 'rgba(236,237,239,.3)' } }))),
+        h('span', { style: { position: 'absolute', left: `${pos * 100}%`, top: -5, width: 18, height: 18, marginLeft: -9, borderRadius: '50%', boxSizing: 'border-box', background: none ? C.s1 : this.tone(this.dayH(pos)), border: none ? `2px dashed ${C.ink3}` : 'none', boxShadow: `0 0 0 3px #141519` } })),
+      h('div', { style: { display: 'flex', gap: 4, marginTop: 26 } }, zones.map(z => h('span', { key: z[0], style: { flex: z[1], fontSize: 12, color: st === z[0] ? C.ink : C.ink3, fontWeight: st === z[0] ? 600 : 400 } }, z[3]))),
+      h('div', { style: { marginTop: 14, fontSize: 12, color: C.ink3, display: 'flex', alignItems: 'center', gap: 7 } }, h('span', { style: { width: 4, height: 4, borderRadius: '50%', background: 'rgba(236,237,239,.35)' } }), none ? 'Sis dies anteriors · el cercle buit és ahir' : 'Els sis dies anteriors'));
+  };
+  // Fila de qüestionari: valor anterior (cercle buit) → valor actual (cercle ple), animat.
+  DumbRow = p => {
+    const C = this.C, pos = useTween(p.v, 900, p.prev != null ? p.prev : p.v), span = p.max - p.min;
+    const pct = x => `${((x - p.min) / span) * 100}%`, col = this.sTone(pos, p.min, p.max, p.inv), d = p.prev != null ? p.v - p.prev : null;
+    const ticks = Array.from({ length: span + 1 }, (_, j) => p.min + j);
+    const a = p.prev != null ? Math.min(p.prev, pos) : pos, b = p.prev != null ? Math.max(p.prev, pos) : pos;
+    return h('div', { className: 'mt-row', style: { display: 'grid', gridTemplateColumns: `${p.labelW || 190}px minmax(0,1fr) 84px`, alignItems: 'center', gap: 22, padding: '11px 12px', margin: '0 -12px', borderRadius: 10, background: p.on ? 'rgba(255,255,255,.045)' : 'transparent' } },
+      h('div', { style: { display: 'flex', alignItems: 'center', gap: 10, minWidth: 0 } }, (p.badges || []).map(n => this.badge(n, p.focus === n, 18)),
+        h('div', { style: { minWidth: 0 } }, h('div', { style: { fontSize: 14, lineHeight: 1.35 } }, p.label), p.hint ? h('div', { style: { marginTop: 2, fontSize: 12, color: C.ink3 } }, p.hint) : null)),
+      h('div', { style: { position: 'relative', height: 26 } },
+        ticks.map(t => h('span', { key: t, style: { position: 'absolute', left: pct(t), top: 5, bottom: 5, width: 1, background: C.grid } })),
+        h('span', { style: { position: 'absolute', left: 0, right: 0, top: 12, height: 2, borderRadius: 1, background: 'rgba(255,255,255,.06)' } }),
+        p.prev != null ? h('span', { style: { position: 'absolute', left: pct(a), width: `calc(${pct(b)} - ${pct(a)})`, top: 12, height: 2, background: 'rgba(255,255,255,.3)' } }) : null,
+        p.prev != null ? h('span', { style: { position: 'absolute', left: pct(p.prev), top: 7, width: 12, height: 12, marginLeft: -6, borderRadius: '50%', boxSizing: 'border-box', border: `1.5px solid ${C.ink3}`, background: C.s1 } }) : null,
+        h('span', { style: { position: 'absolute', left: pct(pos), top: 6, width: 14, height: 14, marginLeft: -7, borderRadius: '50%', background: col, boxShadow: `0 0 0 2px ${C.s1}` } })),
+      h('div', { style: { textAlign: 'right', whiteSpace: 'nowrap' } },
+        h('span', { style: { fontSize: 17, fontWeight: 600, color: col } }, String(p.v)), h('span', { style: { fontSize: 12, color: C.ink3 } }, ` /${p.max}`),
+        h('div', { style: { marginTop: 1, fontSize: 12, color: C.ink3 } }, d == null ? 'primer registre' : d === 0 ? 'igual' : `${d > 0 ? '+' : '−'}${Math.abs(d)} vs anterior`)));
+  };
+
+  // ── Gràfics ─────────────────────────────────────────────────────────
+  spark(k, vals, band) {
+    const W = 84, H = 30, pd = 4, n = vals.length, b = band ? band[k] : null, pres = vals.filter(v => v != null);
+    if (!pres.length) return h('span', { style: { width: W, flex: 'none' } });
+    let lo = Math.min(...pres), hi = Math.max(...pres);
+    if (b) { const half = (b.hi - b.lo) / 2; lo = Math.min(lo, b.mean - 2 * half); hi = Math.max(hi, b.mean + 2 * half); } else { const sp = (hi - lo) || 1; lo -= sp * .5; hi += sp * .5; }
+    const X = i => pd + i * (W - 2 * pd) / (n - 1), Y = v => pd + (1 - (v - lo) / (hi - lo)) * (H - 2 * pd), kids = [];
+    if (b) kids.push(h('rect', { key: 'bd', x: 0, y: Y(b.hi), width: W, height: Math.max(1, Y(b.lo) - Y(b.hi)), rx: 2, fill: 'rgba(255,255,255,.06)' }));
+    const runs = []; let cur = [];
+    vals.forEach((v, i) => { if (v == null) { if (cur.length) runs.push(cur); cur = []; } else cur.push([X(i), Y(v)]); }); if (cur.length) runs.push(cur);
+    runs.forEach((r, ri) => { if (r.length > 1) kids.push(h('path', { key: 'l' + ri, d: 'M' + r.map(q => `${q[0].toFixed(1)},${q[1].toFixed(1)}`).join('L'), fill: 'none', stroke: 'rgba(236,237,239,.45)', strokeWidth: 1.4, strokeLinejoin: 'round', strokeLinecap: 'round', pathLength: 1, style: { strokeDasharray: 1, animation: 'mtDraw .8s cubic-bezier(.4,0,.2,1) .3s both' } })); });
+    const lv = vals[n - 1];
+    if (lv != null) kids.push(h('circle', { key: 'e', cx: X(n - 1), cy: Y(lv), r: 3.2, fill: this.toneOf(k, lv, band), style: { animation: 'mtFade .4s 1s both' } }));
+    return h('svg', { width: W, height: H, style: { display: 'block', flex: 'none', overflow: 'visible' } }, kids);
+  }
+  // Gràfic principal del dia: franja personal, cada dia amb el seu to, carril de l'entrenador i troballes marcades.
+  MainChart = p => {
+    const C = this.C, [ref, W] = useWidth(), [hov, setHov] = React.useState(null);
+    const { k, vals, coach, idx, band, marks, focus } = p, meta = this.META[k], form = meta.form, n = vals.length, b = band ? band[k] : null;
+    const padL = 88, padR = 56, padT = 30, ph = 220, laneT = padT + ph + 16, laneH = 22, axY = laneT + laneH + 22, H = axY + 8;
+    const iw = Math.max(40, W - padL - padR), slot = iw / n, X = j => padL + (j + .5) * slot;
+    const pres = vals.filter(v => v != null);
+    let lo, hi, ticks;
+    if (form === 'bars') { lo = 0; hi = 10; ticks = [0, 2, 4, 6, 8, 10]; }
+    else if (form === 'cells') { lo = .5; hi = 5.5; ticks = [1, 2, 3, 4, 5]; }
+    else {
+      // Sense franja encara, l'eix es dimensiona amb una variació típica perquè 1 bpm no sembli un salt.
+      const half = ((b || this.DEF[k]).hi - (b || this.DEF[k]).lo) / 2, mid = b ? b.mean : pres.length ? this.sum(pres) / pres.length : 0, pool = pres.concat([mid - 2.6 * half, mid + 2.6 * half]);
+      lo = Math.min(...pool); hi = Math.max(...pool); const stp = niceStep(hi - lo, 4); lo = Math.floor(lo / stp) * stp; hi = Math.ceil(hi / stp) * stp; if (hi === lo) hi = lo + stp;
+      ticks = []; for (let t = lo; t <= hi + 1e-9; t += stp) ticks.push(+t.toFixed(4));
+    }
+    const Y = v => padT + (1 - (v - lo) / (hi - lo)) * ph;
+    const tys = useTween(vals.map(v => (v == null ? null : Y(v))), 650);
+    const tc = v => (v == null ? C.ink3 : b ? this.toneOf(k, v, band) : C.ink2), lab = { fontSize: 11, fontVariantNumeric: 'tabular-nums' }, kids = [], defs = [];
+    if (form !== 'cells') ticks.forEach(t => kids.push(h('line', { key: 'g' + t, x1: padL, x2: padL + iw, y1: Y(t), y2: Y(t), stroke: C.grid })));
+    ticks.forEach(t => kids.push(h('text', { key: 'gt' + t, x: padL - 12, y: Y(t) + 4, textAnchor: 'end', fill: C.ink3, style: lab }, form === 'bars' ? `${t} h` : String(t))));
+    if (n > 7) idx.forEach((i, j) => { if (j && this.day(i).wd === 0) kids.push(h('line', { key: 'wk' + j, x1: padL + j * slot, x2: padL + j * slot, y1: padT, y2: padT + ph, stroke: 'rgba(255,255,255,.06)' })); });
+    let bandLines = [];
+    if (b) {
+      const y1 = Y(Math.min(hi, b.hi)), y2 = Y(Math.max(lo, b.lo));
+      kids.push(h('rect', { key: 'bd', x: padL, y: y1, width: iw, height: Math.max(1, y2 - y1), fill: 'rgba(255,255,255,.045)', style: { animation: 'mtFade .6s both' } }));
+      bandLines = [h('line', { key: 'bh', x1: padL, x2: padL + iw, y1, y2: y1, stroke: 'rgba(255,255,255,.15)' }), h('line', { key: 'bl', x1: padL, x2: padL + iw, y1: y2, y2, stroke: 'rgba(255,255,255,.15)' })];
+      if (form !== 'cells') bandLines.push(h('line', { key: 'bm', x1: padL, x2: padL + iw, y1: Y(b.mean), y2: Y(b.mean), stroke: 'rgba(255,255,255,.3)', strokeDasharray: '3 4' }),
+        h('text', { key: 'bht', x: padL + iw + 10, y: y1 + 4, fill: C.ink3, style: lab }, this.fmtV(k, b.hi)), h('text', { key: 'blt', x: padL + iw + 10, y: y2 + 4, fill: C.ink3, style: lab }, this.fmtV(k, b.lo)));
+      if (form === 'line') { kids.push(...bandLines); bandLines = []; }
+    } else if (pres.length) kids.push(h('text', { key: 'calc', x: padL + 4, y: padT - 12, fill: C.ink3, style: { fontSize: 11.5 } }, 'Franja personal en càlcul · 5 de 14 dies'));
+    // Troballes de l'informe: columna ressaltada i número, per veure a quins dies es refereixen.
+    marks.forEach(m => this.dayRuns(m.days, idx).forEach(([j0, j1], ri, all) => {
+      const dim = focus != null && focus !== m.n, on = focus === m.n, lastRun = ri === all.length - 1;
+      const x0 = padL + j0 * slot + 2, x1 = padL + (j1 + 1) * slot - 2;
+      if (m.lane) {
+        kids.push(h('rect', { key: `mh${m.n}-${ri}`, x: x0, y: laneT - 4, width: x1 - x0, height: laneH + 8, rx: 6, fill: on ? 'rgba(255,255,255,.09)' : 'rgba(255,255,255,.045)', opacity: dim ? .4 : 1, style: { transition: 'fill .2s, opacity .2s' } }));
+        if (lastRun) kids.push(h('g', { key: 'mb' + m.n, opacity: dim ? .35 : 1, style: { transition: 'opacity .2s' } }, h('circle', { cx: x1 + 12, cy: laneT + laneH / 2, r: 8, fill: C.ink }), h('text', { x: x1 + 12, y: laneT + laneH / 2 + 3.5, textAnchor: 'middle', fill: C.bg, style: { fontSize: 10, fontWeight: 700 } }, String(m.n))));
+        return;
+      }
+      const by = padT - 15;
+      kids.push(h('rect', { key: `mh${m.n}-${ri}`, x: x0, y: padT, width: x1 - x0, height: ph, rx: 6, fill: on ? 'rgba(255,255,255,.075)' : 'rgba(255,255,255,.035)', opacity: dim ? .4 : 1, style: { transition: 'fill .2s, opacity .2s', animation: 'mtFade .5s .6s both' } }));
+      if (j1 > j0) kids.push(h('line', { key: `ml${m.n}-${ri}`, x1: X(j0), x2: X(j1), y1: by, y2: by, stroke: C.ink, strokeOpacity: dim ? .2 : .5 }));
+      if (lastRun) kids.push(h('g', { key: 'mb' + m.n, opacity: dim ? .35 : 1, style: { transition: 'opacity .2s', animation: 'mtFade .4s .8s both' } }, h('circle', { cx: X(j1), cy: by, r: 8, fill: C.ink }), h('text', { x: X(j1), y: by + 3.5, textAnchor: 'middle', fill: C.bg, style: { fontSize: 10, fontWeight: 700 } }, String(m.n))));
+    }));
+    vals.forEach((v, j) => { if (v === null) kids.push(h('line', { key: 'nd' + j, x1: X(j), x2: X(j), y1: padT + ph * .3, y2: padT + ph, stroke: 'rgba(236,237,239,.22)', strokeDasharray: '2 4' })); });
+    if (hov != null) kids.push(h('line', { key: 'cur', x1: X(hov), x2: X(hov), y1: padT - 4, y2: laneT + laneH, stroke: 'rgba(236,237,239,.3)' }));
+    if (form === 'line') {
+      const runs = []; let cur = [];
+      tys.forEach((y, j) => { if (y == null || vals[j] == null) { if (cur.length) runs.push(cur); cur = []; } else cur.push([X(j), y]); }); if (cur.length) runs.push(cur);
+      defs.push(h('linearGradient', { key: 'ag', id: 'mtArea', x1: 0, y1: 0, x2: 0, y2: 1 }, h('stop', { offset: 0, stopColor: '#fff', stopOpacity: .08 }), h('stop', { offset: 1, stopColor: '#fff', stopOpacity: 0 })));
+      runs.forEach((r, ri) => {
+        if (r.length < 2) return;
+        const d = 'M' + r.map(q => `${q[0].toFixed(1)},${q[1].toFixed(1)}`).join('L');
+        kids.push(h('path', { key: 'a' + ri, d: `${d}L${r[r.length - 1][0].toFixed(1)},${padT + ph}L${r[0][0].toFixed(1)},${padT + ph}Z`, fill: 'url(#mtArea)', style: { animation: 'mtFade .7s .35s both' } }));
+        kids.push(h('path', { key: 'l' + ri, d, fill: 'none', stroke: 'rgba(236,237,239,.8)', strokeWidth: 2, strokeLinejoin: 'round', strokeLinecap: 'round', pathLength: 1, style: { strokeDasharray: 1, animation: 'mtDraw .9s cubic-bezier(.4,0,.2,1) both' } }));
+      });
+      tys.forEach((y, j) => { const v = vals[j]; if (v == null || y == null) return; const last = j === n - 1, r = hov === j ? 6.5 : last ? 5.5 : n > 7 ? 3.5 : 4.5;
+        if (last) kids.push(h('circle', { key: 'pr', cx: X(j), cy: y, r: 11, fill: 'none', stroke: tc(v), strokeOpacity: .35, style: { animation: 'mtFade .5s 1s both' } }));
+        kids.push(h('circle', { key: 'p' + j, cx: X(j), cy: y, r, fill: tc(v), stroke: C.s1, strokeWidth: 2, style: { transformBox: 'fill-box', transformOrigin: 'center', animation: `mtPop .4s cubic-bezier(.3,.7,.2,1.3) ${(.25 + .7 * j / n).toFixed(2)}s both`, transition: 'r .15s' } }));
+      });
+    } else if (form === 'bars') {
+      const bw = Math.min(24, slot * .56), base = Y(0), rr = Math.min(4, bw / 2);
+      vals.forEach((v, j) => { if (v == null) return; const x = X(j) - bw / 2, y = Y(v);
+        kids.push(h('path', { key: 'b' + j, d: `M${x},${base}V${y + rr}Q${x},${y} ${x + rr},${y}H${x + bw - rr}Q${x + bw},${y} ${x + bw},${y + rr}V${base}Z`, fill: tc(v), opacity: hov != null && hov !== j ? .45 : 1,
+          style: { transformBox: 'fill-box', transformOrigin: 'bottom', animation: `mtGrowY .6s cubic-bezier(.2,.7,.2,1) ${j * (n > 7 ? 14 : 45)}ms both`, transition: 'opacity .15s' } })); });
+      const lj = n - 1, lv = vals[lj];
+      if (lv != null && n <= 7) kids.push(h('text', { key: 'cap', x: X(lj), y: Y(lv) - 8, textAnchor: 'middle', fill: C.ink, style: { fontSize: 12, fontWeight: 600, animation: 'mtFade .4s .7s both' } }, this.fmtV(k, lv)));
+    } else {
+      const cw = Math.min(22, slot * .6);
+      vals.forEach((v, j) => { if (v === undefined) return; for (let q = 1; q <= 5; q++) { const on = v != null && q <= v, y0 = Y(q + .5) + 2, y1 = Y(q - .5) - 2;
+        kids.push(h('rect', { key: `c${j}-${q}`, x: X(j) - cw / 2, y: y0, width: cw, height: y1 - y0, rx: 3, fill: on ? tc(v) : 'rgba(255,255,255,.045)', opacity: on && hov != null && hov !== j ? .45 : 1,
+          style: on ? { animation: `mtFade .35s ${(.1 + j * (n > 7 ? .015 : .05) + q * .05).toFixed(2)}s both`, transition: 'opacity .15s' } : { transition: 'opacity .15s' } })); } });
+    }
+    kids.push(...bandLines);
+    kids.push(h('text', { key: 'cl', x: padL - 12, y: laneT + laneH / 2 + 4, textAnchor: 'end', fill: C.ink3, style: { fontSize: 11 } }, 'Entrenador'));
+    kids.push(h('line', { key: 'lnl', x1: padL, x2: padL + iw, y1: laneT - 8, y2: laneT - 8, stroke: C.line }));
+    coach.forEach((c, j) => { const g = this.coachGlyph(c, X(j), laneT + laneH / 2, n > 7 ? 4 : 5, 'cg' + j); if (g) kids.push(h('g', { key: 'cgw' + j, style: { animation: `mtFade .3s ${(.4 + j * .02).toFixed(2)}s both` } }, g)); });
+    idx.forEach((i, j) => { const d = this.day(i), today = i === 41, show = n <= 7 || (d.wd === 0 && j < n - 2) || today; if (!show) return;
+      kids.push(h('text', { key: 'x' + j, x: X(j), y: axY, textAnchor: 'middle', fill: today ? C.ink : C.ink3, style: { fontSize: 11, fontWeight: today ? 600 : 400 } }, today ? 'Avui' : `${this.WD[d.wd]} ${d.n}`)); });
+    kids.push(h('rect', { key: 'ov', x: padL, y: 0, width: iw, height: H, fill: 'transparent', style: { cursor: 'crosshair' },
+      onPointerMove: e => { const r = e.currentTarget.getBoundingClientRect(), j = Math.max(0, Math.min(n - 1, Math.floor((e.clientX - r.left) / r.width * n))), nj = vals[j] === undefined ? null : j; if (nj !== hov) setHov(nj); },
+      onPointerLeave: () => setHov(null) }));
+    let tip = null;
+    if (hov != null && W) {
+      const i = idx[hov], v = vals[hov], st = this.status(k, v, band), tipW = 214, x = X(hov), left = x + 18 + tipW > W ? x - 18 - tipW : x + 18;
+      tip = h('div', { key: 'tip', style: { position: 'absolute', left, top: padT - 4, width: tipW, boxSizing: 'border-box', pointerEvents: 'none', padding: '10px 12px', background: 'rgba(27,28,32,.97)', border: `1px solid ${C.line2}`, borderRadius: 10, boxShadow: '0 12px 32px rgba(0,0,0,.5)', fontSize: 12, color: C.ink2, zIndex: 2 } },
+        h('div', { style: { color: C.ink3 } }, i === 41 ? `Avui · ${this.dLong(i)}` : this.cap(this.dLong(i))),
+        h('div', { style: { marginTop: 5, display: 'flex', alignItems: 'baseline', gap: 5 } }, h('span', { style: { fontSize: 20, fontWeight: 600, color: v == null ? C.ink3 : C.ink } }, this.fmtV(k, v)), v != null ? h('span', { style: { color: C.ink3 } }, meta.unit) : null),
+        h('div', { style: { marginTop: 6, display: 'flex', alignItems: 'center', gap: 7 } }, this.dot(st.col, 7), st.label),
+        v != null && b ? h('div', { style: { marginTop: 3, color: C.ink3 } }, `${this.delta(k, v, b.mean)} vs la teva mitjana`) : null,
+        h('div', { style: { marginTop: 8, paddingTop: 8, borderTop: `1px solid ${C.line}`, display: 'flex', alignItems: 'center', gap: 7 } }, this.coachIcon(coach[hov], 11), `Entrenador: ${this.coachTxt(coach[hov])}`));
+    }
+    return h('div', { ref, style: { position: 'relative', height: H } }, W ? [h('svg', { key: 'svg', width: W, height: H, viewBox: `0 0 ${W} ${H}`, style: { display: 'block', overflow: 'visible', fontFamily: this.SANS } }, h('defs', null, defs), kids), tip] : null);
+  };
+  // Totes les dades diàries en paral·lel, amb una sola línia de lectura que recorre tots els panells.
+  Multi = p => {
+    const C = this.C, [ref, W] = useWidth(), [hov, setHov] = React.useState(null);
+    const { D, idx, marks, focus } = p, n = idx.length, K = this.KEYS, band = D.band;
+    const Lw = 190, padR = 18, iw = Math.max(40, W - Lw - padR), slot = iw / n, X = j => Lw + (j + .5) * slot;
+    const top = 40, PH = 88, LH = 38, laneY = top + K.length * PH, coachY = laneY + LH, axY = coachY + LH + 20, H = axY + 8;
+    let lastJ = n - 1; while (lastJ > 0 && K.every(k => D.vals[k][idx[lastJ]] == null)) lastJ--;
+    const rj = hov != null ? hov : lastJ, ri = idx[rj], kids = [];
+    const markIn = (k, y0, hh) => marks.filter(m => m.k === k).forEach(m => this.dayRuns(m.days, idx).forEach(([j0, j1], ri, all) => {
+      const dim = focus != null && focus !== m.n, on = focus === m.n, x0 = Lw + j0 * slot + 1, x1 = Lw + (j1 + 1) * slot - 1;
+      kids.push(h('rect', { key: `mk${k}${m.n}-${ri}`, x: x0, y: y0 + 3, width: x1 - x0, height: hh - 6, rx: 6, fill: on ? 'rgba(255,255,255,.085)' : 'rgba(255,255,255,.04)', opacity: dim ? .4 : 1, style: { transition: 'fill .2s, opacity .2s' } }));
+      if (ri === all.length - 1) kids.push(h('g', { key: `mb${k}${m.n}`, opacity: dim ? .35 : 1, style: { transition: 'opacity .2s' } }, h('circle', { cx: x1 + 1, cy: y0 + 4, r: 7.5, fill: C.ink }), h('text', { x: x1 + 1, y: y0 + 7.5, textAnchor: 'middle', fill: C.bg, style: { fontSize: 9.5, fontWeight: 700 } }, String(m.n))));
+    }));
+    kids.push(h('text', { key: 'date', x: 0, y: 18, fill: C.ink, style: { fontSize: 13, fontWeight: 600 } }, ri === 41 ? `Avui · ${this.dLong(ri)}` : this.cap(this.dLong(ri))));
+    kids.push(h('text', { key: 'hint', x: W - padR, y: 18, textAnchor: 'end', fill: C.ink3, style: { fontSize: 12 } }, hov == null ? 'Passa el ratolí pel gràfic per veure cada dia' : ''));
+    K.forEach((k, r) => {
+      // En paral·lel, el son també va en línia: amb barres des de zero no es veurien les diferències en un panell tan baix.
+      const y0 = top + r * PH, meta = this.META[k], form = meta.form === 'bars' ? 'line' : meta.form, vals = idx.map(i => D.vals[k][i]), b = band ? band[k] : null, pres = vals.filter(v => v != null);
+      let lo, hi;
+      if (form === 'cells') { lo = .5; hi = 5.5; }
+      else { const half = ((b || this.DEF[k]).hi - (b || this.DEF[k]).lo) / 2, mid = b ? b.mean : pres.length ? this.sum(pres) / pres.length : 0, pool = pres.concat([mid - 2.4 * half, mid + 2.4 * half]); lo = Math.min(...pool); hi = Math.max(...pool); const pd = (hi - lo) * .08 || 1; lo -= pd; hi += pd; }
+      const pt = y0 + 14, pb = y0 + PH - 12, Y = v => pt + (1 - (v - lo) / (hi - lo)) * (pb - pt);
+      kids.push(h('line', { key: 'sep' + r, x1: 0, x2: W, y1: y0, y2: y0, stroke: C.line }));
+      if (b && form !== 'cells') { const a = Y(Math.min(hi, b.hi)), c = Y(Math.max(lo, b.lo)); kids.push(h('rect', { key: 'bd' + k, x: Lw, y: a, width: iw, height: Math.max(1, c - a), fill: 'rgba(255,255,255,.045)' })); }
+      markIn(k, y0, PH);
+      if (form === 'line') {
+        const runs = []; let cur = [];
+        vals.forEach((v, j) => { if (v == null) { if (cur.length) runs.push(cur); cur = []; } else cur.push([X(j), Y(v)]); }); if (cur.length) runs.push(cur);
+        runs.forEach((rr, q) => { if (rr.length > 1) kids.push(h('path', { key: `l${k}${q}`, d: 'M' + rr.map(z => `${z[0].toFixed(1)},${z[1].toFixed(1)}`).join('L'), fill: 'none', stroke: 'rgba(236,237,239,.7)', strokeWidth: 1.6, strokeLinejoin: 'round', strokeLinecap: 'round', pathLength: 1, style: { strokeDasharray: 1, animation: `mtDraw 1s cubic-bezier(.4,0,.2,1) ${(r * .08).toFixed(2)}s both` } })); });
+        vals.forEach((v, j) => { if (v == null) return; kids.push(h('circle', { key: `p${k}${j}`, cx: X(j), cy: Y(v), r: j === rj ? 5 : n > 28 ? 2.4 : n > 7 ? 3 : 4, fill: b ? this.toneOf(k, v, band) : C.ink2, stroke: C.s1, strokeWidth: 1.5, style: { animation: `mtFade .3s ${(.3 + .8 * j / n).toFixed(2)}s both`, transition: 'r .15s' } })); });
+      } else if (form === 'bars') {
+        const bw = Math.min(16, slot * .6);
+        vals.forEach((v, j) => { if (v == null) return; const y = Y(v); kids.push(h('rect', { key: `b${k}${j}`, x: X(j) - bw / 2, y, width: bw, height: pb - y, rx: Math.min(3, bw / 2), fill: b ? this.toneOf(k, v, band) : C.ink2, opacity: hov != null && hov !== j ? .45 : 1, style: { transformBox: 'fill-box', transformOrigin: 'bottom', animation: `mtGrowY .5s cubic-bezier(.2,.7,.2,1) ${(.1 + j * .012).toFixed(3)}s both`, transition: 'opacity .15s' } })); });
+      } else {
+        const cw = Math.min(14, slot * .62);
+        vals.forEach((v, j) => { if (v === undefined) return; for (let q = 1; q <= 5; q++) { const on = v != null && q <= v, a = Y(q + .5) + 1.5, c = Y(q - .5) - 1.5; kids.push(h('rect', { key: `c${k}${j}${q}`, x: X(j) - cw / 2, y: a, width: cw, height: c - a, rx: 2, fill: on ? (b ? this.toneOf(k, v, band) : C.ink2) : 'rgba(255,255,255,.04)', opacity: on && hov != null && hov !== j ? .45 : 1, style: { transition: 'opacity .15s' } })); } });
+      }
+      const v = D.vals[k][ri], st = this.status(k, v, band);
+      kids.push(h('text', { key: 'ln' + k, x: 0, y: y0 + 25, fill: C.ink2, style: { fontSize: 13, fontWeight: 500 } }, meta.name));
+      kids.push(h('text', { key: 'lv' + k, x: 0, y: y0 + 54, style: { fontSize: 22, fontWeight: 600 } }, h('tspan', { fill: v == null ? C.ink3 : st.col }, this.fmtV(k, v)), v != null ? h('tspan', { fill: C.ink3, dx: 5, style: { fontSize: 12, fontWeight: 400 } }, meta.unit) : null));
+      kids.push(h('text', { key: 'ls' + k, x: 0, y: y0 + 74, fill: C.ink3, style: { fontSize: 11.5 } }, st.label));
+    });
+    kids.push(h('line', { key: 'sepL', x1: 0, x2: W, y1: laneY, y2: laneY, stroke: C.line }));
+    markIn('state', laneY, LH);
+    idx.forEach((i, j) => { const pp = D.pos[i]; if (pp === undefined || D.vals.rhr[i] === undefined) return;
+      kids.push(h('rect', { key: 'st' + j, x: Lw + j * slot + 1.5, y: laneY + 11, width: Math.max(2, slot - 3), height: 16, rx: 3, fill: pp == null ? 'transparent' : this.tone(this.dayH(pp)), stroke: pp == null ? 'rgba(255,255,255,.18)' : 'none', strokeDasharray: pp == null ? '2 2' : null, opacity: hov != null && hov !== j ? .5 : 1, style: { transformBox: 'fill-box', transformOrigin: 'left', animation: `mtGrowX .35s ${(.2 + j * .015).toFixed(3)}s both`, transition: 'opacity .15s' } })); });
+    const sp = D.pos[ri], ss = this.stateOf(sp);
+    kids.push(h('text', { key: 'sl', x: 0, y: laneY + 24, fill: C.ink2, style: { fontSize: 13, fontWeight: 500 } }, 'Estat del dia'));
+    kids.push(h('text', { key: 'sv', x: Lw - 18, y: laneY + 24, textAnchor: 'end', fill: ss ? C.ink : C.ink3, style: { fontSize: 13, fontWeight: 600 } }, ss ? this.ST[ss].w : '—'));
+    kids.push(h('line', { key: 'sepC', x1: 0, x2: W, y1: coachY, y2: coachY, stroke: C.line }));
+    idx.forEach((i, j) => { const g = this.coachGlyph(D.coach[i], X(j), coachY + LH / 2, n > 28 ? 3.5 : 4.5, 'cg' + j); if (g) kids.push(g); });
+    kids.push(h('text', { key: 'cl', x: 0, y: coachY + 24, fill: C.ink2, style: { fontSize: 13, fontWeight: 500 } }, 'Entrenador'));
+    kids.push(h('text', { key: 'cv', x: Lw - 18, y: coachY + 24, textAnchor: 'end', fill: C.ink, style: { fontSize: 13, fontWeight: 600 } }, D.coach[ri] ? this.COACH[D.coach[ri]].t.replace('No li he dit res', 'Res') : '—'));
+    kids.push(h('line', { key: 'sepX', x1: 0, x2: W, y1: coachY + LH, y2: coachY + LH, stroke: C.line }));
+    idx.forEach((i, j) => { const d = this.day(i), today = i === 41, show = n <= 7 || (d.wd === 0 && j < n - 2) || today; if (!show) return;
+      kids.push(h('text', { key: 'x' + j, x: X(j), y: axY, textAnchor: 'middle', fill: today ? C.ink : C.ink3, style: { fontSize: 11, fontWeight: today ? 600 : 400 } }, today ? 'Avui' : `${this.WD[d.wd]} ${d.n}`)); });
+    if (hov != null) kids.push(h('line', { key: 'cur', x1: X(hov), x2: X(hov), y1: top, y2: coachY + LH, stroke: 'rgba(236,237,239,.35)' }));
+    kids.push(h('rect', { key: 'ov', x: Lw, y: top, width: iw, height: H - top, fill: 'transparent', style: { cursor: 'crosshair' },
+      onPointerMove: e => { const r = e.currentTarget.getBoundingClientRect(), j = Math.max(0, Math.min(n - 1, Math.floor((e.clientX - r.left) / r.width * n))), nj = D.vals.rhr[idx[j]] === undefined ? null : j; if (nj !== hov) setHov(nj); },
+      onPointerLeave: () => setHov(null) }));
+    return h('div', { ref, style: { position: 'relative', height: H } }, W ? h('svg', { width: W, height: H, viewBox: `0 0 ${W} ${H}`, style: { display: 'block', overflow: 'visible', fontFamily: this.SANS, fontVariantNumeric: 'tabular-nums' } }, kids) : null);
+  };
+  // Com et sents vs què diuen les dades (FC, HRV i son), tots dos respecte al teu normal i en el mateix eix.
+  Sents = p => {
+    const C = this.C, [ref, W] = useWidth(), [hov, setHov] = React.useState(null);
+    const { feel, obj, est, idx, marks, focus } = p, n = idx.length;
+    const padL = 12, padR = 72, padT = 22, ph = 190, axY = padT + ph + 24, H = axY + 8, lo = -2.8, hi = 2.3;
+    const iw = Math.max(40, W - padL - padR), slot = iw / n, X = j => padL + (j + .5) * slot, Y = v => padT + (1 - (v - lo) / (hi - lo)) * ph, kids = [];
+    const fc = v => this.tone(this.lerpPts(this.QH, v)), word = z => (z == null ? 'sense dades' : z >= .5 ? 'per sobre del teu normal' : z <= -.5 ? 'per sota del teu normal' : 'en el teu normal');
+    kids.push(h('rect', { key: 'nb', x: padL, y: Y(1), width: iw, height: Y(-1) - Y(1), fill: 'rgba(255,255,255,.045)' }));
+    kids.push(h('line', { key: 'z', x1: padL, x2: padL + iw, y1: Y(0), y2: Y(0), stroke: 'rgba(255,255,255,.28)', strokeDasharray: '3 4' }));
+    [['Millor', 1.7], ['Normal', 0], ['Pitjor', -1.9]].forEach(([t, v]) => kids.push(h('text', { key: 't' + t, x: padL + iw + 12, y: Y(v) + 4, fill: C.ink3, style: { fontSize: 11.5 } }, t)));
+    marks.forEach(m => this.dayRuns(m.days, idx).forEach(([j0, j1], ri) => {
+      const dim = focus != null && focus !== m.n, on = focus === m.n, x0 = padL + j0 * slot + 1, x1 = padL + (j1 + 1) * slot - 1;
+      kids.push(h('rect', { key: `mk${m.n}-${ri}`, x: x0, y: padT, width: x1 - x0, height: ph, rx: 6, fill: on ? 'rgba(255,255,255,.07)' : 'rgba(255,255,255,.03)', opacity: dim ? .4 : 1, style: { transition: 'fill .2s, opacity .2s' } }));
+      kids.push(h('g', { key: `mb${m.n}-${ri}`, opacity: dim ? .35 : 1 }, h('circle', { cx: X(j1), cy: padT - 12, r: 8, fill: C.ink }), h('text', { x: X(j1), y: padT - 8.5, textAnchor: 'middle', fill: C.bg, style: { fontSize: 10, fontWeight: 700 } }, String(m.n))));
+    }));
+    for (let j = 0; j < n; j++) {
+      const f = feel[j], o = obj[j];
+      if (f == null || o == null) { if (est[j] !== undefined) kids.push(h('line', { key: 'g' + j, x1: X(j), x2: X(j), y1: padT + 20, y2: padT + ph - 20, stroke: 'rgba(236,237,239,.18)', strokeDasharray: '2 4' })); continue; }
+      if (Math.abs(f - o) < 1.2) continue;
+      kids.push(h('rect', { key: 'mm' + j, x: X(j) - slot / 2 + 1, y: padT, width: slot - 2, height: ph, rx: 4, fill: 'rgba(255,255,255,.035)', style: { animation: 'mtFade .5s 1s both' } }));
+      kids.push(h('line', { key: 'mc' + j, x1: X(j), x2: X(j), y1: Y(f), y2: Y(o), stroke: 'rgba(236,237,239,.5)', strokeWidth: 1.5, style: { animation: 'mtFade .5s 1.1s both' } }));
+    }
+    const runsOf = arr => { const runs = []; let cur = []; arr.forEach((v, i) => { if (v == null) { if (cur.length) runs.push(cur); cur = []; } else cur.push([X(i), Y(v)]); }); if (cur.length) runs.push(cur); return runs; };
+    const P = r => 'M' + r.map(q => `${q[0].toFixed(1)},${q[1].toFixed(1)}`).join('L');
+    runsOf(obj).forEach((r, ri) => { if (r.length > 1) kids.push(h('path', { key: 'o' + ri, d: P(r), fill: 'none', stroke: 'rgba(236,237,239,.45)', strokeWidth: 1.5, strokeDasharray: '4 4', style: { animation: 'mtFade .7s .4s both' } })); });
+    runsOf(feel).forEach((r, ri) => { if (r.length > 1) kids.push(h('path', { key: 'f' + ri, d: P(r), fill: 'none', stroke: 'rgba(236,237,239,.85)', strokeWidth: 2, strokeLinejoin: 'round', strokeLinecap: 'round', pathLength: 1, style: { strokeDasharray: 1, animation: 'mtDraw 1.1s cubic-bezier(.4,0,.2,1) both' } })); });
+    feel.forEach((v, j) => { if (v != null) kids.push(h('circle', { key: 'fd' + j, cx: X(j), cy: Y(v), r: hov === j ? 5.5 : n > 7 ? 3.2 : 4.5, fill: fc(v), stroke: C.s1, strokeWidth: 1.5, style: { animation: `mtFade .3s ${(.3 + 1.1 * j / n).toFixed(2)}s both`, transition: 'r .15s' } })); });
+    if (hov != null) kids.push(h('line', { key: 'cur', x1: X(hov), x2: X(hov), y1: padT - 2, y2: padT + ph, stroke: 'rgba(236,237,239,.35)' }));
+    idx.forEach((i, j) => { const d = this.day(i), today = i === 41, show = n <= 7 || (d.wd === 0 && j < n - 2) || today; if (!show) return;
+      kids.push(h('text', { key: 'x' + j, x: X(j), y: axY, textAnchor: 'middle', fill: today ? C.ink : C.ink3, style: { fontSize: 11, fontWeight: today ? 600 : 400 } }, today ? 'Avui' : `${this.WD[d.wd]} ${d.n}`)); });
+    kids.push(h('rect', { key: 'ov', x: padL, y: 0, width: iw, height: H, fill: 'transparent', style: { cursor: 'crosshair' },
+      onPointerMove: e => { const r = e.currentTarget.getBoundingClientRect(), j = Math.max(0, Math.min(n - 1, Math.floor((e.clientX - r.left) / r.width * n))), nj = est[j] === undefined ? null : j; if (nj !== hov) setHov(nj); },
+      onPointerLeave: () => setHov(null) }));
+    let tip = null;
+    if (hov != null && W) {
+      const i = idx[hov], f = feel[hov], o = obj[hov], tipW = 236, x = X(hov), left = x + 18 + tipW > W ? x - 18 - tipW : x + 18, both = f != null && o != null, same = both && Math.abs(f - o) < 1.2;
+      tip = h('div', { key: 'tip', style: { position: 'absolute', left, top: padT, width: tipW, boxSizing: 'border-box', pointerEvents: 'none', padding: '10px 12px', background: 'rgba(27,28,32,.97)', border: `1px solid ${C.line2}`, borderRadius: 10, boxShadow: '0 12px 32px rgba(0,0,0,.5)', fontSize: 12, color: C.ink2, zIndex: 2 } },
+        h('div', { style: { color: C.ink3 } }, i === 41 ? `Avui · ${this.dLong(i)}` : this.cap(this.dLong(i))),
+        h('div', { style: { marginTop: 6, display: 'flex', alignItems: 'center', gap: 8 } }, h('span', { style: { width: 14, borderTop: '2px solid rgba(236,237,239,.85)' } }), h('span', null, 'Et sents ', h('b', { style: { color: C.ink, fontWeight: 600 } }, est[hov] != null ? `${est[hov]}/5` : '—'), ` · ${word(f)}`)),
+        h('div', { style: { marginTop: 4, display: 'flex', alignItems: 'center', gap: 8 } }, h('span', { style: { width: 14, borderTop: '1.5px dashed rgba(236,237,239,.6)' } }), h('span', null, `Dades ${word(o)}`)),
+        both ? h('div', { style: { marginTop: 8, paddingTop: 8, borderTop: `1px solid ${C.line}`, color: same ? C.ink2 : C.ink } }, same ? 'Coincideixen' : 'No coincideixen') : null);
+    }
+    return h('div', { ref, style: { position: 'relative', height: H } }, W ? [h('svg', { key: 'svg', width: W, height: H, viewBox: `0 0 ${W} ${H}`, style: { display: 'block', overflow: 'visible', fontFamily: this.SANS } }, kids), tip] : null);
+  };
+
+  // ── Informe de la IA (capçalera de cada pàgina) ──────────────────────
+  chipFor(k, sc) {
+    if (this.KEYS.includes(k)) return this.META[k].name;
+    const sq = this.SCALES.find(x => x.k === k); if (sq) return sq.t;
+    if (/^wemwbs_\d$/.test(k)) return `Pregunta ${k.slice(7)}`;
+    return { coach: 'Entrenador', sents: 'Sensació vs dades', ostrc: 'Participació', wemwbs: 'Total', ahir: 'Ahir', reg: 'Registre', band: 'Franja' }[k] || '';
+  }
+  findingEl(fd, i, o) {
+    const C = this.C, on = this.focusN() === fd.n, chip = this.chipFor(fd.k);
+    return h('button', { key: fd.n, className: 'mt-f', 'data-on': on ? '' : undefined, 'aria-pressed': this.state.pinF === fd.n,
+      onMouseEnter: () => this.setState({ hoverF: fd.n }), onMouseLeave: () => this.setState({ hoverF: null }), onFocus: () => this.setState({ hoverF: fd.n }), onBlur: () => this.setState({ hoverF: null }),
+      onClick: () => { this.setState(st => ({ pinF: st.pinF === fd.n ? null : fd.n })); if (o.onPick) o.onPick(fd); },
+      style: { display: 'grid', gridTemplateColumns: '22px minmax(0,1fr) auto', gap: 14, alignItems: 'start', width: 'calc(100% + 24px)', margin: '0 -12px', padding: '10px 12px', border: 'none', borderRadius: 10, background: 'transparent', textAlign: 'left', cursor: 'pointer', animation: `mtIn .4s cubic-bezier(.2,.7,.2,1) ${(.15 + i * .08).toFixed(2)}s both` } },
+      h('span', { style: { paddingTop: 1 } }, this.badge(fd.n, on)), h('span', { style: { fontSize: 15, lineHeight: 1.55, color: C.ink2, textWrap: 'pretty' } }, this.segs(fd.text)),
+      chip ? h('span', { style: { paddingTop: 3, fontSize: 12, color: on ? C.ink2 : C.ink3, whiteSpace: 'nowrap' } }, chip) : h('span'));
+  }
+  reportEl(o) {
+    const C = this.C, g = this.geom(), R = o.R;
+    const sk = (w, hh, d) => h('div', { key: w + d, style: { height: hh, width: w, borderRadius: 6, background: 'linear-gradient(90deg, rgba(255,255,255,.04), rgba(255,255,255,.09), rgba(255,255,255,.04))', backgroundSize: '1200px 100%', animation: `mtShim 1.6s linear ${d}s infinite` } });
+    const analysis = R.loading
+      ? h('div', { style: { display: 'flex', flexDirection: 'column', gap: 12 } }, h('div', { style: { fontSize: 13, color: C.ink3 } }, 'Llegint les teves dades…'), sk('62%', 22, 0), sk('100%', 12, .1), sk('92%', 12, .2), sk('84%', 12, .3), sk('70%', 12, .4))
+      : h(React.Fragment, null,
+        h('div', { style: { fontSize: 22, fontWeight: 600, letterSpacing: '-.015em', lineHeight: 1.25, textWrap: 'balance', animation: 'mtIn .45s cubic-bezier(.2,.7,.2,1) .05s both' } }, R.val.titular),
+        h('div', { style: { marginTop: 12, display: 'flex', flexDirection: 'column', gap: 2 } }, R.findings.map((fd, i) => this.findingEl(fd, i, o))),
+        h('div', { style: { marginTop: 14, paddingTop: 16, borderTop: `1px solid ${C.line}`, display: 'grid', gridTemplateColumns: '112px minmax(0,1fr)', gap: 14, animation: 'mtIn .45s cubic-bezier(.2,.7,.2,1) .45s both' } },
+          h('div', { style: { fontSize: 13, color: C.ink3, paddingTop: 2 } }, 'Recomanació'), h('div', { style: { fontSize: 16, lineHeight: 1.5, textWrap: 'pretty' } }, this.segs(R.val.recomanacio))));
+    return h('div', { style: { background: '#141519', border: `1px solid ${C.line}`, borderRadius: 16, boxShadow: 'inset 0 1px 0 rgba(255,255,255,.035)', overflow: 'hidden' } },
+      h('div', { style: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 16, padding: '15px 28px', borderBottom: `1px solid ${C.line}` } },
+        h('div', { style: { display: 'flex', alignItems: 'baseline', gap: 12, minWidth: 0, flexWrap: 'wrap' } }, h('span', { style: { fontSize: 15, fontWeight: 600 } }, o.title), h('span', { style: { fontSize: 13, color: C.ink3 } }, o.meta)),
+        this.tag('Anàlisi redactada per IA')),
+      h('div', { style: { display: 'grid', gridTemplateColumns: g.stack ? 'minmax(0,1fr)' : 'minmax(270px,4fr) minmax(0,8fr)' } },
+        h('div', { style: { padding: '24px 28px 26px', borderRight: g.stack ? 'none' : `1px solid ${C.line}`, borderBottom: g.stack ? `1px solid ${C.line}` : 'none', minWidth: 0 } }, o.left),
+        h('div', { style: { padding: '22px 28px 22px', minWidth: 0 } }, analysis)),
+      h('div', { style: { display: 'flex', justifyContent: 'space-between', gap: '6px 24px', flexWrap: 'wrap', padding: '12px 28px', borderTop: `1px solid ${C.line}`, fontSize: 12, color: C.ink3 } },
+        h('span', null, `Basat en: ${o.basis.join(' · ')}`), h('span', null, o.note || "Orientatiu, no és un diagnòstic mèdic. Si alguna cosa no va bé, parla-ho amb l'entrenador.")));
+  }
+
+  // ── Pàgina: Avui ─────────────────────────────────────────────────────
+  pageAvui(sc, D, g) {
+    const C = this.C, reg = this.REG[sc], R = this.reportData('daily', sc);
+    const right = h('span', { style: { display: 'inline-flex', alignItems: 'center', gap: 8, fontSize: 13, color: C.ink2 } }, this.dot(reg ? C.ink2 : 'transparent', 7, reg ? null : `1px solid ${C.ink3}`), reg ? `Registre d'avui fet a les ${reg}` : "Registre d'avui pendent");
+    const left = h(this.StateScale, { key: 'ss', sc, p: D.pos[41], yp: D.pos[40], hist: [35, 36, 37, 38, 39, 40].map(i => D.pos[i]) });
+    const rep = this.reportEl({ title: 'Informe del dia', meta: reg ? `Dijous 24 set · registre de les ${reg}` : 'Dijous 24 set · a partir de les dades d\'ahir', left, R,
+      basis: ['FC en repòs', 'HRV', 'Son', 'Com estàs', "Comunicació amb l'entrenador", 'Historial de 28 dies'], onPick: f => { if (this.KEYS.includes(f.k)) this.setState({ metric: f.k }); } });
+    const tiles = h('div', { style: { display: 'grid', gridTemplateColumns: `repeat(${g.cols}, minmax(0,1fr))`, gap: 12 } }, this.KEYS.map(k => this.tileEl(k, sc, D, R.findings)));
+    return this.stack([this.headEl('Avui', 'Dijous, 24 de setembre de 2026', right), rep, tiles, this.mainCardEl(sc, D, R.findings), this.grid2(this.weekNowEl(sc, D), this.formsEl(sc), 'minmax(0,7fr) minmax(0,5fr)')]);
+  }
+  tileEl(k, sc, D, findings) {
+    const C = this.C, s = this.state, meta = this.META[k], v = D.vals[k][41], b = D.band, st = this.status(k, v, b), sel = s.metric === k, f = this.focusN(), bg = sel ? '#17181C' : C.s1;
+    const bs = findings.filter(x => x.k === k);
+    const sub = v != null && b ? (Math.abs(v - b[k].mean) < .05 ? 'Igual que la teva mitjana' : `${this.delta(k, v, b[k].mean)} vs la teva mitjana`) : v === null && D.vals[k][40] != null ? `Ahir: ${this.fmtT(k, D.vals[k][40])}` : v != null ? (() => { const ps = D.vals[k].filter(x => x != null); return `Mitjana de ${ps.length} dies: ${this.fmtT(k, this.sum(ps) / ps.length)}`; })() : '';
+    return h('button', { key: k, className: 'mt-tile', onClick: () => this.setState({ metric: k }), 'aria-pressed': sel,
+      style: { ...this.card(), display: 'flex', flexDirection: 'column', padding: '16px 18px 14px', textAlign: 'left', cursor: 'pointer', borderColor: sel ? 'rgba(255,255,255,.26)' : C.line, background: bg, font: 'inherit', color: 'inherit' } },
+      h('div', { style: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 8, minHeight: 20 } }, h('span', { style: { fontSize: 13, fontWeight: 500, color: sel ? C.ink : C.ink2 } }, meta.name), h('span', { style: { display: 'flex', gap: 4 } }, bs.map(x => this.badge(x.n, f === x.n, 19)))),
+      h('div', { style: { display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', gap: 10, marginTop: 10 } },
+        h('div', { style: { display: 'flex', alignItems: 'baseline', gap: 5, minWidth: 0 } }, h('span', { style: { fontSize: 36, fontWeight: 600, letterSpacing: '-.02em', lineHeight: 1 } }, h(this.Num, { k, v, band: b, init: b && v != null ? b[k].mean : undefined })), h('span', { style: { fontSize: 14, color: C.ink3 } }, meta.unit)),
+        this.spark(k, [35, 36, 37, 38, 39, 40, 41].map(i => D.vals[k][i]), b)),
+      h('div', { style: { display: 'flex', alignItems: 'center', gap: 7, marginTop: 11, fontSize: 12.5, color: C.ink2, minWidth: 0 } }, this.dot(st.col, 7), h('span', { style: { whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' } }, st.label)),
+      h('div', { style: { marginTop: 3, fontSize: 12, color: C.ink3, minHeight: 16 } }, sub),
+      h('div', { style: { marginTop: 14 } }, h(this.Bullet, { k, v, band: b, ring: bg })));
+  }
+  mainCardEl(sc, D, findings) {
+    const C = this.C, s = this.state, k = s.metric, meta = this.META[k], nou = sc === 'nou', range = nou ? 7 : s.range;
+    const idx = Array.from({ length: range }, (_, j) => 42 - range + j), b = D.band ? D.band[k] : null;
+    const sub = `${k === 'estat' ? "Escala de 1 a 5" : meta.unit} · ${b ? (k === 'estat' ? 'el teu normal és 4' : `la teva franja és ${this.bandTxt(k, b)}`) : 'franja en càlcul'} · ${range === 7 ? 'últims 7 dies' : 'últimes 4 setmanes'}`;
+    const marks = findings.filter(f => (f.k === k || f.k === 'coach' || f.k === 'ahir') && f.days.length).map(f => ({ n: f.n, days: f.days, lane: f.k === 'coach' }));
+    return h('div', { style: this.card({ padding: '20px 24px 18px' }) },
+      this.cardHead(meta.long, sub, this.seg([{ k: 7, t: '7 dies' }, { k: 28, t: '28 dies', dis: nou }], range, v => this.setState({ range: v }))),
+      h('div', { style: { marginTop: 16 } }, h(this.MainChart, { key: `mc-${meta.form}-${range}-${sc}`, k, vals: idx.map(i => D.vals[k][i]), coach: idx.map(i => D.coach[i]), idx, band: D.band, marks, focus: this.focusN() })),
+      this.legendEl([b ? this.lgBand() : null, b && k !== 'estat' ? this.lgMean() : null, ...(b ? this.lgStatus() : []), this.lgCoach()].filter(Boolean)));
+  }
+  weekNowEl(sc, D) {
+    const C = this.C, days = [38, 39, 40, 41, 42, 43, 44];
+    return h('div', { style: this.card({ padding: '20px 24px 20px' }) },
+      this.cardHead('Aquesta setmana', 'Setmana 39 · 21–27 set'),
+      h('div', { style: { marginTop: 14, display: 'grid', gridTemplateColumns: 'repeat(7, minmax(0,1fr))', gap: 6 } }, days.map((i, j) => {
+        const fut = i > 41, pp = fut ? null : D.pos[i], st = this.stateOf(pp), today = i === 41, e = fut ? null : D.vals.estat[i];
+        return h('div', { key: i, style: { display: 'flex', flexDirection: 'column', gap: 9, padding: '11px 10px 12px', borderRadius: 10, minWidth: 0, background: today ? 'rgba(255,255,255,.035)' : 'transparent', boxShadow: today ? `inset 0 0 0 1px ${C.line2}` : 'none' } },
+          h('div', { style: { fontSize: 12, color: today ? C.ink : C.ink3, fontWeight: today ? 600 : 400 } }, today ? 'Avui' : this.dShort(i)),
+          h('div', { style: { height: 6, borderRadius: 3, boxSizing: 'border-box', background: st ? this.tone(this.dayH(pp)) : 'transparent', border: st ? 'none' : `1px dashed ${fut ? 'rgba(255,255,255,.09)' : 'rgba(255,255,255,.22)'}`, transformOrigin: 'left', animation: st ? `mtGrowX .5s cubic-bezier(.2,.7,.2,1) ${(.3 + j * .06).toFixed(2)}s both` : 'none' } }),
+          h('div', { style: { fontSize: 13, fontWeight: 500, color: st ? C.ink : C.ink3, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' } }, st ? this.ST[st].w : fut ? ' ' : D.vals.rhr[i] != null ? 'En càlcul' : '—'),
+          h('div', { style: { display: 'flex', alignItems: 'center', gap: 6, fontSize: 12, color: C.ink3, minHeight: 14 } }, fut ? null : [h('span', { key: 'c' }, this.coachIcon(D.coach[i], 10)), h('span', { key: 'e' }, e != null ? `${e}/5` : '—')]));
+      })),
+      h('div', { style: { marginTop: 12, fontSize: 12, color: C.ink3 } }, "Estat del dia · què li has dit a l'entrenador i com estaves (de 1 a 5)"));
+  }
+  formsEl(sc) {
+    const C = this.C, nou = sc === 'nou';
+    const row = (t, s, when, done, key) => h('div', { key, style: { display: 'grid', gridTemplateColumns: 'minmax(0,1fr) auto', alignItems: 'center', gap: 16, padding: '12px 0', borderTop: `1px solid ${C.line}` } },
+      h('div', { style: { minWidth: 0 } }, h('div', { style: { fontSize: 14 } }, t), h('div', { style: { marginTop: 3, fontSize: 12.5, color: C.ink3 } }, s)),
+      h('div', { style: { display: 'flex', alignItems: 'center', gap: 10, fontSize: 12.5, color: C.ink2, whiteSpace: 'nowrap' } }, when,
+        h('span', { style: { display: 'inline-flex', alignItems: 'center', gap: 5, padding: '3px 8px', borderRadius: 6, fontSize: 12, border: `1px solid ${done ? 'transparent' : C.line2}`, background: done ? 'rgba(255,255,255,.06)' : 'transparent', color: done ? C.ink2 : C.ink } }, done ? [h('span', { key: 'i' }, this.icon('check', 12)), 'Enviat'] : 'Pendent')));
+    return h('div', { style: this.card({ padding: '20px 24px 10px' }) },
+      this.cardHead('Formularis', nou ? 'Els teus primers formularis' : 'Pendents i últims enviats'),
+      h('div', { style: { marginTop: 12 } },
+        row('Formulari setmanal', 'Rendiment i salut · setmana 39', 'Diumenge 27 set', false, 'w'),
+        row('Formulari mensual', 'Benestar i salut mental · setembre', 'Dimecres 30 set', false, 'm'),
+        nou ? null : row('Setmana 38', 'Formulari setmanal', 'Diumenge 20 set', true, 'w0'),
+        nou ? null : row('Agost', 'Formulari mensual', '31 ago', true, 'm0')));
+  }
+
+  // ── Pàgina: Setmana ──────────────────────────────────────────────────
+  setWeek(j) { this.setState({ week: j, hoverF: null, pinF: null }); }
+  pageSetmana(sc, D, g) {
+    if (sc === 'nou') return this.stack([this.headEl('Setmana', 'Formulari de rendiment i salut'), this.emptyEl('El teu primer formulari setmanal arribarà diumenge', "Cada diumenge respondràs cinc preguntes curtes sobre rendiment, fatiga, descans, salut i organització, més una paraula per a cada àmbit. Aquí veuràs l'informe de la setmana i com evoluciona.")]);
+    const C = this.C, s = this.state, n = this.WEEKS.length, wi = Math.min(s.week, n - 1), W = this.WEEKS[wi], P = this.WEEKS[wi + 1] || null, R = this.reportData('week', sc, wi), f = this.focusN();
+    const right = this.stepper(`Setmana ${W.id} · ${this.weekLabel(W.a)}`, wi < n - 1 ? () => this.setWeek(wi + 1) : null, wi > 0 ? () => this.setWeek(wi - 1) : null);
+    const rep = this.reportEl({ title: 'Informe de la setmana', meta: `Setmana ${W.id} · formulari enviat ${W.sent}`, left: this.weekLeftEl(sc, D, W), R,
+      basis: ['Formulari de rendiment i salut', 'Paraules i comentari', 'Participació (OSTRC)', 'Dades diàries de la setmana'] });
+    const on = k => R.findings.filter(x => x.k === k).map(x => x.n);
+    const form = h('div', { style: this.card({ padding: '20px 24px 12px' }) },
+      this.cardHead('Formulari de rendiment i salut', P ? `Escala de 1 a 10 · el cercle buit és la setmana ${P.id}` : 'Escala de 1 a 10'),
+      h('div', { style: { marginTop: 10, display: 'grid', gridTemplateColumns: '190px minmax(0,1fr) 84px', gap: 22, fontSize: 11, color: C.ink3, fontVariantNumeric: 'tabular-nums' } }, h('span'),
+        h('div', { style: { position: 'relative', height: 14 } }, Array.from({ length: 10 }, (_, j) => h('span', { key: j, style: { position: 'absolute', left: `${(j / 9) * 100}%`, transform: 'translateX(-50%)' } }, String(j + 1)))), h('span')),
+      this.SCALES.map(q => h(this.DumbRow, { key: q.k + W.id, label: q.t, hint: q.hint, v: W.v[q.k], prev: P ? P.v[q.k] : null, min: 1, max: 10, inv: q.inv, badges: on(q.k), focus: f, on: on(q.k).includes(f) })));
+    return this.stack([this.headEl('Setmana', 'Formulari de rendiment i salut', right), rep, this.grid2(form, this.wordsEl(W, R), 'minmax(0,7fr) minmax(0,5fr)'), this.heatEl(sc, D, wi), this.grid2(this.weekDaysEl(sc, D, W, R), this.ostrcEl(W, wi, R), 'minmax(0,8fr) minmax(0,4fr)')]);
+  }
+  weekLeftEl(sc, D, W) {
+    const C = this.C, ws = this.weekStats(sc, W.a), parts = ['fons', 'mod', 'rec'].filter(q => ws.cnt[q]).map(q => `${ws.cnt[q]} ${this.ST[q].w}`);
+    if (ws.cnt.none) parts.push(`${ws.cnt.none} sense registre`);
+    return h('div', null,
+      this.lab('Estat dels dies'),
+      h('div', { style: { marginTop: 12, display: 'flex', gap: 4 } }, ws.idx.map((i, j) => { const pp = D.pos[i];
+        return h('div', { key: i, style: { flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 7 } },
+          h('span', { style: { width: '100%', height: 34, borderRadius: 6, boxSizing: 'border-box', background: pp == null ? 'transparent' : this.tone(this.dayH(pp)), border: pp == null ? '1px dashed rgba(255,255,255,.2)' : 'none', transformOrigin: 'bottom', animation: `mtGrowY .45s cubic-bezier(.2,.7,.2,1) ${(.1 + j * .05).toFixed(2)}s both` } }),
+          h('span', { style: { fontSize: 11, color: C.ink3 } }, this.WD[this.day(i).wd])); })),
+      h('div', { style: { marginTop: 12, fontSize: 13, color: C.ink2 } }, parts.join(' · ')),
+      this.lab('Participació', 'pl', { marginTop: 24 }),
+      h('div', { style: { marginTop: 8, display: 'flex', alignItems: 'center', gap: 9, fontSize: 15 } }, this.dot(this.tone(this.OST_H[W.ostrc]), 8), this.OST[W.ostrc]),
+      W.inici != null ? h('div', { style: { marginTop: 5, fontSize: 13, color: C.ink3 } }, `Problema des del ${this.dLong(W.inici)}`) : null);
+  }
+  wordsEl(W, R) {
+    const C = this.C;
+    return h('div', { style: this.card({ padding: '20px 24px 20px' }) },
+      this.cardHead('En paraules', 'Una paraula per a cada àmbit i el teu comentari'),
+      h('div', { style: { marginTop: 18, display: 'grid', gridTemplateColumns: 'repeat(3, minmax(0,1fr))', gap: 12 } }, [['rendiment', 'Rendiment'], ['descans', 'Descans'], ['salut', 'Salut']].map(([k, t], j) =>
+        h('div', { key: k, style: { minWidth: 0, animation: `mtIn .4s cubic-bezier(.2,.7,.2,1) ${(.15 + j * .07).toFixed(2)}s both` } }, h('div', { style: { fontSize: 12, color: C.ink3 } }, t), h('div', { style: { marginTop: 6, fontSize: 21, fontWeight: 500, letterSpacing: '-.01em', overflow: 'hidden', textOverflow: 'ellipsis' } }, `«${W.w[k]}»`)))),
+      h('div', { style: { marginTop: 22, fontSize: 12, color: C.ink3 } }, 'Comentari'),
+      W.com ? h('p', { style: { margin: '8px 0 0', paddingLeft: 14, borderLeft: '2px solid rgba(255,255,255,.14)', fontSize: 15, lineHeight: 1.55, color: C.ink, textWrap: 'pretty' } }, W.com) : h('p', { style: { margin: '8px 0 0', fontSize: 14, color: C.ink3 } }, 'Aquesta setmana no hi has afegit cap comentari.'),
+      h('div', { style: { marginTop: 20, paddingTop: 14, borderTop: `1px solid ${C.line}`, display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 12, fontSize: 12.5, color: C.ink3, flexWrap: 'wrap' } },
+        h('span', null, 'HRV setmanal registrada: ', h('span', { style: { color: C.ink2, fontWeight: 600 } }, `${W.hrvSet} ms`)), this.tag("No entra a l'anàlisi · es fa servir la diària")));
+  }
+  heatEl(sc, D, wi) {
+    const C = this.C, cols = this.WEEKS.map((w, j) => ({ w, j })).reverse(), gtc = `150px repeat(${cols.length + 1}, minmax(0,1fr))`;
+    const cell = (c, content, bg, key, delay, fg) => h('button', { key, className: 'mt-cell', onClick: () => this.setWeek(c.j), 'aria-label': `Setmana ${c.w.id}`,
+      style: { height: 38, border: 'none', borderRadius: 8, background: bg, color: fg || C.ink, fontSize: 14, fontWeight: 600, fontVariantNumeric: 'tabular-nums', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, padding: '0 6px', minWidth: 0, overflow: 'hidden', boxShadow: c.j === wi ? 'inset 0 0 0 1.5px rgba(236,237,239,.6)' : 'none', animation: `mtFade .35s ${delay.toFixed(2)}s both` } }, content);
+    const pend = key => h('div', { key, style: { height: 38, borderRadius: 8, boxSizing: 'border-box', border: '1px dashed rgba(255,255,255,.13)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 12, color: C.ink3 } }, '—');
+    const rowL = t => h('span', { style: { fontSize: 13, color: C.ink2 } }, t);
+    const rows = this.SCALES.map((q, r) => h('div', { key: q.k, style: { display: 'grid', gridTemplateColumns: gtc, gap: 6, alignItems: 'center' } }, rowL(q.t),
+      cols.map((c, ci) => { const tn = this.sTone(c.w.v[q.k], 1, 10, q.inv); return cell(c, String(c.w.v[q.k]), this.alpha(tn, .13), q.k + c.w.id, .1 + (r * 6 + ci) * .012, tn); }), pend('p' + q.k)));
+    rows.push(h('div', { key: 'ost', style: { display: 'grid', gridTemplateColumns: gtc, gap: 6, alignItems: 'center' } }, rowL('Participació'),
+      cols.map((c, ci) => { const tn = this.tone(this.OST_H[c.w.ostrc]); return cell(c, h('span', { style: { fontSize: 12, fontWeight: 500, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' } }, this.OST_S[c.w.ostrc]), this.alpha(tn, .12), 'o' + c.w.id, .5 + ci * .02, tn); }), pend('po')));
+    rows.push(h('div', { key: 'stt', style: { display: 'grid', gridTemplateColumns: gtc, gap: 6, alignItems: 'center' } }, rowL('Estat dels dies'),
+      cols.map((c, ci) => { const ws = this.weekStats(sc, c.w.a);
+        return cell(c, h('span', { style: { display: 'flex', gap: 2, width: '100%' } }, ws.idx.map(i => { const pp = D.pos[i]; return h('span', { key: i, style: { flex: 1, height: 10, borderRadius: 2, boxSizing: 'border-box', background: pp == null ? 'transparent' : this.tone(this.dayH(pp)), border: pp == null ? '1px dashed rgba(255,255,255,.2)' : 'none' } }); })), 'rgba(255,255,255,.035)', 's' + c.w.id, .6 + ci * .02); }),
+      h('div', { key: 'ps', style: { height: 38, borderRadius: 8, boxSizing: 'border-box', border: '1px dashed rgba(255,255,255,.13)', display: 'flex', alignItems: 'center', gap: 2, padding: '0 6px' } }, [38, 39, 40, 41, 42, 43, 44].map(i => { const pp = i > 41 ? null : D.pos[i]; return h('span', { key: i, style: { flex: 1, height: 10, borderRadius: 2, background: pp == null ? 'rgba(255,255,255,.05)' : this.tone(this.dayH(pp)) } }); }))));
+    return h('div', { style: this.card({ padding: '20px 24px 22px' }) },
+      this.cardHead('Evolució setmanal', "Totes les respostes del formulari. Tria una setmana per veure'n el detall."),
+      h('div', { style: { marginTop: 16, display: 'grid', gridTemplateColumns: gtc, gap: 6, alignItems: 'end' } }, h('span'),
+        cols.map(c => h('button', { key: c.w.id, className: 'mt-btn', onClick: () => this.setWeek(c.j), style: { border: 'none', background: 'transparent', borderRadius: 8, padding: '6px 4px', cursor: 'pointer', textAlign: 'center', color: c.j === wi ? C.ink : C.ink3 } },
+          h('div', { style: { fontSize: 13, fontWeight: 600 } }, `S${c.w.id}`), h('div', { style: { fontSize: 11, marginTop: 2, whiteSpace: 'nowrap' } }, this.weekLabel(c.w.a)))),
+        h('div', { style: { textAlign: 'center', padding: '6px 4px', color: C.ink3 } }, h('div', { style: { fontSize: 13, fontWeight: 600 } }, 'S39'), h('div', { style: { fontSize: 11, marginTop: 2 } }, 'en curs'))),
+      h('div', { style: { marginTop: 6, display: 'flex', flexDirection: 'column', gap: 6 } }, rows),
+      this.legendEl([this.lgItem('l1', h('span', { style: { width: 34, height: 8, borderRadius: 2, background: `linear-gradient(90deg, ${[0, .3, .5, .7, .9, 1].map(x => this.tone(x)).join(', ')})` } }), 'Pitjor → millor (a la fatiga, més baix és millor)'), this.lgItem('l2', h('span', { style: { width: 14, height: 10, borderRadius: 3, boxShadow: 'inset 0 0 0 1.5px rgba(236,237,239,.6)' } }), 'Setmana seleccionada')]));
+  }
+  weekDaysEl(sc, D, W, R) {
+    const C = this.C, f = this.focusN(), idx = Array.from({ length: 7 }, (_, j) => W.a + j), gtc = 'minmax(0,1.2fr) minmax(0,1.1fr) repeat(4, minmax(0,1fr)) minmax(0,1.5fr)';
+    const byDay = {}; R.findings.forEach(x => x.days.forEach(i => { (byDay[i] = byDay[i] || []).push(x.n); }));
+    const th = t => h('span', { key: t, style: { fontSize: 12, color: C.ink3 } }, t);
+    return h('div', { style: this.card({ padding: '20px 24px 10px' }) },
+      this.cardHead('Dies de la setmana', 'Registre de cada matí'),
+      h('div', { style: { marginTop: 14, display: 'grid', gridTemplateColumns: gtc, gap: 10, padding: '0 10px 8px' } }, ['Dia', 'Estat', 'FC', 'HRV', 'Son', 'Com estàs', 'Entrenador'].map(th)),
+      idx.map(i => { const pp = D.pos[i], st = this.stateOf(pp), ns = byDay[i] || [], on = f != null && ns.includes(f);
+        const val = k => { const v = D.vals[k][i]; return h('span', { key: k, style: { fontSize: 14, fontWeight: 500, fontVariantNumeric: 'tabular-nums', color: v == null ? C.ink3 : this.toneOf(k, v, D.band) } }, this.fmtV(k, v)); };
+        return h('div', { key: i, className: 'mt-row', style: { display: 'grid', gridTemplateColumns: gtc, gap: 10, alignItems: 'center', padding: '11px 10px', borderTop: `1px solid ${C.line}`, borderRadius: on ? 8 : 0, background: on ? 'rgba(255,255,255,.05)' : 'transparent' } },
+          h('span', { style: { display: 'flex', alignItems: 'center', gap: 8, fontSize: 13.5 } }, this.cap(this.dShort(i)), ns.map(nn => this.badge(nn, f === nn, 17))),
+          h('span', { style: { display: 'flex', alignItems: 'center', gap: 7, fontSize: 13.5, color: st ? C.ink : C.ink3 } }, st ? this.dot(this.tone(this.dayH(pp)), 7) : null, st ? this.ST[st].w : 'Sense registre'),
+          val('rhr'), val('hrv'), val('son'), val('estat'),
+          h('span', { style: { display: 'flex', alignItems: 'center', gap: 7, fontSize: 13, color: C.ink2, minWidth: 0 } }, this.coachIcon(D.coach[i], 11), h('span', { style: { whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' } }, D.coach[i] ? this.COACH[D.coach[i]].t : '—'))); }));
+  }
+  ostrcEl(W, wi, R) {
+    const C = this.C, f = this.focusN(), bs = R.findings.filter(x => x.k === 'ostrc').map(x => x.n), hist = this.WEEKS.map((w, j) => ({ w, j })).reverse();
+    return h('div', { style: this.card({ padding: '20px 24px 20px', borderColor: bs.includes(f) ? 'rgba(255,255,255,.24)' : C.line, transition: 'border-color .2s' }) },
+      this.cardHead('Participació (OSTRC)', 'Com has pogut entrenar i competir', bs.length ? h('span', { style: { display: 'flex', gap: 4 } }, bs.map(n => this.badge(n, f === n, 19))) : null),
+      h('div', { style: { marginTop: 18, display: 'grid', gridTemplateColumns: 'repeat(4, minmax(0,1fr))', gap: 4 } }, this.OST.map((t, j) => h('div', { key: j, style: { minWidth: 0 } },
+        h('div', { style: { height: 6, borderRadius: 3, background: j === W.ostrc ? this.tone(this.OST_H[j]) : 'rgba(255,255,255,.07)', transition: 'background .3s' } }),
+        h('div', { style: { marginTop: 8, fontSize: 11.5, lineHeight: 1.3, color: j === W.ostrc ? C.ink : C.ink3, fontWeight: j === W.ostrc ? 600 : 400 } }, this.OST_S[j])))),
+      h('div', { style: { marginTop: 16, fontSize: 14, color: C.ink, lineHeight: 1.45 } }, this.OST[W.ostrc]),
+      h('div', { style: { marginTop: 3, fontSize: 13, color: C.ink3, lineHeight: 1.45 } }, W.inici != null ? `Problema des del ${this.dLong(W.inici)}.` : 'Sense cap problema aquesta setmana.'),
+      h('div', { style: { marginTop: 18, paddingTop: 14, borderTop: `1px solid ${C.line}`, fontSize: 12, color: C.ink3 } }, 'Últimes setmanes'),
+      h('div', { style: { marginTop: 10, display: 'flex', gap: 6 } }, hist.map(c => h('button', { key: c.w.id, onClick: () => this.setWeek(c.j), title: `S${c.w.id} · ${this.OST[c.w.ostrc]}`,
+        style: { flex: 1, border: 'none', padding: 0, background: 'transparent', cursor: 'pointer', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6 } },
+        h('span', { style: { width: '100%', height: 18, borderRadius: 4, background: this.tone(this.OST_H[c.w.ostrc]), opacity: c.j === wi ? 1 : .45, boxShadow: c.j === wi ? `0 0 0 2px ${C.s1}, 0 0 0 3px rgba(236,237,239,.5)` : 'none' } }),
+        h('span', { style: { fontSize: 11, color: c.j === wi ? C.ink : C.ink3 } }, `S${c.w.id}`)))));
+  }
+
+  // ── Pàgina: Mes ──────────────────────────────────────────────────────
+  setMonth(j) { this.setState({ month: j, hoverF: null, pinF: null }); }
+  pageMes(sc, D, g) {
+    if (sc === 'nou') return this.stack([this.headEl('Mes', 'Formulari de benestar i salut mental'), this.emptyEl('El teu primer formulari mensual arribarà el 30 de setembre', "Un cop al mes respondràs set afirmacions sobre com t'has sentit (WEMWBS) i unes preguntes sobre l'esforç psicològic de l'esport. Aquí veuràs l'informe del mes i l'evolució del teu benestar.")]);
+    const C = this.C, s = this.state, n = this.MONTHS.length, mi = Math.min(s.month, n - 1), M = this.MONTHS[mi], P = this.MONTHS[mi + 1] || null, R = this.reportData('month', sc, mi), f = this.focusN(), items = this.wemItems(sc);
+    const right = this.stepper(M.Name, mi < n - 1 ? () => this.setMonth(mi + 1) : null, mi > 0 ? () => this.setMonth(mi - 1) : null);
+    const rep = this.reportEl({ title: 'Informe del mes', meta: `${M.Name} · formulari enviat el ${M.sent}`, left: this.monthLeftEl(M, P, mi, R), R, basis: ['Benestar mental (WEMWBS)'], note: "L'APSQ i la informació complementària no entren a l'anàlisi. Orientatiu, no és un diagnòstic mèdic." });
+    const rowsOn = j => R.findings.filter(x => x.rows.includes(j + 1)).map(x => x.n);
+    const wem = h('div', { style: this.card({ padding: '20px 24px 12px' }) },
+      this.cardHead('Benestar mental (WEMWBS)', P ? `Set afirmacions sobre les últimes setmanes · el cercle buit és ${P.name}` : 'Set afirmacions sobre les últimes setmanes'),
+      h('div', { style: { marginTop: 12, display: 'grid', gridTemplateColumns: '300px minmax(0,1fr) 84px', gap: 22, fontSize: 11, color: C.ink3 } }, h('span'),
+        h('div', { style: { position: 'relative', height: 14 } }, this.SCALE5.map((t, j) => h('span', { key: j, style: { position: 'absolute', left: `${j * 25}%`, transform: j === 0 ? 'none' : j === 4 ? 'translateX(-100%)' : 'translateX(-50%)', whiteSpace: 'nowrap' } }, t))), h('span')),
+      items.map((t, j) => h(this.DumbRow, { key: `w${j}-${M.k}`, labelW: 300, label: t, v: M.wem[j], prev: P ? P.wem[j] : null, min: 1, max: 5, badges: rowsOn(j), focus: f, on: rowsOn(j).includes(f) })),
+      h('div', { style: { marginTop: 6, padding: '12px 0 8px', borderTop: `1px solid ${C.line}`, display: 'flex', justifyContent: 'space-between', fontSize: 13, color: C.ink2 } }, h('span', null, 'Total (de 7 a 35, més alt és millor)'), h('span', { style: { fontWeight: 600, color: C.ink, fontVariantNumeric: 'tabular-nums' } }, `${this.sum(M.wem)} /35`)));
+    return this.stack([this.headEl('Mes', 'Formulari de benestar i salut mental', right), rep, wem, this.grid2(this.apsqEl(M, P), this.infoEl(M), 'minmax(0,7fr) minmax(0,5fr)')]);
+  }
+  monthLeftEl(M, P, mi, R) {
+    const C = this.C, tot = this.sum(M.wem), pt = P ? this.sum(P.wem) : null, f = this.focusN(), bs = R.findings.filter(x => x.k === 'wemwbs').map(x => x.n);
+    const cols = this.MONTHS.map((m, j) => ({ m, j })).reverse();
+    return h('div', null,
+      h('div', { style: { display: 'flex', alignItems: 'center', gap: 8 } }, this.lab('Benestar mental'), bs.map(n => this.badge(n, f === n, 18))),
+      h('div', { style: { marginTop: 10, display: 'flex', alignItems: 'baseline', gap: 6 } }, h('span', { style: { fontSize: 52, fontWeight: 600, letterSpacing: '-.03em', lineHeight: 1 } }, h(this.NumS, { key: M.k, v: tot, init: pt != null ? pt : 7, min: 7, max: 35 })), h('span', { style: { fontSize: 16, color: C.ink3 } }, '/35')),
+      h('div', { style: { marginTop: 8, fontSize: 14, color: C.ink2 } }, pt == null ? 'Primer mes registrat' : tot === pt ? `Igual que al ${P.name}` : `${tot > pt ? '+' : '−'}${Math.abs(tot - pt)} respecte al ${P.name}`),
+      h('div', { style: { marginTop: 22, display: 'flex', alignItems: 'flex-end', gap: 10, height: 116 } },
+        cols.map(c => { const t = this.sum(c.m.wem), hh = Math.max(6, (t - 7) / 28 * 84), sel = c.j === mi, col = this.sTone(t, 7, 35);
+          return h('button', { key: c.m.k, onClick: () => this.setMonth(c.j), style: { flex: 1, border: 'none', background: 'transparent', padding: 0, cursor: 'pointer', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'flex-end', gap: 6, height: '100%' } },
+            h('span', { style: { fontSize: 12, fontWeight: 600, color: sel ? C.ink : C.ink3, fontVariantNumeric: 'tabular-nums' } }, String(t)),
+            h('span', { style: { width: '100%', maxWidth: 38, height: hh, borderRadius: '5px 5px 2px 2px', background: sel ? col : this.alpha(col, .3), transformOrigin: 'bottom', animation: `mtGrowY .6s cubic-bezier(.2,.7,.2,1) ${(.2 + c.j * .05).toFixed(2)}s both`, transition: 'background .3s' } }),
+            h('span', { style: { fontSize: 11.5, color: sel ? C.ink : C.ink3 } }, c.m.ab)); }),
+        h('div', { key: 'set', style: { flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'flex-end', gap: 6, height: '100%' } },
+          h('span', { style: { fontSize: 12, color: C.ink3 } }, '—'), h('span', { style: { width: '100%', maxWidth: 38, height: 22, borderRadius: '5px 5px 2px 2px', boxSizing: 'border-box', border: '1px dashed rgba(255,255,255,.2)' } }), h('span', { style: { fontSize: 11.5, color: C.ink3 } }, 'Set'))),
+      h('div', { style: { marginTop: 12, fontSize: 12, color: C.ink3 } }, 'El de setembre arriba el dia 30'));
+  }
+  apsqEl(M, P) {
+    const C = this.C, tot = this.sum(M.apsq), pt = P ? this.sum(P.apsq) : null;
+    return h('div', { style: this.card({ padding: '20px 24px 14px' }) },
+      this.cardHead('Esforç psicològic (APSQ)', 'Deu preguntes · més baix vol dir menys esforç', this.tag("No entra a l'anàlisi de la IA")),
+      h('div', { style: { marginTop: 14, display: 'flex', alignItems: 'baseline', gap: 8 } }, h('span', { style: { fontSize: 28, fontWeight: 600, letterSpacing: '-.02em' } }, String(tot)), h('span', { style: { fontSize: 14, color: C.ink3 } }, '/50'),
+        pt != null ? h('span', { style: { marginLeft: 8, fontSize: 13, color: C.ink3 } }, tot === pt ? `igual que al ${P.name}` : `${tot > pt ? '+' : '−'}${Math.abs(tot - pt)} respecte al ${P.name}`) : null),
+      h('div', { style: { marginTop: 10 } }, this.APSQ_ITEMS.map((t, j) => { const v = M.apsq[j];
+        return h('div', { key: j, style: { display: 'grid', gridTemplateColumns: 'minmax(0,1fr) auto 104px', alignItems: 'center', gap: 16, padding: '9px 0', borderTop: `1px solid ${C.line}` } },
+          h('span', { style: { fontSize: 13, color: C.ink2, lineHeight: 1.4 } }, t),
+          h('span', { style: { display: 'flex', gap: 4 } }, [1, 2, 3, 4, 5].map(q => h('span', { key: q, style: { width: 8, height: 8, borderRadius: '50%', background: q <= v ? 'rgba(236,237,239,.7)' : 'rgba(255,255,255,.1)' } }))),
+          h('span', { style: { fontSize: 12, color: C.ink3, textAlign: 'right', whiteSpace: 'nowrap' } }, this.SCALE5[v - 1])); })));
+  }
+  infoEl(M) {
+    const C = this.C;
+    return h('div', { style: this.card({ padding: '20px 24px 22px' }) },
+      this.cardHead('Informació complementària', 'Text lliure del formulari mensual', this.tag("No entra a l'anàlisi de la IA")),
+      M.info ? h('p', { style: { margin: '18px 0 0', paddingLeft: 14, borderLeft: '2px solid rgba(255,255,255,.14)', fontSize: 16, lineHeight: 1.6, textWrap: 'pretty' } }, M.info) : h('p', { style: { margin: '18px 0 0', fontSize: 14, color: C.ink3 } }, 'Aquest mes no hi has afegit res.'));
+  }
+
+  // ── Pàgina: Evolució ─────────────────────────────────────────────────
+  pageEvol(sc, D, g) {
+    const C = this.C, s = this.state, nou = sc === 'nou', range = nou ? 7 : s.evoRange, idx = Array.from({ length: range }, (_, j) => 42 - range + j), R = this.reportData('trend', sc), f = this.focusN();
+    const right = this.seg([{ k: 7, t: '7 dies' }, { k: 28, t: '28 dies', dis: nou }, { k: 42, t: '6 setmanes', dis: nou }], range, v => this.setState({ evoRange: v }));
+    const rep = this.reportEl({ title: 'Lectura de tendències', meta: nou ? '5 dies de dades' : 'Últims 28 dies', left: this.trendLeftEl(sc), R, basis: ['FC en repòs', 'HRV', 'Son', 'Com estàs', "Comunicació amb l'entrenador"] });
+    const marks = R.findings.filter(x => this.KEYS.includes(x.k) || x.k === 'reg').map(x => ({ k: x.k === 'reg' ? 'state' : x.k, n: x.n, days: x.days }));
+    const multi = h('div', { style: this.card({ padding: '20px 24px 18px' }) },
+      this.cardHead('Dades diàries', `${range === 42 ? '6 setmanes' : `${range} dies`} · cada punt té el to que li correspon respecte a la teva franja`),
+      h('div', { style: { marginTop: 14 } }, h(this.Multi, { key: `mu-${range}-${sc}`, D, idx, marks, focus: f })),
+      this.legendEl([D.band ? this.lgBand() : null, ...(D.band ? this.lgStatus() : []), this.lgCoach()].filter(Boolean)));
+    let sents;
+    if (nou) sents = this.emptyEl('Com et sents vs què diuen les dades', 'Per comparar com et sents amb les teves dades primer necessitem saber quin és el teu normal. Falten 9 dies.');
+    else {
+      const st = this.sentsStats(sc, range), sm = R.findings.filter(x => x.k === 'sents').map(x => ({ n: x.n, days: x.days.length ? x.days : st.mis }));
+      sents = h('div', { style: this.card({ padding: '20px 24px 18px' }) },
+        this.cardHead('Com et sents vs què diuen les dades', `Coincideixen ${st.k} de ${st.n} dies amb registre · tots dos respecte al teu normal`),
+        this.legendEl([this.lgItem('f', h('span', { style: { width: 16, borderTop: '2px solid rgba(236,237,239,.85)' } }), 'Com et sents (com estàs)'), this.lgItem('o', h('span', { style: { width: 16, borderTop: '1.5px dashed rgba(236,237,239,.6)' } }), 'Què diuen les dades (FC, HRV i son)'), this.lgItem('m', h('span', { style: { width: 10, height: 12, borderRadius: 2, background: 'rgba(255,255,255,.08)', borderLeft: '1.5px solid rgba(236,237,239,.5)', boxSizing: 'border-box' } }), 'No coincideixen')]),
+        h('div', { style: { marginTop: 12 } }, h(this.Sents, { key: `se-${range}-${sc}`, feel: idx.map(i => D.feel[i]), obj: idx.map(i => D.obj[i]), est: idx.map(i => D.vals.estat[i]), idx, marks: sm, focus: f })));
+    }
+    return this.stack([this.headEl('Evolució', 'Com canvien les teves dades amb el temps', right), rep, multi, sents]);
+  }
+  trendLeftEl(sc) {
+    const C = this.C;
+    if (sc === 'nou') return h('div', null, this.lab('Com et sents vs dades'), h('div', { style: { marginTop: 10, fontSize: 30, fontWeight: 600, letterSpacing: '-.02em', color: C.ink2 } }, 'Encara no'), h('div', { style: { marginTop: 8, fontSize: 14, color: C.ink3, lineHeight: 1.45 } }, 'Necessitem 14 dies per saber quin és el teu normal.'));
+    const st = this.sentsStats(sc, 28);
+    return h('div', null,
+      this.lab('Com et sents vs dades'),
+      h('div', { style: { marginTop: 10, display: 'flex', alignItems: 'baseline', gap: 8 } }, h('span', { style: { fontSize: 52, fontWeight: 600, letterSpacing: '-.03em', lineHeight: 1 } }, String(st.k)), h('span', { style: { fontSize: 16, color: C.ink3 } }, `de ${st.n} dies`)),
+      h('div', { style: { marginTop: 8, fontSize: 14, color: C.ink2 } }, 'Coincideixen'),
+      h('div', { style: { marginTop: 18, display: 'flex', gap: 2 } }, Array.from({ length: st.n }, (_, j) => h('span', { key: j, style: { flex: 1, height: 16, borderRadius: 2, background: j < st.k ? 'rgba(236,237,239,.55)' : 'rgba(255,255,255,.08)', transformOrigin: 'bottom', animation: `mtGrowY .3s ${(.2 + j * .02).toFixed(2)}s both` } }))),
+      h('div', { style: { marginTop: 18, display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 } },
+        [['Et sents millor', st.better], ['Et sents pitjor', st.worse]].map(([t, v]) => h('div', { key: t }, h('div', { style: { fontSize: 20, fontWeight: 600 } }, String(v)), h('div', { style: { marginTop: 3, fontSize: 12, color: C.ink3 } }, `${t} que les dades`)))),
+      h('div', { style: { marginTop: 14, fontSize: 12, color: C.ink3 } }, 'Últims 28 dies · els dies sense registre no compten'));
+  }
+
+  // ── Pàgina: Privacitat ───────────────────────────────────────────────
+  pagePriv(sc, D, g) {
+    const C = this.C, w = this.who(sc), gtc = 'minmax(0,2.2fr) repeat(3, minmax(0,1fr))';
+    const cell = (r, j) => r === 'yes' ? h('span', { key: j, style: { display: 'flex', alignItems: 'center', gap: 7, fontSize: 13.5 } }, h('span', { style: { color: C.ink } }, this.icon('check', 15)), j === 0 ? 'Ho veus' : 'Ho veu')
+      : r === 'code' ? h('span', { key: j, style: { display: 'flex', alignItems: 'center', gap: 7, fontSize: 13.5, color: C.ink2 } }, h('span', { style: { fontFamily: this.MONO, fontSize: 11.5, padding: '2px 6px', border: `1px solid ${C.line2}`, borderRadius: 5 } }, w.code), 'Amb codi')
+      : h('span', { key: j, style: { display: 'flex', alignItems: 'center', gap: 7, fontSize: 13.5, color: C.ink3 } }, this.icon('minus', 15), 'No ho veu');
+    const table = h('div', { style: this.card({ padding: '6px 24px 8px' }) },
+      h('div', { style: { display: 'grid', gridTemplateColumns: gtc, gap: 20, padding: '16px 0 14px' } }, h('span', { style: { fontSize: 13, color: C.ink3 } }, 'Dada'),
+        this.ROLES.map(r => h('div', { key: r.t }, h('div', { style: { fontSize: 14, fontWeight: 600 } }, r.t), h('div', { style: { marginTop: 3, fontSize: 12, color: C.ink3, lineHeight: 1.35 } }, r.d)))),
+      this.PRIV.map((p, i) => h('div', { key: p.t, className: 'mt-row', style: { display: 'grid', gridTemplateColumns: gtc, gap: 20, alignItems: 'center', padding: '14px 0', borderTop: `1px solid ${C.line}`, animation: `mtIn .4s cubic-bezier(.2,.7,.2,1) ${(.1 + i * .04).toFixed(2)}s both` } },
+        h('div', { style: { minWidth: 0 } }, h('div', { style: { fontSize: 14.5 } }, p.t), h('div', { style: { marginTop: 3, fontSize: 12.5, color: C.ink3 } }, p.s)), p.r.map(cell))));
+    const ident = h('div', { style: this.card({ padding: '20px 24px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 24, flexWrap: 'wrap' }) },
+      h('div', null, h('div', { style: { fontSize: 15, fontWeight: 600 } }, "A l'estudi apareixes com"), h('div', { style: { marginTop: 4, fontSize: 13, color: C.ink3 } }, 'Els resultats es presenten amb codis, mai amb noms.')),
+      h('div', { style: { display: 'flex', alignItems: 'center', gap: 14, fontSize: 16 } }, h('span', { style: { color: C.ink3, textDecoration: 'line-through', textDecorationColor: 'rgba(236,237,239,.5)' } }, w.name), h('span', { style: { color: C.ink3 } }, '→'), h('span', { style: { fontFamily: this.MONO, fontSize: 15, padding: '5px 10px', border: `1px solid ${C.line2}`, borderRadius: 7 } }, w.code)));
+    return this.stack([this.headEl('Privacitat', 'Qui veu cada part de les teves dades'), table, ident]);
+  }
+
+  // ── Pàgina: Ajustos ──────────────────────────────────────────────────
+  pageAjustos(sc, D, g) {
+    const C = this.C, s = this.state, w = this.who(sc);
+    const group = (title, rows, key) => h('div', { key, style: { marginTop: 8 } }, h('div', { style: { fontSize: 13, color: C.ink3, padding: '0 4px 8px' } }, title), h('div', { style: this.card({ padding: '0 20px' }) }, rows));
+    const row = (l, r, i, sub) => h('div', { key: l, style: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 20, padding: '14px 0', borderTop: i ? `1px solid ${C.line}` : 'none' } },
+      h('div', { style: { minWidth: 0 } }, h('div', { style: { fontSize: 14.5 } }, l), sub ? h('div', { style: { marginTop: 3, fontSize: 12.5, color: C.ink3 } }, sub) : null), h('div', { style: { fontSize: 14, color: C.ink2, flex: 'none' } }, r));
+    const langs = this.LANGS.map((l, i) => { const on = l.k === s.lang;
+      return h('button', { key: l.k, onClick: () => this.setState({ lang: l.k }), style: { display: 'flex', alignItems: 'center', gap: 12, width: '100%', padding: '14px 0', border: 'none', borderTop: i ? `1px solid ${C.line}` : 'none', background: 'transparent', textAlign: 'left', cursor: 'pointer', fontSize: 14.5, color: on ? C.ink : C.ink2 } },
+        h('span', { style: { width: 16, height: 16, borderRadius: '50%', boxSizing: 'border-box', border: `1.5px solid ${on ? C.ink : 'rgba(236,237,239,.35)'}`, display: 'flex', alignItems: 'center', justifyContent: 'center' } }, on ? h('span', { style: { width: 7, height: 7, borderRadius: '50%', background: C.ink } }) : null), l.t); });
+    const body = h('div', { style: { maxWidth: 720 } },
+      group('Perfil', [row('Nom', w.name, 0), row("Codi d'esportista", h('span', { style: { fontFamily: this.MONO, fontSize: 13 } }, w.code), 1), row('Sexe', w.sexe, 2), row('Edat', `${w.age} anys`, 3)], 'p'),
+      h('div', { style: { height: 20 } }),
+      group('Dades diàries', [row('Com es registren', 'Manualment, cada matí', 0), row('Polsera o rellotge', this.tag('Properament'), 1, 'Connexió automàtica per API segons la marca i el model')], 'd'),
+      h('div', { style: { height: 20 } }),
+      group('Idioma', langs, 'l'),
+      h('div', { style: { height: 20 } }),
+      group('Sobre la IA', [h('div', { key: 'ia', style: { padding: '16px 0', fontSize: 14, lineHeight: 1.6, color: C.ink2, textWrap: 'pretty' } },
+        h('p', { style: { margin: 0 } }, "Els informes els redacta una IA a partir de les teves dades. Són orientatius: no són un diagnòstic mèdic ni substitueixen el que et digui l'entrenador."),
+        h('p', { style: { margin: '10px 0 0' } }, h('span', { style: { color: C.ink } }, 'La IA llegeix'), ': el registre diari, el formulari setmanal i el benestar mental (WEMWBS).'),
+        h('p', { style: { margin: '6px 0 0' } }, h('span', { style: { color: C.ink } }, 'No llegeix'), ": l'APSQ, la informació complementària ni l'HRV setmanal."))], 'ia'),
+      h('div', { style: { marginTop: 28, fontSize: 12, color: C.ink3 } }, 'Max Tracking 0.9 · Projecte de recerca de Batxillerat'));
+    return this.stack([this.headEl('Ajustos'), body]);
+  }
+
+  // ── Estructura ───────────────────────────────────────────────────────
+  go(k) { this.setState(st => ({ page: k, hoverF: null, pinF: null, visit: st.page === k ? st.visit : st.visit + 1 })); }
+  railEl(sc) {
+    const C = this.C, s = this.state, w = this.who(sc);
+    const item = ([k, t, ic]) => { const on = s.page === k;
+      return h('button', { key: k, className: 'mt-rb', 'data-on': on ? '' : undefined, 'aria-current': on ? 'page' : undefined, onClick: () => this.go(k), title: t,
+        style: { width: 60, height: 58, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 5, border: 'none', borderRadius: 11, cursor: 'pointer', background: on ? 'rgba(255,255,255,.08)' : 'transparent', color: on ? C.ink : C.ink3, flex: 'none' } },
+        this.icon(ic, 20), h('span', { style: { fontSize: 10.5, fontWeight: 500, letterSpacing: '.01em' } }, t)); };
+    return h('nav', { key: 'rail', 'aria-label': 'Navegació', style: { width: 76, flex: 'none', height: '100vh', boxSizing: 'border-box', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4, padding: '18px 0 16px', borderRight: `1px solid ${C.line}`, background: C.bg } },
+      h('div', { key: 'logo', title: 'Max Tracking', style: { width: 34, height: 34, flex: 'none', marginBottom: 18, borderRadius: 9, display: 'flex', alignItems: 'center', justifyContent: 'center', background: C.ink, color: C.bg, fontSize: 12, fontWeight: 700, letterSpacing: '.02em' } }, 'MT'),
+      this.PAGES.map(item), h('div', { key: 'sp', style: { flex: 1 } }), this.PAGES2.map(item),
+      h('div', { key: 'av', title: `${w.name} · ${w.code}`, style: { marginTop: 10, width: 34, height: 34, flex: 'none', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', boxSizing: 'border-box', background: C.s3, border: `1px solid ${C.line2}`, fontSize: 13, fontWeight: 600, color: C.ink2 } }, w.name[0]));
+  }
+  pageEl(sc, D, g) {
+    const s = this.state, P = { avui: this.pageAvui, setmana: this.pageSetmana, mes: this.pageMes, evolucio: this.pageEvol, priv: this.pagePriv, ajustos: this.pageAjustos }[s.page] || this.pageAvui;
+    return h('div', { key: `pg-${s.page}-${sc}-${s.visit}`, style: { boxSizing: 'border-box', width: '100%', maxWidth: g.cw + g.pad * 2, margin: '0 auto', padding: `0 ${g.pad}px 80px` } }, P.call(this, sc, D, g));
+  }
+  pickScn(k) { this.setState(st => ({ scenario: k, hoverF: null, pinF: null, week: 0, month: 0, visit: st.visit + 1, range: k === 'nou' ? 7 : st.range, evoRange: k === 'nou' ? 7 : st.evoRange === 7 ? 28 : st.evoRange })); }
+  setProtoHidden(v) { try { localStorage.setItem('mt-proto-hidden', v ? '1' : '0'); } catch (e) {} this.setState({ pHidden: v, pOpen: false }); }
+  // Control temporal del prototip: botó flotant per canviar d'escenari (tecla E per amagar-lo o recuperar-lo).
+  protoEl(sc) {
+    const s = this.state, C = this.C;
+    if (s.pHidden) return h('div', { key: 'proto-h', className: 'mt-hc', title: 'Mostrar escenario (tecla E)', onClick: () => this.setProtoHidden(false),
+      style: { position: 'fixed', right: 0, bottom: 0, width: 36, height: 36, zIndex: 60, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' } },
+      h('span', { className: 'mt-dot', style: { width: 6, height: 6, borderRadius: '50%', background: C.ink } }));
+    const dotOf = k => { const p = k === 'nou' ? null : this.data(k).pos[41]; return p == null ? 'rgba(236,237,239,.3)' : this.tone(this.dayH(p)); };
+    const rows = this.SCN.map(x => { const on = x.k === sc;
+      return h('button', { key: x.k, className: 'mt-pr', onClick: () => this.pickScn(x.k),
+        style: { display: 'flex', alignItems: 'center', gap: 10, width: '100%', padding: '8px 10px', border: 'none', borderRadius: 7, cursor: 'pointer', textAlign: 'left', fontSize: 13, background: on ? 'rgba(255,255,255,.08)' : 'transparent', color: on ? C.ink : C.ink2 } },
+        h('span', { style: { width: 7, height: 7, flex: 'none', borderRadius: '50%', background: dotOf(x.k) } }), h('span', { style: { flex: 1 } }, x.t), on ? h('span', { style: { color: C.ink } }, this.icon('check', 13)) : null); });
+    const foot = { display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%', boxSizing: 'border-box', padding: '8px 10px', border: 'none', borderRadius: 7, background: 'transparent', cursor: 'pointer', fontSize: 12.5, color: C.ink2, textDecoration: 'none' };
+    const panel = s.pOpen ? h('div', { key: 'pp', style: { position: 'absolute', right: 0, bottom: 50, width: 236, padding: 6, boxSizing: 'border-box', borderRadius: 12, background: 'rgba(22,23,26,.96)', backdropFilter: 'blur(14px)', WebkitBackdropFilter: 'blur(14px)', border: `1px solid ${C.line2}`, boxShadow: '0 18px 50px rgba(0,0,0,.5)', animation: 'mtIn .2s cubic-bezier(.2,.7,.2,1) both' } },
+      h('div', { style: { display: 'flex', justifyContent: 'space-between', padding: '6px 10px 8px', fontSize: 12, color: C.ink3 } }, h('span', null, 'Escenario'), h('span', null, 'Prototipo')),
+      rows,
+      h('div', { style: { height: 1, margin: '6px 4px', background: C.line } }),
+      h('a', { className: 'mt-pr', href: './Max%20Tracking%20-%20M%C3%B3vil.dc.html', target: '_blank', rel: 'noopener', style: foot }, h('span', null, 'Abrir versión móvil'), h('span', null, '↗')),
+      h('button', { className: 'mt-pr', onClick: () => this.setProtoHidden(true), style: foot }, h('span', null, 'Ocultar botón'), h('span', { style: { fontFamily: this.MONO, fontSize: 10, padding: '2px 5px', border: `1px solid ${C.line2}`, borderRadius: 4, color: C.ink3 } }, 'E'))) : null;
+    const btn = h('button', { key: 'pb', className: 'mt-pb', 'data-open': s.pOpen ? '' : undefined, title: 'Escenario del prototipo · E para ocultar', onClick: () => this.setState({ pOpen: !s.pOpen }),
+      style: { width: 40, height: 40, borderRadius: '50%', border: `1px solid ${C.line2}`, background: 'rgba(22,23,26,.9)', backdropFilter: 'blur(10px)', WebkitBackdropFilter: 'blur(10px)', color: C.ink, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', boxShadow: '0 8px 24px rgba(0,0,0,.35)', padding: 0 } },
+      this.icon('flask', 17));
+    return [s.pOpen ? h('div', { key: 'pbd', onClick: () => this.setState({ pOpen: false }), style: { position: 'fixed', inset: 0, zIndex: 59 } }) : null,
+      h('div', { key: 'proto', style: { position: 'fixed', right: 20, bottom: 20, zIndex: 60 } }, panel, btn)];
+  }
+
+  renderVals() {
+    const s = this.state, sc = s.scenario, D = this.data(sc), g = this.geom(), C = this.C;
+    return {
+      rootSt: { display: 'flex', height: '100vh', overflow: 'hidden', background: C.bg, color: C.ink, fontFamily: this.SANS },
+      rail: this.railEl(sc), mainRef: this.mainRef, mainSt: { flex: 1, minWidth: 0, height: '100vh', overflowY: 'auto' },
+      page: this.pageEl(sc, D, g), proto: this.protoEl(sc),
+    };
+  }
+}
+</script>
+</body>
+</html>
