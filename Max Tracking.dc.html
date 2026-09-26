@@ -43,7 +43,7 @@ button{font:inherit;color:inherit}
 <div style="{{ phoneBox }}"><div style="{{ phoneScale }}">
 <x-import component-from-global-scope="IOSDevice" from="./ios-frame.jsx" dark="{{ true }}" hint-size="402px,874px">
 <div ref="{{ phoneRef }}" style="min-height:100%;display:flex;flex-direction:column;background:#0B0C0E;color:#ECEEF1;font-family:'Schibsted Grotesk',system-ui,sans-serif">
-<div style="position:sticky;top:0;z-index:4;background:#0B0C0E;padding:60px 24px 10px;display:flex;justify-content:space-between;align-items:baseline;font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.14em;color:rgba(236,238,241,.5)"><span>MAX TRACKING</span><span>DJ 24 SET</span></div>
+<div style="position:sticky;top:0;z-index:4;background:#0B0C0E;padding:60px 24px 10px;display:flex;justify-content:space-between;align-items:baseline;font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.14em;color:rgba(236,238,241,.5)"><span>MAX TRACKING</span><span>{{ hdr.short }}</span></div>
 <div style="flex:1;display:flex;flex-direction:column">
 
 <sc-if value="{{ m.avui }}" hint-placeholder-val="{{ true }}">
@@ -52,17 +52,17 @@ button{font:inherit;color:inherit}
 <div style="position:relative;overflow:hidden;flex:none;margin:18px 24px 6px;padding:18px;display:flex;align-items:center;gap:18px;background:#121316;border:1px solid rgba(255,255,255,.08);border-radius:18px">
 <div style="flex:none">{{ av.ring }}</div>
 <div style="flex:1;min-width:0;display:flex;flex-direction:column">
-<div style="font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.14em;color:rgba(236,238,241,.5)">ESTAT D'AVUI</div>
+<div style="font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.14em;color:rgba(236,238,241,.5)">{{ tx.todayState }}</div>
 <div style="margin-top:8px;font-size:32px;font-weight:600;letter-spacing:-.02em;line-height:1.05">{{ av.word }}</div>
 <div style="margin-top:8px;font-size:14px;line-height:1.4;color:rgba(236,238,241,.65);text-wrap:pretty">{{ av.line }}</div>
 <div style="margin-top:12px">{{ av.status }}</div>
 </div>
 </div>
 <div style="margin:0 24px;padding:16px 0;border-bottom:1px solid rgba(255,255,255,.08)">
-<div style="display:flex;justify-content:space-between;align-items:center;font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.14em;color:rgba(236,238,241,.5)"><div style="display:flex;align-items:center;gap:8px"><span style="{{ av.sq }}"></span><span>LA IA, AVUI</span></div><span>ORIENTATIU</span></div>
-<sc-if value="{{ av.loading }}" hint-placeholder-val="{{ false }}"><div style="display:flex;flex-direction:column;gap:9px;margin-top:14px"><div style="display:flex;align-items:center;gap:8px;font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.12em;color:rgba(236,238,241,.5)"><span style="width:6px;height:6px;border-radius:50%;background:#ECEEF1;animation:mtPulse 1.1s ease-in-out infinite"></span><span>LLEGINT LES TEVES DADES…</span></div><div style="height:9px;width:100%;background:rgba(255,255,255,.08);animation:mtPulse 1.6s ease-in-out infinite"></div><div style="height:9px;width:92%;background:rgba(255,255,255,.08);animation:mtPulse 1.6s ease-in-out .15s infinite"></div><div style="height:9px;width:60%;background:rgba(255,255,255,.08);animation:mtPulse 1.6s ease-in-out .3s infinite"></div></div></sc-if>
+<div style="display:flex;justify-content:space-between;align-items:center;font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.14em;color:rgba(236,238,241,.5)"><div style="display:flex;align-items:center;gap:8px"><span style="{{ av.sq }}"></span><span>{{ tx.aiToday }}</span></div><span>{{ tx.guide }}</span></div>
+<sc-if value="{{ av.loading }}" hint-placeholder-val="{{ false }}"><div style="display:flex;flex-direction:column;gap:9px;margin-top:14px"><div style="display:flex;align-items:center;gap:8px;font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.12em;color:rgba(236,238,241,.5)"><span style="width:6px;height:6px;border-radius:50%;background:#ECEEF1;animation:mtPulse 1.1s ease-in-out infinite"></span><span>{{ tx.reading }}</span></div><div style="height:9px;width:100%;background:rgba(255,255,255,.08);animation:mtPulse 1.6s ease-in-out infinite"></div><div style="height:9px;width:92%;background:rgba(255,255,255,.08);animation:mtPulse 1.6s ease-in-out .15s infinite"></div><div style="height:9px;width:60%;background:rgba(255,255,255,.08);animation:mtPulse 1.6s ease-in-out .3s infinite"></div></div></sc-if>
 <sc-if value="{{ av.ready }}" hint-placeholder-val="{{ false }}"><p style="margin:10px 0 0;font-size:15px;line-height:1.55;text-wrap:pretty;animation:mtFade .6s both"><sc-for list="{{ av.segs }}" as="g" hint-placeholder-count="1"><span style="{{ g.st }}">{{ g.t }}</span></sc-for></p></sc-if>
-<div style="margin-top:12px;font-family:'IBM Plex Mono',monospace;font-size:9px;letter-spacing:.1em;line-height:1.6;color:rgba(236,238,241,.5)">NO ÉS UN DIAGNÒSTIC MÈDIC · SI ALGUNA COSA NO VA BÉ, PARLA-HO AMB L'ENTRENADOR</div>
+<div style="margin-top:12px;font-family:'IBM Plex Mono',monospace;font-size:9px;letter-spacing:.1em;line-height:1.6;color:rgba(236,238,241,.5)">{{ tx.disclaimer }}</div>
 </div>
 <div style="margin:0 24px;padding:14px 0 0;font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.14em;color:rgba(236,238,241,.5)">{{ av.basis }}</div>
 <div style="margin:0 24px 28px;display:grid;grid-template-columns:1fr 1fr"><sc-for list="{{ av.cells }}" as="c" hint-placeholder-count="4"><button style="{{ c.box }}" style-hover="background:rgba(255,255,255,.025)" onClick="{{ c.onClick }}"><span style="font-family:'IBM Plex Mono',monospace;font-size:28px;font-weight:500;line-height:1"><span style="{{ c.vc }}">{{ c.v }}</span><span style="margin-left:6px;font-size:11px;font-weight:400;color:rgba(236,238,241,.5)">{{ c.unit }}</span></span><span style="margin-top:8px;font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.12em;color:rgba(236,238,241,.5)">{{ c.label }}</span><span style="margin-top:4px;font-family:'IBM Plex Mono',monospace;font-size:10px"><span style="{{ c.dc }}">{{ c.d }}</span></span><span style="margin-top:12px;display:block">{{ c.spark }}</span></button></sc-for></div>
@@ -71,7 +71,7 @@ button{font:inherit;color:inherit}
 
 <sc-if value="{{ m.evol }}" hint-placeholder-val="{{ false }}">
 <div style="display:flex;flex-direction:column;padding-bottom:28px;animation:mtIn .42s cubic-bezier(.2,.7,.2,1) both">
-<div style="display:flex;justify-content:space-between;align-items:center;padding:12px 24px 0"><div style="font-size:22px;font-weight:500;letter-spacing:-.01em">Evolució</div><div style="display:flex;gap:2px;padding:2px;border:1px solid rgba(255,255,255,.12)"><sc-for list="{{ ev.ranges }}" as="r" hint-placeholder-count="2"><button style="{{ r.style }}" onClick="{{ r.onClick }}">{{ r.label }}</button></sc-for></div></div>
+<div style="display:flex;justify-content:space-between;align-items:center;padding:12px 24px 0"><div style="font-size:22px;font-weight:500;letter-spacing:-.01em">{{ tx.evol }}</div><div style="display:flex;gap:2px;padding:2px;border:1px solid rgba(255,255,255,.12)"><sc-for list="{{ ev.ranges }}" as="r" hint-placeholder-count="2"><button style="{{ r.style }}" onClick="{{ r.onClick }}">{{ r.label }}</button></sc-for></div></div>
 <div style="display:grid;grid-template-columns:1fr 1fr;margin:16px 24px 0;border:1px solid rgba(255,255,255,.12)"><sc-for list="{{ evoViews }}" as="v" hint-placeholder-count="2"><button style="{{ v.style }}" onClick="{{ v.onClick }}">{{ v.label }}</button></sc-for></div>
 <sc-if value="{{ evoMetrics }}" hint-placeholder-val="{{ true }}">
 <div style="display:flex;flex-direction:column">
@@ -84,25 +84,25 @@ button{font:inherit;color:inherit}
 <div style="margin:14px 24px 0;width:354px">
 {{ ev.chart }}
 <sc-if value="{{ ev.days }}" hint-placeholder-val="{{ true }}"><div style="display:flex;width:314px;margin-top:8px"><sc-for list="{{ ev.labels }}" as="l" hint-placeholder-count="7"><span style="flex:1;text-align:center;font-family:'IBM Plex Mono',monospace;font-size:9px;letter-spacing:.04em;white-space:nowrap"><span style="{{ l.st }}">{{ l.t }}</span></span></sc-for></div></sc-if>
-<sc-if value="{{ ev.weeks }}" hint-placeholder-val="{{ false }}"><div style="display:flex;width:314px;margin-top:6px;border-left:1px solid rgba(255,255,255,.08)"><sc-for list="{{ ev.weeksList }}" as="w" hint-placeholder-count="4"><button style="flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;padding:8px 0;background:transparent;border:none;border-right:1px solid rgba(255,255,255,.08);cursor:zoom-in;font-family:'IBM Plex Mono',monospace;font-size:9px;letter-spacing:.02em;color:rgba(236,238,241,.65);white-space:nowrap" style-hover="background:rgba(255,255,255,.05);color:#ECEEF1" onClick="{{ w.onClick }}"><span>{{ w.t }}</span><span style="{{ w.fc }}">{{ w.f }}</span></button></sc-for></div><div style="margin-top:8px;font-family:'IBM Plex Mono',monospace;font-size:9px;letter-spacing:.12em;color:rgba(236,238,241,.5)">TOCA UNA SETMANA PER AMPLIAR-LA</div></sc-if>
-<sc-if value="{{ ev.zoomed }}" hint-placeholder-val="{{ false }}"><div style="display:flex;justify-content:space-between;align-items:center;width:314px;margin-top:12px"><span style="font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.12em">{{ ev.zoomLabel }}</span><button style="background:transparent;border:1px solid rgba(255,255,255,.16);padding:6px 9px;cursor:pointer;font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.1em" style-hover="background:rgba(255,255,255,.06)" onClick="{{ ev.back }}">← 28 DIES</button></div></sc-if>
+<sc-if value="{{ ev.weeks }}" hint-placeholder-val="{{ false }}"><div style="display:flex;width:314px;margin-top:6px;border-left:1px solid rgba(255,255,255,.08)"><sc-for list="{{ ev.weeksList }}" as="w" hint-placeholder-count="4"><button style="flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;padding:8px 0;background:transparent;border:none;border-right:1px solid rgba(255,255,255,.08);cursor:zoom-in;font-family:'IBM Plex Mono',monospace;font-size:9px;letter-spacing:.02em;color:rgba(236,238,241,.65);white-space:nowrap" style-hover="background:rgba(255,255,255,.05);color:#ECEEF1" onClick="{{ w.onClick }}"><span>{{ w.t }}</span><span style="{{ w.fc }}">{{ w.f }}</span></button></sc-for></div><div style="margin-top:8px;font-family:'IBM Plex Mono',monospace;font-size:9px;letter-spacing:.12em;color:rgba(236,238,241,.5)">{{ tx.tapWeek }}</div></sc-if>
+<sc-if value="{{ ev.zoomed }}" hint-placeholder-val="{{ false }}"><div style="display:flex;justify-content:space-between;align-items:center;width:314px;margin-top:12px"><span style="font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.12em">{{ ev.zoomLabel }}</span><button style="background:transparent;border:1px solid rgba(255,255,255,.16);padding:6px 9px;cursor:pointer;font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.1em" style-hover="background:rgba(255,255,255,.06)" onClick="{{ ev.back }}">← {{ tx.d28 }}</button></div></sc-if>
 </div>
 <div style="margin:16px 24px 0;display:grid;grid-template-columns:repeat(3,1fr);border-top:1px solid rgba(255,255,255,.08);border-bottom:1px solid rgba(255,255,255,.08);font-family:'IBM Plex Mono',monospace">
 <div style="padding:12px 10px 12px 0;border-right:1px solid rgba(255,255,255,.08)"><div style="font-size:16px;font-weight:500;line-height:1"><span style="{{ ev.avgC }}">{{ ev.avg }}</span></div><div style="margin-top:6px;font-size:9px;letter-spacing:.12em;color:rgba(236,238,241,.5)">{{ ev.avgL }}</div></div>
-<div style="padding:12px 10px;border-right:1px solid rgba(255,255,255,.08)"><div style="font-size:16px;font-weight:500;line-height:1;white-space:nowrap">{{ ev.bandT }}</div><div style="margin-top:6px;font-size:9px;letter-spacing:.12em;color:rgba(236,238,241,.5)">LA TEVA FRANJA</div></div>
+<div style="padding:12px 10px;border-right:1px solid rgba(255,255,255,.08)"><div style="font-size:16px;font-weight:500;line-height:1;white-space:nowrap">{{ ev.bandT }}</div><div style="margin-top:6px;font-size:9px;letter-spacing:.12em;color:rgba(236,238,241,.5)">{{ tx.yourBand }}</div></div>
 <div style="padding:12px 0 12px 10px"><div style="font-size:16px;font-weight:500;line-height:1"><span style="{{ ev.outC }}">{{ ev.outT }}</span></div><div style="margin-top:6px;font-size:9px;letter-spacing:.12em;color:rgba(236,238,241,.5)">{{ ev.outL }}</div></div>
 </div>
 <div style="margin:14px 24px 0;display:flex;flex-wrap:wrap;gap:8px 16px;font-family:'IBM Plex Mono',monospace;font-size:9px;letter-spacing:.1em;color:rgba(236,238,241,.5)">
-<div style="display:flex;align-items:center;gap:7px"><span style="width:14px;height:8px;background:rgba(236,238,241,.08);border-top:1px dashed rgba(236,238,241,.4)"></span><span>LA TEVA FRANJA · ÚLTIMES SETMANES</span></div>
-<div style="display:flex;align-items:center;gap:7px"><span style="{{ legendSw }}"></span><span>PER VIGILAR → BÉ</span></div>
-<div style="display:flex;align-items:center;gap:7px"><span style="width:1px;height:10px;border-left:1px dashed rgba(236,238,241,.45)"></span><span>SENSE DADES</span></div>
+<div style="display:flex;align-items:center;gap:7px"><span style="width:14px;height:8px;background:rgba(236,238,241,.08);border-top:1px dashed rgba(236,238,241,.4)"></span><span>{{ tx.bandLegend }}</span></div>
+<div style="display:flex;align-items:center;gap:7px"><span style="{{ legendSw }}"></span><span>{{ tx.scaleLegend }}</span></div>
+<div style="display:flex;align-items:center;gap:7px"><span style="width:1px;height:10px;border-left:1px dashed rgba(236,238,241,.45)"></span><span>{{ tx.noData }}</span></div>
 </div>
-<div style="margin:10px 24px 0;font-family:'IBM Plex Mono',monospace;font-size:9px;letter-spacing:.1em;color:rgba(236,238,241,.5)">PASSA EL DIT PEL GRÀFIC PER VEURE CADA DIA</div>
+<div style="margin:10px 24px 0;font-family:'IBM Plex Mono',monospace;font-size:9px;letter-spacing:.1em;color:rgba(236,238,241,.5)">{{ tx.swipeHint }}</div>
 <sc-if value="{{ ev.isEstat }}" hint-placeholder-val="{{ false }}">
 <div style="margin:22px 24px 0;padding-top:14px;border-top:1px solid rgba(255,255,255,.08)">
-<div style="display:flex;justify-content:space-between;align-items:center;font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.14em;color:rgba(236,238,241,.5)"><span>EL QUE HAS RESPOST AVUI</span><span style="padding:3px 6px;border:1px solid rgba(236,238,241,.3);color:#ECEEF1">NOMÉS TU HO VEUS</span></div>
+<div style="display:flex;justify-content:space-between;align-items:center;font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.14em;color:rgba(236,238,241,.5)"><span>{{ tx.answeredToday }}</span><span style="padding:3px 6px;border:1px solid rgba(236,238,241,.3);color:#ECEEF1">{{ tx.onlyYou }}</span></div>
 <sc-if value="{{ it.has }}" hint-placeholder-val="{{ true }}"><div style="margin-top:6px"><sc-for list="{{ it.list }}" as="q" hint-placeholder-count="5"><div style="display:grid;grid-template-columns:1fr auto 40px;align-items:center;gap:12px;padding:11px 0;border-bottom:1px solid rgba(255,255,255,.08)"><div style="display:flex;flex-direction:column;gap:3px;min-width:0"><span style="font-size:14px">{{ q.t }}</span><span style="font-family:'IBM Plex Mono',monospace;font-size:10px;color:rgba(236,238,241,.5)">{{ q.n }}</span></div><div style="display:flex;gap:3px"><sc-for list="{{ q.sq }}" as="z" hint-placeholder-count="5"><span style="{{ z }}"></span></sc-for></div><span style="text-align:right;font-family:'IBM Plex Mono',monospace;font-size:12px"><span style="{{ q.vc }}">{{ q.v }}</span></span></div></sc-for></div></sc-if>
-<sc-if value="{{ it.none }}" hint-placeholder-val="{{ false }}"><p style="margin:12px 0 0;font-size:14px;line-height:1.5;color:rgba(236,238,241,.65);text-wrap:pretty">El qüestionari d'avui encara no ha arribat. Quan l'omplis per a la federació, apareixerà aquí.</p></sc-if>
+<sc-if value="{{ it.none }}" hint-placeholder-val="{{ false }}"><p style="margin:12px 0 0;font-size:14px;line-height:1.5;color:rgba(236,238,241,.65);text-wrap:pretty">{{ tx.noQuest }}</p></sc-if>
 </div>
 </sc-if>
 </div>
@@ -112,25 +112,25 @@ button{font:inherit;color:inherit}
 <sc-if value="{{ se.has }}" hint-placeholder-val="{{ true }}">
 <div style="display:flex;flex-direction:column">
 <div style="padding:20px 24px 0">
-<div style="font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.14em;color:rgba(236,238,241,.5)">COINCIDEIXEN</div>
-<div style="display:flex;align-items:baseline;gap:10px;margin-top:8px"><span style="font-family:'IBM Plex Mono',monospace;font-size:44px;font-weight:500;line-height:1">{{ se.k }}</span><span style="font-family:'IBM Plex Mono',monospace;font-size:12px;letter-spacing:.08em;color:rgba(236,238,241,.5)">DE {{ se.n }} DIES</span></div>
+<div style="font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.14em;color:rgba(236,238,241,.5)">{{ tx.match }}</div>
+<div style="display:flex;align-items:baseline;gap:10px;margin-top:8px"><span style="font-family:'IBM Plex Mono',monospace;font-size:44px;font-weight:500;line-height:1">{{ se.k }}</span><span style="font-family:'IBM Plex Mono',monospace;font-size:12px;letter-spacing:.08em;color:rgba(236,238,241,.5)">{{ se.ofN }}</span></div>
 <div style="margin-top:8px;min-height:16px;font-family:'IBM Plex Mono',monospace;font-size:11px;color:rgba(236,238,241,.65)">{{ se.sub }}</div>
 </div>
 <div style="margin:16px 24px 0;display:flex;flex-wrap:wrap;gap:8px 16px;font-family:'IBM Plex Mono',monospace;font-size:9px;letter-spacing:.1em;color:rgba(236,238,241,.65)">
-<div style="display:flex;align-items:center;gap:7px"><span style="{{ seLeg }}"></span><span>COM ET SENTS</span></div>
-<div style="display:flex;align-items:center;gap:7px"><span style="width:16px;border-top:1.5px dashed rgba(236,238,241,.6)"></span><span>QUÈ DIUEN LES DADES</span></div>
-<div style="display:flex;align-items:center;gap:7px"><span style="width:8px;height:10px;background:rgba(236,238,241,.08);border-left:2px solid rgba(236,238,241,.8)"></span><span>NO COINCIDEIXEN</span></div>
+<div style="display:flex;align-items:center;gap:7px"><span style="{{ seLeg }}"></span><span>{{ tx.lgFeel }}</span></div>
+<div style="display:flex;align-items:center;gap:7px"><span style="width:16px;border-top:1.5px dashed rgba(236,238,241,.6)"></span><span>{{ tx.lgData }}</span></div>
+<div style="display:flex;align-items:center;gap:7px"><span style="width:8px;height:10px;background:rgba(236,238,241,.08);border-left:2px solid rgba(236,238,241,.8)"></span><span>{{ tx.noMatch }}</span></div>
 </div>
-<div style="margin:12px 24px 0;width:354px">{{ se.chart }}<div style="display:flex;justify-content:space-between;margin-top:8px;padding-right:48px;font-family:'IBM Plex Mono',monospace;font-size:9px;letter-spacing:.08em;color:rgba(236,238,241,.5)"><span>{{ se.x0 }}</span><span style="color:#ECEEF1">AVUI</span></div></div>
+<div style="margin:12px 24px 0;width:354px">{{ se.chart }}<div style="display:flex;justify-content:space-between;margin-top:8px;padding-right:48px;font-family:'IBM Plex Mono',monospace;font-size:9px;letter-spacing:.08em;color:rgba(236,238,241,.5)"><span>{{ se.x0 }}</span><span style="color:#ECEEF1">{{ tx.TODAY }}</span></div></div>
 <div style="margin:18px 24px 0;padding-top:14px;border-top:1px solid rgba(255,255,255,.08)">
-<div style="font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.14em;color:rgba(236,238,241,.5)">LA IA, SOBRE AIXÒ</div>
+<div style="font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.14em;color:rgba(236,238,241,.5)">{{ tx.aiOnThis }}</div>
 <sc-if value="{{ se.loading }}" hint-placeholder-val="{{ false }}"><div style="display:flex;flex-direction:column;gap:9px;margin-top:14px"><div style="height:9px;width:100%;background:rgba(255,255,255,.08);animation:mtPulse 1.6s ease-in-out infinite"></div><div style="height:9px;width:70%;background:rgba(255,255,255,.08);animation:mtPulse 1.6s ease-in-out .15s infinite"></div></div></sc-if>
 <sc-if value="{{ se.ready }}" hint-placeholder-val="{{ false }}"><p style="margin:10px 0 0;font-size:15px;line-height:1.55;text-wrap:pretty;animation:mtFade .6s both"><sc-for list="{{ se.segs }}" as="g" hint-placeholder-count="1"><span style="{{ g.st }}">{{ g.t }}</span></sc-for></p></sc-if>
 </div>
-<p style="margin:14px 24px 0;font-size:12px;line-height:1.5;color:rgba(236,238,241,.5);text-wrap:pretty">«Què diuen les dades» combina la FC en repòs, l'HRV i el son. «El teu normal» és la teva pròpia mitjana de les últimes setmanes.</p>
+<p style="margin:14px 24px 0;font-size:12px;line-height:1.5;color:rgba(236,238,241,.5);text-wrap:pretty">{{ tx.sentsNote }}</p>
 </div>
 </sc-if>
-<sc-if value="{{ se.empty }}" hint-placeholder-val="{{ false }}"><div style="margin:28px 24px 0;padding:20px 0;border-top:1px dashed rgba(236,238,241,.25);border-bottom:1px dashed rgba(236,238,241,.25)"><div style="font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.14em;color:rgba(236,238,241,.5)">ENCARA NO DISPONIBLE</div><p style="margin:10px 0 0;font-size:15px;line-height:1.55;text-wrap:pretty">Per comparar com et sents amb les teves dades, primer necessitem saber quin és el teu normal. Falten 9 dies.</p></div></sc-if>
+<sc-if value="{{ se.empty }}" hint-placeholder-val="{{ false }}"><div style="margin:28px 24px 0;padding:20px 0;border-top:1px dashed rgba(236,238,241,.25);border-bottom:1px dashed rgba(236,238,241,.25)"><div style="font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.14em;color:rgba(236,238,241,.5)">{{ tx.notYetAvail }}</div><p style="margin:10px 0 0;font-size:15px;line-height:1.55;text-wrap:pretty">{{ tx.feelEmpty }}</p></div></sc-if>
 </div>
 </sc-if>
 </div>
@@ -138,41 +138,41 @@ button{font:inherit;color:inherit}
 
 <sc-if value="{{ m.setm }}" hint-placeholder-val="{{ false }}">
 <div style="display:flex;flex-direction:column;padding-bottom:28px;animation:mtIn .42s cubic-bezier(.2,.7,.2,1) both">
-<div style="padding:12px 24px 0;font-size:22px;font-weight:500;letter-spacing:-.01em">Resum setmanal</div>
+<div style="padding:12px 24px 0;font-size:22px;font-weight:500;letter-spacing:-.01em">{{ tx.weeklySummary }}</div>
 <sc-if value="{{ wk.has }}" hint-placeholder-val="{{ true }}">
 <div style="display:flex;flex-direction:column">
 <div style="margin:16px 24px 0;display:flex;justify-content:space-between;align-items:baseline;gap:12px;font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.12em;color:rgba(236,238,241,.5)"><span style="color:#ECEEF1">{{ wk.label }}</span><span>{{ wk.pubShort }}</span></div>
 <div style="margin:12px 24px 0;border-top:1px solid rgba(255,255,255,.08);border-bottom:1px solid rgba(255,255,255,.08)">{{ wk.strip }}</div>
-<div style="margin:8px 24px 0;display:flex;justify-content:space-between;gap:12px;font-family:'IBM Plex Mono',monospace;font-size:9px;letter-spacing:.1em;color:rgba(236,238,241,.5)"><span>L'ESTAT DE CADA DIA</span><span>{{ wk.sum }}</span></div>
-<sc-if value="{{ wk.loading }}" hint-placeholder-val="{{ false }}"><div style="display:flex;flex-direction:column;gap:10px;margin:24px 24px 0"><div style="display:flex;align-items:center;gap:8px;font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.12em;color:rgba(236,238,241,.5)"><span style="width:6px;height:6px;border-radius:50%;background:#ECEEF1;animation:mtPulse 1.1s ease-in-out infinite"></span><span>LA IA ESTÀ REPASSANT LA SETMANA…</span></div><div style="height:22px;width:70%;background:rgba(255,255,255,.08);animation:mtPulse 1.6s ease-in-out infinite"></div><div style="height:9px;width:100%;margin-top:8px;background:rgba(255,255,255,.08);animation:mtPulse 1.6s ease-in-out .15s infinite"></div><div style="height:9px;width:90%;background:rgba(255,255,255,.08);animation:mtPulse 1.6s ease-in-out .3s infinite"></div><div style="height:9px;width:55%;background:rgba(255,255,255,.08);animation:mtPulse 1.6s ease-in-out .45s infinite"></div></div></sc-if>
+<div style="margin:8px 24px 0;display:flex;justify-content:space-between;gap:12px;font-family:'IBM Plex Mono',monospace;font-size:9px;letter-spacing:.1em;color:rgba(236,238,241,.5)"><span>{{ tx.eachDay }}</span><span>{{ wk.sum }}</span></div>
+<sc-if value="{{ wk.loading }}" hint-placeholder-val="{{ false }}"><div style="display:flex;flex-direction:column;gap:10px;margin:24px 24px 0"><div style="display:flex;align-items:center;gap:8px;font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.12em;color:rgba(236,238,241,.5)"><span style="width:6px;height:6px;border-radius:50%;background:#ECEEF1;animation:mtPulse 1.1s ease-in-out infinite"></span><span>{{ tx.aiReviewing }}</span></div><div style="height:22px;width:70%;background:rgba(255,255,255,.08);animation:mtPulse 1.6s ease-in-out infinite"></div><div style="height:9px;width:100%;margin-top:8px;background:rgba(255,255,255,.08);animation:mtPulse 1.6s ease-in-out .15s infinite"></div><div style="height:9px;width:90%;background:rgba(255,255,255,.08);animation:mtPulse 1.6s ease-in-out .3s infinite"></div><div style="height:9px;width:55%;background:rgba(255,255,255,.08);animation:mtPulse 1.6s ease-in-out .45s infinite"></div></div></sc-if>
 <sc-if value="{{ wk.ready }}" hint-placeholder-val="{{ false }}">
 <div style="margin:22px 24px 0;display:flex;flex-direction:column;animation:mtFade .6s both">
 <div style="font-size:26px;font-weight:500;letter-spacing:-.015em;line-height:1.15;text-wrap:balance">{{ wk.titol }}</div>
-<div style="margin-top:18px;font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.14em;color:rgba(236,238,241,.5)">COM HA ANAT</div>
+<div style="margin-top:18px;font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.14em;color:rgba(236,238,241,.5)">{{ tx.howWent }}</div>
 <p style="margin:8px 0 0;font-size:15px;line-height:1.55;text-wrap:pretty"><sc-for list="{{ wk.com }}" as="g" hint-placeholder-count="1"><span style="{{ g.st }}">{{ g.t }}</span></sc-for></p>
-<div style="margin-top:18px;padding-top:14px;border-top:1px solid rgba(255,255,255,.08);font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.14em;color:rgba(236,238,241,.5)">HA MILLORAT</div>
+<div style="margin-top:18px;padding-top:14px;border-top:1px solid rgba(255,255,255,.08);font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.14em;color:rgba(236,238,241,.5)">{{ tx.improved }}</div>
 <p style="margin:8px 0 0;font-size:15px;line-height:1.55;text-wrap:pretty"><sc-for list="{{ wk.mill }}" as="g" hint-placeholder-count="1"><span style="{{ g.st }}">{{ g.t }}</span></sc-for></p>
-<div style="margin-top:18px;padding-top:14px;border-top:1px solid rgba(255,255,255,.08);font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.14em;color:rgba(236,238,241,.5)">PER VIGILAR</div>
+<div style="margin-top:18px;padding-top:14px;border-top:1px solid rgba(255,255,255,.08);font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.14em;color:rgba(236,238,241,.5)">{{ tx.toWatch }}</div>
 <p style="margin:8px 0 0;font-size:15px;line-height:1.55;text-wrap:pretty"><sc-for list="{{ wk.vig }}" as="g" hint-placeholder-count="1"><span style="{{ g.st }}">{{ g.t }}</span></sc-for></p>
-<div style="margin-top:18px;padding-top:14px;border-top:1px solid rgba(255,255,255,.08);font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.14em;color:rgba(236,238,241,.5)">LA SETMANA QUE VE</div>
+<div style="margin-top:18px;padding-top:14px;border-top:1px solid rgba(255,255,255,.08);font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.14em;color:rgba(236,238,241,.5)">{{ tx.nextWeek }}</div>
 <p style="margin:8px 0 0;font-size:17px;line-height:1.5;text-wrap:pretty"><sc-for list="{{ wk.rec }}" as="g" hint-placeholder-count="1"><span style="{{ g.st }}">{{ g.t }}</span></sc-for></p>
-<div style="margin-top:14px;font-family:'IBM Plex Mono',monospace;font-size:9px;letter-spacing:.1em;color:rgba(236,238,241,.5)">GENERAT PER IA A PARTIR DE LES TEVES DADES · ORIENTATIU</div>
+<div style="margin-top:14px;font-family:'IBM Plex Mono',monospace;font-size:9px;letter-spacing:.1em;color:rgba(236,238,241,.5)">{{ tx.aiGenerated }}</div>
 </div>
 </sc-if>
-<div style="margin:30px 24px 0;font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.14em;color:rgba(236,238,241,.5)">ALTRES SETMANES</div>
+<div style="margin:30px 24px 0;font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.14em;color:rgba(236,238,241,.5)">{{ tx.otherWeeks }}</div>
 <div style="margin:8px 24px 0;border-top:1px solid rgba(255,255,255,.08)"><sc-for list="{{ wk.hist }}" as="x" hint-placeholder-count="4"><button style="display:grid;grid-template-columns:40px minmax(0,1fr) 48px;align-items:center;gap:12px;width:100%;padding:14px 0;background:transparent;border:none;border-bottom:1px solid rgba(255,255,255,.08);text-align:left;cursor:pointer" style-hover="background:rgba(255,255,255,.03)" onClick="{{ x.onClick }}"><span style="font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.08em;color:rgba(236,238,241,.65)">{{ x.id }}</span><span style="display:flex;flex-direction:column;gap:4px;min-width:0"><span style="font-size:14px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ x.t }}</span><span style="font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.06em;color:rgba(236,238,241,.5)">{{ x.dates }}</span></span><span style="display:flex;gap:2px"><sc-for list="{{ x.comp }}" as="cc" hint-placeholder-count="2"><span style="{{ cc }}"></span></sc-for></span></button></sc-for></div>
 </div>
 </sc-if>
 <sc-if value="{{ wk.none }}" hint-placeholder-val="{{ false }}">
 <div style="margin:20px 24px 0;padding-top:18px;border-top:1px dashed rgba(236,238,241,.25)">
-<div style="font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.14em;color:rgba(236,238,241,.5)">EL TEU PRIMER RESUM</div>
-<div style="margin-top:10px;font-size:22px;font-weight:500;line-height:1.2;letter-spacing:-.01em">Arribarà dilluns 28 de setembre</div>
-<p style="margin:10px 0 0;font-size:15px;line-height:1.55;color:rgba(236,238,241,.65);text-wrap:pretty">Cada dilluns, la IA et resumirà la setmana en llenguatge senzill. Hi trobaràs:</p>
+<div style="font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.14em;color:rgba(236,238,241,.5)">{{ tx.firstSummary }}</div>
+<div style="margin-top:10px;font-size:22px;font-weight:500;line-height:1.2;letter-spacing:-.01em">{{ tx.arrivesMon }}</div>
+<p style="margin:10px 0 0;font-size:15px;line-height:1.55;color:rgba(236,238,241,.65);text-wrap:pretty">{{ tx.everyMonday }}</p>
 <div style="margin-top:18px;display:flex;flex-direction:column;gap:18px;font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.14em;color:rgba(236,238,241,.5)">
-<div><div>COM HA ANAT</div><div style="margin-top:8px;height:8px;width:88%;background:rgba(255,255,255,.06)"></div></div>
-<div><div>HA MILLORAT</div><div style="margin-top:8px;height:8px;width:70%;background:rgba(255,255,255,.06)"></div></div>
-<div><div>PER VIGILAR</div><div style="margin-top:8px;height:8px;width:62%;background:rgba(255,255,255,.06)"></div></div>
-<div><div>LA SETMANA QUE VE</div><div style="margin-top:8px;height:8px;width:80%;background:rgba(255,255,255,.06)"></div></div>
+<div><div>{{ tx.howWent }}</div><div style="margin-top:8px;height:8px;width:88%;background:rgba(255,255,255,.06)"></div></div>
+<div><div>{{ tx.improved }}</div><div style="margin-top:8px;height:8px;width:70%;background:rgba(255,255,255,.06)"></div></div>
+<div><div>{{ tx.toWatch }}</div><div style="margin-top:8px;height:8px;width:62%;background:rgba(255,255,255,.06)"></div></div>
+<div><div>{{ tx.nextWeek }}</div><div style="margin-top:8px;height:8px;width:80%;background:rgba(255,255,255,.06)"></div></div>
 </div>
 </div>
 </sc-if>
@@ -181,30 +181,30 @@ button{font:inherit;color:inherit}
 
 <sc-if value="{{ m.priv }}" hint-placeholder-val="{{ false }}">
 <div style="display:flex;flex-direction:column;padding-bottom:28px;animation:mtIn .42s cubic-bezier(.2,.7,.2,1) both">
-<div style="padding:12px 24px 0;font-size:22px;font-weight:500;letter-spacing:-.01em">Qui veu què</div>
-<p style="margin:10px 24px 0;font-size:15px;line-height:1.55;color:rgba(236,238,241,.65);text-wrap:pretty">Les teves dades són teves. Aquí tens, sense lletra petita, qui en veu cada part.</p>
+<div style="padding:12px 24px 0;font-size:22px;font-weight:500;letter-spacing:-.01em">{{ tx.whoSees }}</div>
+<p style="margin:10px 24px 0;font-size:15px;line-height:1.55;color:rgba(236,238,241,.65);text-wrap:pretty">{{ tx.yourData }}</p>
 <div style="display:grid;grid-template-columns:repeat(3,1fr);margin:20px 24px 0;border:1px solid rgba(255,255,255,.12)"><sc-for list="{{ pv.roles }}" as="r" hint-placeholder-count="3"><button style="{{ r.style }}" onClick="{{ r.onClick }}">{{ r.t }}</button></sc-for></div>
 <p style="margin:16px 24px 0;min-height:66px;font-size:14px;line-height:1.55;text-wrap:pretty">{{ pv.desc }}</p>
 <div style="margin:8px 24px 0;border-top:1px solid rgba(255,255,255,.08)"><sc-for list="{{ pv.items }}" as="p" hint-placeholder-count="5"><div style="display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:12px;padding:14px 0;border-bottom:1px solid rgba(255,255,255,.08)"><div style="display:flex;flex-direction:column;align-items:flex-start;gap:4px;min-width:0"><span style="position:relative;display:inline-block;font-size:15px"><span style="{{ p.tc }}">{{ p.t }}</span><span style="{{ p.strike }}"></span></span><span style="font-size:12px;color:rgba(236,238,241,.5)">{{ p.s }}</span></div><span style="{{ p.tagSt }}">{{ p.tag }}</span></div></sc-for></div>
-<div style="margin:22px 24px 0;padding:16px 0;display:flex;justify-content:space-between;align-items:center;gap:12px;border-bottom:1px solid rgba(255,255,255,.08)"><div style="display:flex;flex-direction:column;gap:4px"><span style="font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.14em;color:rgba(236,238,241,.5)">A L'ESTUDI APAREIXES COM</span><span style="font-size:13px;color:rgba(236,238,241,.65)">mai amb el teu nom</span></div><div style="display:flex;align-items:center;gap:10px;font-family:'IBM Plex Mono',monospace;font-size:14px"><span style="position:relative;color:rgba(236,238,241,.5)">{{ pv.name }}<span style="position:absolute;left:-2px;right:-2px;top:55%;height:1.5px;background:rgba(236,238,241,.65)"></span></span><span style="color:rgba(236,238,241,.5)">→</span><span style="padding:4px 8px;border:1px solid rgba(236,238,241,.6)">{{ pv.code }}</span></div></div>
+<div style="margin:22px 24px 0;padding:16px 0;display:flex;justify-content:space-between;align-items:center;gap:12px;border-bottom:1px solid rgba(255,255,255,.08)"><div style="display:flex;flex-direction:column;gap:4px"><span style="font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.14em;color:rgba(236,238,241,.5)">{{ tx.studyAs }}</span><span style="font-size:13px;color:rgba(236,238,241,.65)">{{ tx.neverName }}</span></div><div style="display:flex;align-items:center;gap:10px;font-family:'IBM Plex Mono',monospace;font-size:14px"><span style="position:relative;color:rgba(236,238,241,.5)">{{ pv.name }}<span style="position:absolute;left:-2px;right:-2px;top:55%;height:1.5px;background:rgba(236,238,241,.65)"></span></span><span style="color:rgba(236,238,241,.5)">→</span><span style="padding:4px 8px;border:1px solid rgba(236,238,241,.6)">{{ pv.code }}</span></div></div>
 </div>
 </sc-if>
 
 <sc-if value="{{ m.ajus }}" hint-placeholder-val="{{ false }}">
 <div style="display:flex;flex-direction:column;padding-bottom:28px;animation:mtIn .42s cubic-bezier(.2,.7,.2,1) both">
-<div style="padding:12px 24px 0;font-size:22px;font-weight:500;letter-spacing:-.01em">Ajustos</div>
-<div style="margin:24px 24px 0;font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.14em;color:rgba(236,238,241,.5)">IDIOMA</div>
-<div style="margin:8px 24px 0;border-top:1px solid rgba(255,255,255,.08)"><sc-for list="{{ langs }}" as="l" hint-placeholder-count="3"><button style="display:flex;align-items:center;gap:14px;width:100%;padding:15px 0;background:transparent;border:none;border-bottom:1px solid rgba(255,255,255,.08);text-align:left;cursor:pointer" style-hover="background:rgba(255,255,255,.03)" onClick="{{ l.onClick }}"><span style="{{ l.ind }}"></span><span style="flex:1;font-size:15px"><span style="{{ l.tc }}">{{ l.t }}</span></span><span style="font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.12em;color:rgba(236,238,241,.5)">{{ l.code }}</span></button></sc-for></div>
+<div style="padding:12px 24px 0;font-size:22px;font-weight:500;letter-spacing:-.01em">{{ tx.settings }}</div>
+<div style="margin:24px 24px 0;font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.14em;color:rgba(236,238,241,.5)">{{ tx.language }}</div>
+<div style="margin:8px 24px 0;border-top:1px solid rgba(255,255,255,.08)"><sc-for list="{{ langs }}" as="l" hint-placeholder-count="4"><button style="display:flex;align-items:center;gap:14px;width:100%;padding:15px 0;background:transparent;border:none;border-bottom:1px solid rgba(255,255,255,.08);text-align:left;cursor:pointer" style-hover="background:rgba(255,255,255,.03)" onClick="{{ l.onClick }}"><span style="{{ l.ind }}"></span><span style="flex:1;font-size:15px"><span style="{{ l.tc }}">{{ l.t }}</span></span><span style="font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.12em;color:rgba(236,238,241,.5)">{{ l.code }}</span></button></sc-for></div>
 <p style="margin:10px 24px 0;font-size:12px;color:rgba(236,238,241,.5)">{{ langNote }}</p>
-<div style="margin:28px 24px 0;font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.14em;color:rgba(236,238,241,.5)">PERFIL</div>
+<div style="margin:28px 24px 0;font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.14em;color:rgba(236,238,241,.5)">{{ tx.profile }}</div>
 <div style="margin:8px 24px 0;border-top:1px solid rgba(255,255,255,.08);font-size:15px">
-<div style="display:flex;justify-content:space-between;padding:14px 0;border-bottom:1px solid rgba(255,255,255,.08)"><span style="color:rgba(236,238,241,.65)">Nom</span><span>{{ who.name }}</span></div>
-<div style="display:flex;justify-content:space-between;padding:14px 0;border-bottom:1px solid rgba(255,255,255,.08)"><span style="color:rgba(236,238,241,.65)">Edat</span><span>{{ who.age }}</span></div>
-<div style="display:flex;justify-content:space-between;padding:14px 0;border-bottom:1px solid rgba(255,255,255,.08)"><span style="color:rgba(236,238,241,.65)">Codi d'estudi</span><span style="font-family:'IBM Plex Mono',monospace">{{ who.code }}</span></div>
+<div style="display:flex;justify-content:space-between;padding:14px 0;border-bottom:1px solid rgba(255,255,255,.08)"><span style="color:rgba(236,238,241,.65)">{{ tx.name }}</span><span>{{ who.name }}</span></div>
+<div style="display:flex;justify-content:space-between;padding:14px 0;border-bottom:1px solid rgba(255,255,255,.08)"><span style="color:rgba(236,238,241,.65)">{{ tx.age }}</span><span>{{ who.age }}</span></div>
+<div style="display:flex;justify-content:space-between;padding:14px 0;border-bottom:1px solid rgba(255,255,255,.08)"><span style="color:rgba(236,238,241,.65)">{{ tx.studyCode }}</span><span style="font-family:'IBM Plex Mono',monospace">{{ who.code }}</span></div>
 </div>
-<div style="margin:28px 24px 0;font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.14em;color:rgba(236,238,241,.5)">SOBRE LA IA</div>
-<p style="margin:8px 24px 0;font-size:14px;line-height:1.55;color:rgba(236,238,241,.65);text-wrap:pretty">Els missatges i els resums els escriu una IA a partir de les teves dades. Són orientatius: no són un diagnòstic mèdic ni substitueixen el que et digui l'entrenador.</p>
-<div style="margin:28px 24px 0;font-family:'IBM Plex Mono',monospace;font-size:9px;letter-spacing:.12em;color:rgba(236,238,241,.5)">MAX TRACKING 0.9 · PROJECTE DE RECERCA DE BATXILLERAT</div>
+<div style="margin:28px 24px 0;font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.14em;color:rgba(236,238,241,.5)">{{ tx.aboutAI }}</div>
+<p style="margin:8px 24px 0;font-size:14px;line-height:1.55;color:rgba(236,238,241,.65);text-wrap:pretty">{{ tx.aiAbout }}</p>
+<div style="margin:28px 24px 0;font-family:'IBM Plex Mono',monospace;font-size:9px;letter-spacing:.12em;color:rgba(236,238,241,.5)">{{ tx.version }}</div>
 </div>
 </sc-if>
 
@@ -224,22 +224,22 @@ button{font:inherit;color:inherit}
 <sc-if value="{{ isDesk }}" hint-placeholder-val="{{ false }}">
 <div style="{{ deskApp }}">
 <div style="display:flex;flex-direction:column;padding:0 32px 28px;border-right:1px solid rgba(255,255,255,.08);overflow-y:auto">
-<div style="flex:none;display:flex;justify-content:space-between;align-items:center;height:64px;border-bottom:1px solid rgba(255,255,255,.08);font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.14em;color:rgba(236,238,241,.5)"><span style="color:#ECEEF1">MAX TRACKING</span><span>DIJOUS 24 SET</span></div>
+<div style="flex:none;display:flex;justify-content:space-between;align-items:center;height:64px;border-bottom:1px solid rgba(255,255,255,.08);font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.14em;color:rgba(236,238,241,.5)"><span style="color:#ECEEF1">MAX TRACKING</span><span>{{ hdr.long }}</span></div>
 <div style="padding-top:26px;font-size:24px;font-weight:500;letter-spacing:-.01em">{{ av.greet }}</div>
 <div style="position:relative;overflow:hidden;flex:none;margin:20px 0 4px;padding:18px;display:flex;align-items:center;gap:18px;background:#121316;border:1px solid rgba(255,255,255,.08);border-radius:18px">
 <div style="flex:none">{{ av.ring }}</div>
 <div style="flex:1;min-width:0;display:flex;flex-direction:column">
-<div style="font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.14em;color:rgba(236,238,241,.5)">ESTAT D'AVUI</div>
+<div style="font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.14em;color:rgba(236,238,241,.5)">{{ tx.todayState }}</div>
 <div style="margin-top:8px;font-size:32px;font-weight:600;letter-spacing:-.02em;line-height:1.05">{{ av.word }}</div>
 <div style="margin-top:8px;font-size:14px;line-height:1.4;color:rgba(236,238,241,.65);text-wrap:pretty">{{ av.line }}</div>
 <div style="margin-top:12px">{{ av.status }}</div>
 </div>
 </div>
 <div style="padding:18px 0;border-bottom:1px solid rgba(255,255,255,.08)">
-<div style="display:flex;justify-content:space-between;align-items:center;font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.14em;color:rgba(236,238,241,.5)"><div style="display:flex;align-items:center;gap:8px"><span style="{{ av.sq }}"></span><span>LA IA, AVUI</span></div><span>ORIENTATIU</span></div>
-<sc-if value="{{ av.loading }}" hint-placeholder-val="{{ false }}"><div style="display:flex;flex-direction:column;gap:9px;margin-top:14px"><div style="display:flex;align-items:center;gap:8px;font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.12em;color:rgba(236,238,241,.5)"><span style="width:6px;height:6px;border-radius:50%;background:#ECEEF1;animation:mtPulse 1.1s ease-in-out infinite"></span><span>LLEGINT LES TEVES DADES…</span></div><div style="height:9px;width:100%;background:rgba(255,255,255,.08);animation:mtPulse 1.6s ease-in-out infinite"></div><div style="height:9px;width:92%;background:rgba(255,255,255,.08);animation:mtPulse 1.6s ease-in-out .15s infinite"></div><div style="height:9px;width:60%;background:rgba(255,255,255,.08);animation:mtPulse 1.6s ease-in-out .3s infinite"></div></div></sc-if>
+<div style="display:flex;justify-content:space-between;align-items:center;font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.14em;color:rgba(236,238,241,.5)"><div style="display:flex;align-items:center;gap:8px"><span style="{{ av.sq }}"></span><span>{{ tx.aiToday }}</span></div><span>{{ tx.guide }}</span></div>
+<sc-if value="{{ av.loading }}" hint-placeholder-val="{{ false }}"><div style="display:flex;flex-direction:column;gap:9px;margin-top:14px"><div style="display:flex;align-items:center;gap:8px;font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.12em;color:rgba(236,238,241,.5)"><span style="width:6px;height:6px;border-radius:50%;background:#ECEEF1;animation:mtPulse 1.1s ease-in-out infinite"></span><span>{{ tx.reading }}</span></div><div style="height:9px;width:100%;background:rgba(255,255,255,.08);animation:mtPulse 1.6s ease-in-out infinite"></div><div style="height:9px;width:92%;background:rgba(255,255,255,.08);animation:mtPulse 1.6s ease-in-out .15s infinite"></div><div style="height:9px;width:60%;background:rgba(255,255,255,.08);animation:mtPulse 1.6s ease-in-out .3s infinite"></div></div></sc-if>
 <sc-if value="{{ av.ready }}" hint-placeholder-val="{{ false }}"><p style="margin:10px 0 0;font-size:15px;line-height:1.55;text-wrap:pretty;animation:mtFade .6s both"><sc-for list="{{ av.segs }}" as="g" hint-placeholder-count="1"><span style="{{ g.st }}">{{ g.t }}</span></sc-for></p></sc-if>
-<div style="margin-top:12px;font-family:'IBM Plex Mono',monospace;font-size:9px;letter-spacing:.1em;line-height:1.6;color:rgba(236,238,241,.5)">NO ÉS UN DIAGNÒSTIC MÈDIC · SI ALGUNA COSA NO VA BÉ, PARLA-HO AMB L'ENTRENADOR</div>
+<div style="margin-top:12px;font-family:'IBM Plex Mono',monospace;font-size:9px;letter-spacing:.1em;line-height:1.6;color:rgba(236,238,241,.5)">{{ tx.disclaimer }}</div>
 </div>
 <div style="padding:14px 0 0;font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.14em;color:rgba(236,238,241,.5)">{{ av.basis }}</div>
 <div style="display:grid;grid-template-columns:1fr 1fr"><sc-for list="{{ av.cells }}" as="c" hint-placeholder-count="4"><button style="{{ c.box }}" style-hover="background:rgba(255,255,255,.025)" onClick="{{ c.onClick }}"><span style="font-family:'IBM Plex Mono',monospace;font-size:28px;font-weight:500;line-height:1"><span style="{{ c.vc }}">{{ c.v }}</span><span style="margin-left:6px;font-size:11px;font-weight:400;color:rgba(236,238,241,.5)">{{ c.unit }}</span></span><span style="margin-top:8px;font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.12em;color:rgba(236,238,241,.5)">{{ c.label }}</span><span style="margin-top:4px;font-family:'IBM Plex Mono',monospace;font-size:10px"><span style="{{ c.dc }}">{{ c.d }}</span></span><span style="margin-top:12px;display:block">{{ c.spark }}</span></button></sc-for></div>
@@ -254,7 +254,7 @@ button{font:inherit;color:inherit}
 <div><div style="font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.14em;color:rgba(236,238,241,.5)">{{ ev.label }}</div><div style="display:flex;align-items:baseline;gap:10px;margin-top:10px"><span style="font-family:'IBM Plex Mono',monospace;font-size:56px;font-weight:500;line-height:1;letter-spacing:-.01em"><span style="{{ ev.bigC }}">{{ ev.big }}</span></span><span style="font-family:'IBM Plex Mono',monospace;font-size:13px;letter-spacing:.08em;color:rgba(236,238,241,.5)">{{ ev.unit }}</span></div><div style="margin-top:10px;min-height:16px;font-family:'IBM Plex Mono',monospace;font-size:12px"><span style="{{ ev.subC }}">{{ ev.sub }}</span></div></div>
 <div style="display:flex;font-family:'IBM Plex Mono',monospace">
 <div style="padding:0 24px;border-left:1px solid rgba(255,255,255,.08)"><div style="font-size:20px;font-weight:500;line-height:1"><span style="{{ ev.avgC }}">{{ ev.avg }}</span></div><div style="margin-top:8px;font-size:9px;letter-spacing:.12em;color:rgba(236,238,241,.5)">{{ ev.avgL }}</div></div>
-<div style="padding:0 24px;border-left:1px solid rgba(255,255,255,.08)"><div style="font-size:20px;font-weight:500;line-height:1;white-space:nowrap">{{ ev.bandT }}</div><div style="margin-top:8px;font-size:9px;letter-spacing:.12em;color:rgba(236,238,241,.5)">LA TEVA FRANJA</div></div>
+<div style="padding:0 24px;border-left:1px solid rgba(255,255,255,.08)"><div style="font-size:20px;font-weight:500;line-height:1;white-space:nowrap">{{ ev.bandT }}</div><div style="margin-top:8px;font-size:9px;letter-spacing:.12em;color:rgba(236,238,241,.5)">{{ tx.yourBand }}</div></div>
 <div style="padding:0 0 0 24px;border-left:1px solid rgba(255,255,255,.08)"><div style="font-size:20px;font-weight:500;line-height:1"><span style="{{ ev.outC }}">{{ ev.outT }}</span></div><div style="margin-top:8px;font-size:9px;letter-spacing:.12em;color:rgba(236,238,241,.5)">{{ ev.outL }}</div></div>
 </div>
 </div>
@@ -262,32 +262,32 @@ button{font:inherit;color:inherit}
 {{ ev.chart }}
 <sc-if value="{{ ev.days }}" hint-placeholder-val="{{ true }}"><div style="display:flex;width:{{ dg.lw }}px;margin-top:10px"><sc-for list="{{ ev.labels }}" as="l" hint-placeholder-count="7"><span style="flex:1;text-align:center;font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.06em;white-space:nowrap"><span style="{{ l.st }}">{{ l.t }}</span></span></sc-for></div></sc-if>
 <sc-if value="{{ ev.weeks }}" hint-placeholder-val="{{ false }}"><div style="display:flex;width:{{ dg.lw }}px;margin-top:8px;border-left:1px solid rgba(255,255,255,.08)"><sc-for list="{{ ev.weeksList }}" as="w" hint-placeholder-count="4"><button style="flex:1;display:flex;justify-content:center;align-items:center;gap:12px;padding:10px 0;background:transparent;border:none;border-right:1px solid rgba(255,255,255,.08);cursor:zoom-in;font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.06em;color:rgba(236,238,241,.65);white-space:nowrap" style-hover="background:rgba(255,255,255,.05);color:#ECEEF1" onClick="{{ w.onClick }}"><span>{{ w.t }}</span><span style="{{ w.fc }}">{{ w.f }}</span></button></sc-for></div></sc-if>
-<sc-if value="{{ ev.zoomed }}" hint-placeholder-val="{{ false }}"><div style="display:flex;justify-content:space-between;align-items:center;width:{{ dg.lw }}px;margin-top:14px"><span style="font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.12em">{{ ev.zoomLabel }}</span><button style="background:transparent;border:1px solid rgba(255,255,255,.16);padding:6px 10px;cursor:pointer;font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.1em" style-hover="background:rgba(255,255,255,.06)" onClick="{{ ev.back }}">← 28 DIES</button></div></sc-if>
+<sc-if value="{{ ev.zoomed }}" hint-placeholder-val="{{ false }}"><div style="display:flex;justify-content:space-between;align-items:center;width:{{ dg.lw }}px;margin-top:14px"><span style="font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.12em">{{ ev.zoomLabel }}</span><button style="background:transparent;border:1px solid rgba(255,255,255,.16);padding:6px 10px;cursor:pointer;font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.1em" style-hover="background:rgba(255,255,255,.06)" onClick="{{ ev.back }}">← {{ tx.d28 }}</button></div></sc-if>
 </div>
 <div style="margin-top:14px;display:flex;flex-wrap:wrap;gap:8px 20px;font-family:'IBM Plex Mono',monospace;font-size:9px;letter-spacing:.1em;color:rgba(236,238,241,.5)">
-<div style="display:flex;align-items:center;gap:7px"><span style="width:14px;height:8px;background:rgba(236,238,241,.08);border-top:1px dashed rgba(236,238,241,.4)"></span><span>LA TEVA FRANJA · ÚLTIMES SETMANES</span></div>
-<div style="display:flex;align-items:center;gap:7px"><span style="{{ legendSw }}"></span><span>PER VIGILAR → BÉ</span></div>
-<div style="display:flex;align-items:center;gap:7px"><span style="width:1px;height:10px;border-left:1px dashed rgba(236,238,241,.45)"></span><span>SENSE DADES</span></div>
-<span>PASSA EL RATOLÍ PEL GRÀFIC PER VEURE CADA DIA · A 28 DIES, TRIA UNA SETMANA PER AMPLIAR-LA</span>
+<div style="display:flex;align-items:center;gap:7px"><span style="width:14px;height:8px;background:rgba(236,238,241,.08);border-top:1px dashed rgba(236,238,241,.4)"></span><span>{{ tx.bandLegend }}</span></div>
+<div style="display:flex;align-items:center;gap:7px"><span style="{{ legendSw }}"></span><span>{{ tx.scaleLegend }}</span></div>
+<div style="display:flex;align-items:center;gap:7px"><span style="width:1px;height:10px;border-left:1px dashed rgba(236,238,241,.45)"></span><span>{{ tx.noData }}</span></div>
+<span>{{ tx.hoverHint }}</span>
 </div>
 <div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:48px;margin-top:30px;padding-top:22px;border-top:1px solid rgba(255,255,255,.08)">
 <div style="display:flex;flex-direction:column">
-<div style="display:flex;justify-content:space-between;align-items:baseline;font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.14em;color:rgba(236,238,241,.5)"><span>SENSACIÓ VS DADES</span><sc-if value="{{ se.has }}" hint-placeholder-val="{{ true }}"><span>COINCIDEIXEN <span style="font-size:16px;letter-spacing:0;color:#ECEEF1">{{ se.k }}</span> DE {{ se.n }}</span></sc-if></div>
+<div style="display:flex;justify-content:space-between;align-items:baseline;font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.14em;color:rgba(236,238,241,.5)"><span>{{ tx.feelVsData }}</span><sc-if value="{{ se.has }}" hint-placeholder-val="{{ true }}"><span>{{ tx.match }} <span style="font-size:16px;letter-spacing:0;color:#ECEEF1">{{ se.k }}</span> {{ se.ofNShort }}</span></sc-if></div>
 <sc-if value="{{ se.has }}" hint-placeholder-val="{{ true }}">
 <div style="display:flex;flex-direction:column">
 <div style="margin-top:8px;min-height:15px;font-family:'IBM Plex Mono',monospace;font-size:11px;color:rgba(236,238,241,.65)">{{ se.sub }}</div>
-<div style="margin-top:12px;display:flex;flex-wrap:wrap;gap:8px 16px;font-family:'IBM Plex Mono',monospace;font-size:9px;letter-spacing:.1em;color:rgba(236,238,241,.65)"><div style="display:flex;align-items:center;gap:7px"><span style="{{ seLeg }}"></span><span>COM ET SENTS</span></div><div style="display:flex;align-items:center;gap:7px"><span style="width:16px;border-top:1.5px dashed rgba(236,238,241,.6)"></span><span>QUÈ DIUEN LES DADES</span></div><div style="display:flex;align-items:center;gap:7px"><span style="width:8px;height:10px;background:rgba(236,238,241,.08);border-left:2px solid rgba(236,238,241,.8)"></span><span>NO COINCIDEIXEN</span></div></div>
-<div style="margin-top:12px">{{ se.chart }}<div style="display:flex;justify-content:space-between;margin-top:8px;padding-right:48px;font-family:'IBM Plex Mono',monospace;font-size:9px;letter-spacing:.08em;color:rgba(236,238,241,.5)"><span>{{ se.x0 }}</span><span style="color:#ECEEF1">AVUI</span></div></div>
+<div style="margin-top:12px;display:flex;flex-wrap:wrap;gap:8px 16px;font-family:'IBM Plex Mono',monospace;font-size:9px;letter-spacing:.1em;color:rgba(236,238,241,.65)"><div style="display:flex;align-items:center;gap:7px"><span style="{{ seLeg }}"></span><span>{{ tx.lgFeel }}</span></div><div style="display:flex;align-items:center;gap:7px"><span style="width:16px;border-top:1.5px dashed rgba(236,238,241,.6)"></span><span>{{ tx.lgData }}</span></div><div style="display:flex;align-items:center;gap:7px"><span style="width:8px;height:10px;background:rgba(236,238,241,.08);border-left:2px solid rgba(236,238,241,.8)"></span><span>{{ tx.noMatch }}</span></div></div>
+<div style="margin-top:12px">{{ se.chart }}<div style="display:flex;justify-content:space-between;margin-top:8px;padding-right:48px;font-family:'IBM Plex Mono',monospace;font-size:9px;letter-spacing:.08em;color:rgba(236,238,241,.5)"><span>{{ se.x0 }}</span><span style="color:#ECEEF1">{{ tx.TODAY }}</span></div></div>
 <sc-if value="{{ se.loading }}" hint-placeholder-val="{{ false }}"><div style="display:flex;flex-direction:column;gap:9px;margin-top:16px"><div style="height:9px;width:100%;background:rgba(255,255,255,.08);animation:mtPulse 1.6s ease-in-out infinite"></div><div style="height:9px;width:70%;background:rgba(255,255,255,.08);animation:mtPulse 1.6s ease-in-out .15s infinite"></div></div></sc-if>
 <sc-if value="{{ se.ready }}" hint-placeholder-val="{{ false }}"><p style="margin:14px 0 0;font-size:14px;line-height:1.55;text-wrap:pretty;animation:mtFade .6s both"><sc-for list="{{ se.segs }}" as="g" hint-placeholder-count="1"><span style="{{ g.st }}">{{ g.t }}</span></sc-for></p></sc-if>
 </div>
 </sc-if>
-<sc-if value="{{ se.empty }}" hint-placeholder-val="{{ false }}"><p style="margin:14px 0 0;font-size:14px;line-height:1.55;color:rgba(236,238,241,.65);text-wrap:pretty">Per comparar com et sents amb les teves dades, primer necessitem saber quin és el teu normal. Falten 9 dies.</p></sc-if>
+<sc-if value="{{ se.empty }}" hint-placeholder-val="{{ false }}"><p style="margin:14px 0 0;font-size:14px;line-height:1.55;color:rgba(236,238,241,.65);text-wrap:pretty">{{ tx.feelEmpty }}</p></sc-if>
 </div>
 <div style="display:flex;flex-direction:column">
-<div style="display:flex;justify-content:space-between;align-items:center;font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.14em;color:rgba(236,238,241,.5)"><span>EL QUE HAS RESPOST AVUI</span><span style="padding:3px 6px;border:1px solid rgba(236,238,241,.3);color:#ECEEF1">NOMÉS TU HO VEUS</span></div>
+<div style="display:flex;justify-content:space-between;align-items:center;font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.14em;color:rgba(236,238,241,.5)"><span>{{ tx.answeredToday }}</span><span style="padding:3px 6px;border:1px solid rgba(236,238,241,.3);color:#ECEEF1">{{ tx.onlyYou }}</span></div>
 <sc-if value="{{ it.has }}" hint-placeholder-val="{{ true }}"><div style="margin-top:6px"><sc-for list="{{ it.list }}" as="q" hint-placeholder-count="5"><div style="display:grid;grid-template-columns:1fr auto 40px;align-items:center;gap:12px;padding:11px 0;border-bottom:1px solid rgba(255,255,255,.08)"><div style="display:flex;flex-direction:column;gap:3px;min-width:0"><span style="font-size:14px">{{ q.t }}</span><span style="font-family:'IBM Plex Mono',monospace;font-size:10px;color:rgba(236,238,241,.5)">{{ q.n }}</span></div><div style="display:flex;gap:3px"><sc-for list="{{ q.sq }}" as="z" hint-placeholder-count="5"><span style="{{ z }}"></span></sc-for></div><span style="text-align:right;font-family:'IBM Plex Mono',monospace;font-size:12px"><span style="{{ q.vc }}">{{ q.v }}</span></span></div></sc-for></div></sc-if>
-<sc-if value="{{ it.none }}" hint-placeholder-val="{{ false }}"><p style="margin:12px 0 0;font-size:14px;line-height:1.5;color:rgba(236,238,241,.65);text-wrap:pretty">El qüestionari d'avui encara no ha arribat. Quan l'omplis per a la federació, apareixerà aquí.</p></sc-if>
+<sc-if value="{{ it.none }}" hint-placeholder-val="{{ false }}"><p style="margin:12px 0 0;font-size:14px;line-height:1.5;color:rgba(236,238,241,.65);text-wrap:pretty">{{ tx.noQuest }}</p></sc-if>
 </div>
 </div>
 </div>
@@ -298,25 +298,25 @@ button{font:inherit;color:inherit}
 <sc-if value="{{ wk.has }}" hint-placeholder-val="{{ true }}">
 <div style="flex:1;display:grid;grid-template-columns:260px minmax(0,1fr)">
 <div style="padding:24px 0;border-right:1px solid rgba(255,255,255,.08)">
-<div style="padding:0 24px 12px;font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.14em;color:rgba(236,238,241,.5)">RESUMS SETMANALS</div>
+<div style="padding:0 24px 12px;font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.14em;color:rgba(236,238,241,.5)">{{ tx.weeklySummaries }}</div>
 <sc-for list="{{ wk.all }}" as="x" hint-placeholder-count="5"><button style="{{ x.rowSt }}" onClick="{{ x.onClick }}"><span style="font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.08em;color:rgba(236,238,241,.5)">{{ x.id }} · {{ x.dates }}</span><span style="font-size:14px;line-height:1.3">{{ x.t }}</span><span style="display:flex;width:64px;gap:2px"><sc-for list="{{ x.comp }}" as="cc" hint-placeholder-count="2"><span style="{{ cc }}"></span></sc-for></span></button></sc-for>
 </div>
 <div style="padding:30px 48px 48px;max-width:640px">
 <div style="display:flex;justify-content:space-between;gap:16px;font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.12em;color:rgba(236,238,241,.5)"><span style="color:#ECEEF1">{{ wk.label }}</span><span>{{ wk.pubShort }}</span></div>
 <div style="margin-top:16px;border-top:1px solid rgba(255,255,255,.08);border-bottom:1px solid rgba(255,255,255,.08)">{{ wk.strip }}</div>
-<div style="margin-top:8px;display:flex;justify-content:space-between;gap:12px;font-family:'IBM Plex Mono',monospace;font-size:9px;letter-spacing:.1em;color:rgba(236,238,241,.5)"><span>L'ESTAT DE CADA DIA</span><span>{{ wk.sum }}</span></div>
-<sc-if value="{{ wk.loading }}" hint-placeholder-val="{{ false }}"><div style="display:flex;flex-direction:column;gap:10px;margin-top:28px"><div style="display:flex;align-items:center;gap:8px;font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.12em;color:rgba(236,238,241,.5)"><span style="width:6px;height:6px;border-radius:50%;background:#ECEEF1;animation:mtPulse 1.1s ease-in-out infinite"></span><span>LA IA ESTÀ REPASSANT LA SETMANA…</span></div><div style="height:28px;width:60%;background:rgba(255,255,255,.08);animation:mtPulse 1.6s ease-in-out infinite"></div><div style="height:10px;width:100%;margin-top:10px;background:rgba(255,255,255,.08);animation:mtPulse 1.6s ease-in-out .15s infinite"></div><div style="height:10px;width:88%;background:rgba(255,255,255,.08);animation:mtPulse 1.6s ease-in-out .3s infinite"></div><div style="height:10px;width:50%;background:rgba(255,255,255,.08);animation:mtPulse 1.6s ease-in-out .45s infinite"></div></div></sc-if>
+<div style="margin-top:8px;display:flex;justify-content:space-between;gap:12px;font-family:'IBM Plex Mono',monospace;font-size:9px;letter-spacing:.1em;color:rgba(236,238,241,.5)"><span>{{ tx.eachDay }}</span><span>{{ wk.sum }}</span></div>
+<sc-if value="{{ wk.loading }}" hint-placeholder-val="{{ false }}"><div style="display:flex;flex-direction:column;gap:10px;margin-top:28px"><div style="display:flex;align-items:center;gap:8px;font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.12em;color:rgba(236,238,241,.5)"><span style="width:6px;height:6px;border-radius:50%;background:#ECEEF1;animation:mtPulse 1.1s ease-in-out infinite"></span><span>{{ tx.aiReviewing }}</span></div><div style="height:28px;width:60%;background:rgba(255,255,255,.08);animation:mtPulse 1.6s ease-in-out infinite"></div><div style="height:10px;width:100%;margin-top:10px;background:rgba(255,255,255,.08);animation:mtPulse 1.6s ease-in-out .15s infinite"></div><div style="height:10px;width:88%;background:rgba(255,255,255,.08);animation:mtPulse 1.6s ease-in-out .3s infinite"></div><div style="height:10px;width:50%;background:rgba(255,255,255,.08);animation:mtPulse 1.6s ease-in-out .45s infinite"></div></div></sc-if>
 <sc-if value="{{ wk.ready }}" hint-placeholder-val="{{ false }}">
 <div style="margin-top:26px;animation:mtFade .6s both">
 <div style="font-size:34px;font-weight:500;letter-spacing:-.02em;line-height:1.1;text-wrap:balance">{{ wk.titol }}</div>
-<div style="margin-top:22px;font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.14em;color:rgba(236,238,241,.5)">COM HA ANAT</div>
+<div style="margin-top:22px;font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.14em;color:rgba(236,238,241,.5)">{{ tx.howWent }}</div>
 <p style="margin:8px 0 0;font-size:17px;line-height:1.55;text-wrap:pretty"><sc-for list="{{ wk.com }}" as="g" hint-placeholder-count="1"><span style="{{ g.st }}">{{ g.t }}</span></sc-for></p>
 <div style="display:grid;grid-template-columns:1fr 1fr;gap:32px;margin-top:22px;padding-top:18px;border-top:1px solid rgba(255,255,255,.08)">
-<div><div style="font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.14em;color:rgba(236,238,241,.5)">HA MILLORAT</div><p style="margin:8px 0 0;font-size:15px;line-height:1.55;text-wrap:pretty"><sc-for list="{{ wk.mill }}" as="g" hint-placeholder-count="1"><span style="{{ g.st }}">{{ g.t }}</span></sc-for></p></div>
-<div><div style="font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.14em;color:rgba(236,238,241,.5)">PER VIGILAR</div><p style="margin:8px 0 0;font-size:15px;line-height:1.55;text-wrap:pretty"><sc-for list="{{ wk.vig }}" as="g" hint-placeholder-count="1"><span style="{{ g.st }}">{{ g.t }}</span></sc-for></p></div>
+<div><div style="font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.14em;color:rgba(236,238,241,.5)">{{ tx.improved }}</div><p style="margin:8px 0 0;font-size:15px;line-height:1.55;text-wrap:pretty"><sc-for list="{{ wk.mill }}" as="g" hint-placeholder-count="1"><span style="{{ g.st }}">{{ g.t }}</span></sc-for></p></div>
+<div><div style="font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.14em;color:rgba(236,238,241,.5)">{{ tx.toWatch }}</div><p style="margin:8px 0 0;font-size:15px;line-height:1.55;text-wrap:pretty"><sc-for list="{{ wk.vig }}" as="g" hint-placeholder-count="1"><span style="{{ g.st }}">{{ g.t }}</span></sc-for></p></div>
 </div>
-<div style="margin-top:22px;padding-top:18px;border-top:1px solid rgba(255,255,255,.08)"><div style="font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.14em;color:rgba(236,238,241,.5)">LA SETMANA QUE VE</div><p style="margin:8px 0 0;font-size:17px;line-height:1.55;text-wrap:pretty"><sc-for list="{{ wk.rec }}" as="g" hint-placeholder-count="1"><span style="{{ g.st }}">{{ g.t }}</span></sc-for></p></div>
-<div style="margin-top:18px;font-family:'IBM Plex Mono',monospace;font-size:9px;letter-spacing:.1em;color:rgba(236,238,241,.5)">GENERAT PER IA A PARTIR DE LES TEVES DADES · ORIENTATIU</div>
+<div style="margin-top:22px;padding-top:18px;border-top:1px solid rgba(255,255,255,.08)"><div style="font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.14em;color:rgba(236,238,241,.5)">{{ tx.nextWeek }}</div><p style="margin:8px 0 0;font-size:17px;line-height:1.55;text-wrap:pretty"><sc-for list="{{ wk.rec }}" as="g" hint-placeholder-count="1"><span style="{{ g.st }}">{{ g.t }}</span></sc-for></p></div>
+<div style="margin-top:18px;font-family:'IBM Plex Mono',monospace;font-size:9px;letter-spacing:.1em;color:rgba(236,238,241,.5)">{{ tx.aiGenerated }}</div>
 </div>
 </sc-if>
 </div>
@@ -324,9 +324,9 @@ button{font:inherit;color:inherit}
 </sc-if>
 <sc-if value="{{ wk.none }}" hint-placeholder-val="{{ false }}">
 <div style="padding:40px;max-width:560px">
-<div style="font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.14em;color:rgba(236,238,241,.5)">EL TEU PRIMER RESUM</div>
-<div style="margin-top:12px;font-size:30px;font-weight:500;line-height:1.15;letter-spacing:-.015em">Arribarà dilluns 28 de setembre</div>
-<p style="margin:12px 0 0;font-size:15px;line-height:1.55;color:rgba(236,238,241,.65);text-wrap:pretty">Cada dilluns, la IA et resumirà la setmana en llenguatge senzill: com ha anat, què ha millorat, què cal vigilar i una recomanació per a la setmana següent.</p>
+<div style="font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.14em;color:rgba(236,238,241,.5)">{{ tx.firstSummary }}</div>
+<div style="margin-top:12px;font-size:30px;font-weight:500;line-height:1.15;letter-spacing:-.015em">{{ tx.arrivesMon }}</div>
+<p style="margin:12px 0 0;font-size:15px;line-height:1.55;color:rgba(236,238,241,.65);text-wrap:pretty">{{ tx.everyMondayLong }}</p>
 <div style="margin-top:24px;display:flex;flex-direction:column;gap:12px"><div style="height:10px;width:90%;background:rgba(255,255,255,.06)"></div><div style="height:10px;width:74%;background:rgba(255,255,255,.06)"></div><div style="height:10px;width:82%;background:rgba(255,255,255,.06)"></div></div>
 </div>
 </sc-if>
@@ -335,28 +335,28 @@ button{font:inherit;color:inherit}
 
 <sc-if value="{{ d.priv }}" hint-placeholder-val="{{ false }}">
 <div style="box-sizing:border-box;max-width:1240px;padding:32px 40px 48px;animation:mtIn .42s cubic-bezier(.2,.7,.2,1) both">
-<div style="font-size:30px;font-weight:500;letter-spacing:-.015em">Qui veu què</div>
-<p style="margin:10px 0 0;max-width:560px;font-size:15px;line-height:1.55;color:rgba(236,238,241,.65);text-wrap:pretty">Les teves dades són teves. Aquí tens, sense lletra petita, qui en veu cada part.</p>
+<div style="font-size:30px;font-weight:500;letter-spacing:-.015em">{{ tx.whoSees }}</div>
+<p style="margin:10px 0 0;max-width:560px;font-size:15px;line-height:1.55;color:rgba(236,238,241,.65);text-wrap:pretty">{{ tx.yourData }}</p>
 <div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));margin-top:28px;border-top:1px solid rgba(255,255,255,.08)"><sc-for list="{{ pvCols }}" as="col" hint-placeholder-count="3"><div style="{{ col.box }}"><div style="font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.14em">{{ col.t }}</div><p style="margin:10px 0 0;min-height:84px;font-size:13px;line-height:1.5;color:rgba(236,238,241,.65);text-wrap:pretty">{{ col.d }}</p><div style="margin-top:8px;border-top:1px solid rgba(255,255,255,.08)"><sc-for list="{{ col.items }}" as="p" hint-placeholder-count="5"><div style="display:flex;flex-direction:column;align-items:flex-start;gap:7px;padding:12px 0;border-bottom:1px solid rgba(255,255,255,.08)"><span style="position:relative;display:inline-block;font-size:14px"><span style="{{ p.tc }}">{{ p.t }}</span><span style="{{ p.strike }}"></span></span><span style="{{ p.tagSt }}">{{ p.tag }}</span></div></sc-for></div></div></sc-for></div>
-<div style="margin-top:28px;padding:18px 0;display:flex;justify-content:space-between;align-items:center;gap:24px;border-top:1px solid rgba(255,255,255,.08);border-bottom:1px solid rgba(255,255,255,.08)"><div style="display:flex;flex-direction:column;gap:4px"><span style="font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.14em;color:rgba(236,238,241,.5)">A L'ESTUDI APAREIXES COM</span><span style="font-size:14px;color:rgba(236,238,241,.65)">Els resultats es presenten amb codis, mai amb noms.</span></div><div style="display:flex;align-items:center;gap:12px;font-family:'IBM Plex Mono',monospace;font-size:16px"><span style="position:relative;color:rgba(236,238,241,.5)">{{ pv.name }}<span style="position:absolute;left:-2px;right:-2px;top:55%;height:1.5px;background:rgba(236,238,241,.65)"></span></span><span style="color:rgba(236,238,241,.5)">→</span><span style="padding:5px 10px;border:1px solid rgba(236,238,241,.6)">{{ pv.code }}</span></div></div>
+<div style="margin-top:28px;padding:18px 0;display:flex;justify-content:space-between;align-items:center;gap:24px;border-top:1px solid rgba(255,255,255,.08);border-bottom:1px solid rgba(255,255,255,.08)"><div style="display:flex;flex-direction:column;gap:4px"><span style="font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.14em;color:rgba(236,238,241,.5)">{{ tx.studyAs }}</span><span style="font-size:14px;color:rgba(236,238,241,.65)">{{ tx.codesNever }}</span></div><div style="display:flex;align-items:center;gap:12px;font-family:'IBM Plex Mono',monospace;font-size:16px"><span style="position:relative;color:rgba(236,238,241,.5)">{{ pv.name }}<span style="position:absolute;left:-2px;right:-2px;top:55%;height:1.5px;background:rgba(236,238,241,.65)"></span></span><span style="color:rgba(236,238,241,.5)">→</span><span style="padding:5px 10px;border:1px solid rgba(236,238,241,.6)">{{ pv.code }}</span></div></div>
 </div>
 </sc-if>
 
 <sc-if value="{{ d.ajus }}" hint-placeholder-val="{{ false }}">
 <div style="padding:32px 40px 48px;max-width:560px;animation:mtIn .42s cubic-bezier(.2,.7,.2,1) both">
-<div style="font-size:30px;font-weight:500;letter-spacing:-.015em">Ajustos</div>
-<div style="margin-top:28px;font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.14em;color:rgba(236,238,241,.5)">IDIOMA</div>
-<div style="margin-top:8px;border-top:1px solid rgba(255,255,255,.08)"><sc-for list="{{ langs }}" as="l" hint-placeholder-count="3"><button style="display:flex;align-items:center;gap:14px;width:100%;padding:15px 0;background:transparent;border:none;border-bottom:1px solid rgba(255,255,255,.08);text-align:left;cursor:pointer" style-hover="background:rgba(255,255,255,.03)" onClick="{{ l.onClick }}"><span style="{{ l.ind }}"></span><span style="flex:1;font-size:15px"><span style="{{ l.tc }}">{{ l.t }}</span></span><span style="font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.12em;color:rgba(236,238,241,.5)">{{ l.code }}</span></button></sc-for></div>
+<div style="font-size:30px;font-weight:500;letter-spacing:-.015em">{{ tx.settings }}</div>
+<div style="margin-top:28px;font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.14em;color:rgba(236,238,241,.5)">{{ tx.language }}</div>
+<div style="margin-top:8px;border-top:1px solid rgba(255,255,255,.08)"><sc-for list="{{ langs }}" as="l" hint-placeholder-count="4"><button style="display:flex;align-items:center;gap:14px;width:100%;padding:15px 0;background:transparent;border:none;border-bottom:1px solid rgba(255,255,255,.08);text-align:left;cursor:pointer" style-hover="background:rgba(255,255,255,.03)" onClick="{{ l.onClick }}"><span style="{{ l.ind }}"></span><span style="flex:1;font-size:15px"><span style="{{ l.tc }}">{{ l.t }}</span></span><span style="font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.12em;color:rgba(236,238,241,.5)">{{ l.code }}</span></button></sc-for></div>
 <p style="margin:10px 0 0;font-size:12px;color:rgba(236,238,241,.5)">{{ langNote }}</p>
-<div style="margin-top:28px;font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.14em;color:rgba(236,238,241,.5)">PERFIL</div>
+<div style="margin-top:28px;font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.14em;color:rgba(236,238,241,.5)">{{ tx.profile }}</div>
 <div style="margin-top:8px;border-top:1px solid rgba(255,255,255,.08);font-size:15px">
-<div style="display:flex;justify-content:space-between;padding:14px 0;border-bottom:1px solid rgba(255,255,255,.08)"><span style="color:rgba(236,238,241,.65)">Nom</span><span>{{ who.name }}</span></div>
-<div style="display:flex;justify-content:space-between;padding:14px 0;border-bottom:1px solid rgba(255,255,255,.08)"><span style="color:rgba(236,238,241,.65)">Edat</span><span>{{ who.age }}</span></div>
-<div style="display:flex;justify-content:space-between;padding:14px 0;border-bottom:1px solid rgba(255,255,255,.08)"><span style="color:rgba(236,238,241,.65)">Codi d'estudi</span><span style="font-family:'IBM Plex Mono',monospace">{{ who.code }}</span></div>
+<div style="display:flex;justify-content:space-between;padding:14px 0;border-bottom:1px solid rgba(255,255,255,.08)"><span style="color:rgba(236,238,241,.65)">{{ tx.name }}</span><span>{{ who.name }}</span></div>
+<div style="display:flex;justify-content:space-between;padding:14px 0;border-bottom:1px solid rgba(255,255,255,.08)"><span style="color:rgba(236,238,241,.65)">{{ tx.age }}</span><span>{{ who.age }}</span></div>
+<div style="display:flex;justify-content:space-between;padding:14px 0;border-bottom:1px solid rgba(255,255,255,.08)"><span style="color:rgba(236,238,241,.65)">{{ tx.studyCode }}</span><span style="font-family:'IBM Plex Mono',monospace">{{ who.code }}</span></div>
 </div>
-<div style="margin-top:28px;font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.14em;color:rgba(236,238,241,.5)">SOBRE LA IA</div>
-<p style="margin:8px 0 0;font-size:14px;line-height:1.55;color:rgba(236,238,241,.65);text-wrap:pretty">Els missatges i els resums els escriu una IA a partir de les teves dades. Són orientatius: no són un diagnòstic mèdic ni substitueixen el que et digui l'entrenador.</p>
-<div style="margin-top:28px;font-family:'IBM Plex Mono',monospace;font-size:9px;letter-spacing:.12em;color:rgba(236,238,241,.5)">MAX TRACKING 0.9 · PROJECTE DE RECERCA DE BATXILLERAT</div>
+<div style="margin-top:28px;font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.14em;color:rgba(236,238,241,.5)">{{ tx.aboutAI }}</div>
+<p style="margin:8px 0 0;font-size:14px;line-height:1.55;color:rgba(236,238,241,.65);text-wrap:pretty">{{ tx.aiAbout }}</p>
+<div style="margin-top:28px;font-family:'IBM Plex Mono',monospace;font-size:9px;letter-spacing:.12em;color:rgba(236,238,241,.5)">{{ tx.version }}</div>
 </div>
 </sc-if>
 
@@ -367,14 +367,25 @@ button{font:inherit;color:inherit}
 </div>
 </x-dc>
 <script type="text/x-dc" data-dc-script data-props="{&quot;aiLive&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;IA&quot;},&quot;athleteName&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;Martí&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Deportista&quot;}}">
+// Textos en quatre idiomes: cada objecte { ca, es, fr, en } es resol a l'idioma `l` (si en falta un, surt el català); la resta de l'estructura es copia tal qual.
+const LANG_KEYS = ['ca', 'es', 'fr', 'en'];
+function locTx(x, l) {
+  if (Array.isArray(x)) return x.map(y => locTx(y, l));
+  if (!x || typeof x !== 'object') return x;
+  const ks = Object.keys(x);
+  if (ks.length && 'ca' in x && ks.every(k => LANG_KEYS.includes(k))) return x[l] ?? x.ca;
+  const o = {}; ks.forEach(k => { o[k] = locTx(x[k], l); }); return o;
+}
 class Component extends DCLogic {
   state = (() => {
     let ai = {};
-    try { ai = JSON.parse(localStorage.getItem('mt-ai-cache-v3') || '{}') || {}; } catch (e) { ai = {}; }
+    try { ai = JSON.parse(localStorage.getItem('mt-ai-cache-v4') || '{}') || {}; } catch (e) { ai = {}; }
     let pHidden = false;
     try { pHidden = localStorage.getItem('mt-proto-hidden') === '1'; } catch (e) {}
+    let lang = 'ca';
+    try { lang = localStorage.getItem('mt-lang') || 'ca'; } catch (e) {}
     return { scenario: 'normal', device: 'mobile', mTab: 'avui', dTab: 'evolucio', metric: 'rhr', range: 7, zoom: null, evoView: 'metrics',
-      hover: null, sHover: null, week: 0, role: 'coach', lang: 'ca', visit: 0, mount: 0, vw: window.innerWidth, vh: window.innerHeight, ai, pOpen: false, pHidden };
+      hover: null, sHover: null, week: 0, role: 'coach', lang: LANG_KEYS.includes(lang) ? lang : 'ca', visit: 0, mount: 0, vw: window.innerWidth, vh: window.innerHeight, ai, pOpen: false, pHidden };
   })();
   phoneRef = React.createRef();
   deskRef = React.createRef();
@@ -394,20 +405,8 @@ class Component extends DCLogic {
   // Cada segment de l'anell ocupa el mateix quadrant que la seva xifra a la graella de sota.
   RING = { rhr: 315, hrv: 45, estat: 135, son: 225 };
   RING_ORD = { rhr: 0, hrv: 1, estat: 2, son: 3 };
-  WD = ['DL', 'DT', 'DC', 'DJ', 'DV', 'DS', 'DG'];
-  WDL = ['DILLUNS', 'DIMARTS', 'DIMECRES', 'DIJOUS', 'DIVENDRES', 'DISSABTE', 'DIUMENGE'];
   DEF = { rhr: { mean: 50, lo: 48, hi: 52, worse: 'up' }, hrv: { mean: 65, lo: 59, hi: 71, worse: 'down' },
     son: { mean: 7 + 25 / 60, lo: 6 + 55 / 60, hi: 7 + 55 / 60, worse: 'down' }, estat: { mean: 4, lo: 3.6, hi: 4.4, worse: 'down' } };
-  META = {
-    rhr: { short: 'FC repòs', label: 'FREQÜÈNCIA CARDÍACA EN REPÒS', cell: 'FC EN REPÒS', unit: 'BPM', mode: 'line', name: 'FC en repòs' },
-    hrv: { short: 'HRV', label: 'VARIABILITAT CARDÍACA · HRV', cell: 'HRV', unit: 'MS', mode: 'line', name: 'HRV' },
-    son: { short: 'Son', label: 'HORES DE SON', cell: 'SON', unit: 'H', mode: 'bars', floor: 4, name: 'Son' },
-    estat: { short: 'Estat', label: 'ESTAT PERCEBUT · DE 1 A 5', cell: 'ESTAT PERCEBUT', unit: '/5', mode: 'bars', floor: 2, ceil: 5, name: 'Estat percebut' },
-  };
-  ST = { fons: { w: 'A FONS', line: 'Tot a punt: entrena amb normalitat.' },
-    mod: { w: 'MODERA', line: 'Entrena, però avui sense forçar.' },
-    rec: { w: 'RECUPERA', line: 'Avui toca prioritzar la recuperació.' } };
-  WS = { fons: 'A fons', mod: 'Modera', rec: 'Recupera' };
   // Sis setmanes inventades (14 AGO – 20 SET): una nit curta, un stage amb més càrrega, la tornada a l'institut i un refredat.
   BASE = (() => { const hm = (h, m) => h + m / 60; return {
     rhr: [50, 49, 50, 49, 48, 49, 50, 49, 51, 52, 50, 51, 53, 54, 52, 50, 49, 50, 51, 50, 49, 50, null, 49, 50, 55, 56, 53, 49, 48, 47, 48, 49, 50, 51, 50, 49, 48],
@@ -423,43 +422,357 @@ class Component extends DCLogic {
     comp: { 37: { rhr: 51, hrv: 62, son: hm(7, 0), estat: 4.2 }, 38: { rhr: 52, hrv: 60, son: hm(6, 45), estat: 4.4 }, 39: { rhr: 53, hrv: 57, son: hm(6, 20), estat: 4.4 }, 40: { rhr: 53, hrv: 58, son: hm(6, 30), estat: 4.2 }, 41: { rhr: 55, hrv: 56, son: hm(6, 40), estat: 4.4 } },
     buit: { 36: null, 37: null, 38: { rhr: 51, hrv: 63, son: hm(7, 10), estat: 4.0 }, 39: { rhr: 50, hrv: 65, son: hm(7, 30), estat: 4.2 }, 40: { rhr: 50, hrv: 64, son: hm(7, 20), estat: 4.0 }, 41: null },
   }; })();
-  ITEMS = [{ t: 'Cansament', n: '5 = gens cansat' }, { t: 'Rendiment', n: 'com et sents rendint' }, { t: 'Ànim i estrès', n: 'salut mental' }, { t: 'Dolor o molèsties', n: '5 = cap' }, { t: 'Salut general', n: 'com et trobes' }];
   USUAL = [3.8, 4.0, 4.2, 3.9, 4.1];
   TODAY = { normal: [4, 4, 5, 3, 4], descans: [2, 3, 3, 3, 1], comp: [3, 5, 5, 4, 5], nou: [4, 4, 4, 4, 4], buit: null };
-  WEEKS = [{ id: 38, a: 31, pub: 'DL 21 SET' }, { id: 37, a: 24, pub: 'DL 14 SET' }, { id: 36, a: 17, pub: 'DL 7 SET' }, { id: 35, a: 10, pub: 'DL 31 AGO' }, { id: 34, a: 3, pub: 'DL 24 AGO' }];
+  // Resums setmanals: `a` = índex del dilluns; es publiquen el dilluns següent (a + 7).
+  WEEKS = [{ id: 38, a: 31 }, { id: 37, a: 24 }, { id: 36, a: 17 }, { id: 35, a: 10 }, { id: 34, a: 3 }];
   SCN = [{ k: 'normal', t: 'Día normal' }, { k: 'descans', t: 'Descanso claro' }, { k: 'comp', t: 'Competición' }, { k: 'buit', t: 'Sin datos' }, { k: 'nou', t: 'Deportista nuevo' }];
-  PRIV = [
-    { t: 'El teu nom', s: "qui ets dins de l'equip", r: { tu: 'yes', coach: 'yes', study: 'no' } },
-    { t: 'Estat general del dia', s: 'Recupera · Modera · A fons', r: { tu: 'yes', coach: 'yes', study: 'code' } },
-    { t: 'Evolució de FC, HRV i son', s: 'gràfics i franja personal', r: { tu: 'yes', coach: 'yes', study: 'code' } },
-    { t: 'Respostes dels qüestionaris', s: 'cansament, ànim, dolor, salut…', r: { tu: 'yes', coach: 'no', study: 'code' } },
-    { t: 'Missatges i resums de la IA', s: "el que l'app t'explica", r: { tu: 'yes', coach: 'no', study: 'no' } },
-  ];
-  ROLES = { tu: { t: 'TU', d: 'Ho veus tot, sempre. Són les teves dades.' },
-    coach: { t: 'ENTRENADOR', d: 'Veu com evolucionen les teves dades i el teu estat general, per planificar millor els entrenaments. No veu què has respost als qüestionaris ni els missatges de la IA.' },
-    study: { t: 'ESTUDI', d: "L'equip de recerca analitza les dades amb un codi en lloc del teu nom. Als resultats no hi surt mai ningú identificat." } };
-  LANGS = [{ k: 'ca', t: 'Català', n: "L'app es mostra en català." }, { k: 'es', t: 'Castellano', n: 'La app se mostrará en castellano.' }, { k: 'fr', t: 'Français', n: "L'application s'affichera en français." }];
-  FB_DAILY = {
-    normal: "Has dormit [[6 h 45|~]], una mica menys del teu normal, però la FC en repòs ([[47 bpm|+]]) i l'HRV ([[66 ms]]) diuen que el cos està recuperat. Avui pots entrenar amb normalitat; aquesta nit, intenta anar a dormir una mica abans.",
-    descans: "Avui les dades són clares: la FC en repòs està [[7 bpm|!]] per sobre del teu normal i l'HRV ha baixat fins a [[49 ms|!]]. Has dormit bé ([[7 h 05]]), però dius que no et trobes bé ([[2,6|!]] de 5). El cos et demana descans: prioritza la recuperació i comenta-ho amb l'entrenador abans d'entrenar.",
-    comp: "Et sents amb ganes ([[4,4|+]] de 5), però les dades diuen una altra cosa: portes quatre nits dormint menys de l'habitual ([[6 h 40|~]] aquesta nit) i la FC en repòs és de [[55 bpm|!]], per sobre de la teva franja. Entrena, però baixa la intensitat i intenta dormir una mica més.",
-    buit: "Encara no han arribat les dades d'avui. Quan arribin, t'explicaré com estàs. Ahir tot era dins la teva franja, així que si et trobes bé, segueix el pla de l'entrenador.",
-    nou: "Benvinguda, Laia! Encara estem aprenent com ets tu: amb [[5 de 14]] dies de dades, aviat podrem comparar cada dia amb el teu normal. De moment, escolta com et sents i segueix el pla de l'entrenador.",
-  };
-  FB_SENTS = {
-    normal: "Aquest mes, el que sents i el que diuen les dades van gairebé sempre de la mà. Vol dir que et coneixes bé: continua fent-te cas.",
-    descans: "Avui tu i les teves dades dieu el mateix: toca descansar. Quan coincideixen tant, val la pena fer-ne cas.",
-    comp: "Els últims dies et sents millor del que diuen les dades. És normal quan hi ha molta motivació, però el cos també necessita recuperar.",
-    buit: "Els dies sense dades no compten. La resta del mes, el que sents i les dades coincideixen gairebé sempre.",
-  };
-  SYSTEM = `Ets el mòdul d'IA de Max Tracking, una aplicació que retorna als esportistes de competició joves (de 14 a 20 anys) les seves pròpies dades de salut i recuperació, perquè entenguin com estan.
+  LANGS = [{ k: 'ca', t: 'Català', n: "L'app es mostra en català." }, { k: 'es', t: 'Castellano', n: 'La app se muestra en castellano.' }, { k: 'fr', t: 'Français', n: "L'application s'affiche en français." }, { k: 'en', t: 'English', n: 'The app is shown in English.' }];
+
+  // ── Idiomes ───────────────────────────────────────────────────────────
+  // Tots els textos de l'app en català, castellà, francès i anglès. Cada text és { ca, es, fr, en } i L() el resol a l'idioma triat a Ajustos.
+  TX = {
+    WD: { ca: ['DL', 'DT', 'DC', 'DJ', 'DV', 'DS', 'DG'], es: ['LU', 'MA', 'MI', 'JU', 'VI', 'SÁ', 'DO'], fr: ['LU', 'MA', 'ME', 'JE', 'VE', 'SA', 'DI'], en: ['MO', 'TU', 'WE', 'TH', 'FR', 'SA', 'SU'] },
+    WDL: { ca: ['DILLUNS', 'DIMARTS', 'DIMECRES', 'DIJOUS', 'DIVENDRES', 'DISSABTE', 'DIUMENGE'], es: ['LUNES', 'MARTES', 'MIÉRCOLES', 'JUEVES', 'VIERNES', 'SÁBADO', 'DOMINGO'],
+      fr: ['LUNDI', 'MARDI', 'MERCREDI', 'JEUDI', 'VENDREDI', 'SAMEDI', 'DIMANCHE'], en: ['MONDAY', 'TUESDAY', 'WEDNESDAY', 'THURSDAY', 'FRIDAY', 'SATURDAY', 'SUNDAY'] },
+    MS: { ca: ['GEN', 'FEB', 'MAR', 'ABR', 'MAI', 'JUN', 'JUL', 'AGO', 'SET', 'OCT', 'NOV', 'DES'], es: ['ENE', 'FEB', 'MAR', 'ABR', 'MAY', 'JUN', 'JUL', 'AGO', 'SEP', 'OCT', 'NOV', 'DIC'],
+      fr: ['JANV.', 'FÉVR.', 'MARS', 'AVR.', 'MAI', 'JUIN', 'JUIL.', 'AOÛT', 'SEPT.', 'OCT.', 'NOV.', 'DÉC.'], en: ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC'] },
+    META: {
+      rhr: { short: { ca: 'FC repòs', es: 'FC reposo', fr: 'FC repos', en: 'Resting HR' }, label: { ca: 'FREQÜÈNCIA CARDÍACA EN REPÒS', es: 'FRECUENCIA CARDÍACA EN REPOSO', fr: 'FRÉQUENCE CARDIAQUE AU REPOS', en: 'RESTING HEART RATE' },
+        cell: { ca: 'FC EN REPÒS', es: 'FC EN REPOSO', fr: 'FC AU REPOS', en: 'RESTING HR' }, unit: 'BPM', mode: 'line', name: { ca: 'FC en repòs', es: 'FC en reposo', fr: 'FC au repos', en: 'Resting HR' } },
+      hrv: { short: 'HRV', label: { ca: 'VARIABILITAT CARDÍACA · HRV', es: 'VARIABILIDAD CARDÍACA · HRV', fr: 'VARIABILITÉ CARDIAQUE · HRV', en: 'HEART RATE VARIABILITY · HRV' }, cell: 'HRV', unit: 'MS', mode: 'line', name: 'HRV' },
+      son: { short: { ca: 'Son', es: 'Sueño', fr: 'Sommeil', en: 'Sleep' }, label: { ca: 'HORES DE SON', es: 'HORAS DE SUEÑO', fr: 'HEURES DE SOMMEIL', en: 'HOURS OF SLEEP' },
+        cell: { ca: 'SON', es: 'SUEÑO', fr: 'SOMMEIL', en: 'SLEEP' }, unit: 'H', mode: 'bars', floor: 4, name: { ca: 'Son', es: 'Sueño', fr: 'Sommeil', en: 'Sleep' } },
+      estat: { short: { ca: 'Estat', es: 'Estado', fr: 'État', en: 'Feeling' }, label: { ca: 'ESTAT PERCEBUT · DE 1 A 5', es: 'ESTADO PERCIBIDO · DE 1 A 5', fr: 'ÉTAT PERÇU · DE 1 À 5', en: 'PERCEIVED STATE · 1 TO 5' },
+        cell: { ca: 'ESTAT PERCEBUT', es: 'ESTADO PERCIBIDO', fr: 'ÉTAT PERÇU', en: 'PERCEIVED STATE' }, unit: '/5', mode: 'bars', floor: 2, ceil: 5, name: { ca: 'Estat percebut', es: 'Estado percibido', fr: 'État perçu', en: 'Perceived state' } },
+    },
+    ST: { fons: { w: { ca: 'A FONS', es: 'A TOPE', fr: 'À FOND', en: 'GO HARD' }, line: { ca: 'Tot a punt: entrena amb normalitat.', es: 'Todo a punto: entrena con normalidad.', fr: 'Tout est prêt : entraîne-toi normalement.', en: 'All set: train as normal.' } },
+      mod: { w: { ca: 'MODERA', es: 'MODERA', fr: 'MODÈRE', en: 'EASE OFF' }, line: { ca: 'Entrena, però avui sense forçar.', es: 'Entrena, pero hoy sin forzar.', fr: "Entraîne-toi, mais sans forcer aujourd'hui.", en: "Train, but don't push it today." } },
+      rec: { w: { ca: 'RECUPERA', es: 'RECUPERA', fr: 'RÉCUPÈRE', en: 'RECOVER' }, line: { ca: 'Avui toca prioritzar la recuperació.', es: 'Hoy toca priorizar la recuperación.', fr: "Aujourd'hui, priorité à la récupération.", en: 'Today, recovery comes first.' } } },
+    WS: { fons: { ca: 'A fons', es: 'A tope', fr: 'À fond', en: 'Go hard' }, mod: { ca: 'Modera', es: 'Modera', fr: 'Modère', en: 'Ease off' }, rec: { ca: 'Recupera', es: 'Recupera', fr: 'Récupère', en: 'Recover' } },
+    ITEMS: [
+      { t: { ca: 'Cansament', es: 'Cansancio', fr: 'Fatigue', en: 'Tiredness' }, n: { ca: '5 = gens cansat', es: '5 = nada cansado', fr: '5 = pas du tout fatigué', en: '5 = not tired at all' } },
+      { t: { ca: 'Rendiment', es: 'Rendimiento', fr: 'Performance', en: 'Performance' }, n: { ca: 'com et sents rendint', es: 'cómo te sientes rindiendo', fr: 'ton niveau ressenti', en: 'how well you feel you perform' } },
+      { t: { ca: 'Ànim i estrès', es: 'Ánimo y estrés', fr: 'Moral et stress', en: 'Mood and stress' }, n: { ca: 'salut mental', es: 'salud mental', fr: 'santé mentale', en: 'mental health' } },
+      { t: { ca: 'Dolor o molèsties', es: 'Dolor o molestias', fr: 'Douleur ou gêne', en: 'Pain or discomfort' }, n: { ca: '5 = cap', es: '5 = ninguno', fr: '5 = aucune', en: '5 = none' } },
+      { t: { ca: 'Salut general', es: 'Salud general', fr: 'Santé générale', en: 'General health' }, n: { ca: 'com et trobes', es: 'cómo te encuentras', fr: 'comment tu te sens', en: 'how you feel' } },
+    ],
+    PRIV: [
+      { t: { ca: 'El teu nom', es: 'Tu nombre', fr: 'Ton nom', en: 'Your name' }, s: { ca: "qui ets dins de l'equip", es: 'quién eres dentro del equipo', fr: "qui tu es dans l'équipe", en: 'who you are in the team' }, r: { tu: 'yes', coach: 'yes', study: 'no' } },
+      { t: { ca: 'Estat general del dia', es: 'Estado general del día', fr: 'État général du jour', en: 'Overall day status' }, s: { ca: 'Recupera · Modera · A fons', es: 'Recupera · Modera · A tope', fr: 'Récupère · Modère · À fond', en: 'Recover · Ease off · Go hard' }, r: { tu: 'yes', coach: 'yes', study: 'code' } },
+      { t: { ca: 'Evolució de FC, HRV i son', es: 'Evolución de FC, HRV y sueño', fr: 'Évolution de la FC, de la HRV et du sommeil', en: 'HR, HRV and sleep trends' }, s: { ca: 'gràfics i franja personal', es: 'gráficos y franja personal', fr: 'graphiques et plage personnelle', en: 'charts and personal range' }, r: { tu: 'yes', coach: 'yes', study: 'code' } },
+      { t: { ca: 'Respostes dels qüestionaris', es: 'Respuestas de los cuestionarios', fr: 'Réponses aux questionnaires', en: 'Questionnaire answers' }, s: { ca: 'cansament, ànim, dolor, salut…', es: 'cansancio, ánimo, dolor, salud…', fr: 'fatigue, moral, douleur, santé…', en: 'tiredness, mood, pain, health…' }, r: { tu: 'yes', coach: 'no', study: 'code' } },
+      { t: { ca: 'Missatges i resums de la IA', es: 'Mensajes y resúmenes de la IA', fr: "Messages et résumés de l'IA", en: 'AI messages and summaries' }, s: { ca: "el que l'app t'explica", es: 'lo que la app te explica', fr: "ce que l'app t'explique", en: 'what the app tells you' }, r: { tu: 'yes', coach: 'no', study: 'no' } },
+    ],
+    ROLES: {
+      tu: { t: { ca: 'TU', es: 'TÚ', fr: 'TOI', en: 'YOU' }, d: { ca: 'Ho veus tot, sempre. Són les teves dades.', es: 'Lo ves todo, siempre. Son tus datos.', fr: 'Tu vois tout, toujours. Ce sont tes données.', en: 'You see everything, always. It is your data.' } },
+      coach: { t: { ca: 'ENTRENADOR', es: 'ENTRENADOR', fr: 'ENTRAÎNEUR', en: 'COACH' }, d: { ca: 'Veu com evolucionen les teves dades i el teu estat general, per planificar millor els entrenaments. No veu què has respost als qüestionaris ni els missatges de la IA.',
+        es: 'Ve cómo evolucionan tus datos y tu estado general, para planificar mejor los entrenamientos. No ve lo que has respondido en los cuestionarios ni los mensajes de la IA.',
+        fr: "Voit comment évoluent tes données et ton état général, pour mieux planifier les entraînements. Il ne voit ni tes réponses aux questionnaires ni les messages de l'IA.",
+        en: "Sees how your data and overall status change, to plan training better. Doesn't see your questionnaire answers or the AI's messages." } },
+      study: { t: { ca: 'ESTUDI', es: 'ESTUDIO', fr: 'ÉTUDE', en: 'STUDY' }, d: { ca: "L'equip de recerca analitza les dades amb un codi en lloc del teu nom. Als resultats no hi surt mai ningú identificat.",
+        es: 'El equipo de investigación analiza los datos con un código en lugar de tu nombre. En los resultados nunca aparece nadie identificado.',
+        fr: "L'équipe de recherche analyse les données avec un code au lieu de ton nom. Personne n'est jamais identifié dans les résultats.",
+        en: 'The research team analyses the data with a code instead of your name. No one is ever identified in the results.' } },
+    },
+    // Textos de reserva (quan la IA en directe no està disponible). [[xifra|marca]] es pinta amb el to de la dada.
+    FB_DAILY: {
+      normal: { ca: "Has dormit [[6 h 45|~]], una mica menys del teu normal, però la FC en repòs ([[47 bpm|+]]) i l'HRV ([[66 ms]]) diuen que el cos està recuperat. Avui pots entrenar amb normalitat; aquesta nit, intenta anar a dormir una mica abans.",
+        es: 'Has dormido [[6 h 45|~]], algo menos de tu normal, pero la FC en reposo ([[47 bpm|+]]) y la HRV ([[66 ms]]) dicen que el cuerpo está recuperado. Hoy puedes entrenar con normalidad; esta noche, intenta irte a dormir un poco antes.',
+        fr: "Tu as dormi [[6 h 45|~]], un peu moins que ta normale, mais ta FC au repos ([[47 bpm|+]]) et ta HRV ([[66 ms]]) disent que ton corps a récupéré. Aujourd'hui, tu peux t'entraîner normalement ; ce soir, essaie de te coucher un peu plus tôt.",
+        en: 'You slept [[6h 45m|~]], a little less than usual, but your resting HR ([[47 bpm|+]]) and HRV ([[66 ms]]) say your body has recovered. You can train as normal today; tonight, try going to bed a little earlier.' },
+      descans: { ca: "Avui les dades són clares: la FC en repòs està [[7 bpm|!]] per sobre del teu normal i l'HRV ha baixat fins a [[49 ms|!]]. Has dormit bé ([[7 h 05]]), però dius que no et trobes bé ([[2,6|!]] de 5). El cos et demana descans: prioritza la recuperació i comenta-ho amb l'entrenador abans d'entrenar.",
+        es: 'Hoy los datos son claros: la FC en reposo está [[7 bpm|!]] por encima de tu normal y la HRV ha bajado hasta [[49 ms|!]]. Has dormido bien ([[7 h 05]]), pero dices que no te encuentras bien ([[2,6|!]] de 5). El cuerpo te pide descanso: prioriza la recuperación y coméntalo con el entrenador antes de entrenar.',
+        fr: "Aujourd'hui, les données sont claires : ta FC au repos est [[7 bpm|!]] au-dessus de ta normale et ta HRV est descendue à [[49 ms|!]]. Tu as bien dormi ([[7 h 05]]), mais tu dis que tu ne te sens pas bien ([[2,6|!]] sur 5). Ton corps te demande du repos : donne la priorité à la récupération et parles-en à ton entraîneur avant de t'entraîner.",
+        en: "Today the data are clear: your resting HR is [[7 bpm|!]] above your usual and your HRV has dropped to [[49 ms|!]]. You slept well ([[7h 05m]]), but you say you don't feel well ([[2.6|!]] out of 5). Your body is asking for rest: put recovery first and talk to your coach before training." },
+      comp: { ca: "Et sents amb ganes ([[4,4|+]] de 5), però les dades diuen una altra cosa: portes quatre nits dormint menys de l'habitual ([[6 h 40|~]] aquesta nit) i la FC en repòs és de [[55 bpm|!]], per sobre de la teva franja. Entrena, però baixa la intensitat i intenta dormir una mica més.",
+        es: 'Te sientes con ganas ([[4,4|+]] de 5), pero los datos dicen otra cosa: llevas cuatro noches durmiendo menos de lo habitual ([[6 h 40|~]] esta noche) y la FC en reposo es de [[55 bpm|!]], por encima de tu franja. Entrena, pero baja la intensidad e intenta dormir un poco más.',
+        fr: "Tu te sens motivé ([[4,4|+]] sur 5), mais les données disent autre chose : tu dors moins que d'habitude depuis quatre nuits ([[6 h 40|~]] cette nuit) et ta FC au repos est de [[55 bpm|!]], au-dessus de ta plage. Entraîne-toi, mais baisse l'intensité et essaie de dormir un peu plus.",
+        en: "You feel keen ([[4.4|+]] out of 5), but the data say something else: you've slept less than usual for four nights ([[6h 40m|~]] last night) and your resting HR is [[55 bpm|!]], above your range. Train, but lower the intensity and try to sleep a little more." },
+      buit: { ca: "Encara no han arribat les dades d'avui. Quan arribin, t'explicaré com estàs. Ahir tot era dins la teva franja, així que si et trobes bé, segueix el pla de l'entrenador.",
+        es: 'Aún no han llegado los datos de hoy. Cuando lleguen, te explicaré cómo estás. Ayer todo estaba dentro de tu franja, así que si te encuentras bien, sigue el plan del entrenador.',
+        fr: "Les données du jour ne sont pas encore arrivées. Quand elles arriveront, je t'expliquerai comment tu vas. Hier, tout était dans ta plage, donc si tu te sens bien, suis le plan de ton entraîneur.",
+        en: "Today's data haven't arrived yet. When they do, I'll tell you how you're doing. Yesterday everything was within your range, so if you feel good, follow your coach's plan." },
+      nou: { ca: "Benvinguda, Laia! Encara estem aprenent com ets tu: amb [[5 de 14]] dies de dades, aviat podrem comparar cada dia amb el teu normal. De moment, escolta com et sents i segueix el pla de l'entrenador.",
+        es: '¡Bienvenida, Laia! Aún estamos aprendiendo cómo eres: con [[5 de 14]] días de datos, pronto podremos comparar cada día con tu normal. De momento, escucha cómo te sientes y sigue el plan del entrenador.',
+        fr: "Bienvenue, Laia ! On apprend encore à te connaître : avec [[5 sur 14]] jours de données, on pourra bientôt comparer chaque jour à ta normale. Pour l'instant, écoute ton ressenti et suis le plan de ton entraîneur.",
+        en: "Welcome, Laia! We're still getting to know you: with [[5 of 14]] days of data, we'll soon be able to compare each day with your usual. For now, listen to how you feel and follow your coach's plan." },
+    },
+    FB_SENTS: {
+      normal: { ca: 'Aquest mes, el que sents i el que diuen les dades van gairebé sempre de la mà. Vol dir que et coneixes bé: continua fent-te cas.', es: 'Este mes, lo que sientes y lo que dicen los datos van casi siempre de la mano. Quiere decir que te conoces bien: sigue haciéndote caso.',
+        fr: "Ce mois-ci, ton ressenti et les données vont presque toujours de pair. Ça veut dire que tu te connais bien : continue à t'écouter.", en: 'This month, how you feel and what the data say have almost always gone hand in hand. It means you know yourself well: keep listening to yourself.' },
+      descans: { ca: 'Avui tu i les teves dades dieu el mateix: toca descansar. Quan coincideixen tant, val la pena fer-ne cas.', es: 'Hoy tú y tus datos decís lo mismo: toca descansar. Cuando coinciden tanto, vale la pena hacer caso.',
+        fr: "Aujourd'hui, toi et tes données dites la même chose : il faut te reposer. Quand ils concordent autant, ça vaut la peine de les écouter.", en: "Today you and your data are saying the same thing: time to rest. When they agree this much, it's worth listening." },
+      comp: { ca: 'Els últims dies et sents millor del que diuen les dades. És normal quan hi ha molta motivació, però el cos també necessita recuperar.', es: 'Los últimos días te sientes mejor de lo que dicen los datos. Es normal cuando hay mucha motivación, pero el cuerpo también necesita recuperar.',
+        fr: 'Ces derniers jours, tu te sens mieux que ce que disent les données. C\'est normal quand la motivation est forte, mais ton corps a aussi besoin de récupérer.', en: "In the last few days you've felt better than the data say. That's normal when motivation is high, but your body also needs to recover." },
+      buit: { ca: 'Els dies sense dades no compten. La resta del mes, el que sents i les dades coincideixen gairebé sempre.', es: 'Los días sin datos no cuentan. El resto del mes, lo que sientes y los datos coinciden casi siempre.',
+        fr: 'Les jours sans données ne comptent pas. Le reste du mois, ton ressenti et les données concordent presque toujours.', en: "Days without data don't count. The rest of the month, how you feel and the data almost always match." },
+    },
+
+    // Textos de la interfície (plantilla i codi). Els que porten dades són funcions.
+    UI: {
+      dec: { ca: ',', es: ',', fr: ',', en: '.' },
+      hm: { ca: (h, m) => `${h} h ${m}`, es: (h, m) => `${h} h ${m}`, fr: (h, m) => `${h} h ${m}`, en: (h, m) => `${h}h ${m}m` },
+      years: { ca: n => `${n} anys`, es: n => `${n} años`, fr: n => `${n} ans`, en: n => `${n} years` },
+      pl: { ca: (n, w) => `${n} ${n === 1 ? { d: 'dia', n: 'nit' }[w] : { d: 'dies', n: 'nits' }[w]}`, es: (n, w) => `${n} ${n === 1 ? { d: 'día', n: 'noche' }[w] : { d: 'días', n: 'noches' }[w]}`,
+        fr: (n, w) => `${n} ${n === 1 ? { d: 'jour', n: 'nuit' }[w] : { d: 'jours', n: 'nuits' }[w]}`, en: (n, w) => `${n} ${n === 1 ? { d: 'day', n: 'night' }[w] : { d: 'days', n: 'nights' }[w]}` },
+      chartCalc: { ca: 'FRANJA EN CÀLCUL · 5 DE 14 DIES', es: 'FRANJA EN CÁLCULO · 5 DE 14 DÍAS', fr: 'PLAGE EN CALCUL · 5 JOURS SUR 14', en: 'RANGE BEING CALCULATED · 5 OF 14 DAYS' },
+      axBetter: { ca: 'MILLOR', es: 'MEJOR', fr: 'MIEUX', en: 'BETTER' },
+      axNormal: { ca: 'NORMAL', es: 'NORMAL', fr: 'NORMAL', en: 'USUAL' },
+      axWorse: { ca: 'PITJOR', es: 'PEOR', fr: 'PIRE', en: 'WORSE' },
+      TODAY: { ca: 'AVUI', es: 'HOY', fr: "AUJOURD'HUI", en: 'TODAY' },
+      dayAbbr: { ca: 'D', es: 'D', fr: 'J', en: 'D' },
+      wAbbr: { ca: 'S', es: 'S', fr: 'S', en: 'W' },
+      // Navegació
+      navAvui: { ca: 'Avui', es: 'Hoy', fr: "Aujourd'hui", en: 'Today' },
+      evol: { ca: 'Evolució', es: 'Evolución', fr: 'Évolution', en: 'Trends' },
+      navSetm: { ca: 'Setmana', es: 'Semana', fr: 'Semaine', en: 'Week' },
+      navPriv: { ca: 'Privacitat', es: 'Privacidad', fr: 'Vie privée', en: 'Privacy' },
+      settings: { ca: 'Ajustos', es: 'Ajustes', fr: 'Réglages', en: 'Settings' },
+      metrics: { ca: 'MÈTRIQUES', es: 'MÉTRICAS', fr: 'MESURES', en: 'METRICS' },
+      feelVsData: { ca: 'SENSACIÓ VS DADES', es: 'SENSACIÓN VS DATOS', fr: 'RESSENTI VS DONNÉES', en: 'FEELING VS DATA' },
+      // Avui
+      greet: { ca: n => `Bon dia, ${n}.`, es: n => `Buenos días, ${n}.`, fr: n => `Bonjour, ${n}.`, en: n => `Good morning, ${n}.` },
+      calculating: { ca: 'Calculant', es: 'Calculando', fr: 'En calcul', en: 'Calculating' },
+      learning: { ca: 'Encara estem aprenent com ets tu.', es: 'Aún estamos aprendiendo cómo eres.', fr: 'On apprend encore à te connaître.', en: "We're still getting to know you." },
+      pending: { ca: 'Pendent', es: 'Pendiente', fr: 'En attente', en: 'Pending' },
+      noDataYet: { ca: "Encara no han arribat les dades d'avui.", es: 'Aún no han llegado los datos de hoy.', fr: 'Les données du jour ne sont pas encore arrivées.', en: "Today's data haven't arrived yet." },
+      basisNone: { ca: "EN QUÈ ES BASA · ENCARA SENSE DADES D'AVUI", es: 'EN QUÉ SE BASA · AÚN SIN DATOS DE HOY', fr: 'SUR QUOI ÇA SE BASE · PAS ENCORE DE DONNÉES DU JOUR', en: "WHAT IT'S BASED ON · NO DATA TODAY YET" },
+      basis4: { ca: "EN QUÈ ES BASA · 4 DADES D'AVUI", es: 'EN QUÉ SE BASA · 4 DATOS DE HOY', fr: 'SUR QUOI ÇA SE BASE · 4 DONNÉES DU JOUR', en: "WHAT IT'S BASED ON · 4 OF TODAY'S METRICS" },
+      bandCalc514: { ca: 'Franja en càlcul · 5/14', es: 'Franja en cálculo · 5/14', fr: 'Plage en calcul · 5/14', en: 'Range being calculated · 5/14' },
+      noDataToday: { ca: "Sense dades d'avui", es: 'Sin datos de hoy', fr: "Pas de données aujourd'hui", en: 'No data today' },
+      nBad: { ca: 'per vigilar', es: 'a vigilar', fr: 'à surveiller', en: 'to watch' },
+      nMid: { ca: 'al límit', es: 'al límite', fr: 'à la limite', en: 'borderline' },
+      nOk: { ca: 'dins la franja', es: 'dentro de la franja', fr: 'dans la plage', en: 'in range' },
+      allOk: { ca: 'Tot dins la franja', es: 'Todo dentro de la franja', fr: 'Tout dans la plage', en: 'All in range' },
+      noDataL: { ca: 'sense dades', es: 'sin datos', fr: 'pas de données', en: 'no data' },
+      bandCalcL: { ca: 'franja en càlcul', es: 'franja en cálculo', fr: 'plage en calcul', en: 'range being calculated' },
+      veryGood: { ca: 'molt bé', es: 'muy bien', fr: 'très bien', en: 'very good' },
+      inBandOf: { ca: b => `dins · franja ${b}`, es: b => `dentro · franja ${b}`, fr: b => `dedans · plage ${b}`, en: b => `in · range ${b}` },
+      // Evolució
+      notHere: { ca: 'encara no hi eres', es: 'aún no estabas', fr: "tu n'étais pas encore là", en: "you weren't here yet" },
+      vsMean: { ca: d => `${d} vs la teva mitjana`, es: d => `${d} vs tu media`, fr: d => `${d} vs ta moyenne`, en: d => `${d} vs your average` },
+      inYourBand: { ca: 'dins la teva franja', es: 'dentro de tu franja', fr: 'dans ta plage', en: 'within your range' },
+      zoomWeek: { ca: s => `SETMANA ${s}`, es: s => `SEMANA ${s}`, fr: s => `SEMAINE ${s}`, en: s => `WEEK ${s}` },
+      avgWeek: { ca: 'MITJANA SETMANA', es: 'MEDIA SEMANA', fr: 'MOYENNE SEMAINE', en: 'WEEK AVERAGE' },
+      avgN: { ca: n => `MITJANA ${n} D`, es: n => `MEDIA ${n} D`, fr: n => `MOYENNE ${n} J`, en: n => `${n}-DAY AVERAGE` },
+      inCalcU: { ca: 'EN CÀLCUL', es: 'EN CÁLCULO', fr: 'EN CALCUL', en: 'CALCULATING' },
+      outDesk: { ca: 'BÉ · LÍMIT · VIGILAR', es: 'BIEN · LÍMITE · VIGILAR', fr: 'BIEN · LIMITE · ALERTE', en: 'GOOD · LIMIT · WATCH' },
+      outMob: { ca: 'BÉ·LÍMIT·VIGILAR', es: 'OK·LÍMITE·VIGILAR', fr: 'OK·LIMITE·ALERTE', en: 'OK·LIMIT·WATCH' },
+      daysByState: { ca: 'DIES PER ESTAT', es: 'DÍAS POR ESTADO', fr: 'JOURS PAR ÉTAT', en: 'DAYS BY STATUS' },
+      tapWeek: { ca: 'TOCA UNA SETMANA PER AMPLIAR-LA', es: 'TOCA UNA SEMANA PARA AMPLIARLA', fr: 'TOUCHE UNE SEMAINE POUR LA DÉTAILLER', en: 'TAP A WEEK TO ZOOM IN' },
+      d28: { ca: '28 DIES', es: '28 DÍAS', fr: '28 JOURS', en: '28 DAYS' },
+      yourBand: { ca: 'LA TEVA FRANJA', es: 'TU FRANJA', fr: 'TA PLAGE', en: 'YOUR RANGE' },
+      bandLegend: { ca: 'LA TEVA FRANJA · ÚLTIMES SETMANES', es: 'TU FRANJA · ÚLTIMAS SEMANAS', fr: 'TA PLAGE · DERNIÈRES SEMAINES', en: 'YOUR RANGE · RECENT WEEKS' },
+      scaleLegend: { ca: 'PER VIGILAR → BÉ', es: 'A VIGILAR → BIEN', fr: 'À SURVEILLER → BIEN', en: 'WATCH → GOOD' },
+      noData: { ca: 'SENSE DADES', es: 'SIN DATOS', fr: 'PAS DE DONNÉES', en: 'NO DATA' },
+      swipeHint: { ca: 'PASSA EL DIT PEL GRÀFIC PER VEURE CADA DIA', es: 'PASA EL DEDO POR EL GRÁFICO PARA VER CADA DÍA', fr: 'GLISSE LE DOIGT SUR LE GRAPHIQUE POUR VOIR CHAQUE JOUR', en: 'DRAG ACROSS THE CHART TO SEE EACH DAY' },
+      hoverHint: { ca: 'PASSA EL RATOLÍ PEL GRÀFIC PER VEURE CADA DIA · A 28 DIES, TRIA UNA SETMANA PER AMPLIAR-LA', es: 'PASA EL RATÓN POR EL GRÁFICO PARA VER CADA DÍA · EN 28 DÍAS, ELIGE UNA SEMANA PARA AMPLIARLA', fr: 'SURVOLE LE GRAPHIQUE POUR VOIR CHAQUE JOUR · SUR 28 JOURS, CHOISIS UNE SEMAINE POUR LA DÉTAILLER', en: 'HOVER OVER THE CHART TO SEE EACH DAY · ON 28 DAYS, PICK A WEEK TO ZOOM IN' },
+      answeredToday: { ca: 'EL QUE HAS RESPOST AVUI', es: 'LO QUE HAS RESPONDIDO HOY', fr: "CE QUE TU AS RÉPONDU AUJOURD'HUI", en: 'WHAT YOU ANSWERED TODAY' },
+      onlyYou: { ca: 'NOMÉS TU HO VEUS', es: 'SOLO TÚ LO VES', fr: 'TOI SEUL LE VOIS', en: 'ONLY YOU SEE THIS' },
+      noQuest: { ca: "El qüestionari d'avui encara no ha arribat. Quan l'omplis per a la federació, apareixerà aquí.", es: 'El cuestionario de hoy aún no ha llegado. Cuando lo rellenes para la federación, aparecerá aquí.', fr: "Le questionnaire du jour n'est pas encore arrivé. Quand tu le rempliras pour la fédération, il apparaîtra ici.", en: "Today's questionnaire hasn't arrived yet. Once you fill it in for the federation, it will appear here." },
+      usual: { ca: u => `habitual ${u}`, es: u => `habitual ${u}`, fr: u => `habituel ${u}`, en: u => `usual ${u}` },
+      // Sensació vs dades
+      match: { ca: 'COINCIDEIXEN', es: 'COINCIDEN', fr: 'CONCORDENT', en: 'MATCH' },
+      ofNDays: { ca: n => `DE ${n} DIES`, es: n => `DE ${n} DÍAS`, fr: n => `SUR ${n} JOURS`, en: n => `OF ${n} DAYS` },
+      ofN: { ca: n => `DE ${n}`, es: n => `DE ${n}`, fr: n => `SUR ${n}`, en: n => `OF ${n}` },
+      lgFeel: { ca: 'COM ET SENTS', es: 'CÓMO TE SIENTES', fr: 'TON RESSENTI', en: 'HOW YOU FEEL' },
+      lgData: { ca: 'QUÈ DIUEN LES DADES', es: 'QUÉ DICEN LOS DATOS', fr: 'CE QUE DISENT LES DONNÉES', en: 'WHAT THE DATA SAY' },
+      noMatch: { ca: 'NO COINCIDEIXEN', es: 'NO COINCIDEN', fr: 'NE CONCORDENT PAS', en: "DON'T MATCH" },
+      aiOnThis: { ca: 'LA IA, SOBRE AIXÒ', es: 'LA IA, SOBRE ESTO', fr: "L'IA, LÀ-DESSUS", en: 'THE AI, ON THIS' },
+      sentsNote: { ca: "«Què diuen les dades» combina la FC en repòs, l'HRV i el son. «El teu normal» és la teva pròpia mitjana de les últimes setmanes.", es: '«Qué dicen los datos» combina la FC en reposo, la HRV y el sueño. «Tu normal» es tu propia media de las últimas semanas.', fr: "« Ce que disent les données » combine la FC au repos, la HRV et le sommeil. « Ta normale » est ta propre moyenne des dernières semaines.", en: '"What the data say" combines resting HR, HRV and sleep. "Your usual" is your own average over recent weeks.' },
+      notYetAvail: { ca: 'ENCARA NO DISPONIBLE', es: 'AÚN NO DISPONIBLE', fr: 'PAS ENCORE DISPONIBLE', en: 'NOT AVAILABLE YET' },
+      feelEmpty: { ca: 'Per comparar com et sents amb les teves dades, primer necessitem saber quin és el teu normal. Falten 9 dies.', es: 'Para comparar cómo te sientes con tus datos, primero necesitamos saber cuál es tu normal. Faltan 9 días.', fr: "Pour comparer ton ressenti avec tes données, on doit d'abord connaître ta normale. Il reste 9 jours.", en: 'To compare how you feel with your data, we first need to know your usual. 9 days to go.' },
+      wAbove: { ca: 'per sobre del teu normal', es: 'por encima de tu normal', fr: 'au-dessus de ta normale', en: 'above your usual' },
+      wBelow: { ca: 'per sota del teu normal', es: 'por debajo de tu normal', fr: 'en dessous de ta normale', en: 'below your usual' },
+      wNormal: { ca: 'en el teu normal', es: 'en tu normal', fr: 'dans ta normale', en: 'at your usual' },
+      sentsDay: { ca: (d, f, o) => `${d} · et sents ${f} · dades ${o}`, es: (d, f, o) => `${d} · te sientes ${f} · datos ${o}`, fr: (d, f, o) => `${d} · tu te sens ${f} · données ${o}`, en: (d, f, o) => `${d} · you feel ${f} · data ${o}` },
+      sentsSame: { ca: 'El que sents i les dades diuen el mateix', es: 'Lo que sientes y los datos dicen lo mismo', fr: 'Ton ressenti et les données disent la même chose', en: 'How you feel and the data say the same' },
+      sentsBetter: { ca: n => `${n} ${n === 1 ? 'dia' : 'dies'} et sents millor del que diuen les dades`, es: n => `${n} ${n === 1 ? 'día' : 'días'} te sientes mejor de lo que dicen los datos`, fr: n => `${n} ${n === 1 ? 'jour' : 'jours'}, tu te sens mieux que ce que disent les données`, en: n => `On ${n} ${n === 1 ? 'day' : 'days'} you feel better than the data say` },
+      sentsWorse: { ca: n => `${n} ${n === 1 ? 'dia' : 'dies'} et sents pitjor del que diuen les dades`, es: n => `${n} ${n === 1 ? 'día' : 'días'} te sientes peor de lo que dicen los datos`, fr: n => `${n} ${n === 1 ? 'jour' : 'jours'}, tu te sens moins bien que ce que disent les données`, en: n => `On ${n} ${n === 1 ? 'day' : 'days'} you feel worse than the data say` },
+      // Setmana
+      weeklySummary: { ca: 'Resum setmanal', es: 'Resumen semanal', fr: 'Résumé hebdomadaire', en: 'Weekly summary' },
+      weeklySummaries: { ca: 'RESUMS SETMANALS', es: 'RESÚMENES SEMANALES', fr: 'RÉSUMÉS HEBDOMADAIRES', en: 'WEEKLY SUMMARIES' },
+      weekLbl: { ca: (n, d) => `SETMANA ${n} · ${d}`, es: (n, d) => `SEMANA ${n} · ${d}`, fr: (n, d) => `SEMAINE ${n} · ${d}`, en: (n, d) => `WEEK ${n} · ${d}` },
+      published: { ca: d => `PUBLICAT ${d}`, es: d => `PUBLICADO ${d}`, fr: d => `PUBLIÉ ${d}`, en: d => `PUBLISHED ${d}` },
+      eachDay: { ca: "L'ESTAT DE CADA DIA", es: 'EL ESTADO DE CADA DÍA', fr: "L'ÉTAT DE CHAQUE JOUR", en: 'EACH DAY\'S STATUS' },
+      aiReviewing: { ca: 'LA IA ESTÀ REPASSANT LA SETMANA…', es: 'LA IA ESTÁ REPASANDO LA SEMANA…', fr: "L'IA PASSE LA SEMAINE EN REVUE…", en: 'THE AI IS REVIEWING THE WEEK…' },
+      howWent: { ca: 'COM HA ANAT', es: 'CÓMO HA IDO', fr: "COMMENT ÇA S'EST PASSÉ", en: 'HOW IT WENT' },
+      improved: { ca: 'HA MILLORAT', es: 'HA MEJORADO', fr: "CE QUI S'EST AMÉLIORÉ", en: 'WHAT IMPROVED' },
+      toWatch: { ca: 'PER VIGILAR', es: 'A VIGILAR', fr: 'À SURVEILLER', en: 'TO WATCH' },
+      nextWeek: { ca: 'LA SETMANA QUE VE', es: 'LA SEMANA QUE VIENE', fr: 'LA SEMAINE PROCHAINE', en: 'NEXT WEEK' },
+      aiGenerated: { ca: 'GENERAT PER IA A PARTIR DE LES TEVES DADES · ORIENTATIU', es: 'GENERADO POR IA A PARTIR DE TUS DATOS · ORIENTATIVO', fr: "GÉNÉRÉ PAR L'IA À PARTIR DE TES DONNÉES · INDICATIF", en: 'GENERATED BY AI FROM YOUR DATA · GUIDANCE ONLY' },
+      otherWeeks: { ca: 'ALTRES SETMANES', es: 'OTRAS SEMANAS', fr: 'AUTRES SEMAINES', en: 'OTHER WEEKS' },
+      firstSummary: { ca: 'EL TEU PRIMER RESUM', es: 'TU PRIMER RESUMEN', fr: 'TON PREMIER RÉSUMÉ', en: 'YOUR FIRST SUMMARY' },
+      arrivesMon: { ca: 'Arribarà dilluns 28 de setembre', es: 'Llegará el lunes 28 de septiembre', fr: 'Il arrivera lundi 28 septembre', en: 'It arrives on Monday 28 September' },
+      everyMonday: { ca: 'Cada dilluns, la IA et resumirà la setmana en llenguatge senzill. Hi trobaràs:', es: 'Cada lunes, la IA te resumirá la semana en lenguaje sencillo. Encontrarás:', fr: "Chaque lundi, l'IA te résumera la semaine avec des mots simples. Tu y trouveras :", en: 'Every Monday, the AI will sum up your week in plain language. You will find:' },
+      everyMondayLong: { ca: 'Cada dilluns, la IA et resumirà la setmana en llenguatge senzill: com ha anat, què ha millorat, què cal vigilar i una recomanació per a la setmana següent.', es: 'Cada lunes, la IA te resumirá la semana en lenguaje sencillo: cómo ha ido, qué ha mejorado, qué hay que vigilar y una recomendación para la semana siguiente.', fr: "Chaque lundi, l'IA te résumera la semaine avec des mots simples : comment ça s'est passé, ce qui s'est amélioré, ce qu'il faut surveiller et une recommandation pour la semaine suivante.", en: 'Every Monday, the AI will sum up your week in plain language: how it went, what improved, what to watch and a recommendation for the following week.' },
+      // Privacitat
+      whoSees: { ca: 'Qui veu què', es: 'Quién ve qué', fr: 'Qui voit quoi', en: 'Who sees what' },
+      yourData: { ca: 'Les teves dades són teves. Aquí tens, sense lletra petita, qui en veu cada part.', es: 'Tus datos son tuyos. Aquí tienes, sin letra pequeña, quién ve cada parte.', fr: 'Tes données sont à toi. Voici, sans petits caractères, qui en voit chaque partie.', en: 'Your data is yours. Here, with no small print, is who sees each part.' },
+      studyAs: { ca: "A L'ESTUDI APAREIXES COM", es: 'EN EL ESTUDIO APARECES COMO', fr: "DANS L'ÉTUDE, TU APPARAIS COMME", en: 'IN THE STUDY YOU APPEAR AS' },
+      neverName: { ca: 'mai amb el teu nom', es: 'nunca con tu nombre', fr: 'jamais avec ton nom', en: 'never with your name' },
+      codesNever: { ca: 'Els resultats es presenten amb codis, mai amb noms.', es: 'Los resultados se presentan con códigos, nunca con nombres.', fr: 'Les résultats sont présentés avec des codes, jamais avec des noms.', en: 'Results are presented with codes, never with names.' },
+      youSee: { ca: 'HO VEUS', es: 'LO VES', fr: 'TU LE VOIS', en: 'YOU SEE IT' },
+      sees: { ca: 'HO VEU', es: 'LO VE', fr: 'LE VOIT', en: 'SEES IT' },
+      withCode: { ca: 'AMB CODI', es: 'CON CÓDIGO', fr: 'AVEC CODE', en: 'WITH CODE' },
+      notSee: { ca: 'NO HO VEU', es: 'NO LO VE', fr: 'NE LE VOIT PAS', en: "DOESN'T SEE IT" },
+      // Ajustos
+      language: { ca: 'IDIOMA', es: 'IDIOMA', fr: 'LANGUE', en: 'LANGUAGE' },
+      profile: { ca: 'PERFIL', es: 'PERFIL', fr: 'PROFIL', en: 'PROFILE' },
+      name: { ca: 'Nom', es: 'Nombre', fr: 'Nom', en: 'Name' },
+      age: { ca: 'Edat', es: 'Edad', fr: 'Âge', en: 'Age' },
+      studyCode: { ca: "Codi d'estudi", es: 'Código de estudio', fr: "Code d'étude", en: 'Study code' },
+      aboutAI: { ca: 'SOBRE LA IA', es: 'SOBRE LA IA', fr: "À PROPOS DE L'IA", en: 'ABOUT THE AI' },
+      aiAbout: { ca: "Els missatges i els resums els escriu una IA a partir de les teves dades. Són orientatius: no són un diagnòstic mèdic ni substitueixen el que et digui l'entrenador.", es: 'Los mensajes y los resúmenes los escribe una IA a partir de tus datos. Son orientativos: no son un diagnóstico médico ni sustituyen lo que te diga el entrenador.', fr: "Les messages et les résumés sont écrits par une IA à partir de tes données. Ils sont indicatifs : ce n'est pas un diagnostic médical et ils ne remplacent pas ce que te dit ton entraîneur.", en: "The messages and summaries are written by an AI from your data. They are for guidance only: they are not a medical diagnosis and don't replace what your coach tells you." },
+      version: { ca: 'MAX TRACKING 0.9 · PROJECTE DE RECERCA DE BATXILLERAT', es: 'MAX TRACKING 0.9 · PROYECTO DE INVESTIGACIÓN DE BACHILLERATO', fr: 'MAX TRACKING 0.9 · PROJET DE RECHERCHE DE LYCÉE', en: 'MAX TRACKING 0.9 · SIXTH-FORM RESEARCH PROJECT' },
+      // Informe
+      todayState: { ca: "ESTAT D'AVUI", es: 'ESTADO DE HOY', fr: 'ÉTAT DU JOUR', en: "TODAY'S STATUS" },
+      aiToday: { ca: 'LA IA, AVUI', es: 'LA IA, HOY', fr: "L'IA, AUJOURD'HUI", en: 'THE AI, TODAY' },
+      guide: { ca: 'ORIENTATIU', es: 'ORIENTATIVO', fr: 'INDICATIF', en: 'GUIDANCE ONLY' },
+      reading: { ca: 'LLEGINT LES TEVES DADES…', es: 'LEYENDO TUS DATOS…', fr: 'LECTURE DE TES DONNÉES…', en: 'READING YOUR DATA…' },
+      disclaimer: { ca: "NO ÉS UN DIAGNÒSTIC MÈDIC · SI ALGUNA COSA NO VA BÉ, PARLA-HO AMB L'ENTRENADOR", es: 'NO ES UN DIAGNÓSTICO MÉDICO · SI ALGO NO VA BIEN, HÁBLALO CON EL ENTRENADOR', fr: "CE N'EST PAS UN DIAGNOSTIC MÉDICAL · SI QUELQUE CHOSE NE VA PAS, PARLES-EN À TON ENTRAÎNEUR", en: "NOT A MEDICAL DIAGNOSIS · IF SOMETHING ISN'T RIGHT, TALK TO YOUR COACH" },
+    },
+
+    // Instruccions per a la IA, en l'idioma en què ha de respondre.
+    AI: {
+      system: {
+        ca: `Ets el mòdul d'IA de Max Tracking, una aplicació que retorna als esportistes de competició joves (de 14 a 20 anys) les seves pròpies dades de salut i recuperació, perquè entenguin com estan.
 Normes:
 - Escriu sempre en català, en segona persona (tu), amb un to proper, clar i motivador. Frases curtes i planeres, sense tecnicismes.
 - Compara la persona NOMÉS amb ella mateixa (la seva franja habitual). Mai amb altres esportistes.
 - Suggereixes, no manes: fes servir fórmules com "et proposo", "pots" o "millor si". No facis diagnòstics mèdics ni parlis de malalties.
 - Si les dades indiquen clarament que cal descansar, o la persona diu que no es troba bé, digues-ho amb claredat però amb calma, sense alarmar, i anima-la a comentar-ho amb l'entrenador.
 - Quan escriguis una xifra de les dades, embolcalla-la amb dobles claudàtors, per exemple [[7 h 20]]. Si la xifra està clarament fora de la franja en la direcció dolenta, afegeix |! així: [[5 h 50|!]]. Si està una mica fora o al límit, afegeix |~ així: [[6 h 45|~]]. Si està millor que l'habitual, afegeix |+ així: [[72 ms|+]]. Si està dins la franja, no hi posis cap marca.
-- No facis servir emojis, markdown, llistes ni cometes. Respon només amb el que et demanen.`;
+- No facis servir emojis, markdown, llistes ni cometes. Respon només amb el que et demanen.`,
+        es: `Eres el módulo de IA de Max Tracking, una aplicación que devuelve a los deportistas de competición jóvenes (de 14 a 20 años) sus propios datos de salud y recuperación, para que entiendan cómo están.
+Normas:
+- Escribe siempre en castellano, en segunda persona (tú), con un tono cercano, claro y motivador. Frases cortas y sencillas, sin tecnicismos.
+- Compara a la persona SOLO consigo misma (su franja habitual). Nunca con otros deportistas.
+- Sugieres, no mandas: usa fórmulas como "te propongo", "puedes" o "mejor si". No hagas diagnósticos médicos ni hables de enfermedades.
+- Si los datos indican claramente que hay que descansar, o la persona dice que no se encuentra bien, dilo con claridad pero con calma, sin alarmar, y anímala a comentarlo con el entrenador.
+- Cuando escribas una cifra de los datos, envuélvela con dobles corchetes, por ejemplo [[7 h 20]]. Si la cifra está claramente fuera de la franja en la dirección mala, añade |! así: [[5 h 50|!]]. Si está un poco fuera o al límite, añade |~ así: [[6 h 45|~]]. Si está mejor de lo habitual, añade |+ así: [[72 ms|+]]. Si está dentro de la franja, no pongas ninguna marca.
+- No uses emojis, markdown, listas ni comillas. Responde solo con lo que te piden.`,
+        fr: `Tu es le module d'IA de Max Tracking, une application qui restitue à de jeunes sportifs de compétition (de 14 à 20 ans) leurs propres données de santé et de récupération, pour qu'ils comprennent comment ils vont.
+Règles :
+- Écris toujours en français, à la deuxième personne (tu), sur un ton proche, clair et motivant. Phrases courtes et simples, sans jargon.
+- Compare la personne UNIQUEMENT avec elle-même (sa plage habituelle). Jamais avec d'autres sportifs.
+- Tu suggères, tu n'ordonnes pas : utilise des formules comme "je te propose", "tu peux" ou "mieux vaut". Ne pose aucun diagnostic médical et ne parle pas de maladies.
+- Si les données indiquent clairement qu'il faut se reposer, ou si la personne dit qu'elle ne se sent pas bien, dis-le clairement mais calmement, sans alarmer, et encourage-la à en parler à son entraîneur.
+- Quand tu écris un chiffre des données, entoure-le de doubles crochets, par exemple [[7 h 20]]. Si le chiffre est nettement hors de la plage dans le mauvais sens, ajoute |! comme ceci : [[5 h 50|!]]. S'il est un peu hors de la plage ou à la limite, ajoute |~ comme ceci : [[6 h 45|~]]. S'il est meilleur que d'habitude, ajoute |+ comme ceci : [[72 ms|+]]. S'il est dans la plage, ne mets aucune marque.
+- N'utilise ni emojis, ni markdown, ni listes, ni guillemets. Réponds uniquement à ce qu'on te demande.`,
+        en: `You are the AI module of Max Tracking, an app that gives young competitive athletes (aged 14 to 20) their own health and recovery data back, so they understand how they are doing.
+Rules:
+- Always write in English, in the second person (you), in a warm, clear and motivating tone. Short, plain sentences, no jargon.
+- Compare the person ONLY with themselves (their usual range). Never with other athletes.
+- You suggest, you do not order: use phrases like "I suggest", "you can" or "it's better to". Do not make medical diagnoses or talk about illnesses.
+- If the data clearly show they need to rest, or the person says they do not feel well, say so clearly but calmly, without alarming them, and encourage them to talk to their coach.
+- When you write a figure from the data, wrap it in double square brackets, for example [[7h 20m]]. If the figure is clearly outside the range in the bad direction, add |! like this: [[5h 50m|!]]. If it is slightly outside or borderline, add |~ like this: [[6h 45m|~]]. If it is better than usual, add |+ like this: [[72 ms|+]]. If it is within the range, add no mark.
+- Do not use emojis, markdown, lists or quotation marks. Reply only with what you are asked for.`,
+      },
+      // Missatge diari
+      dNou: {
+        ca: (w, v) => `Persona nova: ${w.name}, ${w.age} anys. Porta 5 dies de dades. La franja habitual es calcula amb 14 dies, així que encara no en té.\nDades d'avui: son ${v.son}, FC en repòs ${v.rhr}, HRV ${v.hrv}, estat percebut ${v.estat} sobre 5.\nNO comparis amb cap franja ni amb altres persones. Escriu el missatge diari: 2 o 3 frases, màxim 55 paraules. Dona-li la benvinguda, explica que l'app encara està aprenent com és ${w.fem ? 'ella' : 'ell'}, i dona un consell general i positiu per avui.`,
+        es: (w, v) => `Persona nueva: ${w.name}, ${w.age} años. Lleva 5 días de datos. La franja habitual se calcula con 14 días, así que aún no tiene.\nDatos de hoy: sueño ${v.son}, FC en reposo ${v.rhr}, HRV ${v.hrv}, estado percibido ${v.estat} sobre 5.\nNO compares con ninguna franja ni con otras personas. Escribe el mensaje diario: 2 o 3 frases, máximo 55 palabras. Dale la bienvenida, explica que la app aún está aprendiendo cómo es ${w.fem ? 'ella' : 'él'}, y da un consejo general y positivo para hoy.`,
+        fr: (w, v) => `Nouvelle personne : ${w.name}, ${w.age} ans. Elle a 5 jours de données. La plage habituelle se calcule sur 14 jours, elle n'en a donc pas encore.\nDonnées du jour : sommeil ${v.son}, FC au repos ${v.rhr}, HRV ${v.hrv}, état perçu ${v.estat} sur 5.\nNE compare avec aucune plage ni avec d'autres personnes. Écris le message du jour : 2 ou 3 phrases, 55 mots maximum. Souhaite-lui la bienvenue, explique que l'app apprend encore à ${w.fem ? 'la' : 'le'} connaître et donne un conseil général et positif pour aujourd'hui.`,
+        en: (w, v) => `New person: ${w.name}, ${w.age} years old. They have 5 days of data. The usual range is calculated from 14 days, so they do not have one yet.\nToday's data: sleep ${v.son}, resting HR ${v.rhr}, HRV ${v.hrv}, perceived state ${v.estat} out of 5.\nDo NOT compare with any range or with other people. Write the daily message: 2 or 3 sentences, 55 words max. Welcome them, explain that the app is still getting to know them, and give a general, positive tip for today.`,
+      },
+      dBuit: {
+        ca: (w, y, st) => `Persona: ${w.name}, ${w.age} anys. Avui encara no han arribat les dades (no és cap error: arriben quan se sincronitzen). Ahir tot era dins la seva franja habitual (${y}); estat d'ahir: ${st}.\nEscriu 2 frases, màxim 40 paraules: explica amb calma que quan arribin les dades li diràs com està, i dona una orientació suau per avui basada en ahir.`,
+        es: (w, y, st) => `Persona: ${w.name}, ${w.age} años. Hoy aún no han llegado los datos (no es ningún error: llegan cuando se sincronizan). Ayer todo estaba dentro de su franja habitual (${y}); estado de ayer: ${st}.\nEscribe 2 frases, máximo 40 palabras: explica con calma que cuando lleguen los datos le dirás cómo está, y da una orientación suave para hoy basada en ayer.`,
+        fr: (w, y, st) => `Personne : ${w.name}, ${w.age} ans. Les données du jour ne sont pas encore arrivées (ce n'est pas une erreur : elles arrivent à la synchronisation). Hier, tout était dans sa plage habituelle (${y}) ; état d'hier : ${st}.\nÉcris 2 phrases, 40 mots maximum : explique calmement que tu lui diras comment elle va quand les données arriveront, et donne une orientation douce pour aujourd'hui basée sur hier.`,
+        en: (w, y, st) => `Person: ${w.name}, ${w.age} years old. Today's data have not arrived yet (it is not an error: they arrive when they sync). Yesterday everything was within their usual range (${y}); yesterday's status: ${st}.\nWrite 2 sentences, 40 words max: calmly explain that you will tell them how they are when the data arrive, and give gentle guidance for today based on yesterday.`,
+      },
+      dir: { ca: ['per sobre', 'per sota'], es: ['por encima', 'por debajo'], fr: ['au-dessus', 'en dessous'], en: ['above', 'below'] },
+      lv: {
+        ca: (lv, d) => lv === 'bad' ? `clarament ${d} de la franja (per vigilar)` : lv === 'mid' ? `una mica ${d} de la franja (al límit)` : lv === 'top' ? 'millor que la seva franja habitual' : 'dins la franja',
+        es: (lv, d) => lv === 'bad' ? `claramente ${d} de la franja (a vigilar)` : lv === 'mid' ? `un poco ${d} de la franja (al límite)` : lv === 'top' ? 'mejor que su franja habitual' : 'dentro de la franja',
+        fr: (lv, d) => lv === 'bad' ? `nettement ${d} de la plage (à surveiller)` : lv === 'mid' ? `un peu ${d} de la plage (à la limite)` : lv === 'top' ? 'meilleur que sa plage habituelle' : 'dans la plage',
+        en: (lv, d) => lv === 'bad' ? `clearly ${d} the range (needs attention)` : lv === 'mid' ? `slightly ${d} the range (borderline)` : lv === 'top' ? 'better than their usual range' : 'within the range',
+      },
+      dLine: {
+        ca: (n, v, of5, lo, hi, st, d) => `- ${n}: ${v}${of5 ? ' sobre 5' : ''}. Franja habitual: ${lo} a ${hi}. ${st}; ${d} respecte a la seva mitjana.`,
+        es: (n, v, of5, lo, hi, st, d) => `- ${n}: ${v}${of5 ? ' sobre 5' : ''}. Franja habitual: ${lo} a ${hi}. ${st}; ${d} respecto a su media.`,
+        fr: (n, v, of5, lo, hi, st, d) => `- ${n} : ${v}${of5 ? ' sur 5' : ''}. Plage habituelle : ${lo} à ${hi}. ${st} ; ${d} par rapport à sa moyenne.`,
+        en: (n, v, of5, lo, hi, st, d) => `- ${n}: ${v}${of5 ? ' out of 5' : ''}. Usual range: ${lo} to ${hi}. ${st}; ${d} compared with their average.`,
+      },
+      dQuest: { ca: s => `- Qüestionari d'avui (1 a 5, 5 = millor): ${s}.`, es: s => `- Cuestionario de hoy (1 a 5, 5 = mejor): ${s}.`, fr: s => `- Questionnaire du jour (1 à 5, 5 = mieux) : ${s}.`, en: s => `- Today's questionnaire (1 to 5, 5 = best): ${s}.` },
+      run: { ca: (n, c) => `${n}: ${c} dies seguits fora de la franja`, es: (n, c) => `${n}: ${c} días seguidos fuera de la franja`, fr: (n, c) => `${n} : ${c} jours d'affilée hors de la plage`, en: (n, c) => `${n}: ${c} days in a row outside the range` },
+      trend: { ca: s => `- Tendència: ${s}.`, es: s => `- Tendencia: ${s}.`, fr: s => `- Tendance : ${s}.`, en: s => `- Trend: ${s}.` },
+      noData: { ca: 'sense dades', es: 'sin datos', fr: 'pas de données', en: 'no data' },
+      dMain: {
+        ca: (w, L, st, sy) => `Persona: ${w.name}, ${w.age} anys. Dades d'avui (dijous 24 de setembre) comparades amb la seva franja habitual de les últimes setmanes:\n${L}\nEstat del dia calculat per l'app: ${st} (ahir: ${sy}).\nEscriu el missatge diari de l'app: 2 o 3 frases, màxim 60 paraules. Primer explica com està i per què, citant les dades clau; després recomana què fer avui (per exemple entrenar amb normalitat, baixar la intensitat, prioritzar la recuperació o dormir més).`,
+        es: (w, L, st, sy) => `Persona: ${w.name}, ${w.age} años. Datos de hoy (jueves 24 de septiembre) comparados con su franja habitual de las últimas semanas:\n${L}\nEstado del día calculado por la app: ${st} (ayer: ${sy}).\nEscribe el mensaje diario de la app: 2 o 3 frases, máximo 60 palabras. Primero explica cómo está y por qué, citando los datos clave; después recomienda qué hacer hoy (por ejemplo entrenar con normalidad, bajar la intensidad, priorizar la recuperación o dormir más).`,
+        fr: (w, L, st, sy) => `Personne : ${w.name}, ${w.age} ans. Données du jour (jeudi 24 septembre) comparées à sa plage habituelle des dernières semaines :\n${L}\nÉtat du jour calculé par l'app : ${st} (hier : ${sy}).\nÉcris le message du jour de l'app : 2 ou 3 phrases, 60 mots maximum. Explique d'abord comment la personne va et pourquoi, en citant les données clés ; puis recommande quoi faire aujourd'hui (par exemple s'entraîner normalement, baisser l'intensité, donner la priorité à la récupération ou dormir plus).`,
+        en: (w, L, st, sy) => `Person: ${w.name}, ${w.age} years old. Today's data (Thursday 24 September) compared with their usual range over recent weeks:\n${L}\nDay status calculated by the app: ${st} (yesterday: ${sy}).\nWrite the app's daily message: 2 or 3 sentences, 60 words max. First explain how they are and why, citing the key data; then recommend what to do today (for example train as normal, lower the intensity, put recovery first or sleep more).`,
+      },
+      // Sensació vs dades
+      sDir: { ca: [' en aquests dies se sent millor del que diuen les dades', ' en aquests dies se sent pitjor del que diuen les dades'], es: [' estos días se siente mejor de lo que dicen los datos', ' estos días se siente peor de lo que dicen los datos'],
+        fr: [' ces jours-là, la personne se sent mieux que ce que disent les données', ' ces jours-là, la personne se sent moins bien que ce que disent les données'], en: [' on those days they feel better than the data say', ' on those days they feel worse than the data say'] },
+      sents: {
+        ca: (w, a, b, mis, dir, rest) => `Compara com diu ${w.name} que se sent (estat percebut) amb el que indiquen les seves dades objectives (FC en repòs, HRV i son), sempre respecte al seu propi normal.\nÚltims 28 dies: coincideixen ${a.k} de ${a.n} dies amb dades.\nÚltims 7 dies: coincideixen ${b.k} de ${b.n}.${mis ? ` Dies que no coincideixen: ${mis} de setembre;${dir}.` : ''}${rest ? ' Avui tant la sensació com les dades estan clarament per sota del seu normal.' : ''}\nEscriu 1 o 2 frases (màxim 40 paraules) que l'ajudin a entendre què vol dir, sense jutjar. Si se sent millor del que diuen les dades, recorda amb suavitat que el cos també necessita recuperar.`,
+        es: (w, a, b, mis, dir, rest) => `Compara cómo dice ${w.name} que se siente (estado percibido) con lo que indican sus datos objetivos (FC en reposo, HRV y sueño), siempre respecto a su propio normal.\nÚltimos 28 días: coinciden ${a.k} de ${a.n} días con datos.\nÚltimos 7 días: coinciden ${b.k} de ${b.n}.${mis ? ` Días que no coinciden: ${mis} de septiembre;${dir}.` : ''}${rest ? ' Hoy tanto la sensación como los datos están claramente por debajo de su normal.' : ''}\nEscribe 1 o 2 frases (máximo 40 palabras) que le ayuden a entender qué significa, sin juzgar. Si se siente mejor de lo que dicen los datos, recuerda con suavidad que el cuerpo también necesita recuperar.`,
+        fr: (w, a, b, mis, dir, rest) => `Compare ce que ${w.name} dit ressentir (état perçu) avec ce qu'indiquent ses données objectives (FC au repos, HRV et sommeil), toujours par rapport à sa propre normale.\n28 derniers jours : concordance ${a.k} jours sur ${a.n} avec données.\n7 derniers jours : concordance ${b.k} sur ${b.n}.${mis ? ` Jours sans concordance : ${mis} septembre ;${dir}.` : ''}${rest ? " Aujourd'hui, le ressenti comme les données sont nettement en dessous de sa normale." : ''}\nÉcris 1 ou 2 phrases (40 mots maximum) qui l'aident à comprendre ce que cela veut dire, sans juger. Si la personne se sent mieux que ce que disent les données, rappelle doucement que le corps a aussi besoin de récupérer.`,
+        en: (w, a, b, mis, dir, rest) => `Compare how ${w.name} says they feel (perceived state) with what their objective data show (resting HR, HRV and sleep), always against their own usual.\nLast 28 days: they match on ${a.k} of ${a.n} days with data.\nLast 7 days: they match on ${b.k} of ${b.n}.${mis ? ` Days that don't match: ${mis} September;${dir}.` : ''}${rest ? ' Today both the feeling and the data are clearly below their usual.' : ''}\nWrite 1 or 2 sentences (40 words max) that help them understand what it means, without judging. If they feel better than the data say, gently remind them that the body also needs to recover.`,
+      },
+      // Resum setmanal
+      wDays: {
+        ca: (n, c, W) => `- Dies amb dades: ${n} de 7. Estat per dies: ${c.fons} ${W.fons}, ${c.mod} ${W.mod}, ${c.rec} ${W.rec}.`, es: (n, c, W) => `- Días con datos: ${n} de 7. Estado por días: ${c.fons} ${W.fons}, ${c.mod} ${W.mod}, ${c.rec} ${W.rec}.`,
+        fr: (n, c, W) => `- Jours avec données : ${n} sur 7. État par jour : ${c.fons} ${W.fons}, ${c.mod} ${W.mod}, ${c.rec} ${W.rec}.`, en: (n, c, W) => `- Days with data: ${n} of 7. Status by day: ${c.fons} ${W.fons}, ${c.mod} ${W.mod}, ${c.rec} ${W.rec}.`,
+      },
+      wMetric: {
+        ca: (n, a, lo, hi, f, b, worst, prev) => `- ${n}: mitjana ${a} (franja ${lo} a ${hi}). Dies fora de la franja en la direcció dolenta: ${f}, dels quals ${b} clarament fora${worst ? ` (el pitjor, ${worst})` : ''}. Setmana anterior: ${prev || 'sense dades'}.`,
+        es: (n, a, lo, hi, f, b, worst, prev) => `- ${n}: media ${a} (franja ${lo} a ${hi}). Días fuera de la franja en la dirección mala: ${f}, de los cuales ${b} claramente fuera${worst ? ` (el peor, ${worst})` : ''}. Semana anterior: ${prev || 'sin datos'}.`,
+        fr: (n, a, lo, hi, f, b, worst, prev) => `- ${n} : moyenne ${a} (plage ${lo} à ${hi}). Jours hors de la plage dans le mauvais sens : ${f}, dont ${b} nettement hors de la plage${worst ? ` (le pire, ${worst})` : ''}. Semaine précédente : ${prev || 'pas de données'}.`,
+        en: (n, a, lo, hi, f, b, worst, prev) => `- ${n}: average ${a} (range ${lo} to ${hi}). Days outside the range in the bad direction: ${f}, of which ${b} clearly outside${worst ? ` (the worst, ${worst})` : ''}. Previous week: ${prev || 'no data'}.`,
+      },
+      wMain: {
+        ca: (id, lb, w, L) => `Resum de la setmana ${id} (${lb}) de ${w.name}, ${w.age} anys:\n${L}\nRespon NOMÉS amb un objecte JSON vàlid, sense cap text abans ni després, amb aquestes claus: "titol" (títol curt, màxim 6 paraules), "com_ha_anat" (2 frases), "millorat" (1 frase), "vigilar" (1 frase; si no hi ha res a vigilar, digues-ho en positiu), "recomanacio" (1 o 2 frases per a la setmana que ve). Fes servir [[...]], [[...|!]], [[...|~]] i [[...|+]] per a les xifres.`,
+        es: (id, lb, w, L) => `Resumen de la semana ${id} (${lb}) de ${w.name}, ${w.age} años:\n${L}\nResponde SOLO con un objeto JSON válido, sin ningún texto antes ni después, con estas claves tal cual: "titol" (título corto, máximo 6 palabras), "com_ha_anat" (cómo ha ido, 2 frases), "millorat" (qué ha mejorado, 1 frase), "vigilar" (qué vigilar, 1 frase; si no hay nada que vigilar, dilo en positivo), "recomanacio" (1 o 2 frases para la semana que viene). Usa [[...]], [[...|!]], [[...|~]] y [[...|+]] para las cifras.`,
+        fr: (id, lb, w, L) => `Résumé de la semaine ${id} (${lb}) de ${w.name}, ${w.age} ans :\n${L}\nRéponds UNIQUEMENT avec un objet JSON valide, sans aucun texte avant ni après, avec ces clés telles quelles : "titol" (titre court, 6 mots maximum), "com_ha_anat" (comment ça s'est passé, 2 phrases), "millorat" (ce qui s'est amélioré, 1 phrase), "vigilar" (ce qu'il faut surveiller, 1 phrase ; s'il n'y a rien à surveiller, dis-le de façon positive), "recomanacio" (1 ou 2 phrases pour la semaine prochaine). Utilise [[...]], [[...|!]], [[...|~]] et [[...|+]] pour les chiffres.`,
+        en: (id, lb, w, L) => `Summary of week ${id} (${lb}) for ${w.name}, ${w.age} years old:\n${L}\nReply ONLY with a valid JSON object, with no text before or after, using exactly these keys: "titol" (short title, 6 words max), "com_ha_anat" (how it went, 2 sentences), "millorat" (what improved, 1 sentence), "vigilar" (what to watch, 1 sentence; if there is nothing to watch, say so positively), "recomanacio" (1 or 2 sentences for next week). Use [[...]], [[...|!]], [[...|~]] and [[...|+]] for the figures.`,
+      },
+    },
+    // Resum setmanal de reserva, fet amb les dades de la setmana.
+    WF: {
+      titol: { rec: { ca: 'Una setmana exigent', es: 'Una semana exigente', fr: 'Une semaine exigeante', en: 'A demanding week' }, ok: { ca: 'Una setmana sòlida', es: 'Una semana sólida', fr: 'Une semaine solide', en: 'A solid week' },
+        son: { ca: 'Bona setmana, però amb poc son', es: 'Buena semana, pero con poco sueño', fr: 'Bonne semaine, mais avec peu de sommeil', en: 'A good week, but short on sleep' }, avis: { ca: 'Bona setmana, amb un avís', es: 'Buena semana, con un aviso', fr: 'Bonne semaine, avec une alerte', en: 'A good week, with one warning' } },
+      com: {
+        ca: (nd, c, son, rhr) => `De [[${nd}]] amb dades, [[${c.fons}|+]] han estat A fons${c.mod ? ` i [[${c.mod}|~]] Modera` : ''}${c.rec ? ` i [[${c.rec}|!]] Recupera` : ''}. Has dormit de mitjana [[${son}]] per nit i la FC en repòs ha estat de [[${rhr}]].`,
+        es: (nd, c, son, rhr) => `De [[${nd}]] con datos, [[${c.fons}|+]] han sido A tope${c.mod ? ` y [[${c.mod}|~]] Modera` : ''}${c.rec ? ` y [[${c.rec}|!]] Recupera` : ''}. Has dormido de media [[${son}]] por noche y la FC en reposo ha sido de [[${rhr}]].`,
+        fr: (nd, c, son, rhr) => `Sur [[${nd}]] avec des données, [[${c.fons}|+]] ont été À fond${c.mod ? ` et [[${c.mod}|~]] Modère` : ''}${c.rec ? ` et [[${c.rec}|!]] Récupère` : ''}. Tu as dormi en moyenne [[${son}]] par nuit et ta FC au repos a été de [[${rhr}]].`,
+        en: (nd, c, son, rhr) => `Of [[${nd}]] with data, [[${c.fons}|+]] were Go hard${c.mod ? ` and [[${c.mod}|~]] Ease off` : ''}${c.rec ? ` and [[${c.rec}|!]] Recover` : ''}. You slept an average of [[${son}]] a night and your resting HR was [[${rhr}]].`,
+      },
+      none: { ca: n => ` Hi ha [[${n}]] sense dades, que no compten.`, es: n => ` Hay [[${n}]] sin datos, que no cuentan.`, fr: n => ` Il y a [[${n}]] sans données, qui ne comptent pas.`, en: n => ` [[${n}]] had no data and don't count.` },
+      millDef: { ca: "Has mantingut la regularitat: les mitjanes s'han quedat dins la teva franja.", es: 'Has mantenido la regularidad: las medias se han quedado dentro de tu franja.', fr: 'Tu as gardé ta régularité : les moyennes sont restées dans ta plage.', en: 'You kept things steady: your averages stayed within your range.' },
+      mill: {
+        hrv: { ca: (a, d) => `L'HRV, que indica com de recuperat està el teu cos, ha pujat fins a [[${a}|+]] de mitjana: [[${d} ms]] més que la setmana anterior.`, es: (a, d) => `La HRV, que indica lo recuperado que está tu cuerpo, ha subido hasta [[${a}|+]] de media: [[${d} ms]] más que la semana anterior.`,
+          fr: (a, d) => `La HRV, qui indique à quel point ton corps a récupéré, est montée à [[${a}|+]] en moyenne : [[${d} ms]] de plus que la semaine précédente.`, en: (a, d) => `Your HRV, which shows how recovered your body is, rose to an average of [[${a}|+]]: [[${d} ms]] more than the week before.` },
+        rhr: { ca: a => `La FC en repòs ha baixat fins a [[${a}|+]] de mitjana, un bon senyal de recuperació.`, es: a => `La FC en reposo ha bajado hasta [[${a}|+]] de media, una buena señal de recuperación.`, fr: a => `Ta FC au repos est descendue à [[${a}|+]] en moyenne, un bon signe de récupération.`, en: a => `Your resting HR dropped to an average of [[${a}|+]], a good sign of recovery.` },
+        son: { ca: m => `Has dormit [[${m} min|+]] més per nit que la setmana anterior.`, es: m => `Has dormido [[${m} min|+]] más por noche que la semana anterior.`, fr: m => `Tu as dormi [[${m} min|+]] de plus par nuit que la semaine précédente.`, en: m => `You slept [[${m} min|+]] more a night than the week before.` },
+        estat: { ca: (a, p) => `T'has sentit millor: [[${a}|+]] de mitjana, per [[${p}]] la setmana anterior.`, es: (a, p) => `Te has sentido mejor: [[${a}|+]] de media, frente a [[${p}]] la semana anterior.`, fr: (a, p) => `Tu t'es senti mieux : [[${a}|+]] en moyenne, contre [[${p}]] la semaine précédente.`, en: (a, p) => `You felt better: [[${a}|+]] on average, compared with [[${p}]] the week before.` },
+      },
+      vigDef: { ca: 'Res destacable: cap dada ha sortit de la teva franja.', es: 'Nada destacable: ningún dato ha salido de tu franja.', fr: "Rien à signaler : aucune donnée n'est sortie de ta plage.", en: 'Nothing to flag: none of your data left your range.' },
+      vig: {
+        son: { ca: (n, v) => `El son: [[${n}]] per sota de la teva franja; la més curta, de [[${v}]].`, es: (n, v) => `El sueño: [[${n}]] por debajo de tu franja; la más corta, de [[${v}]].`, fr: (n, v) => `Le sommeil : [[${n}]] en dessous de ta plage ; la plus courte, de [[${v}]].`, en: (n, v) => `Sleep: [[${n}]] below your range; the shortest was [[${v}]].` },
+        rhr: { ca: (n, v) => `La FC en repòs: [[${n}]] per sobre de la teva franja, amb un màxim de [[${v}]].`, es: (n, v) => `La FC en reposo: [[${n}]] por encima de tu franja, con un máximo de [[${v}]].`, fr: (n, v) => `La FC au repos : [[${n}]] au-dessus de ta plage, avec un maximum de [[${v}]].`, en: (n, v) => `Resting HR: [[${n}]] above your range, peaking at [[${v}]].` },
+        hrv: { ca: (n, v) => `L'HRV: [[${n}]] per sota de la teva franja, amb un mínim de [[${v}]].`, es: (n, v) => `La HRV: [[${n}]] por debajo de tu franja, con un mínimo de [[${v}]].`, fr: (n, v) => `La HRV : [[${n}]] en dessous de ta plage, avec un minimum de [[${v}]].`, en: (n, v) => `HRV: [[${n}]] below your range, with a low of [[${v}]].` },
+        estat: { ca: (n, v) => `Com et sents: [[${n}]] per sota del teu normal, amb un mínim de [[${v}]].`, es: (n, v) => `Cómo te sientes: [[${n}]] por debajo de tu normal, con un mínimo de [[${v}]].`, fr: (n, v) => `Ton ressenti : [[${n}]] en dessous de ta normale, avec un minimum de [[${v}]].`, en: (n, v) => `How you feel: [[${n}]] below your usual, with a low of [[${v}]].` },
+      },
+      rec: {
+        ok: { ca: "Mantén la rutina: està funcionant. Si alguna cosa canvia, t'ho diré.", es: 'Mantén la rutina: está funcionando. Si algo cambia, te lo diré.', fr: 'Garde ta routine : elle fonctionne. Si quelque chose change, je te le dirai.', en: "Keep your routine: it's working. If anything changes, I'll let you know." },
+        son: { ca: "Intenta avançar 20 o 30 minuts l'hora d'anar a dormir, sobretot abans dels dies d'entrenament fort.", es: 'Intenta adelantar 20 o 30 minutos la hora de irte a dormir, sobre todo antes de los días de entrenamiento fuerte.', fr: "Essaie d'avancer ton coucher de 20 ou 30 minutes, surtout avant les jours d'entraînement intense.", en: 'Try going to bed 20 or 30 minutes earlier, especially before hard training days.' },
+        estat: { ca: "Si et notes cansat uns quants dies seguits, comenta-ho amb l'entrenador.", es: 'Si te notas cansado varios días seguidos, coméntalo con el entrenador.', fr: "Si tu te sens fatigué plusieurs jours de suite, parles-en à ton entraîneur.", en: 'If you feel tired several days in a row, mention it to your coach.' },
+        other: { ca: 'Després de les sessions més intenses, deixa un dia més suau per recuperar.', es: 'Después de las sesiones más intensas, deja un día más suave para recuperar.', fr: 'Après les séances les plus intenses, prévois une journée plus légère pour récupérer.', en: 'After your hardest sessions, leave an easier day to recover.' },
+      },
+    },
+  };
+  // Textos resolts a l'idioma actiu (es recalculen només quan canvia l'idioma).
+  L() { const l = this.state.lang; return this._L && this._L.lang === l ? this._L : (this._L = { lang: l, ...locTx(this.TX, l) }); }
+  t(k, ...a) { const v = this.L().UI[k]; return typeof v === 'function' ? v(...a) : v ?? k; }
+  get WD() { return this.L().WD; } get WDL() { return this.L().WDL; } get META() { return this.L().META; } get ST() { return this.L().ST; } get WS() { return this.L().WS; }
+  get ITEMS() { return this.L().ITEMS; } get PRIV() { return this.L().PRIV; } get ROLES() { return this.L().ROLES; } get FB_DAILY() { return this.L().FB_DAILY; } get FB_SENTS() { return this.L().FB_SENTS; }
+  setLang(l) { try { localStorage.setItem('mt-lang', l); } catch (e) {} this.setState({ lang: l }); }
 
   componentDidMount() {
     this.onResize = () => this.setState({ vw: window.innerWidth, vh: window.innerHeight });
@@ -473,11 +786,13 @@ Normes:
     window.addEventListener('keydown', this.onKey);
     this._ps = this.state;
     this.ensureAI();
+    try { document.documentElement.lang = this.state.lang; } catch (e) {}
   }
   componentWillUnmount() { window.removeEventListener('resize', this.onResize); window.removeEventListener('keydown', this.onKey); }
   // El runtime només passa prevProps, així que l'estat anterior el guardem nosaltres.
   componentDidUpdate() {
     this.ensureAI();
+    try { document.documentElement.lang = this.state.lang; } catch (e) {}
     const s = this.state, ps = this._ps || s;
     this._ps = s;
     if (ps.mTab !== s.mTab || ps.week !== s.week || ps.scenario !== s.scenario) {
@@ -605,15 +920,16 @@ Normes:
     const n = String(this.props.athleteName ?? 'Martí').trim() || 'Martí';
     return { name: n, age: 17, code: 'MT-07', fem: false };
   }
-  day(i) { const d = 14 + i, s = d > 31; return { n: s ? d - 31 : d, mo: s ? 'SET' : 'AGO', wd: (4 + i) % 7 }; }
+  day(i) { const d = 14 + i, s = d > 31; return { n: s ? d - 31 : d, mo: this.L().MS[s ? 8 : 7], wd: (4 + i) % 7 }; }
+  hdr() { const d = this.day(41); return { short: `${this.WD[d.wd]} ${d.n} ${d.mo}`, long: `${this.WDL[d.wd]} ${d.n} ${d.mo}` }; }
   fmtV(k, v) {
     if (v == null) return '—';
     if (k === 'son') { let h = Math.floor(v + 1e-6), m = Math.round((v - h) * 60); if (m === 60) { h++; m = 0; } return `${h}:${String(m).padStart(2, '0')}`; }
-    if (k === 'estat') return v.toFixed(1).replace('.', ',');
+    if (k === 'estat') return v.toFixed(1).replace('.', this.t('dec'));
     return String(Math.round(v));
   }
-  fmtT(k, v) { if (v == null) return '—'; if (k === 'son') { const p = this.fmtV(k, v).split(':'); return `${p[0]} h ${p[1]}`; } if (k === 'estat') return this.fmtV(k, v); return `${Math.round(v)} ${k === 'rhr' ? 'bpm' : 'ms'}`; }
-  delta(k, v, mean) { const d = v - mean, s = d >= 0 ? '+' : '−', a = Math.abs(d); if (k === 'son') return `${s}${Math.round(a * 60)} min`; if (k === 'estat') return `${s}${a.toFixed(1).replace('.', ',')}`; return `${s}${Math.round(a)} ${k === 'rhr' ? 'bpm' : 'ms'}`; }
+  fmtT(k, v) { if (v == null) return '—'; if (k === 'son') { const p = this.fmtV(k, v).split(':'); return this.t('hm', p[0], p[1]); } if (k === 'estat') return this.fmtV(k, v); return `${Math.round(v)} ${k === 'rhr' ? 'bpm' : 'ms'}`; }
+  delta(k, v, mean) { const d = v - mean, s = d >= 0 ? '+' : '−', a = Math.abs(d); if (k === 'son') return `${s}${Math.round(a * 60)} min`; if (k === 'estat') return `${s}${a.toFixed(1).replace('.', this.t('dec'))}`; return `${s}${Math.round(a)} ${k === 'rhr' ? 'bpm' : 'ms'}`; }
   bandTxt(k, b) { return `${this.fmtV(k, b.lo)}–${this.fmtV(k, b.hi)}`; }
   flag(k, v, band) { return v != null && !!band && this.qOf(k, v, band) < -1; }
   outAny(k, v, band) { if (v == null || !band) return false; const d = band[k]; return v < d.lo || v > d.hi; }
@@ -621,7 +937,7 @@ Normes:
 
   // ── IA ──────────────────────────────────────────────────────────────
   live() { return (this.props.aiLive ?? true) && !!(window.claude && window.claude.complete); }
-  aiKey(kind, sc, extra) { return [kind, sc, extra ?? '', this.who(sc).name].join('|'); }
+  aiKey(kind, sc, extra) { return [kind, sc, extra ?? '', this.who(sc).name, this.state.lang].join('|'); }
   ensureAI() {
     if (!this.live()) return;
     const s = this.state, sc = s.scenario, want = [this.aiKey('daily', sc)];
@@ -634,7 +950,7 @@ Normes:
   setAI(key, entry) {
     this.setState(st => {
       const ai = { ...st.ai, [key]: entry };
-      try { const keep = {}; Object.keys(ai).forEach(k => { if (ai[k].status === 'done') keep[k] = ai[k]; }); localStorage.setItem('mt-ai-cache-v3', JSON.stringify(keep)); } catch (e) {}
+      try { const keep = {}; Object.keys(ai).forEach(k => { if (ai[k].status === 'done') keep[k] = ai[k]; }); localStorage.setItem('mt-ai-cache-v4', JSON.stringify(keep)); } catch (e) {}
       return { ai };
     });
   }
@@ -643,7 +959,7 @@ Normes:
     this.setAI(key, { status: 'loading' });
     try {
       const user = kind === 'daily' ? this.promptDaily(sc) : kind === 'sents' ? this.promptSents(sc) : this.promptWeek(sc, +extra);
-      const raw = String(await window.claude.complete({ system: this.SYSTEM, max_tokens: 700, messages: [{ role: 'user', content: user }] }));
+      const raw = String(await window.claude.complete({ system: this.L().AI.system, max_tokens: 700, messages: [{ role: 'user', content: user }] }));
       let val;
       if (kind === 'week') {
         const mm = raw.match(/\{[\s\S]*\}/); val = JSON.parse(mm[0]);
@@ -669,32 +985,27 @@ Normes:
     return out;
   }
   promptDaily(sc) {
-    const D = this.data(sc), w = this.who(sc), K = this.KEYS;
-    if (sc === 'nou') return `Persona nova: ${w.name}, ${w.age} anys. Porta 5 dies de dades. La franja habitual es calcula amb 14 dies, així que encara no en té.\nDades d'avui: son ${this.fmtT('son', D.vals.son[41])}, FC en repòs ${this.fmtT('rhr', D.vals.rhr[41])}, HRV ${this.fmtT('hrv', D.vals.hrv[41])}, estat percebut ${this.fmtT('estat', D.vals.estat[41])} sobre 5.\nNO comparis amb cap franja ni amb altres persones. Escriu el missatge diari: 2 o 3 frases, màxim 55 paraules. Dona-li la benvinguda, explica que l'app encara està aprenent com és ${w.fem ? 'ella' : 'ell'}, i dona un consell general i positiu per avui.`;
-    if (sc === 'buit') {
-      const y = K.map(k => `${this.META[k].name} ${this.fmtT(k, D.vals[k][40])}`).join(', ');
-      return `Persona: ${w.name}, ${w.age} anys. Avui encara no han arribat les dades (no és cap error: arriben quan se sincronitzen). Ahir tot era dins la seva franja habitual (${y}); estat d'ahir: A FONS.\nEscriu 2 frases, màxim 40 paraules: explica amb calma que quan arribin les dades li diràs com està, i dona una orientació suau per avui basada en ahir.`;
-    }
-    const lines = K.map(k => { const v = D.vals[k][41], b = D.band[k], lv = this.lvlOf(k, v, D.band), dir = b.worse === 'up' ? 'per sobre' : 'per sota';
-      const st = lv === 'bad' ? `clarament ${dir} de la franja (per vigilar)` : lv === 'mid' ? `una mica ${dir} de la franja (al límit)` : this.qOf(k, v, D.band) > 1 ? 'millor que la seva franja habitual' : 'dins la franja';
-      return `- ${this.META[k].name}: ${this.fmtT(k, v)}${k === 'estat' ? ' sobre 5' : ''}. Franja habitual: ${this.fmtT(k, b.lo)} a ${this.fmtT(k, b.hi)}. ${st}; ${this.delta(k, v, b.mean)} respecte a la seva mitjana.`; });
+    const D = this.data(sc), w = this.who(sc), K = this.KEYS, A = this.L().AI;
+    if (sc === 'nou') return A.dNou(w, { son: this.fmtT('son', D.vals.son[41]), rhr: this.fmtT('rhr', D.vals.rhr[41]), hrv: this.fmtT('hrv', D.vals.hrv[41]), estat: this.fmtT('estat', D.vals.estat[41]) });
+    if (sc === 'buit') return A.dBuit(w, K.map(k => `${this.META[k].name} ${this.fmtT(k, D.vals[k][40])}`).join(', '), this.ST.fons.w);
+    const lines = K.map(k => { const v = D.vals[k][41], b = D.band[k], lv = this.lvlOf(k, v, D.band), st = A.lv(lv === 'ok' && this.qOf(k, v, D.band) > 1 ? 'top' : lv, A.dir[b.worse === 'up' ? 0 : 1]);
+      return A.dLine(this.META[k].name, this.fmtT(k, v), k === 'estat', this.fmtT(k, b.lo), this.fmtT(k, b.hi), st, this.delta(k, v, b.mean)); });
     const it = this.TODAY[sc];
-    if (it) lines.push(`- Qüestionari d'avui (1 a 5, 5 = millor): ${this.ITEMS.map((x, i) => `${x.t.toLowerCase()} ${it[i]}`).join(', ')}.`);
-    const runs = K.map(k => { let n = 0; for (let i = 41; i >= 0 && this.flag(k, D.vals[k][i], D.band); i--) n++; return n > 1 ? `${this.META[k].name}: ${n} dies seguits fora de la franja` : null; }).filter(Boolean);
-    if (runs.length) lines.push(`- Tendència: ${runs.join('; ')}.`);
+    if (it) lines.push(A.dQuest(this.ITEMS.map((x, i) => `${x.t.toLowerCase()} ${it[i]}`).join(', ')));
+    const runs = K.map(k => { let n = 0; for (let i = 41; i >= 0 && this.flag(k, D.vals[k][i], D.band); i--) n++; return n > 1 ? A.run(this.META[k].name, n) : null; }).filter(Boolean);
+    if (runs.length) lines.push(A.trend(runs.join('; ')));
     const st = this.stateOf(D.pos[41]), sy = this.stateOf(D.pos[40]);
-    return `Persona: ${w.name}, ${w.age} anys. Dades d'avui (dijous 24 de setembre) comparades amb la seva franja habitual de les últimes setmanes:\n${lines.join('\n')}\nEstat del dia calculat per l'app: ${this.ST[st].w} (ahir: ${sy ? this.ST[sy].w : 'sense dades'}).\nEscriu el missatge diari de l'app: 2 o 3 frases, màxim 60 paraules. Primer explica com està i per què, citant les dades clau; després recomana què fer avui (per exemple entrenar amb normalitat, baixar la intensitat, prioritzar la recuperació o dormir més).`;
+    return A.dMain(w, lines.join('\n'), this.ST[st].w, sy ? this.ST[sy].w : A.noData);
   }
   promptSents(sc) {
-    const w = this.who(sc), a = this.sentsStats(sc, 28), b = this.sentsStats(sc, 7);
-    const dir = b.better >= b.worse ? 'en aquests dies se sent millor del que diuen les dades' : 'en aquests dies se sent pitjor del que diuen les dades';
-    return `Compara com diu ${w.name} que se sent (estat percebut) amb el que indiquen les seves dades objectives (FC en repòs, HRV i son), sempre respecte al seu propi normal.\nÚltims 28 dies: coincideixen ${a.k} de ${a.n} dies amb dades.\nÚltims 7 dies: coincideixen ${b.k} de ${b.n}.${b.mis.length ? ` Dies que no coincideixen: ${b.mis.map(i => this.day(i).n).join(', ')} de setembre; ${dir}.` : ''}${sc === 'descans' ? ' Avui tant la sensació com les dades estan clarament per sota del seu normal.' : ''}\nEscriu 1 o 2 frases (màxim 40 paraules) que l'ajudin a entendre què vol dir, sense jutjar. Si se sent millor del que diuen les dades, recorda amb suavitat que el cos també necessita recuperar.`;
+    const w = this.who(sc), a = this.sentsStats(sc, 28), b = this.sentsStats(sc, 7), A = this.L().AI;
+    return A.sents(w, a, b, b.mis.map(i => this.day(i).n).join(', '), A.sDir[b.better >= b.worse ? 0 : 1], sc === 'descans');
   }
   promptWeek(sc, wi) {
-    const W = this.WEEKS[wi], ws = this.weekStats(sc, W.a), w = this.who(sc), m = ws.m, f = (k, v) => this.fmtT(k, v);
-    const L = [`- Dies amb dades: ${ws.nDays} de 7. Estat per dies: ${ws.cnt.fons} A FONS, ${ws.cnt.mod} MODERA, ${ws.cnt.rec} RECUPERA.`];
-    this.KEYS.forEach(k => { const x = m[k], b = this.DEF[k]; L.push(`- ${this.META[k].name}: mitjana ${f(k, x.avg)} (franja ${f(k, b.lo)} a ${f(k, b.hi)}). Dies fora de la franja en la direcció dolenta: ${x.flags}, dels quals ${x.bad} clarament fora${x.worst != null ? ` (el pitjor, ${f(k, x.worst)})` : ''}. Setmana anterior: ${x.prev != null ? f(k, x.prev) : 'sense dades'}.`); });
-    return `Resum de la setmana ${W.id} (${this.weekLabel(wi).toLowerCase()}) de ${w.name}, ${w.age} anys:\n${L.join('\n')}\nRespon NOMÉS amb un objecte JSON vàlid, sense cap text abans ni després, amb aquestes claus: "titol" (títol curt, màxim 6 paraules), "com_ha_anat" (2 frases), "millorat" (1 frase), "vigilar" (1 frase; si no hi ha res a vigilar, digues-ho en positiu), "recomanacio" (1 o 2 frases per a la setmana que ve). Fes servir [[...]], [[...|!]], [[...|~]] i [[...|+]] per a les xifres.`;
+    const W = this.WEEKS[wi], ws = this.weekStats(sc, W.a), w = this.who(sc), m = ws.m, f = (k, v) => this.fmtT(k, v), A = this.L().AI;
+    const L = [A.wDays(ws.nDays, ws.cnt, { fons: this.ST.fons.w, mod: this.ST.mod.w, rec: this.ST.rec.w })];
+    this.KEYS.forEach(k => { const x = m[k], b = this.DEF[k]; L.push(A.wMetric(this.META[k].name, f(k, x.avg), f(k, b.lo), f(k, b.hi), x.flags, x.bad, x.worst != null ? f(k, x.worst) : null, x.prev != null ? f(k, x.prev) : null)); });
+    return A.wMain(W.id, this.weekLabel(wi).toLowerCase(), w, L.join('\n'));
   }
   weekLabel(wi) { const a = this.WEEKS[wi].a, d0 = this.day(a), d6 = this.day(a + 6); return d0.mo === d6.mo ? `${d0.n}–${d6.n} ${d6.mo}` : `${d0.n} ${d0.mo} – ${d6.n} ${d6.mo}`; }
   weekStats(sc, a) {
@@ -711,30 +1022,21 @@ Normes:
     return { m, cnt, idx, nDays: 7 - cnt.none };
   }
   weekFallback(ws) {
-    const { m, cnt, nDays } = ws, f = (k, v) => this.fmtT(k, v), pl = (n, a, b) => `${n} ${n === 1 ? a : b}`;
+    const { m, cnt, nDays } = ws, f = (k, v) => this.fmtT(k, v), pl = (n, u) => this.t('pl', n, u), X = this.L().WF;
     const fl = this.KEYS.filter(k => m[k].flags > 0).sort((x, y) => m[y].flags - m[x].flags);
-    const titol = cnt.rec ? 'Una setmana exigent' : !fl.length ? 'Una setmana sòlida' : fl[0] === 'son' ? 'Bona setmana, però amb poc son' : 'Bona setmana, amb un avís';
-    let com = `De [[${pl(nDays, 'dia', 'dies')}]] amb dades, [[${cnt.fons}|+]] han estat A fons${cnt.mod ? ` i [[${cnt.mod}|~]] Modera` : ''}${cnt.rec ? ` i [[${cnt.rec}|!]] Recupera` : ''}. Has dormit de mitjana [[${f('son', m.son.avg)}${this.mark('son', m.son.avg)}]] per nit i la FC en repòs ha estat de [[${f('rhr', m.rhr.avg)}${this.mark('rhr', m.rhr.avg)}]].`;
-    if (cnt.none) com += ` Hi ha [[${pl(cnt.none, 'dia', 'dies')}]] sense dades, que no compten.`;
+    const titol = X.titol[cnt.rec ? 'rec' : !fl.length ? 'ok' : fl[0] === 'son' ? 'son' : 'avis'];
+    let com = X.com(pl(nDays, 'd'), cnt, `${f('son', m.son.avg)}${this.mark('son', m.son.avg)}`, `${f('rhr', m.rhr.avg)}${this.mark('rhr', m.rhr.avg)}`);
+    if (cnt.none) com += X.none(pl(cnt.none, 'd'));
     let best = null, bs = 0;
     this.KEYS.forEach(k => { if (m[k].prev == null || m[k].avg == null) return; const d0 = this.DEF[k]; let q = (m[k].avg - m[k].prev) / ((d0.hi - d0.lo) / 2); if (d0.worse === 'up') q = -q; if (q > bs) { bs = q; best = k; } });
-    let mill = "Has mantingut la regularitat: les mitjanes s'han quedat dins la teva franja.";
+    let mill = X.millDef;
     if (best && bs > .25) {
       const d = Math.abs(m[best].avg - m[best].prev);
-      mill = best === 'hrv' ? `L'HRV, que indica com de recuperat està el teu cos, ha pujat fins a [[${f('hrv', m.hrv.avg)}|+]] de mitjana: [[${Math.round(d)} ms]] més que la setmana anterior.`
-        : best === 'rhr' ? `La FC en repòs ha baixat fins a [[${f('rhr', m.rhr.avg)}|+]] de mitjana, un bon senyal de recuperació.`
-        : best === 'son' ? `Has dormit [[${Math.round(d * 60)} min|+]] més per nit que la setmana anterior.`
-        : `T'has sentit millor: [[${f('estat', m.estat.avg)}|+]] de mitjana, per [[${f('estat', m.estat.prev)}]] la setmana anterior.`;
+      mill = best === 'hrv' ? X.mill.hrv(f('hrv', m.hrv.avg), Math.round(d)) : best === 'rhr' ? X.mill.rhr(f('rhr', m.rhr.avg)) : best === 'son' ? X.mill.son(Math.round(d * 60)) : X.mill.estat(f('estat', m.estat.avg), f('estat', m.estat.prev));
     }
-    let vig = 'Res destacable: cap dada ha sortit de la teva franja.';
-    if (fl.length) {
-      const k = fl[0], n = m[k].flags, wv = m[k].worst, mk = m[k].bad ? '|!' : '|~';
-      vig = k === 'son' ? `El son: [[${pl(n, 'nit', 'nits')}]] per sota de la teva franja; la més curta, de [[${f('son', wv)}${mk}]].`
-        : k === 'rhr' ? `La FC en repòs: [[${pl(n, 'dia', 'dies')}]] per sobre de la teva franja, amb un màxim de [[${f('rhr', wv)}${mk}]].`
-        : k === 'hrv' ? `L'HRV: [[${pl(n, 'dia', 'dies')}]] per sota de la teva franja, amb un mínim de [[${f('hrv', wv)}${mk}]].`
-        : `Com et sents: [[${pl(n, 'dia', 'dies')}]] per sota del teu normal, amb un mínim de [[${f('estat', wv)}${mk}]].`;
-    }
-    const rec = !fl.length ? "Mantén la rutina: està funcionant. Si alguna cosa canvia, t'ho diré." : fl[0] === 'son' ? "Intenta avançar 20 o 30 minuts l'hora d'anar a dormir, sobretot abans dels dies d'entrenament fort." : fl[0] === 'estat' ? "Si et notes cansat uns quants dies seguits, comenta-ho amb l'entrenador." : 'Després de les sessions més intenses, deixa un dia més suau per recuperar.';
+    let vig = X.vigDef;
+    if (fl.length) { const k = fl[0]; vig = X.vig[k](pl(m[k].flags, k === 'son' ? 'n' : 'd'), `${f(k, m[k].worst)}${m[k].bad ? '|!' : '|~'}`); }
+    const rec = X.rec[!fl.length ? 'ok' : fl[0] === 'son' ? 'son' : fl[0] === 'estat' ? 'estat' : 'other'];
     return { titol, com_ha_anat: com, millorat: mill, vigilar: vig, recomanacio: rec };
   }
   sentsStats(sc, range) {
@@ -787,7 +1089,7 @@ Normes:
       kids.push(h('line', { key: 'bm', x1: 0, x2: iw, y1: Y(b.mean), y2: Y(b.mean), stroke: 'rgba(236,238,241,.32)', strokeDasharray: '3 5' }));
       kids.push(h('text', { key: 'th', x: iw + 8, y: Y(b.hi) + 3.5, fill: C.dim, style: lab }, this.fmtV(o.k, b.hi)));
       kids.push(h('text', { key: 'tl', x: iw + 8, y: Y(b.lo) + 3.5, fill: C.dim, style: lab }, this.fmtV(o.k, b.lo)));
-    } else kids.push(h('text', { key: 'calc', x: 0, y: padT + 2, fill: C.dim, style: { ...lab, fontSize: 9, letterSpacing: '.12em' } }, 'FRANJA EN CÀLCUL · 5 DE 14 DIES'));
+    } else kids.push(h('text', { key: 'calc', x: 0, y: padT + 2, fill: C.dim, style: { ...lab, fontSize: 9, letterSpacing: '.12em' } }, this.t('chartCalc')));
     if (n === 28) [1, 2, 3].forEach(q => kids.push(h('line', { key: 'ws' + q, x1: q * 7 * slot, x2: q * 7 * slot, y1: padT, y2: base, stroke: 'rgba(255,255,255,.06)' })));
     kids.push(h('line', { key: 'base', x1: 0, x2: iw, y1: base, y2: base, stroke: 'rgba(255,255,255,.12)' }));
     o.vals.forEach((v, i) => { if (v === null) kids.push(h('line', { key: 'g' + i, x1: X(i), x2: X(i), y1: padT + 6, y2: base, stroke: 'rgba(236,238,241,.28)', strokeDasharray: '2 4' })); });
@@ -833,9 +1135,9 @@ Normes:
     const slot = iw / n, X = i => (i + .5) * slot, Y = v => padT + (1 - (v - lo) / (hi - lo)) * ih, lab = { fontFamily: this.MONO, fontSize: 9, letterSpacing: '.1em' }, kids = [];
     kids.push(h('rect', { key: 'nb', x: 0, y: Y(1), width: iw, height: Y(-1) - Y(1), fill: 'rgba(236,238,241,.05)' }));
     kids.push(h('line', { key: 'z', x1: 0, x2: iw, y1: Y(0), y2: Y(0), stroke: 'rgba(236,238,241,.3)', strokeDasharray: '3 5' }));
-    kids.push(h('text', { key: 't1', x: iw + 8, y: Y(1) + 3, fill: C.dim, style: lab }, 'MILLOR'));
-    kids.push(h('text', { key: 't0', x: iw + 8, y: Y(0) + 3, fill: C.dim, style: lab }, 'NORMAL'));
-    kids.push(h('text', { key: 't2', x: iw + 8, y: Y(-1) + 3, fill: C.dim, style: lab }, 'PITJOR'));
+    kids.push(h('text', { key: 't1', x: iw + 8, y: Y(1) + 3, fill: C.dim, style: lab }, this.t('axBetter')));
+    kids.push(h('text', { key: 't0', x: iw + 8, y: Y(0) + 3, fill: C.dim, style: lab }, this.t('axNormal')));
+    kids.push(h('text', { key: 't2', x: iw + 8, y: Y(-1) + 3, fill: C.dim, style: lab }, this.t('axWorse')));
     for (let i = 0; i < n; i++) {
       const f = o.feel[i], b = o.obj[i];
       if (f == null || b == null) { kids.push(h('line', { key: 'g' + i, x1: X(i), x2: X(i), y1: padT + 14, y2: H - padB - 14, stroke: 'rgba(236,238,241,.2)', strokeDasharray: '2 4' })); continue; }
@@ -864,7 +1166,7 @@ Normes:
   weekStrip(o) {
     const h = React.createElement, C = this.C, M = this.MONO, W = o.W, cw = W - o.gut, n = 7, col = cw / n, top = 26, ch = o.ch, H = top + ch + 28;
     const X = j => (j + .5) * col, Y = p => top + (1 - p) * ch, kids = [];
-    [[1, .55, this.LV.ok, 'A FONS'], [.55, .3, this.LV.mid, 'MODERA'], [.3, 0, this.LV.bad, 'RECUPERA']].forEach(([a, b, t, lb], z) => {
+    [[1, .55, this.LV.ok, this.ST.fons.w], [.55, .3, this.LV.mid, this.ST.mod.w], [.3, 0, this.LV.bad, this.ST.rec.w]].forEach(([a, b, t, lb], z) => {
       const c = this.tone(t);
       kids.push(h('rect', { key: 'z' + z, x: 0, y: Y(a), width: cw, height: Y(b) - Y(a), fill: c, fillOpacity: .05 }));
       kids.push(h('text', { key: 'zl' + z, x: cw + 10, y: (Y(a) + Y(b)) / 2 + 3, fill: c, fillOpacity: .85, style: { fontFamily: M, fontSize: 9, letterSpacing: '.1em' } }, lb));
@@ -912,15 +1214,15 @@ Normes:
       h('span', null, n != null ? h('span', { style: { color: col, fontWeight: 600 } }, String(n) + ' ') : null, t));
     const grey = 'rgba(236,238,241,.35)';
     let rows;
-    if (sc === 'nou') rows = [row('n', grey, null, 'Franja en càlcul · 5/14', 0)];
-    else if (p == null) rows = [row('x', grey, null, "Sense dades d'avui", 0)];
+    if (sc === 'nou') rows = [row('n', grey, null, this.t('bandCalc514'), 0)];
+    else if (p == null) rows = [row('x', grey, null, this.t('noDataToday'), 0)];
     else {
       const g = { bad: [], mid: [], ok: [] }, avg = a => a.reduce((s, x) => s + x, 0) / a.length; let j = 0;
       lvs.forEach((l, i) => { if (l) g[l].push(hs[i]); });
       rows = [];
-      if (g.bad.length) rows.push(row('b', this.tone(Math.min(...g.bad)), g.bad.length, 'per vigilar', j++));
-      if (g.mid.length) rows.push(row('m', this.tone(avg(g.mid)), g.mid.length, 'al límit', j++));
-      if (g.ok.length) rows.push(row('o', this.tone(avg(g.ok)), g.ok.length === 4 ? null : g.ok.length, g.ok.length === 4 ? 'Tot dins la franja' : 'dins la franja', j++));
+      if (g.bad.length) rows.push(row('b', this.tone(Math.min(...g.bad)), g.bad.length, this.t('nBad'), j++));
+      if (g.mid.length) rows.push(row('m', this.tone(avg(g.mid)), g.mid.length, this.t('nMid'), j++));
+      if (g.ok.length) rows.push(row('o', this.tone(avg(g.ok)), g.ok.length === 4 ? null : g.ok.length, this.t(g.ok.length === 4 ? 'allOk' : 'nOk'), j++));
     }
     return h('div', { key: 'st-' + sc, style: { display: 'flex', flexWrap: 'wrap', gap: '5px 14px', fontFamily: this.MONO, fontSize: 11, lineHeight: 1.35, color: 'rgba(236,238,241,.75)' } }, rows);
   }
@@ -929,12 +1231,12 @@ Normes:
     return this.KEYS.map((k, i) => {
       const v = D.vals[k][41], b = D.band ? D.band[k] : null, lv = this.lvlOf(k, v, D.band);
       let d;
-      if (v == null) d = 'sense dades';
-      else if (!b) d = 'franja en càlcul';
-      else if (lv === 'bad') d = `${this.delta(k, v, b.mean)} · per vigilar`;
-      else if (lv === 'mid') d = `${this.delta(k, v, b.mean)} · al límit`;
-      else if (this.qOf(k, v, D.band) > 1) d = `${this.delta(k, v, b.mean)} · molt bé`;
-      else d = `dins · franja ${this.bandTxt(k, b)}`;
+      if (v == null) d = this.t('noDataL');
+      else if (!b) d = this.t('bandCalcL');
+      else if (lv === 'bad') d = `${this.delta(k, v, b.mean)} · ${this.t('nBad')}`;
+      else if (lv === 'mid') d = `${this.delta(k, v, b.mean)} · ${this.t('nMid')}`;
+      else if (this.qOf(k, v, D.band) > 1) d = `${this.delta(k, v, b.mean)} · ${this.t('veryGood')}`;
+      else d = this.t('inBandOf', this.bandTxt(k, b));
       return { v: React.createElement(this.Num, { k, v, band: D.band, dur: 900 }), unit: this.META[k].unit, label: this.META[k].cell, d, vc: {},
         dc: { color: v == null || !b ? C.mut : this.toneOf(k, v, D.band), transition: 'color .6s ease' },
         spark: this.spark({ key: `sp-${k}-${sc}-${desk ? 'd' : 'm'}-${s.mount}`, gid: `sp${k}${desk ? 'd' : 'm'}`, k, vals: idx.map(j => D.vals[k][j]), band: D.band, W: desk ? (this.geom().side < 400 ? 118 : 136) : 150 }),
@@ -945,16 +1247,16 @@ Normes:
   avuiVM(sc, D, desk) {
     const h = React.createElement, C = this.C, s = this.state, w = this.who(sc), p = D.pos[41], st = this.stateOf(p), dh = sc === 'nou' ? null : this.dayH(p);
     let word, line;
-    if (sc === 'nou') { word = 'Calculant'; line = 'Encara estem aprenent com ets tu.'; }
-    else if (p == null) { word = 'Pendent'; line = "Encara no han arribat les dades d'avui."; }
+    if (sc === 'nou') { word = this.t('calculating'); line = this.t('learning'); }
+    else if (p == null) { word = this.t('pending'); line = this.t('noDataYet'); }
     else { word = this.WS[st]; line = this.ST[st].line; }
     const hs = this.KEYS.map(k => this.hOf(k, D.vals[k][41], D.band)), lvs = this.KEYS.map(k => this.lvlOf(k, D.vals[k][41], D.band));
     const ai = this.aiGet(this.aiKey('daily', sc), this.FB_DAILY[sc]), anim = d => ({ display: 'inline-block', animation: `mtWord .5s cubic-bezier(.2,.7,.2,1) ${d}s both` });
-    return { greet: `Bon dia, ${w.name}.`, word: h('span', { key: 'w-' + word, style: anim(0) }, word), line: h('span', { key: 'l-' + word, style: anim(.06) }, line),
+    return { greet: this.t('greet', w.name), word: h('span', { key: 'w-' + word, style: anim(0) }, word), line: h('span', { key: 'l-' + word, style: anim(.06) }, line),
       sq: { width: 6, height: 6, flex: 'none', background: dh == null ? C.mut : this.tone(dh), transition: 'background .6s' },
       ring: h(this.Ring, { key: `rg-${s.mount}-${desk ? 'd' : 'm'}`, size: desk ? (this.geom().side < 400 ? 94 : 104) : 112, hs, dh, st, nou: sc === 'nou' }),
       status: this.statusEl(sc, lvs, hs, p), loading: ai.loading, ready: ai.ready, segs: ai.ready ? this.segs(ai.val) : [],
-      basis: p == null && sc !== 'nou' ? "EN QUÈ ES BASA · ENCARA SENSE DADES D'AVUI" : "EN QUÈ ES BASA · 4 DADES D'AVUI", cells: this.cellsVM(sc, D, desk) };
+      basis: this.t(p == null && sc !== 'nou' ? 'basisNone' : 'basis4'), cells: this.cellsVM(sc, D, desk) };
   }
   evoVM(sc, D, desk) {
     const h = React.createElement, s = this.state, C = this.C, M = this.MONO, k = s.metric, meta = this.META[k], b = D.band ? D.band[k] : null;
@@ -962,29 +1264,29 @@ Normes:
     const from = zoomed ? 14 + s.zoom * 7 : 42 - range, n = zoomed ? 7 : range;
     const idx = Array.from({ length: n }, (_, j) => from + j), vals = idx.map(i => D.vals[k][i]);
     const hv = s.hover != null && s.hover < n ? s.hover : null, ri = hv != null ? idx[hv] : 41, rv = D.vals[k][ri], lv = this.lvlOf(k, rv, D.band);
-    const dd = this.day(ri), when = ri === 41 ? 'AVUI' : `${this.WDL[dd.wd]} ${dd.n} ${dd.mo}`;
+    const dd = this.day(ri), when = ri === 41 ? this.t('TODAY') : `${this.WDL[dd.wd]} ${dd.n} ${dd.mo}`;
     let sub;
-    if (rv === undefined) sub = `${when} · encara no hi eres`;
-    else if (rv === null) sub = `${when} · sense dades`;
-    else if (!b) sub = `${when} · franja en càlcul`;
-    else if (lv === 'bad') sub = `${when} · ${this.delta(k, rv, b.mean)} vs la teva mitjana · per vigilar`;
-    else if (lv === 'mid') sub = `${when} · ${this.delta(k, rv, b.mean)} vs la teva mitjana · al límit`;
-    else if (this.qOf(k, rv, D.band) > 1) sub = `${when} · ${this.delta(k, rv, b.mean)} · molt bé`;
-    else sub = `${when} · dins la teva franja`;
+    if (rv === undefined) sub = `${when} · ${this.t('notHere')}`;
+    else if (rv === null) sub = `${when} · ${this.t('noDataL')}`;
+    else if (!b) sub = `${when} · ${this.t('bandCalcL')}`;
+    else if (lv === 'bad') sub = `${when} · ${this.t('vsMean', this.delta(k, rv, b.mean))} · ${this.t('nBad')}`;
+    else if (lv === 'mid') sub = `${when} · ${this.t('vsMean', this.delta(k, rv, b.mean))} · ${this.t('nMid')}`;
+    else if (this.qOf(k, rv, D.band) > 1) sub = `${when} · ${this.delta(k, rv, b.mean)} · ${this.t('veryGood')}`;
+    else sub = `${when} · ${this.t('inYourBand')}`;
     const pres = vals.filter(v => v != null), avg = pres.length ? pres.reduce((a, x) => a + x, 0) / pres.length : null;
     const cnt = { ok: 0, mid: 0, bad: 0 }; pres.forEach(v => { const l = this.lvlOf(k, v, D.band); if (l) cnt[l]++; });
     const tb = { background: 'none', border: 'none', borderBottom: '1px solid transparent', marginBottom: -1, padding: desk ? '12px 0 14px' : '10px 0 12px', fontFamily: M, fontSize: desk ? 12 : 11, letterSpacing: '.1em', textTransform: 'uppercase', cursor: 'pointer', color: C.dim, transition: 'color .25s, border-color .25s' };
     const tabs = this.KEYS.map(q => ({ label: this.META[q].short, style: q === k ? { ...tb, color: C.ink, borderBottomColor: C.ink } : tb, onClick: () => this.setState({ metric: q, hover: null }) }));
     const rB = { border: 'none', padding: '6px 10px', fontFamily: M, fontSize: 11, letterSpacing: '.08em', cursor: 'pointer', background: 'transparent', color: C.mut, transition: 'background .25s, color .25s' };
     const ranges = [7, 28].map(r => { const dis = sc === 'nou' && r === 28;
-      return { label: `${r} D`, style: r === range ? { ...rB, background: C.ink, color: C.bg } : dis ? { ...rB, opacity: .35, cursor: 'not-allowed' } : rB, onClick: () => { if (!dis) this.setState({ range: r, zoom: null, hover: null }); } }; });
-    const labels = idx.map(i => { const d = this.day(i); return { t: i === 41 ? 'AVUI' : `${this.WD[d.wd]} ${d.n}`, st: { color: i === 41 ? C.ink : C.dim } }; });
+      return { label: `${r} ${this.t('dayAbbr')}`, style: r === range ? { ...rB, background: C.ink, color: C.bg } : dis ? { ...rB, opacity: .35, cursor: 'not-allowed' } : rB, onClick: () => { if (!dis) this.setState({ range: r, zoom: null, hover: null }); } }; });
+    const labels = idx.map(i => { const d = this.day(i); return { t: i === 41 ? this.t('TODAY') : `${this.WD[d.wd]} ${d.n}`, st: { color: i === 41 ? C.ink : C.dim } }; });
     const sq = v => ({ width: 7, height: 7, borderRadius: 1.5, boxSizing: 'border-box', background: v == null ? 'transparent' : this.toneOf(k, v, D.band), border: v == null ? '1px dashed rgba(236,238,241,.35)' : 'none', transition: 'background .4s' });
     const weeksList = [0, 1, 2, 3].map(q => { const i0 = 14 + q * 7, d0 = this.day(i0), d6 = this.day(i0 + 6);
       return { t: d0.mo === d6.mo ? `${d0.n}–${d6.n} ${d6.mo}` : `${d0.n} ${d0.mo}–${d6.n} ${d6.mo}`, fc: { display: 'inline-flex', gap: 2 },
         f: Array.from({ length: 7 }, (_, j) => h('span', { key: j, style: sq(D.vals[k][i0 + j]) })), onClick: () => this.setState({ zoom: q, hover: null }) }; });
     let zoomLabel = '';
-    if (zoomed) { const d0 = this.day(from), d6 = this.day(from + 6); zoomLabel = `SETMANA ${d0.n} ${d0.mo} – ${d6.n} ${d6.mo}`; }
+    if (zoomed) { const d0 = this.day(from), d6 = this.day(from + 6); zoomLabel = this.t('zoomWeek', `${d0.n} ${d0.mo} – ${d6.n} ${d6.mo}`); }
     const chart = this.chart({ key: `c-${desk ? 'd' : 'm'}-${sc}-${k}-${range}-${zoomed ? s.zoom : 'x'}-${s.visit}`, k, vals, b, band: D.band, W: desk ? this.geom().cw : 354, H: desk ? this.geom().ch : 190, padR: desk ? 48 : 40,
       hover: hv, setHover: v => this.setState({ hover: v }), gid: desk ? 'mtgd' : 'mtgm', isToday: !zoomed });
     const dist = b ? h('span', { style: { display: 'inline-flex', alignItems: 'baseline', gap: 5 } },
@@ -993,29 +1295,29 @@ Normes:
     return { label: meta.label, big: h(this.Num, { key: k, k, v: rv, band: D.band, dur: 260 }), bigC: {}, unit: meta.unit, sub,
       subC: { color: rv == null || !b ? C.mut : this.toneOf(k, rv, D.band), transition: 'color .25s' },
       tabs, ranges, chart, days: !(range === 28 && !zoomed), weeks: range === 28 && !zoomed, zoomed, labels, weeksList, zoomLabel, back: () => this.setState({ zoom: null, hover: null }),
-      avg: this.fmtV(k, avg), avgC: { color: avg == null || !b ? C.ink : this.toneOf(k, avg, D.band), transition: 'color .4s' }, avgL: zoomed ? 'MITJANA SETMANA' : `MITJANA ${range} D`,
-      bandT: b ? this.bandTxt(k, b) : 'EN CÀLCUL', outT: dist, outL: b ? (desk ? 'BÉ · LÍMIT · VIGILAR' : 'BÉ·LÍMIT·VIGILAR') : 'DIES PER ESTAT', outC: {}, isEstat: k === 'estat' };
+      avg: this.fmtV(k, avg), avgC: { color: avg == null || !b ? C.ink : this.toneOf(k, avg, D.band), transition: 'color .4s' }, avgL: zoomed ? this.t('avgWeek') : this.t('avgN', range),
+      bandT: b ? this.bandTxt(k, b) : this.t('inCalcU'), outT: dist, outL: b ? this.t(desk ? 'outDesk' : 'outMob') : this.t('daysByState'), outC: {}, isEstat: k === 'estat' };
   }
   sentsVM(sc, D, desk) {
     const s = this.state;
     if (sc === 'nou') return { empty: true, has: false, loading: false, ready: false, segs: [] };
     const range = s.range, idx = Array.from({ length: range }, (_, j) => 42 - range + j), st = this.sentsStats(sc, range);
     const hv = s.sHover != null && s.sHover < range ? s.sHover : null;
-    const word = zz => zz == null ? 'sense dades' : zz >= .5 ? 'per sobre del teu normal' : zz <= -.5 ? 'per sota del teu normal' : 'en el teu normal';
+    const word = zz => this.t(zz == null ? 'noDataL' : zz >= .5 ? 'wAbove' : zz <= -.5 ? 'wBelow' : 'wNormal');
     let sub;
-    if (hv != null) { const i = idx[hv], d = this.day(i); sub = `${this.WD[d.wd]} ${d.n} ${d.mo} · et sents ${word(D.feel[i])} · dades ${word(D.obj[i])}`; }
-    else sub = !st.mis.length ? 'El que sents i les dades diuen el mateix' : st.better >= st.worse ? `${st.better} ${st.better === 1 ? 'dia' : 'dies'} et sents millor del que diuen les dades` : `${st.worse} ${st.worse === 1 ? 'dia' : 'dies'} et sents pitjor del que diuen les dades`;
+    if (hv != null) { const i = idx[hv], d = this.day(i); sub = this.t('sentsDay', `${this.WD[d.wd]} ${d.n} ${d.mo}`, word(D.feel[i]), word(D.obj[i])); }
+    else sub = !st.mis.length ? this.t('sentsSame') : st.better >= st.worse ? this.t('sentsBetter', st.better) : this.t('sentsWorse', st.worse);
     const chart = this.sentsChart({ key: `s-${desk ? 'd' : 'm'}-${sc}-${range}-${s.visit}`, feel: idx.map(i => D.feel[i]), obj: idx.map(i => D.obj[i]), W: desk ? this.geom().sw : 354, H: 150, padR: 48,
       hover: hv, setHover: v => this.setState({ sHover: v }), gid: desk ? 'sgd' : 'sgm' });
     const d0 = this.day(idx[0]), ai = this.aiGet(this.aiKey('sents', sc), this.FB_SENTS[sc]);
-    return { empty: false, has: true, k: String(st.k), n: String(st.n), sub, chart, x0: `${d0.n} ${d0.mo}`, loading: ai.loading, ready: ai.ready, segs: ai.ready ? this.segs(ai.val) : [] };
+    return { empty: false, has: true, k: String(st.k), n: String(st.n), ofN: this.t('ofNDays', st.n), ofNShort: this.t('ofN', st.n), sub, chart, x0: `${d0.n} ${d0.mo}`, loading: ai.loading, ready: ai.ready, segs: ai.ready ? this.segs(ai.val) : [] };
   }
   itemsVM(sc) {
     const it = this.TODAY[sc], C = this.C;
     if (!it) return { has: false, none: true, list: [] };
     return { has: true, none: false, list: this.ITEMS.map((x, i) => {
       const v = it[i], u = this.USUAL[i], nou = sc === 'nou', col = nou ? C.ink : this.tone(this.lerpPts(this.QH, (v - u) / .6));
-      return { t: x.t, n: nou ? x.n : `habitual ${u.toFixed(1).replace('.', ',')} · ${x.n}`, v: `${v}/5`, vc: { color: col, transition: 'color .5s' },
+      return { t: x.t, n: nou ? x.n : `${this.t('usual', u.toFixed(1).replace('.', this.t('dec')))} · ${x.n}`, v: `${v}/5`, vc: { color: col, transition: 'color .5s' },
         sq: [1, 2, 3, 4, 5].map(q => ({ width: 16, height: 6, borderRadius: 1, background: q <= v ? col : 'rgba(255,255,255,.1)', transformOrigin: 'left center', transition: 'background .5s',
           ...(q <= v ? { animation: `mtSq .35s cubic-bezier(.3,.7,.2,1) ${(.1 + (i * 5 + q) * .025).toFixed(3)}s both` } : {}) })) }; }) };
   }
@@ -1031,16 +1333,16 @@ Normes:
     const comp = cnt => [['fons', AN.fons], ['mod', AN.mod], ['rec', AN.rec], ['none', 'rgba(255,255,255,.14)']].filter(e => cnt[e[0]]).map(e => ({ flex: cnt[e[0]], height: 4, background: e[1] }));
     const all = this.WEEKS.map((w2, j) => { const st2 = this.weekStats(sc, w2.a), f2 = this.weekFallback(st2), c2 = this.state.ai[this.aiKey('week', sc, j)], on = j === wi;
       const t = c2 && c2.status === 'done' && this.live() ? String(c2.val.titol).replace(/\[\[|\]\]|\|[!~+]/g, '') : f2.titol;
-      return { id: `S${w2.id}`, dates: this.weekLabel(j), t, comp: comp(st2.cnt), onClick: () => this.setState({ week: j }), on,
+      return { id: `${this.t('wAbbr')}${w2.id}`, dates: this.weekLabel(j), t, comp: comp(st2.cnt), onClick: () => this.setState({ week: j }), on,
         rowSt: { display: 'flex', flexDirection: 'column', gap: 6, width: '100%', padding: '14px 24px 14px 22px', background: on ? 'rgba(255,255,255,.05)' : 'transparent', border: 'none', borderLeft: `2px solid ${on ? this.C.ink : 'transparent'}`, textAlign: 'left', cursor: 'pointer', transition: 'background .2s' } }; });
-    return { has: true, none: false, label: `SETMANA ${W.id} · ${this.weekLabel(wi)}`, pubShort: `PUBLICAT ${W.pub}`, strip, sum, loading: ai.loading, ready: ai.ready,
+    return { has: true, none: false, label: this.t('weekLbl', W.id, this.weekLabel(wi)), pubShort: this.t('published', (d => `${this.WD[d.wd]} ${d.n} ${d.mo}`)(this.day(W.a + 7))), strip, sum, loading: ai.loading, ready: ai.ready,
       titol: val ? String(val.titol).replace(/\[\[|\]\]|\|[!~+]/g, '') : '', com: val ? this.segs(val.com_ha_anat) : [], mill: val ? this.segs(val.millorat) : [], vig: val ? this.segs(val.vigilar) : [], rec: val ? this.segs(val.recomanacio) : [],
       all, hist: all.filter(x => !x.on) };
   }
   privItems(role, sc) {
     const C = this.C, code = this.who(sc).code;
     return this.PRIV.map((p, i) => { const r = p.r[role], hid = r === 'no';
-      const tag = role === 'tu' ? 'HO VEUS' : r === 'yes' ? 'HO VEU' : r === 'code' ? 'AMB CODI' : (i === 0 && role === 'study' ? code : 'NO HO VEU');
+      const tag = role === 'tu' ? this.t('youSee') : r === 'yes' ? this.t('sees') : r === 'code' ? this.t('withCode') : (i === 0 && role === 'study' ? code : this.t('notSee'));
       return { t: p.t, s: p.s, tag, tc: { color: hid ? C.dim : C.ink, transition: 'color .35s' },
         strike: { position: 'absolute', left: -2, right: -2, top: '56%', height: 1.5, background: C.mut, transformOrigin: 'left center', transform: hid ? 'scaleX(1)' : 'scaleX(0)', transition: 'transform .35s cubic-bezier(.4,0,.2,1)', ...(hid ? { animation: `mtStrike .5s cubic-bezier(.4,0,.2,1) ${(.15 + i * .07).toFixed(2)}s both` } : {}) },
         tagSt: { display: 'inline-block', fontFamily: this.MONO, fontSize: 10, letterSpacing: '.1em', whiteSpace: 'nowrap', padding: '4px 7px', border: `1px solid ${hid ? 'rgba(255,255,255,.1)' : r === 'code' ? 'rgba(236,238,241,.35)' : 'rgba(236,238,241,.6)'}`, color: hid ? C.dim : C.ink, transition: 'color .35s, border-color .35s' } }; });
@@ -1084,20 +1386,20 @@ Normes:
 
   renderVals() {
     const s = this.state, sc = s.scenario, D = this.data(sc), desk = this.isDesk(), C = this.C, M = this.MONO, w = this.who(sc), g = this.geom();
-    const mt = [['avui', 'Avui', 'sun'], ['evolucio', 'Evolució', 'chart'], ['setmana', 'Setmana', 'cal'], ['priv', 'Privacitat', 'shield'], ['ajustos', 'Ajustos', 'sliders']];
+    const mt = [['avui', this.t('navAvui'), 'sun'], ['evolucio', this.t('evol'), 'chart'], ['setmana', this.t('navSetm'), 'cal'], ['priv', this.t('navPriv'), 'shield'], ['ajustos', this.t('settings'), 'sliders']];
     const mi = Math.max(0, mt.findIndex(x => x[0] === s.mTab));
     // El menú és neutre: el color queda reservat per a les dades.
     const navM = mt.map(e => ({ label: e[1], icon: this.icon(e[2], 22), st: { display: 'flex', color: s.mTab === e[0] ? C.ink : C.dim, transition: 'color .25s' },
       onClick: () => this.setState(st => { const back = e[0] === 'avui' && st.mTab !== 'avui'; return { mTab: e[0], hover: null, sHover: null, visit: back ? st.visit + 1 : st.visit, mount: back ? st.mount + 1 : st.mount }; }) }));
-    const navD = [['evolucio', 'EVOLUCIÓ'], ['setmana', 'SETMANA'], ['priv', 'PRIVACITAT'], ['ajustos', 'AJUSTOS']].map(e => ({ label: e[1], onClick: () => this.setState({ dTab: e[0], hover: null, sHover: null }),
+    const navD = [['evolucio', this.t('evol')], ['setmana', this.t('navSetm')], ['priv', this.t('navPriv')], ['ajustos', this.t('settings')]].map(e => [e[0], e[1].toUpperCase()]).map(e => ({ label: e[1], onClick: () => this.setState({ dTab: e[0], hover: null, sHover: null }),
       style: { background: 'none', border: 'none', borderBottom: `2px solid ${s.dTab === e[0] ? C.ink : 'transparent'}`, height: 64, padding: 0, fontFamily: M, fontSize: 11, letterSpacing: '.14em', color: s.dTab === e[0] ? C.ink : C.dim, cursor: 'pointer', transition: 'color .25s, border-color .25s' } }));
     const vB = { border: 'none', padding: '10px 0', fontFamily: M, fontSize: 10, letterSpacing: '.12em', cursor: 'pointer', background: 'transparent', color: C.dim, transition: 'background .25s, color .25s' };
-    const evoViews = [['metrics', 'MÈTRIQUES'], ['sents', 'SENSACIÓ VS DADES']].map(e => ({ label: e[1], style: s.evoView === e[0] ? { ...vB, background: 'rgba(255,255,255,.08)', color: C.ink } : vB, onClick: () => this.setState({ evoView: e[0], hover: null, sHover: null }) }));
+    const evoViews = [['metrics', this.t('metrics')], ['sents', this.t('feelVsData')]].map(e => ({ label: e[1], style: s.evoView === e[0] ? { ...vB, background: 'rgba(255,255,255,.08)', color: C.ink } : vB, onClick: () => this.setState({ evoView: e[0], hover: null, sHover: null }) }));
     const rb = { border: 'none', padding: '11px 0', fontFamily: M, fontSize: 10, letterSpacing: '.12em', cursor: 'pointer', background: 'transparent', color: C.dim, transition: 'background .25s, color .25s' };
-    const roles = [['tu', 'TU'], ['coach', 'ENTRENADOR'], ['study', 'ESTUDI']].map(e => ({ t: e[1], style: s.role === e[0] ? { ...rb, background: C.ink, color: C.bg } : rb, onClick: () => this.setState({ role: e[0] }) }));
+    const roles = ['tu', 'coach', 'study'].map(k => [k, this.ROLES[k].t]).map(e => ({ t: e[1], style: s.role === e[0] ? { ...rb, background: C.ink, color: C.bg } : rb, onClick: () => this.setState({ role: e[0] }) }));
     const pvCols = ['tu', 'coach', 'study'].map((r, j) => ({ t: this.ROLES[r].t, d: this.ROLES[r].d, items: this.privItems(r, sc), box: { padding: j === 0 ? '22px 24px 0 0' : '22px 24px 0', borderRight: j < 2 ? C.hair : 'none' } }));
     const langs = this.LANGS.map(l => { const on = l.k === s.lang;
-      return { t: l.t, code: l.k.toUpperCase(), onClick: () => this.setState({ lang: l.k }), tc: { color: on ? C.ink : C.mut },
+      return { t: l.t, code: l.k.toUpperCase(), onClick: () => this.setLang(l.k), tc: { color: on ? C.ink : C.mut },
         ind: { width: 10, height: 10, flex: 'none', boxSizing: 'border-box', border: `1px solid ${on ? C.ink : 'rgba(236,238,241,.4)'}`, background: on ? C.ink : 'transparent', transition: 'all .25s' } }; });
     const scale = [0, .2, .4, .55, .7, .85, 1].map(t => this.tone(t)).join(', ');
     return {
@@ -1114,7 +1416,7 @@ Normes:
       legendSw: { width: 40, height: 6, borderRadius: 3, background: `linear-gradient(90deg, ${scale})` },
       seLeg: { width: 16, height: 2, background: `linear-gradient(90deg, ${this.tone(.1)}, ${this.tone(.5)}, ${this.tone(.95)})` },
       pv: { roles, desc: this.ROLES[s.role].d, items: this.privItems(s.role, sc), name: w.name, code: w.code }, pvCols,
-      langs, langNote: (this.LANGS.find(l => l.k === s.lang) || this.LANGS[0]).n, who: { name: w.name, age: `${w.age} anys`, code: w.code },
+      langs, langNote: (this.LANGS.find(l => l.k === s.lang) || this.LANGS[0]).n, who: { name: w.name, age: this.t('years', w.age), code: w.code }, tx: this.L().UI, hdr: this.hdr(),
     };
   }
 }
