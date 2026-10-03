@@ -152,13 +152,14 @@ class Component extends DCLogic {
     try { done = JSON.parse(localStorage.getItem('mt-desk-done') || '{}') || {}; } catch (e) { done = {}; }
     let chv = {};
     try { chv = JSON.parse(localStorage.getItem('mt-desk-charts-v2') || '{}') || {}; } catch (e) { chv = {}; }
-    let theme = 'gpt', mode = 'dark', sysDark = true, lang = 'ca', side = 'open';
-    try { theme = localStorage.getItem('mt-desk-theme-v3') || 'gpt'; mode = localStorage.getItem('mt-desk-mode') || 'dark'; lang = localStorage.getItem('mt-lang') || 'ca'; side = localStorage.getItem('mt-desk-side') || 'open'; } catch (e) {}
+    // Per defecte, l'estil Senzill (gpt) i el mode automàtic (segueix el sistema). Claus renovades el 03-10-2026 perquè tothom hi comenci.
+    let theme = 'gpt', mode = 'auto', sysDark = true, lang = 'ca', side = 'open';
+    try { theme = localStorage.getItem('mt-desk-theme-v4') || 'gpt'; mode = localStorage.getItem('mt-desk-mode-v2') || 'auto'; lang = localStorage.getItem('mt-lang') || 'ca'; side = localStorage.getItem('mt-desk-side') || 'open'; } catch (e) {}
     try { sysDark = !window.matchMedia || window.matchMedia('(prefers-color-scheme: dark)').matches; } catch (e) {}
     let page = 'avui';
     try { if (/graf/i.test(window.location.hash)) page = 'grafics'; } catch (e) {}
     return { scenario: 'normal', page, metric: 'rhr', range: 7, evoRange: 28, month: 0, hoverF: null, pinF: null,
-      lang: LANG_KEYS.includes(lang) ? lang : 'ca', visit: 0, vw: window.innerWidth, vh: window.innerHeight, ai, pOpen: false, pHidden, chv, done, trk, trkOpen: false, cvx: {}, week2: -1, pbSim: 'sc', trkSel: 0, wkPick: false, wemSim: 'sc', moPick: false, chatOpen: false, chatBig: false, chatPx, chatLog: [], theme: ['gpt', 'hibrid', 'editorial', 'grafit'].includes(theme) ? theme : 'gpt', mode: /^(dark|light|auto)$/.test(mode) ? mode : 'dark', sysDark,
+      lang: LANG_KEYS.includes(lang) ? lang : 'ca', visit: 0, vw: window.innerWidth, vh: window.innerHeight, ai, pOpen: false, pHidden, chv, done, trk, trkOpen: false, cvx: {}, week2: -1, pbSim: 'sc', trkSel: 0, wkPick: false, wemSim: 'sc', moPick: false, chatOpen: false, chatBig: false, chatPx, chatLog: [], theme: ['gpt', 'hibrid', 'editorial', 'grafit'].includes(theme) ? theme : 'gpt', mode: /^(dark|light|auto)$/.test(mode) ? mode : 'auto', sysDark,
       side: side === 'closed' ? 'closed' : 'open', pick: false, scrolled: false };
   })();
   mainRef = React.createRef();
@@ -228,8 +229,8 @@ class Component extends DCLogic {
   ov(a) { return `rgba(${this.C.ovB},${a})`; }
   fg(a) { return `rgba(${this.C.fgB},${a})`; }
   sh(a) { return this.C.dark ? `rgba(0,0,0,${a})` : `rgba(16,24,40,${(a * .3).toFixed(3)})`; }
-  setTheme(k) { try { localStorage.setItem('mt-desk-theme-v3', k); } catch (e) {} this.setState({ theme: k, pick: false }); }
-  setMode(m) { try { localStorage.setItem('mt-desk-mode', m); } catch (e) {} this.setState({ mode: m }); }
+  setTheme(k) { try { localStorage.setItem('mt-desk-theme-v4', k); } catch (e) {} this.setState({ theme: k, pick: false }); }
+  setMode(m) { try { localStorage.setItem('mt-desk-mode-v2', m); } catch (e) {} this.setState({ mode: m }); }
   // Distància a la franja personal, en mitges franges (positiu = millor) → to.
   QH = [[-3.4, 0], [-2.5, .18], [-1.8, .38], [-1.25, .52], [-.9, .66], [0, .84], [1.1, 1]];
   // Posició del dia (0 = Recuperació, 1 = Òptim) → to.
@@ -423,7 +424,7 @@ class Component extends DCLogic {
     ],
     // Nom de cada idioma en l'idioma actiu, en l'ordre de LANGS.
     LANG_N: { ca: ['Català', 'Castellà', 'Francès', 'Anglès'], es: ['Catalán', 'Castellano', 'Francés', 'Inglés'], fr: ['Catalan', 'Espagnol', 'Français', 'Anglais'], en: ['Catalan', 'Spanish', 'French', 'English'] },
-    THEME_N: { gpt: 'ChatGPT', hibrid: { ca: 'Híbrid', es: 'Híbrido', fr: 'Hybride', en: 'Hybrid' }, editorial: { ca: 'Editorial', es: 'Editorial', fr: 'Éditorial', en: 'Editorial' }, grafit: { ca: 'Grafit', es: 'Grafito', fr: 'Graphite', en: 'Graphite' } },
+    THEME_N: { gpt: { ca: 'Senzill', es: 'Sencillo', fr: 'Simple', en: 'Simple' }, hibrid: { ca: 'Híbrid', es: 'Híbrido', fr: 'Hybride', en: 'Hybrid' }, editorial: { ca: 'Editorial', es: 'Editorial', fr: 'Éditorial', en: 'Editorial' }, grafit: { ca: 'Grafit', es: 'Grafito', fr: 'Graphite', en: 'Graphite' } },
     // Etiqueta de les troballes que no són una dada diària ni una pregunta.
     CHIP: { coach: { ca: 'Entrenador', es: 'Entrenador', fr: 'Entraîneur', en: 'Coach' }, sents: { ca: 'Sensació vs dades', es: 'Sensación vs datos', fr: 'Ressenti vs données', en: 'Feeling vs data' },
       ostrc: { ca: 'Participació', es: 'Participación', fr: 'Participation', en: 'Participation' }, wemwbs: { ca: 'Total', es: 'Total', fr: 'Total', en: 'Total' }, ahir: { ca: 'Ahir', es: 'Ayer', fr: 'Hier', en: 'Yesterday' },
@@ -877,8 +878,6 @@ class Component extends DCLogic {
       wkFeelWorse: { ca: "T'has sentit pitjor del que diuen les teves dades.", es: 'Te has sentido peor de lo que dicen tus datos.', fr: "Tu t'es senti moins bien que ce que disent tes données.", en: 'You felt worse than your data say.' },
       wkRingLast: { ca: 'Últim formulari', es: 'Último formulario', fr: 'Dernier formulaire', en: 'Last form' },
       // Què li has dit a l'entrenador vs les teves dades (H2)
-      cvMis: { ca: (a, b) => `${a} de ${b} dies el que li vas dir no coincideix amb les teves dades.`, es: (a, b) => `${a} de ${b} días lo que le dijiste no coincide con tus datos.`, fr: (a, b) => `${a} jours sur ${b}, ce que tu lui as dit ne correspond pas à tes données.`, en: (a, b) => `On ${a} of ${b} days, what you told your coach doesn't match your data.` },
-      cvPair: { ca: (n, b, c, s) => `${n} de ${b} ${b === 1 ? 'dia' : 'dies'} li vas dir «${c}» amb dades de ${s}`, es: (n, b, c, s) => `${n} de ${b} ${b === 1 ? 'día' : 'días'} le dijiste «${c}» con datos de ${s}`, fr: (n, b, c, s) => `${n} ${n === 1 ? 'jour' : 'jours'} sur ${b}, tu lui as dit « ${c} » avec des données « ${s} »`, en: (n, b, c, s) => `${n} of ${b} ${b === 1 ? 'day' : 'days'} you said “${c}” with data at ${s}` },
       cvNote: { ca: (c, s) => `Li has dit [[«${c}»]] a l'entrenador, però les teves dades marquen [[«${s}»]]. Potser val la pena parlar-ne.`, es: (c, s) => `Le has dicho [[«${c}»]] al entrenador, pero tus datos marcan [[«${s}»]]. Quizá valga la pena hablarlo.`, fr: (c, s) => `Tu as dit [[« ${c} »]] à ton entraîneur, mais tes données indiquent [[« ${s} »]]. Ça vaut peut-être la peine d'en parler.`, en: (c, s) => `You told your coach [[“${c}”]], but your data say [[“${s}”]]. It may be worth talking about it.` },
       cvRowCoach: { ca: "A l'entrenador", es: 'Al entrenador', fr: "À l'entraîneur", en: 'To your coach' }, cvRowData: { ca: 'Les teves dades', es: 'Tus datos', fr: 'Tes données', en: 'Your data' },
       cvTitle: { ca: "No quadra amb el que has dit a l'entrenador", es: 'No cuadra con lo que le dijiste al entrenador', fr: 'Ça ne correspond pas à ce que tu as dit à ton entraîneur', en: "Doesn't match what you told your coach" },
@@ -1001,7 +1000,6 @@ class Component extends DCLogic {
       wkByWeek: { ca: 'Setmana a setmana', es: 'Semana a semana', fr: 'Semaine après semaine', en: 'Week by week' },
       nmCalc: { ca: 'El teu normal: calculant', es: 'Tu normal: calculando', fr: 'Ta normale : en calcul', en: 'Your usual: calculating' },
       vsTitle: { ca: 'El que vas dir vs les teves dades', es: 'Lo que dijiste vs tus datos', fr: 'Ce que tu as dit vs tes données', en: 'What you said vs your data' },
-      vsSaid: { ca: 'Vas dir', es: 'Dijiste', fr: 'Tu as dit', en: 'You said' },
       vsHrRhr: { ca: 'FC en repòs i HRV', es: 'FC en reposo y HRV', fr: 'FC au repos et HRV', en: 'Resting HR and HRV' },
       vsDays: { ca: (o, n) => `${o} de ${n} dies al teu normal`, es: (o, n) => `${o} de ${n} días en tu normal`, fr: (o, n) => `${o} jours sur ${n} dans ta normale`, en: (o, n) => `${o} of ${n} days at your usual` },
       vsSleep: { ca: (hh, o, n) => `${hh} h de mitjana · ${o} de ${n} nits al teu normal`, es: (hh, o, n) => `${hh} h de media · ${o} de ${n} noches en tu normal`, fr: (hh, o, n) => `${hh} h en moyenne · ${o} nuits sur ${n} dans ta normale`, en: (hh, o, n) => `${hh} h on average · ${o} of ${n} nights at your usual` },
@@ -1011,12 +1009,12 @@ class Component extends DCLogic {
       vsWorse: { ca: 'Et notes pitjor', es: 'Te notas peor', fr: 'Tu te sens moins bien', en: 'You feel worse' },
       vsBetter: { ca: 'Et notes millor', es: 'Te notas mejor', fr: 'Tu te sens mieux', en: 'You feel better' },
       vsCoach: { ca: 'Entrenador', es: 'Entrenador', fr: 'Entraîneur', en: 'Coach' },
-      vsSaidTop: { ca: (w, o, n) => `«${w}» ${o} de ${n} dies`, es: (w, o, n) => `«${w}» ${o} de ${n} días`, fr: (w, o, n) => `« ${w} » ${o} jours sur ${n}`, en: (w, o, n) => `“${w}” on ${o} of ${n} days` },
       vsCoachOk: { ca: 'Quadra', es: 'Cuadra', fr: 'Ça correspond', en: 'It matches' },
       vsCoachNo: { ca: n => `No quadra ${n} ${n === 1 ? 'dia' : 'dies'}`, es: n => `No cuadra ${n} ${n === 1 ? 'día' : 'días'}`, fr: n => `Ne correspond pas ${n} jour${n === 1 ? '' : 's'}`, en: n => `Doesn't match on ${n} day${n === 1 ? '' : 's'}` },
       vsToldS: { ca: 'Li vas dir', es: 'Le dijiste', fr: 'Tu lui as dit', en: 'You told them' },
       vsMiss: { ca: n => `${n} ${n === 1 ? 'dia' : 'dies'} sense registre`, es: n => `${n} ${n === 1 ? 'día' : 'días'} sin registro`, fr: n => `${n} jour${n === 1 ? '' : 's'} sans relevé`, en: n => `${n} day${n === 1 ? '' : 's'} not logged` },
       vsNightsN: { ca: (o, n) => `${o} de ${n} nits al teu normal`, es: (o, n) => `${o} de ${n} noches en tu normal`, fr: (o, n) => `${o} nuits sur ${n} dans ta normale`, en: (o, n) => `${o} of ${n} nights at your usual` },
+      vsDataS: { ca: 'Les teves dades', es: 'Tus datos', fr: 'Tes données', en: 'Your data' },
       kBetter: { ca: 'Millor que el teu normal', es: 'Mejor que tu normal', fr: 'Mieux que ta normale', en: 'Better than your usual' },
       kWorse: { ca: 'Pitjor que el teu normal', es: 'Peor que tu normal', fr: 'Moins bien que ta normale', en: 'Worse than your usual' },
       kHigh: { ca: 'La teva millor nota aquesta setmana', es: 'Tu mejor nota esta semana', fr: 'Ta meilleure note cette semaine', en: 'Your best score this week' },
@@ -3699,16 +3697,6 @@ Reply ONLY with this JSON: {"text": "your answer", "blocs": [], "basat": ["data 
     const P = this.PB, lc = x => x.toLowerCase(), det = [...(b.t === 'les' ? (b.z || []).map(k => lc(P.z[k])) : (b.sis || []).map(k => lc(P.sis[k]))), P.nou[b.nou] ? lc(P.nou[b.nou]) : null].filter(Boolean).join(', ');
     return { tp: P.t[b.t], det, mod: b.mod != null ? P.mod[b.mod] : null, perf: b.perf != null ? P.perf[b.perf] : null, sym: b.sym != null ? P.sym[b.sym] : null, b };
   }
-  // Una sola línia sobre l'entrenador (hipòtesi 2), només si algun dia el que li vas dir no quadra amb les teves dades.
-  coachWeek(sc, D, a) {
-    if (!D.band) return null;
-    const LV = { be: 'fons', reg: 'mod', mal: 'rec' }, rows = Array.from({ length: 7 }, (_, j) => a + j).filter(i => i <= 41).map(i => { const c = D.coach[i], st = this.dayState(sc, i); return { c, st, m: c === 'res' ? 'res' : c && st ? (st === 'prec' ? 'na' : LV[c] === st ? 'ok' : 'no') : null }; });
-    const nb = rows.filter(r => r.m === 'ok' || r.m === 'no' || r.m === 'res').length, mis = rows.filter(r => r.m === 'no');
-    if (!mis.length) return null;
-    const pairs = {}; mis.forEach(r => { const k = r.c + '|' + r.st; pairs[k] = (pairs[k] || 0) + 1; });
-    const ks = Object.keys(pairs); if (ks.length > 1) return this.t('cvMis', mis.length, nb);
-    const [c, st] = ks[0].split('|'); return this.t('cvPair', mis.length, nb, this.COACH[c].t, this.ST[st].w) + '.';
-  }
   pageSetmana(sc, D, g) {
     const C = this.C, s = this.state, nou = sc === 'nou', lwi = this.lastWi(), n = this.WEEKS.length;
     const title = this.t('week');
@@ -3777,13 +3765,8 @@ Reply ONLY with this JSON: {"text": "your answer", "blocs": [], "basat": ["data 
       { k: 'salut', data: this.t('daysState'), M: st, sum: st ? this.t('vsState', this.ST.fons.w, st.ok, st.n) : null },
     ].map(r => { const f = fOf(r.k), d = r.M ? r.M.d : null; return { ...r, f, d, m: r.k === 'salut' && pbW && d != null ? 'pb' : res(f, d), miss: r.M ? past.length - r.M.n : 0 }; });
   }
-  // L'entrenador aquella setmana: què li vas dir més sovint, en quants dies no quadra amb l'estat de les teves dades i la frase del parell que més es repeteix.
-  coachStats(sc, D, a) {
-    const LV = { be: 'fons', reg: 'mod', mal: 'rec' }, rows = Array.from({ length: 7 }, (_, j) => a + j).filter(i => i <= 41).map(i => { const c = D.coach[i], st = this.dayState(sc, i); return { c, m: c === 'res' ? 'res' : c && st ? (st === 'prec' ? 'na' : LV[c] === st ? 'ok' : 'no') : null }; });
-    const said = rows.filter(r => r.c && r.c !== 'res'), cnt = {}; said.forEach(r => { cnt[r.c] = (cnt[r.c] || 0) + 1; });
-    const top = Object.entries(cnt).sort((x, y) => y[1] - x[1])[0];
-    return { cmp: rows.filter(r => r.m === 'ok' || r.m === 'no').length, mis: rows.filter(r => r.m === 'no').length, top: top ? { c: top[0], n: top[1] } : null, nSaid: said.length, line: D.band ? this.coachWeek(sc, D, a) : null };
-  }
+  // L'entrenador aquella setmana: en quants dies es pot comparar el que li vas dir amb l'estat de les teves dades i en quants no quadra.
+  coachStats(sc, D, a) { const ds = this.coachDays(sc, D, a); return { cmp: ds.filter(x => x.m === 'ok' || x.m === 'no').length, mis: ds.filter(x => x.m === 'no').length }; }
   // Les 2 o 3 claus de dalt. Amb la IA en directe, les seves troballes (la xifra la posa l'app); si no, les calcula l'app:
   // el problema de salut, la resposta que millora més el teu normal, si les teves dades diuen el mateix que tu i la que empitjora més.
   wkKeys(sc, D, W, wi, R) {
@@ -3837,17 +3820,15 @@ Reply ONLY with this JSON: {"text": "your answer", "blocs": [], "basat": ["data 
     return h('section', { id: 'mt-wk-top' }, wordsEl, titEl, keysEl,
       h('div', { key: 'nt', style: { marginTop: 18, textAlign: 'center', fontSize: 12, color: C.ink3, textWrap: 'balance' } }, this.t('note')));
   }
-  // ── El que vas dir vs les teves dades (hipòtesi 2): per a cada parella, dues barres a la mateixa escala (triat el 30-09-2026 entre barres,
-  // escala i resum). Files: fatiga ↔ FC i HRV, descans ↔ son, salut ↔ estat dels dies i entrenador ↔ estat dels dies.
-  // f = com va el que vas dir (0–1, més = millor; la fatiga girada) · d = com van les dades (la part de dies al teu normal) · m = 'ok' / 'worse' / 'better'
-  // (entrenador: 'ok' / 'no'). Entrenador: la mitjana del que li vas dir (Bé / Regular / Malament) vs els dies en Òptim; «No quadra» a partir de 2 dies, com a la clau de dalt.
+  // ── El que vas dir vs les teves dades (hipòtesi 2), «cara a cara»: triat el 03-10-2026 entre les dues barres (l'anterior), una sola escala i la
+  // diferència. Files: fatiga ↔ FC i HRV, descans ↔ son, salut ↔ estat dels dies i entrenador ↔ estat dels dies, dia a dia.
+  // f = com va el que vas dir (0–1, més = millor; la fatiga girada) · d = com van les dades (la part de dies al teu normal) · m = 'ok' / 'worse' / 'better' / 'pb'
+  // (entrenador: 'ok' / 'no'; «No quadra» a partir de 2 dies, com a la clau de dalt).
   vsRows(sc, D, W) {
-    const V = this.wkVs(sc, D, W), cs = this.coachStats(sc, D, W.a), st = V[2], past = Array.from({ length: 7 }, (_, j) => W.a + j).filter(i => i <= 41);
+    const V = this.wkVs(sc, D, W), cs = this.coachStats(sc, D, W.a);
     const rows = V.map(r => { const q = this.SCALES.find(y => y.k === r.k);
       return { ...r, name: q.t, said: `${W.v[r.k]}/10`, word: W.w[r.k] ? this.t('q', W.w[r.k]) : null, fcol: this.sTone(W.v[r.k], 1, 10, q.inv), dval: r.M ? (r.k === 'descans' ? this.t('vsNightsN', r.M.ok, r.M.n) : r.sum) : null }; });
-    const LV = { be: .9, reg: .47, mal: .12 }, said = past.map(i => D.coach[i]).filter(c => LV[c] != null);
-    rows.push({ k: 'coach', name: this.t('vsCoach'), f: said.length ? this.sum(said.map(c => LV[c])) / said.length : null, d: st.d, M: st.M, m: cs.cmp ? (cs.mis >= 2 ? 'no' : 'ok') : null, data: st.data, cs,
-      said: cs.top ? this.t('vsSaidTop', this.COACH[cs.top.c].t, cs.top.n, cs.nSaid) : null, word: null, fcol: cs.top ? this.tone(this.COACH[cs.top.c].h) : null, dval: st.sum, miss: 0 });
+    rows.push({ k: 'coach', name: this.t('vsCoach'), m: cs.cmp ? (cs.mis >= 2 ? 'no' : 'ok') : null, cs, miss: 0 });
     return rows;
   }
   vsVerdict(r) {
@@ -3859,24 +3840,49 @@ Reply ONLY with this JSON: {"text": "your answer", "blocs": [], "basat": ["data 
     return h('span', { style: { display: 'inline-flex', alignItems: 'center', gap: 6, flex: 'none', fontSize: 13.5, fontWeight: 600, color: C.ink, whiteSpace: 'nowrap' } },
       h('span', { style: { width: 18, height: 18, flex: 'none', borderRadius: this.G.badge, background: ok ? this.tone(.9) : this.tone(.47), color: C.dark ? C.bg : '#FFFFFF', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', fontSize: 12, fontWeight: 800 } }, ok ? this.icon('check', 11, 2.8) : '≠'), txt);
   }
-  wkVsEl(sc, D, W) { return this.box({ id: 'mt-wk-vs', title: this.t('vsTitle'), st: { padding: 16 } }, this.wkVsBars(sc, D, W)); }
-  // Dues barres a la mateixa escala (més plena = millor): el que vas dir (en blanc, com «Tu» a Avui) i les teves dades (en violeta, com «el teu
-  // cos»), cadascuna amb el seu nom i la seva xifra. El veredicte a dalt a la dreta; a l'entrenador, la frase del dia que no quadra.
-  wkVsBars(sc, D, W) {
-    const C = this.C, g = this.geom(), R = this.vsRows(sc, D, W), vio = this.idCol('data');
-    const bar = (key, lab, val, v, colr, vcol, j) => h('div', { key, style: { marginTop: 12 } },
-      h('div', { style: { display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', gap: 10 } },
-        h('span', { style: { fontSize: 13, fontWeight: 600, color: C.ink } }, lab),
-        val != null ? h('span', { style: { fontSize: 13.5, fontWeight: 600, color: vcol || C.ink, textAlign: 'right' } }, val) : this.missChip(this.t('noReg'))),
-      h('div', { style: { position: 'relative', marginTop: 6, height: 8, borderRadius: 4, background: this.ov(.08), overflow: 'hidden' } }, v == null ? null :
-        h('span', { style: { position: 'absolute', left: 0, top: 0, bottom: 0, width: `${Math.max(4, v * 100)}%`, borderRadius: 4, background: colr, transformOrigin: 'left', animation: `mtGrowX .6s cubic-bezier(.2,.7,.2,1) ${(.1 + j * .07).toFixed(2)}s both` } })));
+  // El nivell d'una part (0–1) amb els llindars del veredicte (wkVs), dit amb les paraules de l'entrenador: Malament / Regular / Bé.
+  vsLvl(x) { return x == null ? null : x >= .62 ? 'be' : x >= .4 ? 'reg' : 'mal'; }
+  // L'entrenador dia a dia: el que li vas dir, l'estat de les teves dades i si quadren. Els dies en Precaució no es comparen; «No li he dit res», tampoc.
+  coachDays(sc, D, a) {
+    const LV = { be: 'fons', reg: 'mod', mal: 'rec' };
+    return Array.from({ length: 7 }, (_, j) => a + j).filter(i => i <= 41).map(i => { const c = D.coach[i] || null, st = this.dayState(sc, i);
+      return { i, c, st, m: c === 'res' ? 'res' : c && st ? (st === 'prec' ? 'na' : LV[c] === st ? 'ok' : 'no') : null }; });
+  }
+  vsDayTip(x) { return `${this.cap(this.dLong(x.i))} · ${this.t('vsToldS')}: ${this.coachTxt(x.c)} · ${this.t('vsDataS')}: ${x.st ? this.ST[x.st].w : this.t('noRegL')}`; }
+  // Els dies amb l'entrenador: a dalt, el que li vas dir; a sota, l'estat de les teves dades, cada punt del seu color. Els dies que
+  // no quadren, emmarcats en àmbar; els que no es comparen (Precaució o «No li he dit res», anella buida), més apagats; sense registre, punt discontinu.
+  // La paraula de cada dia, en passar el ratolí.
+  vsDaysEl(sc, D, W) {
+    const C = this.C, amb = this.alertC(this.tone(.47)), days = this.coachDays(sc, D, W.a);
+    const pt = (col, ring) => h('span', { style: { width: 14, height: 14, borderRadius: '50%', boxSizing: 'border-box', background: col || 'transparent', border: col ? 'none' : ring ? `2px solid ${C.ink}` : `1.5px dashed ${this.ov(.3)}` } });
+    const lab = (row, txt) => h('span', { key: 'l' + row, style: { gridColumn: 1, gridRow: row, paddingRight: 10, fontSize: 13, fontWeight: 500, color: C.ink, whiteSpace: 'nowrap' } }, txt);
+    const kids = [lab(2, this.t('vsToldS')), lab(3, this.t('vsDataS'))];
+    days.forEach((x, j) => { const col = j + 2, tip = this.vsDayTip(x), cell = { gridColumn: col, position: 'relative', zIndex: 1, display: 'flex', justifyContent: 'center', opacity: x.m === 'na' || x.m === 'res' ? .4 : 1 };
+      if (x.m === 'no') kids.push(h('span', { key: 'bg' + j, style: { gridColumn: col, gridRow: '1 / 4', alignSelf: 'stretch', margin: '-7px 0', borderRadius: 10, background: amb.bg, border: `1px solid ${amb.bd}`, animation: `mtFade .4s ease ${(.2 + j * .04).toFixed(2)}s both` } }));
+      kids.push(h('span', { key: 'd' + j, title: tip, style: { ...cell, gridRow: 1, fontSize: 12.5, fontWeight: 600, color: C.ink } }, this.WD[this.day(x.i).wd]),
+        h('span', { key: 't' + j, title: tip, style: { ...cell, gridRow: 2 } }, pt(x.c && this.COACH[x.c].h != null ? this.tone(this.COACH[x.c].h) : null, x.c === 'res')),
+        h('span', { key: 's' + j, title: tip, style: { ...cell, gridRow: 3 } }, pt(x.st ? this.dayTone(sc, x.i) : null))); });
+    return h('div', { style: { display: 'grid', gridTemplateColumns: `auto repeat(${days.length}, minmax(0,1fr))`, gridTemplateRows: 'auto 18px 18px', columnGap: 4, rowGap: 9, alignItems: 'center' } }, kids);
+  }
+  // A cada parella, el que vas dir i les teves dades amb les mateixes paraules (Bé / Regular / Malament), l'una al costat de l'altra amb = o ≠ al mig
+  // (≈ si coincideixen però queden a tocar d'un nivell diferent). A sota de cada paraula, la seva xifra. L'entrenador, dia a dia; cap frase a sota.
+  wkVsEl(sc, D, W) {
+    const C = this.C, g = this.geom(), R = this.vsRows(sc, D, W);
+    const side = (lab, lv, col, det, empty) => h('div', { style: { minWidth: 0 } },
+      h('div', { style: { fontSize: 13, fontWeight: 500, color: C.ink, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' } }, lab),
+      lv ? h('div', { style: { marginTop: 4, fontFamily: this.G.display, fontSize: 26, fontWeight: 600, letterSpacing: '-.015em', lineHeight: 1.15, color: col } }, this.COACH[lv].t) : h('div', { style: { marginTop: 8 } }, empty),
+      lv && det ? h('div', { style: { marginTop: 4, fontSize: 13, lineHeight: 1.4, color: C.ink, textWrap: 'pretty' } }, det) : null);
+    const sym = r => { if (r.m == null || r.m === 'pb') return h('span'); const ok = r.m === 'ok';
+      return h('span', { style: { textAlign: 'center', fontSize: 30, fontWeight: 300, lineHeight: 1, color: this.tone(ok ? .9 : .47) } }, ok ? (this.vsLvl(r.f) === this.vsLvl(r.d) ? '=' : '≈') : '≠'); };
     const tile = (r, j) => h('div', { key: r.k, style: { minWidth: 0, padding: '14px 16px 16px', borderRadius: this.G.inner || 8, background: C.bg, border: `1px solid ${C.line2}`, animation: `mtIn .4s cubic-bezier(.2,.7,.2,1) ${(.1 + j * .06).toFixed(2)}s both` } },
       h('div', { style: { display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10, minHeight: 20 } }, h('span', { style: { fontSize: 15.5, fontWeight: 600, color: C.ink } }, r.name), this.vsVerdict(r)),
-      bar('f', r.k === 'coach' ? this.t('vsToldS') : this.t('vsSaid'), r.said ? [r.said, r.word ? ` · ${r.word}` : ''].join('') : null, r.f, C.ink, r.fcol, j),
-      bar('d', r.data, r.dval, r.d, vio, r.d != null ? this.tone(r.d) : null, j),
-      r.miss > 0 && r.d != null ? h('div', { style: { marginTop: 8 } }, this.missChip(this.t('vsMiss', r.miss))) : null,
-      r.k === 'coach' && r.cs.mis ? h('div', { style: { marginTop: 12, paddingTop: 10, borderTop: `1px solid ${C.line}`, fontSize: 13.5, lineHeight: 1.45, color: C.ink, textWrap: 'pretty' } }, r.cs.line) : null);
-    return h('div', { style: { display: 'grid', gridTemplateColumns: g.stack ? 'minmax(0,1fr)' : 'repeat(2, minmax(0,1fr))', gap: 12 } }, R.map(tile));
+      r.k === 'coach' ? h('div', { style: { marginTop: 20 } }, this.vsDaysEl(sc, D, W))
+        : h('div', { style: { marginTop: 14, display: 'grid', gridTemplateColumns: 'minmax(0,1fr) 36px minmax(0,1fr)', alignItems: 'center', gap: 10 } },
+          side(this.t('fvYou'), this.vsLvl(r.f), r.fcol, [r.said, r.word ? ` · ${r.word}` : ''].join('')),
+          sym(r),
+          side(r.data, this.vsLvl(r.d), r.d != null ? this.tone(r.d) : null, r.dval, this.missChip(this.t(D.band ? 'noReg' : 'calculating')))),
+      r.miss > 0 && r.d != null ? h('div', { style: { marginTop: 12 } }, this.missChip(this.t('vsMiss', r.miss))) : null);
+    return this.box({ id: 'mt-wk-vs', title: this.t('vsTitle'), st: { padding: 16 } }, h('div', { style: { display: 'grid', gridTemplateColumns: g.stack ? 'minmax(0,1fr)' : 'repeat(2, minmax(0,1fr))', gap: 12 } }, R.map(tile)));
   }
   // Les teves respostes i setmana a setmana, en dos blocs: cada bloc parla d'un sol moment (l'usuari va trobar que barrejar «aquesta setmana»
   // i «les últimes setmanes» a la mateixa targeta confonia; triat el 30-09-2026 entre barra, rang i evolució).
@@ -4444,12 +4450,11 @@ Reply ONLY with this JSON: {"text": "your answer", "blocs": [], "basat": ["data 
   setSide(v) { try { localStorage.setItem('mt-desk-side', v); } catch (e) {} this.setState({ side: v }); }
   railEl(sc) { return this.G.gpt ? this.sideEl(sc) : this.railIcons(sc); }
   // Barra lateral a l'estil ChatGPT: «Max Tracking» i botó per plegar a dalt, pàgines amb icona i nom, i a baix Privacitat, Ajustos i el perfil.
-  // Plegada queda en una columna d'icones; a menys de 1000 px sempre plegada.
+  // Plegada queda en una columna d'icones, sense el logo «MT» (rodó, semblava un segon perfil); a menys de 1000 px sempre plegada.
   sideEl(sc) {
     const C = this.C, s = this.state, w = this.who(sc), open = this.sideOpen(), W = this.sideW();
     const toggle = s.vw >= 1000 ? h('button', { key: 'tg', className: 'mt-ib', onClick: () => this.setSide(open ? 'closed' : 'open'), title: this.t(open ? 'sideClose' : 'sideOpen'), 'aria-label': this.t(open ? 'sideClose' : 'sideOpen'),
       style: { width: 36, height: 36, flex: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', border: 'none', borderRadius: 10, background: 'transparent', color: C.ink3, cursor: 'pointer', padding: 0 } }, this.icon('panel', 19)) : null;
-    const logo = h('div', { key: 'logo', title: 'Max Tracking', style: { width: 30, height: 30, flex: 'none', borderRadius: this.G.logo, display: 'flex', alignItems: 'center', justifyContent: 'center', background: C.ink, color: C.bg, fontSize: 10.5, fontWeight: 700, letterSpacing: '.02em' } }, 'MT');
     const item = ([k, tk, ic]) => { const on = s.page === k, t = this.t(tk);
       return h('button', { key: k, className: 'mt-sb', 'data-on': on ? '' : undefined, 'aria-current': on ? 'page' : undefined, onClick: () => this.go(k), title: open ? undefined : t,
         style: { width: open ? '100%' : 40, height: open ? 38 : 40, display: 'flex', alignItems: 'center', justifyContent: open ? 'flex-start' : 'center', gap: 11, padding: open ? '0 10px' : 0, boxSizing: 'border-box', border: 'none', borderRadius: this.G.rail, cursor: 'pointer', background: 'transparent', color: C.ink, fontSize: 14, fontWeight: on ? 500 : 400, textAlign: 'left', flex: 'none' } },
@@ -4461,7 +4466,7 @@ Reply ONLY with this JSON: {"text": "your answer", "blocs": [], "basat": ["data 
       : h('div', { key: 'pf', title: `${w.name} · ${w.code}`, style: { marginTop: 8 } }, avatar);
     return h('nav', { key: 'rail', 'aria-label': this.t('nav'), style: { width: W, flex: 'none', height: '100vh', boxSizing: 'border-box', display: 'flex', flexDirection: 'column', alignItems: open ? 'stretch' : 'center', gap: 2, padding: open ? '8px 10px 8px' : '8px 0 12px', background: C.side || C.bg, borderRight: `1px solid ${C.sideLine || C.line}`, transition: 'background .3s' } },
       open ? h('div', { key: 'top', style: { height: 44, display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0 0 0 10px', marginBottom: 10 } }, h('span', { style: { fontSize: 18, fontWeight: 600, letterSpacing: '-.01em', color: C.ink, whiteSpace: 'nowrap' } }, 'Max Tracking'), toggle)
-        : h('div', { key: 'top', style: { display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8, marginBottom: 10 } }, h('div', { style: { height: 44, display: 'flex', alignItems: 'center' } }, logo), toggle),
+        : h('div', { key: 'top', style: { height: 44, display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 10 } }, toggle),
       this.PAGES.map(item), h('div', { key: 'sp', style: { flex: 1 } }),
       this.PAGES2.map(item), prof);
   }

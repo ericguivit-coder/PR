@@ -90,10 +90,10 @@ Habrá una segunda app, para los entrenadores y **sobre todo para el preparador 
   - `qOf` (distancia a la franja), `hOf` / `lvlOf` (`ok` / `mid` / `bad`) y `status()`.
   - `tone(h)` para texto, líneas, puntos y barras; `toneF(h)` para rellenos grandes (anillos, celdas, bloques de estado); `sTone(v, min, max, inv)` para los cuestionarios (curva `SQ`).
   - `dayState(sc, i)` (`fons` Óptimo / `mod` Moderado / `rec` Recuperación / `prec` Precaución) y `dayTone`.
-- **Estilos:** `THEMES` (`gpt` por defecto, más `hibrid`, `editorial` y `grafit`) × modo oscuro/claro, todo con tokens `C.*` y `G.*`. Nunca pongas colores fijos (`#000`, etc.).
+- **Estilos:** `THEMES` (`gpt` por defecto, que en Ajustes se llama «Senzill / Sencillo / Simple / Simple» desde el 03-10-2026, nunca «ChatGPT»; más `hibrid`, `editorial` y `grafit`) × modo oscuro/claro/automático (**automático por defecto**, sigue el sistema), todo con tokens `C.*` y `G.*`. Nunca pongas colores fijos (`#000`, etc.).
   - `C.well` para paneles de gráfico dentro de tarjetas.
   - `alertC(col, a)` para cualquier aviso (en claro, más marcado).
-  - `G.gpt` cambia la estructura: con ChatGPT, `sideEl` + `topEl` + `reportChat`; con el resto, `railIcons` + `reportBox`.
+  - `G.gpt` cambia la estructura: con Sencillo, `sideEl` + `topEl` + `reportChat`; con el resto, `railIcons` + `reportBox`. La barra lateral plegada no lleva el logo «MT» (redondo, parecía un segundo perfil): arriba solo el botón de abrir y abajo el perfil.
 - **IA:** `fetchAI` → `window.claude.complete`, con respuesta en JSON y caché en `localStorage` (`mt-desk-ai-v14`; súbele la versión si cambian los datos o los prompts).
   - Prompts: `promptDaily`, `promptWeek` (tipo `week2` en Semana), `promptMonth2`, `promptTrend`.
   - **Nada personal** (desde el 03-10-2026): ningún informe envía el nombre, la edad ni el sexo (plantillas `head`, `wMain`, `tMain` y `m2Main`).
@@ -108,7 +108,7 @@ Habrá una segunda app, para los entrenadores y **sobre todo para el preparador 
   - `lastWi()` / `mLast()`: último formulario semanal / mensual respondido (con «Simular cuestionarios sin responder», el anterior).
   - `stack()`: cada bloque queda por encima del siguiente (zIndex), así los desplegables no quedan tapados.
   - `formBtn(url, …)`, `stateMark`, `markWord`.
-- **Estado persistente (`localStorage`):** `mt-lang`, `mt-desk-theme-v3`, `mt-desk-mode`, `mt-desk-side`, `mt-desk-done`, `mt-desk-trk` (respuestas de «¿Cómo va hoy?» y «Ya estoy bien», una por problema), `mt-desk-charts-v2`, `mt-desk-ai-v14`, `mt-proto-hidden`, `mt-desk-chatw` (ancho de la vista general del chat; la conversación nunca se guarda).
+- **Estado persistente (`localStorage`):** `mt-lang`, `mt-desk-theme-v4`, `mt-desk-mode-v2` (claves renovadas el 03-10-2026 para que todos empiecen en Sencillo + Automático), `mt-desk-side`, `mt-desk-done`, `mt-desk-trk` (respuestas de «¿Cómo va hoy?» y «Ya estoy bien», una por problema), `mt-desk-charts-v2`, `mt-desk-ai-v14`, `mt-proto-hidden`, `mt-desk-chatw` (ancho de la vista general del chat; la conversación nunca se guarda).
 - **Matraz** (`protoEl`, tecla E). Es temporal; se quitará cuando acabe la fase de prototipo. Contiene:
   - el escenario;
   - «Opciones de gráficos»;
@@ -152,10 +152,10 @@ Habrá una segunda app, para los entrenadores y **sobre todo para el preparador 
      - la ficha «Revisión · Formulario» del próximo formulario (en rojo si está sin responder);
      - «Ir al seguimiento» → Hoy, con ese problema elegido.
   4. «Tus respuestas» (solo esta semana): «más / menos / como tu normal», con la media de las 4 anteriores (`normOf`) y una marca blanca en la barra. Al final, «Participación» con el texto largo (`OST`: «Completa, con problemas»…).
-  5. «Lo que dijiste vs tus datos» (`wkVsEl` → `wkVsBars`): dos barras por pareja, tú en blanco y tus datos en violeta; los días sin registro se avisan. Las parejas: fatiga ↔ FC y HRV, descanso ↔ sueño, salud ↔ estado de los días, entrenador. Desde el 03-10-2026 (análisis de Semana frente al plan v2):
+  5. «Lo que dijiste vs tus datos» (`wkVsEl`), diseño **«Cara a cara»** (elegido el 03-10-2026 entre las dos barras de antes, una escala y la diferencia: las barras no dejaban entender la comparación). Una tarjeta negra por pareja: las dos partes con las mismas palabras (Bien / Regular / Mal, los niveles del veredicto, `vsLvl`), una al lado de la otra con = / ≠ en medio (≈ si coinciden a un nivel de distancia), y la cifra debajo de cada palabra; los días sin registro se avisan. El entrenador va día a día (`vsDaysEl` / `coachDays`): lo que le dijiste arriba y el estado de tus datos abajo, con los días que no cuadran enmarcados en ámbar y los que no se comparan (Precaución, «No le he dicho nada») atenuados. **Sin frase debajo** (la del entrenador se quitó: «sobrecarga y no aporta»). Las parejas: fatiga ↔ FC y HRV, descanso ↔ sueño, salud ↔ estado de los días, entrenador. Desde el 03-10-2026 (análisis de Semana frente al plan v2):
      - el estado de los días cuenta con `dayState`: un día en «Precaución» no es «Óptimo», como en Hoy;
      - si ese formulario marca un problema de salud (lesión, enfermedad o salud mental), la pareja Salud no da veredicto: «Marcaste un problema de salud» (`vsPb`), y no cuenta como diferencia en la clave «Tú vs tus datos»;
-     - entrenador: «No cuadra» a partir de 2 días, igual en la clave y en la tarjeta; con 1 día, «Cuadra», y la frase de ese día se queda.
+     - entrenador: «No cuadra» a partir de 2 días, igual en la clave y en la tarjeta; con 1 día, «Cuadra» (el día sigue enmarcado).
   - El titular de reserva (`fbWeek`) solo cuenta lesiones y enfermedades (`physList`): con salud mental no dice «con un problema de salud en curso».
   6. «Semana a semana» (`WeekAnswersF` con `mode: 'panel'`): solo para mirar, no cambia la página. La semana sin responder es una columna en discontinuo.
 
