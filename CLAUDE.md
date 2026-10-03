@@ -52,13 +52,18 @@ Habrá una segunda app, para los entrenadores y **sobre todo para el preparador 
 - **Comprobar sintaxis:** extrae el `<script>` más largo del motor y pásale `node --check`.
 - **Documentos de los formularios, en el Drive del usuario.** Se leen con el conector de Google Drive.
   - «Formulari de rendiment i salut de l'esportista 2026-2027 — Preguntas y variables» (en Mi unidad): las 58 preguntas del semanal, con sus opciones, saltos y variables `entry.NNN`.
-  - «Formulari de rendiment i salut de l'esportista 2026-2027 — Cómo lo usa la app» (carpeta «PR - IA i seguiment d'esportistes › 03 Metodologia», id `1Trf5DWRnhkFLeJMKOylFGw6ltbsL6QVAxbrrR5RCgxY`). Contiene:
+  - «Formulari de rendiment i salut de l'esportista 2026-2027 — Cómo lo usa la app» (carpeta «PR - IA i seguiment d'esportistes › 03 Metodologia», versión 2 del 03-10-2026, id `1JnmmVaZMtUI4xUSMi3ZgpB2m5IiPxE4dDffCafGH-_c`; la versión 1 se conserva con «sustituida» en el título). Contiene:
     - qué mide cada pregunta y qué hace la app con ella: dónde sale, si va a la IA o si no se usa nunca;
     - los datos que se recogen y no se usan, como el ciclo menstrual;
     - lo que hay que revisar en el formulario.
 
     **Si cambias cómo usa la app una pregunta del semanal, díselo al usuario.** Con el conector no se puede editar un Google Doc, así que hay que crear una versión nueva en la misma carpeta.
   - «Formulari de benestar i salut mental 2026-2027 — estructura» (en Mi unidad): el mensual, con SWEMWBS (7 ítems), APSQ (10 ítems, nunca en la app) y el texto libre.
+- **Planificación, en «PR - IA i seguiment d'esportistes › 01 Planificació»:**
+  - «App del deportista (Max Tracking): qué enseña y cómo funciona · versión 2»: la referencia de la app. Regla del usuario: si quitas o añades un bloque, se cambia primero en el plan y después en el código.
+  - «Pantalla Mes: plan de diseño (2 oct 2026)»: sustituye a la sección 8 (Mes) de la versión 2.
+  - «App del deportista: en qué punto estamos (análisis, 2 oct 2026)»: el plan comparado con el código, con la lista de pendientes.
+  - «Plan de los paneles: preparador físico y especialista»: decisiones D1–D7, qué ve cada rol y fases.
 
 ## Cómo está hecho el motor (`Max Tracking Escritorio.dc.html`)
 
@@ -89,8 +94,10 @@ Habrá una segunda app, para los entrenadores y **sobre todo para el preparador 
   - `C.well` para paneles de gráfico dentro de tarjetas.
   - `alertC(col, a)` para cualquier aviso (en claro, más marcado).
   - `G.gpt` cambia la estructura: con ChatGPT, `sideEl` + `topEl` + `reportChat`; con el resto, `railIcons` + `reportBox`.
-- **IA:** `fetchAI` → `window.claude.complete`, con respuesta en JSON y caché en `localStorage` (`mt-desk-ai-v12`; súbele la versión si cambian los datos o los prompts).
-  - Prompts: `promptDaily`, `promptWeek` (tipo `week2` en Semana), `promptMonth`, `promptTrend`.
+- **IA:** `fetchAI` → `window.claude.complete`, con respuesta en JSON y caché en `localStorage` (`mt-desk-ai-v14`; súbele la versión si cambian los datos o los prompts).
+  - Prompts: `promptDaily`, `promptWeek` (tipo `week2` en Semana), `promptMonth2`, `promptTrend`.
+  - **Nada personal** (desde el 03-10-2026): ningún informe envía el nombre, la edad ni el sexo (plantillas `head`, `wMain`, `tMain` y `m2Main`).
+  - El informe de la semana solo pide el titular y las claves (`jsonW`), comparando con su normal, nunca con la semana anterior (no la recibe). Para `week2` el lector ya no exige «accions».
   - Textos de reserva generados con datos: `fbDaily`, `fbWeek`. Nunca se pide un informe de un formulario sin responder (`ensureAI`).
 - **Piezas útiles:**
   - `box({ title, right, id, st }, …)` / `secHead`: título fuera de la tarjeta.
@@ -101,19 +108,19 @@ Habrá una segunda app, para los entrenadores y **sobre todo para el preparador 
   - `lastWi()` / `mLast()`: último formulario semanal / mensual respondido (con «Simular cuestionarios sin responder», el anterior).
   - `stack()`: cada bloque queda por encima del siguiente (zIndex), así los desplegables no quedan tapados.
   - `formBtn(url, …)`, `stateMark`, `markWord`.
-- **Estado persistente (`localStorage`):** `mt-lang`, `mt-desk-theme-v3`, `mt-desk-mode`, `mt-desk-side`, `mt-desk-done`, `mt-desk-trk` (respuestas de «¿Cómo va hoy?» y «Ya estoy bien», una por problema), `mt-desk-charts-v2`, `mt-desk-ai-v12`, `mt-proto-hidden`, `mt-desk-chatlab` (chat de prueba encendido o no; la conversación nunca se guarda), `mt-desk-chatw` (ancho de la vista general del chat).
+- **Estado persistente (`localStorage`):** `mt-lang`, `mt-desk-theme-v3`, `mt-desk-mode`, `mt-desk-side`, `mt-desk-done`, `mt-desk-trk` (respuestas de «¿Cómo va hoy?» y «Ya estoy bien», una por problema), `mt-desk-charts-v2`, `mt-desk-ai-v14`, `mt-proto-hidden`, `mt-desk-chatw` (ancho de la vista general del chat; la conversación nunca se guarda).
 - **Matraz** (`protoEl`, tecla E). Es temporal; se quitará cuando acabe la fase de prototipo. Contiene:
   - el escenario;
   - «Opciones de gráficos»;
   - «Salud en el formulario (semana 38)» (`pbSim`: Escenario / Lesión / Mental / Dos);
-  - «Probar chat» (`chatLab`), la versión de prueba del chat;
+  - «Bienestar en el formulario (mes)» (`wemSim`: Escenario / Bajada / Zona baja);
   - «Simular cuestionarios sin responder» (`simOverdue`);
   - abrir la versión móvil y ocultar el botón.
 
 ## Páginas (estado a 30-09-2026)
 
 **Hoy** (`pageAvui`), de arriba abajo:
-1. Salud mental (`wellBlockEl`): si el último formulario semanal la marca en curso, sale el bloque `menBlockEl`, el mismo de Semana. Si no, no sale nada (se quitó el aviso de bienestar aparte por WEMWBS bajo, que duplicaba este bloque).
+1. Salud mental (`wellBlockEl`): si el último formulario semanal la marca en curso, sale el bloque `menBlockEl`, el mismo de Semana. Si no, y el último formulario mensual está en zona baja (≤ 19), el bloque de ayuda del Mes (`wemSupHoy`). Nunca los dos.
 2. Informe del día:
    - A la izquierda, el veredicto con la palabra del estado y 4 anillos (`RingsV`). Cada anillo se llena según dónde cae el dato respecto a tu normal (más lleno = mejor) y lleva debajo un texto en dos líneas: la dirección en blanco y el nivel con el color del anillo.
    - A la derecha, el titular y el párrafo de la IA, cortado a unas 4 líneas con «Seguir leyendo» (`ClampBox`).
@@ -144,13 +151,40 @@ Habrá una segunda app, para los entrenadores y **sobre todo para el preparador 
      - una **fila continua** de fichas por día. Con dos problemas comparten fechas; los días sin registro van en discontinuo;
      - la ficha «Revisión · Formulario» del próximo formulario (en rojo si está sin responder);
      - «Ir al seguimiento» → Hoy, con ese problema elegido.
-  4. «Tus respuestas» (solo esta semana): «más / menos / como tu normal», con la media de las 4 anteriores (`normOf`) y una marca blanca en la barra.
-  5. «Lo que dijiste vs tus datos» (`wkVsEl` → `wkVsBars`): dos barras por pareja, tú en blanco y tus datos en violeta; los días sin registro se avisan. Las parejas: fatiga ↔ FC y HRV, descanso ↔ sueño, salud ↔ estado de los días, entrenador.
+  4. «Tus respuestas» (solo esta semana): «más / menos / como tu normal», con la media de las 4 anteriores (`normOf`) y una marca blanca en la barra. Al final, «Participación» con el texto largo (`OST`: «Completa, con problemas»…).
+  5. «Lo que dijiste vs tus datos» (`wkVsEl` → `wkVsBars`): dos barras por pareja, tú en blanco y tus datos en violeta; los días sin registro se avisan. Las parejas: fatiga ↔ FC y HRV, descanso ↔ sueño, salud ↔ estado de los días, entrenador. Desde el 03-10-2026 (análisis de Semana frente al plan v2):
+     - el estado de los días cuenta con `dayState`: un día en «Precaución» no es «Óptimo», como en Hoy;
+     - si ese formulario marca un problema de salud (lesión, enfermedad o salud mental), la pareja Salud no da veredicto: «Marcaste un problema de salud» (`vsPb`), y no cuenta como diferencia en la clave «Tú vs tus datos»;
+     - entrenador: «No cuadra» a partir de 2 días, igual en la clave y en la tarjeta; con 1 día, «Cuadra», y la frase de ese día se queda.
+  - El titular de reserva (`fbWeek`) solo cuenta lesiones y enfermedades (`physList`): con salud mental no dice «con un problema de salud en curso».
   6. «Semana a semana» (`WeekAnswersF` con `mode: 'panel'`): solo para mirar, no cambia la página. La semana sin responder es una columna en discontinuo.
 
-**Mes**, **Evolución**, **Privacidad**, **Ajustes**: existen. Mes es la siguiente página que toca repasar. Ya se abre en el último mes respondido: el que falta sale en discontinuo, con el aviso «Sin responder» (`monthPendEl`).
+**Evolución**, **Privacidad**, **Ajustes**: existen.
 
-**Chat «Pregunta a tus datos»** (versión de prueba del 30-09-2026, matraz › «Probar chat», pendiente de aprobar). Lo que eligió el usuario: preguntas sugeridas + texto libre; disponible en todas las páginas; respuestas con texto, tarjetas o gráficos; comparar periodos, datos entre sí, formularios en el tiempo y antes/después de un problema.
+**Mes** (`pageMes`, oficial desde el 02-10-2026; el Mes antiguo, con el APSQ, el texto libre y el informe en tarjetas, se borró). Hecho con el plan del Drive «Pantalla Mes: plan de diseño (2 oct 2026)», que sustituye a la sección 8 del plan v2. Maquetas: https://claude.ai/artifact/JvG3jDXCxxJwRjd5a6tWQk. Se abre en el último mes respondido: el que falta sale en discontinuo, con el aviso «Sin responder» (`monthPendEl`).
+- **Solo habla del formulario mensual:** las 7 frases de bienestar (escala corta de Warwick-Edinburgh, 1–5, total 7–35). El APSQ y el texto libre nunca llegan a la app ni a la IA. «Tú vs tu cuerpo» y lo del entrenador se quitaron.
+- Pregunta por las **dos últimas semanas**: el periodo sale en el selector («Agosto · 18–31 ago», `mPer`) y se cuenta desde el día en que se responde (`mDate`: `M.resp = [mes, día]` con datos reales; en el prototipo, el día en que llega).
+- Tu normal = media de tus meses anteriores (hasta 3; hacen falta 2, `mNorm`). Cambio claro = 3 puntos o más (`mCmp`). En cada frase, «más / menos que tu normal» a partir de ¾ de punto.
+- **Sin rojo:** el bienestar va de ámbar a verde (`wTone`, `WSEG`, `segs(texto, true)`) en Mes, en la tarjeta del mes de Hoy y en el chat. «Sin responder» sigue en rojo (es el estado del formulario).
+- Avisos con texto fijo, nunca de la IA, solo con el último formulario respondido (`mLvl`):
+  - **bajada clara** (3+ puntos por debajo de tu normal): debajo del texto de arriba, con quién hablar, sin teléfonos;
+  - **zona baja** (total ≤ 19): arriba del todo, el bloque de ayuda con el 024 y el 112 (`wemSupEl`), **también en Hoy** (`wemSupHoy`). Nunca a la vez que el de salud mental.
+- De arriba abajo:
+  - selector de mes (`monthPickEl`) y ayuda;
+  - tu bienestar: número y barra con la marca de tu normal, el titular («Basado en…» al pasar el ratón) y un texto corto de la IA (`mesHeroF`);
+  - Tus respuestas: filas compactas con barra corta y la etiqueta junto al nombre, solo si cambia (`mesAnswersEl`);
+  - Ideas para las próximas semanas (`mesIdeasEl`): son **recomendaciones, no tareas** (sin casillas ni «0 de 3 hechas»). Diseño «Destacada» (elegido el 02-10-2026): la primera en grande y las otras al lado, las dos tarjetas de la misma altura. Si todo va bien, «Seguir con lo que te ha funcionado» sale con un círculo verde con la marca, que no se puede marcar. Iconos con sentido para cada frase: amanecer (optimismo), mano que ayuda (sentirte útil), ondas (calma), montaña (afrontar problemas), bombilla (claridad), personas (relaciones), brújula (autonomía) y bocadillo (hablarlo). Ya no usan los colores de la FC, la HRV ni el sueño. Estilo negro, elegido el 03-10-2026: cuadrado negro con borde fino y el icono en blanco (en modo claro, cuadrado claro e icono oscuro);
+  - Mes a mes (`mesEvoEl` → `monthCardsEl`): solo el total. Tarjetas, elegidas el 02-10-2026 entre línea, columnas y tarjetas: una por mes, como «Esta semana», con el total, una barra y cómo estaba frente a su normal (`m2CmpS`). Al tocar una, se abre ese mes, y la elegida lleva el borde de su color. El mes sin responder va en discontinuo, con «Responder».
+- Cambia con los escenarios (`MONTH_SC`: normal 28, estres 21 = bajada, gran 18 = zona baja…).
+- IA: `promptMonth2` (tipo `month2`), con estas reglas:
+  - recibe las frases sin nombre ni sexo (neutras, `WEM_N`), tu normal y los meses anteriores (`m2Prev`);
+  - solo para el tono, sabe si hay un problema de salud en curso, sin detalle (`m2Health`);
+  - pide un `texto` de 2–3 frases (`m2Texto`) e ideas;
+  - dice «coincide con», nunca «porque»; sin palabras clínicas ni teléfonos.
+  - La reserva hecha con datos es `fbMonth2` (titular, texto `m2Tx` e ideas).
+- Chat: en Mes, la sugerida «¿Qué ha cambiado en mi bienestar?» (`q_wem_ch`) sustituye a «¿Mi cuerpo dice lo mismo que yo?».
+
+**Chat «Pregunta a tus datos»** (oficial desde el 02-10-2026; hecho el 30-09-2026; ya no hay interruptor en el matraz). Lo que eligió el usuario: preguntas sugeridas + texto libre; disponible en todas las páginas; respuestas con texto, tarjetas o gráficos; comparar periodos, datos entre sí, formularios en el tiempo y antes/después de un problema.
 - **Botón flotante** (01-10-2026, «como el del matraz»): redondo, abajo a la derecha, en todas las páginas (`chatFabEl`). El matraz queda a su izquierda. Ya no hay botón «Pregunta» arriba ni en la barra lateral.
 - Siempre se abre **pequeño**: una ventana flotante de 420 px encima del botón, por encima de la página. Se queda abierta mientras miras la página.
 - Con ⤢ pasa a la **vista general**: el chat a la derecha, de arriba abajo, y la página se estrecha (`chatDock` / `chatPush`).
@@ -190,10 +224,12 @@ Habrá una segunda app, para los entrenadores y **sobre todo para el preparador 
 
 ## Pendiente
 
-- Chat: versión de prueba en el matraz, pendiente de que el usuario la apruebe. La IA real solo existe dentro del host (`window.claude`); en local responden las sugeridas.
-- Mes: por repasar con el mismo criterio que Hoy y Semana.
-- Privacidad: la fila «Informes de la IA → Entrenador»; el APSQ todavía se nombra en textos de Privacidad y Mes (debe desaparecer).
-- El nombre del deportista todavía se envía a la IA.
+- Chat: la IA real solo existe dentro del host (`window.claude`); en local responden las sugeridas.
+- Aviso automático al especialista (idea del usuario, 02-10-2026): por decidir quién lo recibe, qué lo dispara y si el deportista lo ve en la app. Iría fuera de la app (en la hoja de respuestas de los Google Forms), porque la app no recibe el APSQ ni el texto libre.
+- Privacidad: la fila «Informes de la IA → Entrenador»; el APSQ todavía se nombra en la tabla de Privacidad («Formulario mensual») y en Ajustes › Sobre la IA (debe desaparecer).
+- Semana, por decidir con el usuario:
+  - las 3 palabras son texto libre: si alguien escribe algo de salud mental, sale en grande y llega a la IA;
+  - las fichas de una lesión dicen «Bien» (son los datos del cuerpo, no la lesión).
 - **Formulario semanal** (detalles en el documento «Cómo lo usa la app»):
   - Confirmar si la opción «Cap» de las zonas de lesión quiere decir «cabeza». La app no tiene esa zona.
   - En salud mental, el «desde cuándo» debería salir de P29, que es obligatoria. Ahora la app usa P15, que es opcional.

@@ -141,11 +141,9 @@ function niceStep(span, count) { const raw = span / Math.max(1, count), p = Math
 class Component extends DCLogic {
   state = (() => {
     let ai = {};
-    try { ai = JSON.parse(localStorage.getItem('mt-desk-ai-v12') || '{}') || {}; } catch (e) { ai = {}; }
+    try { ai = JSON.parse(localStorage.getItem('mt-desk-ai-v14') || '{}') || {}; } catch (e) { ai = {}; }
     let pHidden = false;
     try { pHidden = localStorage.getItem('mt-proto-hidden') === '1'; } catch (e) {}
-    let chatLab = false;
-    try { chatLab = localStorage.getItem('mt-desk-chatlab') === '1'; } catch (e) {}
     let chatPx = 380;
     try { chatPx = Math.round(+localStorage.getItem('mt-desk-chatw')) || 380; } catch (e) {}
     let trk = {};
@@ -160,7 +158,7 @@ class Component extends DCLogic {
     let page = 'avui';
     try { if (/graf/i.test(window.location.hash)) page = 'grafics'; } catch (e) {}
     return { scenario: 'normal', page, metric: 'rhr', range: 7, evoRange: 28, month: 0, hoverF: null, pinF: null,
-      lang: LANG_KEYS.includes(lang) ? lang : 'ca', visit: 0, vw: window.innerWidth, vh: window.innerHeight, ai, pOpen: false, pHidden, chv, done, trk, trkOpen: false, cvx: {}, week2: -1, pbSim: 'sc', trkSel: 0, wkPick: false, chatLab, chatOpen: false, chatBig: false, chatPx, chatLog: [], theme: ['gpt', 'hibrid', 'editorial', 'grafit'].includes(theme) ? theme : 'gpt', mode: /^(dark|light|auto)$/.test(mode) ? mode : 'dark', sysDark,
+      lang: LANG_KEYS.includes(lang) ? lang : 'ca', visit: 0, vw: window.innerWidth, vh: window.innerHeight, ai, pOpen: false, pHidden, chv, done, trk, trkOpen: false, cvx: {}, week2: -1, pbSim: 'sc', trkSel: 0, wkPick: false, wemSim: 'sc', moPick: false, chatOpen: false, chatBig: false, chatPx, chatLog: [], theme: ['gpt', 'hibrid', 'editorial', 'grafit'].includes(theme) ? theme : 'gpt', mode: /^(dark|light|auto)$/.test(mode) ? mode : 'dark', sysDark,
       side: side === 'closed' ? 'closed' : 'open', pick: false, scrolled: false };
   })();
   mainRef = React.createRef();
@@ -277,7 +275,8 @@ class Component extends DCLogic {
   LANGS = [{ k: 'ca', t: 'Català' }, { k: 'es', t: 'Castellano' }, { k: 'fr', t: 'Français' }, { k: 'en', t: 'English' }];
   SCN = [{ k: 'normal', t: 'Día normal' }, { k: 'descans', t: 'Fatiga' }, { k: 'salut', t: 'Problema de salud' }, { k: 'disc', t: 'Discrepancia' }, { k: 'gran', t: 'Gran diferencia' }, { k: 'estres', t: 'Te notas peor' }, { k: 'buit', t: 'Sin datos' }, { k: 'nou', t: 'Deportista nuevo' }];
   AI_KEYS = { daily: ['rhr', 'hrv', 'son', 'estat', 'coach'], week: ['rendiment', 'fatiga', 'descans', 'salut', 'organitzacio', 'ostrc', 'rhr', 'hrv', 'son', 'estat'],
-    month: ['wemwbs', 'wemwbs_1', 'wemwbs_2', 'wemwbs_3', 'wemwbs_4', 'wemwbs_5', 'wemwbs_6', 'wemwbs_7'], trend: ['sents', 'rhr', 'hrv', 'son', 'estat'] };
+    month2: ['wemwbs', 'wemwbs_1', 'wemwbs_2', 'wemwbs_3', 'wemwbs_4', 'wemwbs_5', 'wemwbs_6', 'wemwbs_7'],
+    trend: ['sents', 'rhr', 'hrv', 'son', 'estat'] };
 
   // ── Idiomes ───────────────────────────────────────────────────────────
   // Tots els textos de l'app en català, castellà, francès i anglès. Cada text és { ca, es, fr, en } i L() el resol a l'idioma triat a Ajustos.
@@ -390,32 +389,24 @@ class Component extends DCLogic {
     // Formulari mensual de benestar i salut mental (el més recent primer). `m` = mes (0 = gener), `sent` = dia d'enviament.
     SCALE5: { ca: ['Cap vegada', 'Rarament', 'Algunes vegades', 'Sovint', 'Sempre'], es: ['Nunca', 'Rara vez', 'Algunas veces', 'A menudo', 'Siempre'],
       fr: ['Jamais', 'Rarement', 'Parfois', 'Souvent', 'Tout le temps'], en: ['None of the time', 'Rarely', 'Some of the time', 'Often', 'All of the time'] },
-    APSQ_ITEMS: {
-      ca: ["M'ha costat estar amb els companys d'equip", "M'ha costat fer el que havia de fer", 'He estat menys motivat', 'He estat irritable, enfadat o agressiu', 'No he pogut deixar de pensar en lesions o en el rendiment',
-        "Els entrenaments m'han estressat més", "M'ha costat gestionar la pressió de les convocatòries", "M'ha preocupat la vida després de l'esport", 'He necessitat alcohol o altres substàncies per relaxar-me', "He assumit més riscos fora de l'esport"],
-      es: ['Me ha costado estar con los compañeros de equipo', 'Me ha costado hacer lo que tenía que hacer', 'He estado menos motivado', 'He estado irritable, enfadado o agresivo', 'No he podido dejar de pensar en lesiones o en el rendimiento',
-        'Los entrenamientos me han estresado más', 'Me ha costado gestionar la presión de las convocatorias', 'Me ha preocupado la vida después del deporte', 'He necesitado alcohol u otras sustancias para relajarme', 'He asumido más riesgos fuera del deporte'],
-      fr: ["J'ai eu du mal à être avec mes coéquipiers", "J'ai eu du mal à faire ce que je devais faire", "J'étais moins motivé", "J'étais irritable, en colère ou agressif", "Je n'ai pas pu m'empêcher de penser aux blessures ou à ma performance",
-        "Les entraînements m'ont davantage stressé", "J'ai eu du mal à gérer la pression des sélections", "Je me suis inquiété de ma vie après le sport", "J'ai eu besoin d'alcool ou d'autres substances pour me détendre", "J'ai pris plus de risques en dehors du sport"],
-      en: ['I found it hard to be around my teammates', 'I found it hard to do what I needed to do', 'I was less motivated', 'I was irritable, angry or aggressive', "I couldn't stop thinking about injury or my performance",
-        'I found training more stressful', 'I found it hard to cope with selection pressure', 'I worried about life after sport', 'I needed alcohol or other substances to relax', 'I took more risks outside sport'] },
     MONTHS: [
-      { k: 'ago', m: 7, sent: 31, wem: [4, 3, 3, 4, 4, 5, 4], apsq: [1, 2, 2, 1, 3, 2, 2, 1, 1, 1],
-        info: { ca: "Aquest mes he tingut el stage i m'ha costat desconnectar. Res greu.", es: 'Este mes he tenido el stage y me ha costado desconectar. Nada grave.',
-          fr: "Ce mois-ci, j'ai eu le stage et j'ai eu du mal à décrocher. Rien de grave.", en: 'This month I had the training camp and found it hard to switch off. Nothing serious.' } },
-      { k: 'jul', m: 6, sent: 31, wem: [4, 4, 4, 4, 4, 5, 4], apsq: [1, 1, 1, 1, 2, 1, 1, 1, 1, 1], info: '' },
-      { k: 'jun', m: 5, sent: 30, wem: [4, 4, 3, 4, 4, 5, 4], apsq: [1, 2, 1, 1, 2, 1, 2, 1, 1, 1],
-        info: { ca: "Final de curs i exàmens: una mica d'estrès.", es: 'Final de curso y exámenes: un poco de estrés.', fr: "Fin d'année et examens : un peu de stress.", en: 'End of the school year and exams: a bit of stress.' } },
+      { k: 'ago', m: 7, sent: 31, wem: [4, 3, 3, 4, 4, 5, 4] },
+      { k: 'jul', m: 6, sent: 31, wem: [4, 4, 4, 4, 4, 5, 4] },
+      { k: 'jun', m: 5, sent: 30, wem: [4, 4, 3, 4, 4, 5, 4] },
     ],
     WEM_SHORT: { ca: ['Optimisme', 'Sentir-te útil', 'Calma', 'Afrontar problemes', 'Claredat', 'Relacions', 'Autonomia'], es: ['Optimismo', 'Sentirte útil', 'Calma', 'Afrontar problemas', 'Claridad', 'Relaciones', 'Autonomía'],
       fr: ['Optimisme', 'Te sentir utile', 'Calme', 'Gérer les problèmes', 'Clarté', 'Relations', 'Autonomie'], en: ['Optimism', 'Feeling useful', 'Calm', 'Handling problems', 'Clarity', 'Relationships', 'Autonomy'] },
-    // Les set afirmacions del WEMWBS curt; `f` = dona.
-    WEM: {
-      ca: f => ["M'he sentit optimista respecte al futur", "M'he sentit útil", `M'he sentit ${f ? 'relaxada' : 'relaxat'}`, 'He afrontat bé els problemes', 'He pensat amb claredat', "M'he sentit a prop d'altres persones", `He pogut decidir per ${f ? 'mi mateixa' : 'mi mateix'}`],
-      es: f => ['Me he sentido optimista respecto al futuro', 'Me he sentido útil', `Me he sentido ${f ? 'relajada' : 'relajado'}`, 'He afrontado bien los problemas', 'He pensado con claridad', 'Me he sentido cerca de otras personas', 'He podido tomar mis propias decisiones'],
-      fr: f => { const e = f ? 'e' : ''; return [`Je me suis senti${e} optimiste quant à l'avenir`, `Je me suis senti${e} utile`, `Je me suis senti${e} détendu${e}`, "J'ai bien fait face aux problèmes", "J'avais les idées claires", `Je me suis senti${e} proche des autres`, "J'ai pu prendre mes propres décisions"]; },
-      en: () => ["I've been feeling optimistic about the future", "I've been feeling useful", "I've been feeling relaxed", "I've been dealing with problems well", "I've been thinking clearly", "I've been feeling close to other people", "I've been able to make up my own mind about things"],
+    // Mes: les set frases tal com surten al formulari mensual, sense gènere (en passar el ratolí i per a la IA, que així no sap el sexe).
+    WEM_N: {
+      ca: ["M'he sentit optimista pel futur", "M'he sentit útil", "M'he sentit relaxat/ada", 'He afrontat bé els problemes', 'He pensat amb claredat', "M'he sentit a prop de les altres persones", 'He estat capaç de decidir per mi mateix/a sobre les coses'],
+      es: ['Me he sentido optimista respecto al futuro', 'Me he sentido útil', 'Me he sentido relajado/a', 'He afrontado bien los problemas', 'He pensado con claridad', 'Me he sentido cerca de otras personas', 'He sido capaz de decidir por mí mismo/a sobre las cosas'],
+      fr: ["Je me suis senti(e) optimiste pour l'avenir", 'Je me suis senti(e) utile', 'Je me suis senti(e) détendu(e)', "J'ai bien fait face aux problèmes", "J'ai eu les idées claires", 'Je me suis senti(e) proche des autres', "J'ai été capable de prendre mes propres décisions"],
+      en: ["I've been feeling optimistic about the future", "I've been feeling useful", "I've been feeling relaxed", "I've been dealing with problems well", "I've been thinking clearly", "I've been feeling close to other people", "I've been able to make up my own mind about things"],
     },
+    // Mes nou (prova): el formulari mensual de l'últim mes segons l'escenari, perquè en canviar d'escenari també canviï Mes. Totals (el teu normal és 28,5):
+    // normal i buit 28 (com el teu normal) · descans 26 i salut 27 (una mica per sota) · disc 29 · estres 21 (baixada clara) · gran 18 (zona baixa).
+    MONTH_SC: { normal: { ago: [4, 4, 3, 4, 4, 5, 4] }, buit: { ago: [4, 4, 3, 4, 4, 5, 4] }, descans: { ago: [4, 3, 3, 4, 3, 5, 4] }, salut: { ago: [4, 3, 3, 4, 4, 5, 4] },
+      disc: { ago: [4, 4, 4, 4, 4, 5, 4] }, estres: { ago: [3, 3, 2, 3, 3, 4, 3] }, gran: { ago: [2, 3, 2, 3, 3, 3, 2] } },
     PRIV: [
       { t: { ca: 'El teu nom', es: 'Tu nombre', fr: 'Ton nom', en: 'Your name' }, s: { ca: "Qui ets dins de l'equip", es: 'Quién eres dentro del equipo', fr: "Qui tu es dans l'équipe", en: 'Who you are in the team' }, r: ['yes', 'yes', 'no'] },
       { t: { ca: 'Estat del dia', es: 'Estado del día', fr: 'État du jour', en: 'Day status' }, s: { ca: 'Òptim · Moderat · Recuperació', es: 'Óptimo · Moderado · Recuperación', fr: 'Optimal · Modéré · Récupération', en: 'Optimal · Moderate · Recovery' }, r: ['yes', 'yes', 'code'] },
@@ -545,33 +536,6 @@ class Component extends DCLogic {
         wAct: "If something doesn't add up, you can talk it over with your coach.",
         idea: { doc: ['Follow the advice of your doctor or physio', (d, w) => (w ? `${w} · since ${d}.` : `You've had an open health problem since ${d}.`)], son: ['You could go to bed a little earlier tonight', m => `Last night you slept ${m} min less than your average.`], desc: ['Setting aside some rest time today may help', s => `${s}: it's worth giving your body time to recover.`], resp: ['A few minutes of slow breathing before bed may help', 'It helps your body wind down when your HRV is low.'], com: ['If you feel like it, tell your coach how you feel', 'Today you feel worse than usual.'], reg: ["When you can, log today's data", "Without today's data we can't tailor these ideas."], regNou: ['Logging every morning at the same time', 'That way your data are comparable from day to day.'], sonReg: ['Keeping a regular sleep schedule', 'It makes your usual range more reliable.'], hidr: ['Drinking water before, during and after training', 'Staying hydrated helps you recover.'], hidrS: ['Drinking water often through the day', 'It helps your body recover.'], mob: ['A few minutes of gentle mobility after training', 'It helps recovery without adding load.'], nutr: ['A meal with carbs and protein after training', 'It helps your body refuel.'] },
       },
-    },
-    FB_MONTH: {
-      ago: {
-        titular: { ca: 'Benestar bo, amb una mica menys de calma', es: 'Buen bienestar, con algo menos de calma', fr: 'Bon bien-être, avec un peu moins de calme', en: 'Good wellbeing, with a little less calm' },
-        resum: { ca: "Baixa una mica respecte al juliol, sobretot perquè t'has sentit menys relaxat i menys útil.", es: 'Baja un poco respecto a julio, sobre todo porque te has sentido menos relajado y menos útil.', fr: "Un peu en baisse par rapport à juillet, surtout parce que tu t'es senti moins détendu et moins utile.", en: 'Slightly down on July, mainly because you felt less relaxed and less useful.' },
-        troballes: [
-          { k: 'wemwbs', to: 'vigilar', t: { ca: 'Continua sent un bon nivell per a tu, però baixa respecte al juliol.', es: 'Sigue siendo un buen nivel para ti, pero baja respecto a julio.', fr: "C'est toujours un bon niveau pour toi, mais en baisse par rapport à juillet.", en: 'Still a good level for you, but down on July.' } },
-          { k: 'wemwbs_3', to: 'vigilar', t: { ca: "T'has sentit relaxat menys sovint que al juliol.", es: 'Te has sentido relajado menos a menudo que en julio.', fr: "Tu t'es senti détendu moins souvent qu'en juillet.", en: 'You felt relaxed less often than in July.' } },
-          { k: 'wemwbs_2', to: 'vigilar', t: { ca: 'Sentir-te útil també baixa un punt.', es: 'Sentirte útil también baja un punto.', fr: "Te sentir utile baisse aussi d'un point.", en: 'Feeling useful is also down a point.' } },
-          { k: 'wemwbs_6', to: 'be', t: { ca: 'El teu punt més fort, com cada mes.', es: 'Tu punto más fuerte, como cada mes.', fr: 'Ton point le plus fort, comme chaque mois.', en: 'Your strongest point, as every month.' } }],
-        accions: [{ ca: "Reserva alguna estona de la setmana per a coses que et relaxin fora de l'esport.", es: 'Reserva algún rato de la semana para cosas que te relajen fuera del deporte.', fr: 'Garde un moment dans la semaine pour des choses qui te détendent en dehors du sport.', en: 'Set aside some time each week for things that relax you outside sport.' }] },
-      jul: {
-        titular: { ca: 'El millor mes dels que portes', es: 'El mejor mes de los que llevas', fr: "Ton meilleur mois jusqu'ici", en: 'Your best month so far' },
-        resum: { ca: 'Puja respecte al juny, gràcies a sentir-te més relaxat.', es: 'Sube respecto a junio, gracias a sentirte más relajado.', fr: 'En hausse par rapport à juin, parce que tu te sens plus détendu.', en: 'Up on June, thanks to feeling more relaxed.' },
-        troballes: [
-          { k: 'wemwbs', to: 'be', t: { ca: 'La puntuació més alta fins ara.', es: 'La puntuación más alta hasta ahora.', fr: "Le score le plus élevé jusqu'ici.", en: 'Your highest score so far.' } },
-          { k: 'wemwbs_3', to: 'be', t: { ca: 'Et sents relaxat més sovint que al juny.', es: 'Te sientes relajado más a menudo que en junio.', fr: "Tu te sens détendu plus souvent qu'en juin.", en: 'You feel relaxed more often than in June.' } },
-          { k: 'wemwbs_6', to: 'be', t: { ca: 'Continues sentint-te sempre a prop dels altres.', es: 'Sigues sintiéndote siempre cerca de los demás.', fr: 'Tu te sens toujours proche des autres.', en: 'You still always feel close to others.' } }],
-        accions: [{ ca: "Continua amb el que t'ha funcionat aquest mes.", es: 'Sigue con lo que te ha funcionado este mes.', fr: 'Continue avec ce qui a marché ce mois-ci.', en: 'Keep doing what worked for you this month.' }] },
-      jun: {
-        titular: { ca: 'El teu primer registre de benestar', es: 'Tu primer registro de bienestar', fr: 'Ton premier relevé de bien-être', en: 'Your first wellbeing entry' },
-        resum: { ca: "A partir d'ara, cada mes el compararem amb aquest.", es: 'A partir de ahora, cada mes lo compararemos con este.', fr: 'Désormais, on comparera chaque mois avec celui-ci.', en: "From now on, we'll compare each month with this one." },
-        troballes: [
-          { k: 'wemwbs', to: 'info', t: { ca: 'El teu punt de partida.', es: 'Tu punto de partida.', fr: 'Ton point de départ.', en: 'Your starting point.' } },
-          { k: 'wemwbs_6', to: 'be', t: { ca: 'El teu punt més fort: et sents sempre a prop dels altres.', es: 'Tu punto más fuerte: te sientes siempre cerca de los demás.', fr: 'Ton point le plus fort : tu te sens toujours proche des autres.', en: 'Your strongest point: you always feel close to others.' } },
-          { k: 'wemwbs_3', to: 'vigilar', t: { ca: 'El que queda més avall: sentir-te relaxat.', es: 'Lo que queda más abajo: sentirte relajado.', fr: 'Le plus bas : te sentir détendu.', en: 'Your lowest: feeling relaxed.' } }],
-        accions: [{ ca: 'Respon el formulari cada final de mes per poder veure tendències.', es: 'Responde el formulario cada final de mes para poder ver tendencias.', fr: 'Réponds au formulaire à chaque fin de mois pour voir les tendances.', en: 'Fill in the form at the end of each month so we can see trends.' }] },
     },
     FB_TREND: {
       normal: {
@@ -829,12 +793,8 @@ class Component extends DCLogic {
       noProblems: { ca: 'Sense problemes', es: 'Sin problemas', fr: 'Aucun problème', en: 'No problems' },
       worstDay: { ca: d => `El pitjor dia: ${d}`, es: d => `El peor día: ${d}`, fr: d => `Le pire jour : ${d}`, en: d => `Worst day: ${d}` },
       weekMean: { ca: 'Mitjana de la setmana', es: 'Media de la semana', fr: 'Moyenne de la semaine', en: 'Weekly average' },
-      wellTotal: { ca: 'Benestar total', es: 'Bienestar total', fr: 'Bien-être total', en: 'Total wellbeing' },
-      firstMonth: { ca: 'Primer mes', es: 'Primer mes', fr: 'Premier mois', en: 'First month' },
       // «Igual que al juliol», «respecte a l'agost»…
-      sameMonth: { ca: m => `Igual que ${/^[aeiouàèéíòóú]/.test(m) ? "a l'" : 'al '}${m}`, es: m => `Igual que en ${m}`, fr: m => `Comme en ${m}`, en: m => `Same as in ${m}` },
       vsMonth: { ca: (d, m) => `${d} vs ${m}`, es: (d, m) => `${d} vs ${m}`, fr: (d, m) => `${d} vs ${m}`, en: (d, m) => `${d} vs ${m}` },
-      vsMonthL: { ca: (d, m) => `${d} respecte ${/^[aeiouàèéíòóú]/.test(m) ? "a l'" : 'al '}${m}`, es: (d, m) => `${d} respecto a ${m}`, fr: (d, m) => `${d} par rapport à ${m}`, en: (d, m) => `${d} compared with ${m}` },
       before: { ca: s => ` · abans ${s}`, es: s => ` · antes ${s}`, fr: s => ` · avant ${s}`, en: s => ` · previously ${s}` },
       noMatchOf: { ca: n => `No coincideixen, de ${n}`, es: n => `No coinciden, de ${n}`, fr: n => `Pas de concordance, sur ${n}`, en: n => `Don't match, out of ${n}` },
       ofNDays: { ca: n => `de ${n} dies`, es: n => `de ${n} días`, fr: n => `sur ${n} jours`, en: n => `of ${n} days` },
@@ -849,7 +809,6 @@ class Component extends DCLogic {
       ringHint: { ca: "Cada tram de l'anell és una dada d'avui:", es: 'Cada tramo del anillo es un dato de hoy:', fr: "Chaque segment de l'anneau est une donnée du jour :", en: "Each ring segment is one of today's metrics:" },
       doToday: { ca: 'Què fer avui', es: 'Qué hacer hoy', fr: "À faire aujourd'hui", en: 'What to do today' },
       nextWeek: { ca: 'La setmana que ve', es: 'La semana que viene', fr: 'La semaine prochaine', en: 'Next week' },
-      nextMonth: { ca: 'El mes que ve', es: 'El mes que viene', fr: 'Le mois prochain', en: 'Next month' },
       nextDays: { ca: 'Els propers dies', es: 'Los próximos días', fr: 'Les prochains jours', en: 'The next few days' },
       // Avui
       regDone: { ca: t => `Registre d'avui fet a les ${t}`, es: t => `Registro de hoy hecho a las ${t}`, fr: t => `Relevé du jour fait à ${t.replace(':', ' h ')}`, en: t => `Today's log done at ${t}` },
@@ -889,7 +848,6 @@ class Component extends DCLogic {
         fr: "Chaque dimanche, tu répondras à cinq questions courtes sur la performance, la fatigue, le repos, la santé et l'organisation, plus un mot pour chaque domaine. Ici, tu verras le rapport de la semaine et son évolution.",
         en: 'Every Sunday you will answer five short questions about performance, fatigue, rest, health and organisation, plus one word for each area. Here you will see the weekly report and how things change.' },
       formSentW: { ca: d => `formulari respost el ${d}`, es: d => `formulario respondido el ${d}`, fr: d => `formulaire rempli le ${d}`, en: d => `form answered on ${d}` },
-      formSentM: { ca: d => `formulari enviat el ${d}`, es: d => `formulario enviado el ${d}`, fr: d => `formulaire envoyé le ${d}`, en: d => `form sent on ${d}` },
       wordsCom: { ca: 'Paraules i comentari', es: 'Palabras y comentario', fr: 'Mots et commentaire', en: 'Words and comment' },
       partOstrc: { ca: 'Participació (OSTRC)', es: 'Participación (OSTRC)', fr: 'Participation (OSTRC)', en: 'Participation (OSTRC)' },
       weekDaily: { ca: 'Dades diàries de la setmana', es: 'Datos diarios de la semana', fr: 'Données quotidiennes de la semaine', en: "The week's daily data" },
@@ -983,6 +941,7 @@ class Component extends DCLogic {
         q_fat_weeks: { ca: 'Com va la meva fatiga setmana a setmana?', es: '¿Cómo va mi fatiga semana a semana?', fr: 'Comment évolue ma fatigue semaine après semaine ?', en: 'How is my fatigue going week by week?' },
         q_vs: { ca: 'El que vaig dir quadra amb les meves dades?', es: '¿Lo que dije cuadra con mis datos?', fr: "Ce que j'ai dit correspond-il à mes données ?", en: 'Does what I said match my data?' },
         q_problem: { ca: 'Com estan les meves dades des del problema de salut?', es: '¿Cómo están mis datos desde el problema de salud?', fr: 'Comment vont mes données depuis le problème de santé ?', en: 'How have my data been since the health problem?' },
+        q_wem_ch: { ca: 'Què ha canviat en el meu benestar?', es: '¿Qué ha cambiado en mi bienestar?', fr: "Qu'est-ce qui a changé dans mon bien-être ?", en: 'What has changed in my wellbeing?' },
         q_wem: { ca: 'Com ha anat el meu benestar mes a mes?', es: '¿Cómo ha ido mi bienestar mes a mes?', fr: 'Comment a évolué mon bien-être mois après mois ?', en: 'How has my wellbeing gone month by month?' },
         q_hrv28: { ca: 'Com ha canviat la meva HRV en 4 setmanes?', es: '¿Cómo ha cambiado mi HRV en 4 semanas?', fr: 'Comment ma HRV a-t-elle évolué en 4 semaines ?', en: 'How has my HRV changed over 4 weeks?' },
         q_son_hrv: { ca: 'El meu son i la meva HRV van junts?', es: '¿Mi sueño y mi HRV van juntos?', fr: 'Mon sommeil et ma HRV vont-ils ensemble ?', en: 'Do my sleep and my HRV move together?' },
@@ -1008,6 +967,11 @@ class Component extends DCLogic {
         fr: (w, st, ws, nt) => `${w} · ${st}. ${ws.length ? `Pendant le problème, [[${ws.length} données sur ${nt}]] (${ws.join(', ')}) étaient moins bonnes que les jours d'avant.` : "Pendant le problème, tes données étaient proches des jours d'avant."}`,
         en: (w, st, ws, nt) => `${w} · ${st}. ${ws.length ? `During the problem, [[${ws.length} of ${nt} data]] (${ws.join(', ')}) were worse than in the days before.` : 'During the problem, your data were similar to the days before.'}` },
       chA_noPb: { ca: 'No hi ha cap problema de salut als teus últims formularis.', es: 'No hay ningún problema de salud en tus últimos formularios.', fr: 'Aucun problème de santé dans tes derniers formulaires.', en: "There's no health problem in your latest forms." },
+      chA_wemCh: { ca: (m, u, d) => !u.length && !d.length ? `${m}: les 7 respostes són [[com el teu normal]].` : `${m}, respecte al teu normal: ${[u.length ? `${u.map(x => `[[${x}|+]]`).join(' i ')} ${u.length > 1 ? 'pugen' : 'puja'}` : '', d.length ? `${d.map(x => `[[${x}|~]]`).join(' i ')} ${d.length > 1 ? 'baixen' : 'baixa'}` : ''].filter(Boolean).join(' i ')}.`,
+        es: (m, u, d) => !u.length && !d.length ? `${m}: las 7 respuestas están [[como tu normal]].` : `${m}, respecto a tu normal: ${[u.length ? `${u.map(x => `[[${x}|+]]`).join(' y ')} ${u.length > 1 ? 'suben' : 'sube'}` : '', d.length ? `${d.map(x => `[[${x}|~]]`).join(' y ')} ${d.length > 1 ? 'bajan' : 'baja'}` : ''].filter(Boolean).join(' y ')}.`,
+        fr: (m, u, d) => !u.length && !d.length ? `${m} : tes 7 réponses sont [[comme ta normale]].` : `${m}, par rapport à ta normale : ${[u.length ? `${u.map(x => `[[${x}|+]]`).join(' et ')} en hausse` : '', d.length ? `${d.map(x => `[[${x}|~]]`).join(' et ')} en baisse` : ''].filter(Boolean).join(', ')}.`,
+        en: (m, u, d) => !u.length && !d.length ? `${m}: all 7 answers are [[at your usual]].` : `${m}, compared with your usual: ${[u.length ? `${u.map(x => `[[${x}|+]]`).join(' and ')} ${u.length > 1 ? 'are' : 'is'} up` : '', d.length ? `${d.map(x => `[[${x}|~]]`).join(' and ')} ${d.length > 1 ? 'are' : 'is'} down` : ''].filter(Boolean).join(' and ')}.` },
+      chA_wemNoNorm: { ca: 'Encara no hi ha prou mesos per saber el teu normal: en calen dos.', es: 'Aún no hay meses suficientes para saber tu normal: hacen falta dos.', fr: "Il n'y a pas encore assez de mois pour connaître ta normale : il en faut deux.", en: "There aren't enough months yet to know your usual: it takes two." },
       chA_wem: { ca: (m, t, pm, d) => `${m}: benestar de [[${t}/35]]${pm ? `, ${d > 0 ? '+' : d < 0 ? '−' : '±'}${Math.abs(d)} respecte a ${pm}` : ''}.`, es: (m, t, pm, d) => `${m}: bienestar de [[${t}/35]]${pm ? `, ${d > 0 ? '+' : d < 0 ? '−' : '±'}${Math.abs(d)} respecto a ${pm}` : ''}.`,
         fr: (m, t, pm, d) => `${m} : bien-être de [[${t}/35]]${pm ? `, ${d > 0 ? '+' : d < 0 ? '−' : '±'}${Math.abs(d)} par rapport à ${pm}` : ''}.`, en: (m, t, pm, d) => `${m}: wellbeing [[${t}/35]]${pm ? `, ${d > 0 ? '+' : d < 0 ? '−' : '±'}${Math.abs(d)} compared with ${pm[0].toUpperCase() + pm.slice(1)}` : ''}.` },
       chA_trend: { ca: (nm, a, b, d) => `La teva ${nm} dels últims 7 dies és [[${a}]], davant de ${b} de les 3 setmanes anteriors (${d}).`, es: (nm, a, b, d) => `Tu ${nm} de los últimos 7 días es [[${a}]], frente a ${b} de las 3 semanas anteriores (${d}).`, fr: (nm, a, b, d) => `Ta ${nm} des 7 derniers jours est de [[${a}]], contre ${b} les 3 semaines d'avant (${d}).`, en: (nm, a, b, d) => `Your ${nm} over the last 7 days is [[${a}]], against ${b} in the 3 weeks before (${d}).` },
@@ -1043,6 +1007,7 @@ class Component extends DCLogic {
       vsSleep: { ca: (hh, o, n) => `${hh} h de mitjana · ${o} de ${n} nits al teu normal`, es: (hh, o, n) => `${hh} h de media · ${o} de ${n} noches en tu normal`, fr: (hh, o, n) => `${hh} h en moyenne · ${o} nuits sur ${n} dans ta normale`, en: (hh, o, n) => `${hh} h on average · ${o} of ${n} nights at your usual` },
       vsState: { ca: (w, o, n) => `${w} ${o} de ${n} dies`, es: (w, o, n) => `${w} ${o} de ${n} días`, fr: (w, o, n) => `${w} ${o} jours sur ${n}`, en: (w, o, n) => `${w} on ${o} of ${n} days` },
       vsMatch: { ca: 'Coincideixen', es: 'Coinciden', fr: 'Ça correspond', en: 'They match' },
+      vsPb: { ca: 'Vas marcar un problema de salut', es: 'Marcaste un problema de salud', fr: 'Tu as signalé un problème de santé', en: 'You reported a health problem' },
       vsWorse: { ca: 'Et notes pitjor', es: 'Te notas peor', fr: 'Tu te sens moins bien', en: 'You feel worse' },
       vsBetter: { ca: 'Et notes millor', es: 'Te notas mejor', fr: 'Tu te sens mieux', en: 'You feel better' },
       vsCoach: { ca: 'Entrenador', es: 'Entrenador', fr: 'Entraîneur', en: 'Coach' },
@@ -1072,18 +1037,69 @@ class Component extends DCLogic {
       hrvSun: { ca: 'arriba diumenge', es: 'llega el domingo', fr: 'arrive dimanche', en: 'arrives on Sunday' },
       // Mes
       firstMonthlyT: { ca: 'El teu primer formulari mensual arribarà el 30 de setembre', es: 'Tu primer formulario mensual llegará el 30 de septiembre', fr: 'Ton premier formulaire mensuel arrivera le 30 septembre', en: 'Your first monthly form arrives on 30 September' },
-      firstMonthlyP: { ca: "Un cop al mes respondràs set afirmacions sobre com t'has sentit (WEMWBS) i unes preguntes sobre l'esforç psicològic de l'esport. Aquí veuràs l'informe del mes i l'evolució del teu benestar.",
-        es: 'Una vez al mes responderás siete afirmaciones sobre cómo te has sentido (WEMWBS) y unas preguntas sobre el esfuerzo psicológico del deporte. Aquí verás el informe del mes y la evolución de tu bienestar.',
-        fr: "Une fois par mois, tu répondras à sept affirmations sur ce que tu as ressenti (WEMWBS) et à quelques questions sur l'effort psychologique du sport. Ici, tu verras le rapport du mois et l'évolution de ton bien-être.",
-        en: 'Once a month you will respond to seven statements about how you have felt (WEMWBS) and a few questions about the psychological strain of sport. Here you will see the monthly report and how your wellbeing changes.' },
-      monthReport: { ca: 'Informe del mes', es: 'Informe del mes', fr: 'Rapport du mois', en: 'Monthly report' },
       wemTitle: { ca: 'Benestar mental (WEMWBS)', es: 'Bienestar mental (WEMWBS)', fr: 'Bien-être mental (WEMWBS)', en: 'Mental wellbeing (WEMWBS)' },
       mentalWell: { ca: 'Benestar mental', es: 'Bienestar mental', fr: 'Bien-être mental', en: 'Mental wellbeing' },
-      firstMonthReg: { ca: 'Primer mes registrat', es: 'Primer mes registrado', fr: 'Premier mois enregistré', en: 'First month recorded' },
-      septArrives: { ca: 'El de setembre arriba el dia 30', es: 'El de septiembre llega el día 30', fr: 'Celui de septembre arrive le 30', en: "September's arrives on the 30th" },
-      apsqTitle: { ca: 'Esforç psicològic (APSQ)', es: 'Esfuerzo psicológico (APSQ)', fr: 'Effort psychologique (APSQ)', en: 'Psychological strain (APSQ)' },
-      infoTitle: { ca: 'Informació complementària', es: 'Información complementaria', fr: 'Informations complémentaires', en: 'Additional information' },
-      noInfo: { ca: 'Aquest mes no hi has afegit res.', es: 'Este mes no has añadido nada.', fr: "Ce mois-ci, tu n'as rien ajouté.", en: "You didn't add anything this month." },
+      // Mes nou (versió de prova)
+      m2Cmp: { ca: { same: 'Com el teu normal', up1: 'Una mica per sobre del teu normal', up: 'Per sobre del teu normal', dn1: 'Una mica per sota del teu normal', dn: 'Per sota del teu normal', first: 'El teu punt de partida' },
+        es: { same: 'Como tu normal', up1: 'Un poco por encima de tu normal', up: 'Por encima de tu normal', dn1: 'Un poco por debajo de tu normal', dn: 'Por debajo de tu normal', first: 'Tu punto de partida' },
+        fr: { same: 'Comme ta normale', up1: 'Un peu au-dessus de ta normale', up: 'Au-dessus de ta normale', dn1: 'Un peu en dessous de ta normale', dn: 'En dessous de ta normale', first: 'Ton point de départ' },
+        en: { same: 'Same as your usual', up1: 'A little above your usual', up: 'Above your usual', dn1: 'A little below your usual', dn: 'Below your usual', first: 'Your starting point' } },
+      m2CmpS: { ca: { same: 'Al teu normal', up1: 'Una mica per sobre', up: 'Per sobre', dn1: 'Una mica per sota', dn: 'Per sota', first: 'Punt de partida', calc: 'Calculant' },
+        es: { same: 'En tu normal', up1: 'Algo por encima', up: 'Por encima', dn1: 'Algo por debajo', dn: 'Por debajo', first: 'Punto de partida', calc: 'Calculando' },
+        fr: { same: 'Dans ta normale', up1: 'Un peu au-dessus', up: 'Au-dessus', dn1: 'Un peu en dessous', dn: 'En dessous', first: 'Point de départ', calc: 'En calcul' },
+        en: { same: 'At your usual', up1: 'A little above', up: 'Above', dn1: 'A little below', dn: 'Below', first: 'Starting point', calc: 'Calculating' } },
+      m2T: { ca: { down: n => `«${n}» és el que baixa més`, up: n => `«${n}» és el que puja més`, stable: 'Unes setmanes estables', first: 'El teu primer formulari de benestar', calc: 'El teu benestar aquestes dues setmanes' },
+        es: { down: n => `«${n}» es lo que más baja`, up: n => `«${n}» es lo que más sube`, stable: 'Unas semanas estables', first: 'Tu primer formulario de bienestar', calc: 'Tu bienestar estas dos semanas' },
+        fr: { down: n => `« ${n} » est ce qui baisse le plus`, up: n => `« ${n} » est ce qui monte le plus`, stable: 'Des semaines stables', first: 'Ton premier formulaire de bien-être', calc: 'Ton bien-être ces deux semaines' },
+        en: { down: n => `“${n}” drops the most`, up: n => `“${n}” rises the most`, stable: 'A steady couple of weeks', first: 'Your first wellbeing form', calc: 'Your wellbeing over these two weeks' } },
+      // Text de reserva del Mes nou (sense IA): com estàs respecte al teu normal, què puja i què baixa, i una frase de tancament si toca.
+      // Les marques [[…|!]] i [[…|~]] surten en àmbar (mai vermell) i [[…|+]] en verd; sense marca, en blanc.
+      m2Tx: {
+        ca: { lead: { same: 'El teu benestar és [[al teu normal]].', up1: 'El teu benestar és [[una mica per sobre del teu normal|+]].', up: 'El teu benestar és [[per sobre del teu normal|+]].', dn1: 'El teu benestar és [[una mica per sota del teu normal|~]].', dn: 'El teu benestar és [[per sota del teu normal|!]].', first: "A partir d'ara, cada mes es compararà amb els teus mesos anteriors.", calc: 'Amb un mes més sabrem quin és el teu normal.' },
+          change: (u, d, nu, nd) => { const L = (xs, m) => { const a = xs.map(x => `[[${x}|${m}]]`); return a.length < 3 ? a.join(' i ') : `${a.slice(0, -1).join(', ')} i ${a[a.length - 1]}`; };
+            const many = (n, xs, m, v) => `${v} [[${n === 7 ? 'les 7 frases' : `${n} de les 7 frases`}|${m}]], sobretot ${L(xs, m)}.`, sm = (xs, m, n, v1, vn) => `${L(xs, m)} ${n > 1 ? vn : v1}`;
+            if (nu >= 4 || nd >= 4) return [nd >= 4 ? many(nd, d, '~', 'Baixen') : nd ? `${sm(d, '~', nd, 'baixa', 'baixen')}.` : '', nu >= 4 ? many(nu, u, '+', 'Pugen') : nu ? `${sm(u, '+', nu, 'puja', 'pugen')}.` : ''].filter(Boolean).join(' ');
+            return `${[nu ? sm(u, '+', nu, 'puja', 'pugen') : '', nd ? sm(d, '~', nd, 'baixa', 'baixen') : ''].filter(Boolean).join(' i ')}.`; },
+          same: 'Les 7 respostes són com sempre.', strong: x => `El teu punt més fort: [[${x}|+]].`, lowest: xs => `El més baix: ${xs.map(x => `[[${x}|~]]`).join(' i ')}.`,
+          end: { drop: 'Si et ve de gust, parlar-ne amb algú et pot ajudar.', low: "Pas a pas: amb una de les idees de sota ja n'hi ha prou." } },
+        es: { lead: { same: 'Tu bienestar está [[en tu normal]].', up1: 'Tu bienestar está [[un poco por encima de tu normal|+]].', up: 'Tu bienestar está [[por encima de tu normal|+]].', dn1: 'Tu bienestar está [[un poco por debajo de tu normal|~]].', dn: 'Tu bienestar está [[por debajo de tu normal|!]].', first: 'A partir de ahora, cada mes se comparará con tus meses anteriores.', calc: 'Con un mes más sabremos cuál es tu normal.' },
+          change: (u, d, nu, nd) => { const L = (xs, m) => { const a = xs.map(x => `[[${x}|${m}]]`); return a.length < 3 ? a.join(' y ') : `${a.slice(0, -1).join(', ')} y ${a[a.length - 1]}`; };
+            const many = (n, xs, m, v) => `${v} [[${n === 7 ? 'las 7 frases' : `${n} de las 7 frases`}|${m}]], sobre todo ${L(xs, m)}.`, sm = (xs, m, n, v1, vn) => `${L(xs, m)} ${n > 1 ? vn : v1}`;
+            if (nu >= 4 || nd >= 4) return [nd >= 4 ? many(nd, d, '~', 'Bajan') : nd ? `${sm(d, '~', nd, 'baja', 'bajan')}.` : '', nu >= 4 ? many(nu, u, '+', 'Suben') : nu ? `${sm(u, '+', nu, 'sube', 'suben')}.` : ''].filter(Boolean).join(' ');
+            return `${[nu ? sm(u, '+', nu, 'sube', 'suben') : '', nd ? sm(d, '~', nd, 'baja', 'bajan') : ''].filter(Boolean).join(' y ')}.`; },
+          same: 'Las 7 respuestas están como siempre.', strong: x => `Tu punto más fuerte: [[${x}|+]].`, lowest: xs => `Lo más bajo: ${xs.map(x => `[[${x}|~]]`).join(' y ')}.`,
+          end: { drop: 'Si te apetece, hablarlo con alguien puede ayudarte.', low: 'Paso a paso: con una de las ideas de abajo ya es suficiente.' } },
+        fr: { lead: { same: 'Ton bien-être est [[dans ta normale]].', up1: 'Ton bien-être est [[un peu au-dessus de ta normale|+]].', up: 'Ton bien-être est [[au-dessus de ta normale|+]].', dn1: 'Ton bien-être est [[un peu en dessous de ta normale|~]].', dn: 'Ton bien-être est [[en dessous de ta normale|!]].', first: 'Désormais, chaque mois sera comparé à tes mois précédents.', calc: 'Avec un mois de plus, on saura quelle est ta normale.' },
+          change: (u, d, nu, nd) => { const L = (xs, m) => { const a = xs.map(x => `[[${x}|${m}]]`); return a.length < 3 ? a.join(' et ') : `${a.slice(0, -1).join(', ')} et ${a[a.length - 1]}`; };
+            const many = (n, xs, m, w) => `[[${n === 7 ? 'Les 7 phrases' : `${n} des 7 phrases`}|${m}]] ${w}, surtout ${L(xs, m)}.`, sm = (xs, m, w) => `${L(xs, m)} ${w}`;
+            if (nu >= 4 || nd >= 4) return [nd >= 4 ? many(nd, d, '~', 'en baisse') : nd ? `${sm(d, '~', 'en baisse')}.` : '', nu >= 4 ? many(nu, u, '+', 'en hausse') : nu ? `${sm(u, '+', 'en hausse')}.` : ''].filter(Boolean).join(' ');
+            return `${[nu ? sm(u, '+', 'en hausse') : '', nd ? sm(d, '~', 'en baisse') : ''].filter(Boolean).join(', ')}.`; },
+          same: "Tes 7 réponses sont comme d'habitude.", strong: x => `Ton point fort : [[${x}|+]].`, lowest: xs => `Le plus bas : ${xs.map(x => `[[${x}|~]]`).join(' et ')}.`,
+          end: { drop: "Si tu en as envie, en parler à quelqu'un peut t'aider.", low: 'Pas à pas : une seule des idées ci-dessous suffit.' } },
+        en: { lead: { same: 'Your wellbeing is [[at your usual]].', up1: 'Your wellbeing is [[a little above your usual|+]].', up: 'Your wellbeing is [[above your usual|+]].', dn1: 'Your wellbeing is [[a little below your usual|~]].', dn: 'Your wellbeing is [[below your usual|!]].', first: 'From now on, each month will be compared with your previous months.', calc: "With one more month we'll know your usual." },
+          change: (u, d, nu, nd) => { const L = (xs, m) => { const a = xs.map(x => `[[${x}|${m}]]`); return a.length < 3 ? a.join(' and ') : `${a.slice(0, -1).join(', ')} and ${a[a.length - 1]}`; };
+            const many = (n, xs, m, w) => `[[${n === 7 ? 'All 7 statements' : `${n} of the 7 statements`}|${m}]] are ${w}, especially ${L(xs, m)}.`, sm = (xs, m, n, w) => `${L(xs, m)} ${n > 1 ? 'are' : 'is'} ${w}`;
+            if (nu >= 4 || nd >= 4) return [nd >= 4 ? many(nd, d, '~', 'down') : nd ? `${sm(d, '~', nd, 'down')}.` : '', nu >= 4 ? many(nu, u, '+', 'up') : nu ? `${sm(u, '+', nu, 'up')}.` : ''].filter(Boolean).join(' ');
+            return `${[nu ? sm(u, '+', nu, 'up') : '', nd ? sm(d, '~', nd, 'down') : ''].filter(Boolean).join(' and ')}.`; },
+          same: 'All 7 answers are as usual.', strong: x => `Your strongest point: [[${x}|+]].`, lowest: xs => `Lowest: ${xs.map(x => `[[${x}|~]]`).join(' and ')}.`,
+          end: { drop: 'If you feel like it, talking it over with someone can help.', low: 'Step by step: one of the ideas below is enough.' } } },
+      m2SupT: { ca: 'Aquestes dues setmanes no han estat fàcils', es: 'Estas dos semanas no han sido fáciles', fr: "Ces deux semaines n'ont pas été faciles", en: "These two weeks haven't been easy" },
+      m2SupB: { ca: 'Ho diuen les teves respostes del formulari mensual. Parlar-ne amb algú ajuda, i pots triar amb qui.', es: 'Lo dicen tus respuestas del formulario mensual. Hablarlo con alguien ayuda, y puedes elegir con quién.',
+        fr: "C'est ce que disent tes réponses au formulaire du mois. En parler à quelqu'un aide, et tu peux choisir à qui.", en: 'Your monthly form answers say so. Talking to someone helps, and you can choose who.' },
+      m2DropT: { ca: 'Si et ve de gust, en pots parlar amb:', es: 'Si te apetece, puedes hablarlo con:', fr: 'Si tu en as envie, tu peux en parler à :', en: 'If you feel like it, you can talk it over with:' },
+      m2BForm: { ca: 'Formulari mensual (7 frases)', es: 'Formulario mensual (7 frases)', fr: 'Formulaire mensuel (7 phrases)', en: 'Monthly form (7 statements)' },
+      m2BNorm: { ca: n => `Els teus ${n} mesos anteriors`, es: n => `Tus ${n} meses anteriores`, fr: n => `Tes ${n} mois précédents`, en: n => `Your previous ${n} months` },
+      m2ByMonth: { ca: 'Mes a mes', es: 'Mes a mes', fr: 'Mois après mois', en: 'Month by month' },
+      m2Ideas: { ca: 'Idees per a les properes setmanes', es: 'Ideas para las próximas semanas', fr: 'Idées pour les prochaines semaines', en: 'Ideas for the coming weeks' },
+      m2Idea: { ca: { opt: 'Pensar en alguna cosa de les properes setmanes que et faci il·lusió', util: "Donar un cop de mà a algú de l'equip amb alguna cosa que se't doni bé", calma: 'Reservar cada dia una estona sense pantalles per desconnectar', afr: 'Dividir el que et preocupa en passos petits i començar per un', clar: 'Mantenir un horari de son regular', rel: 'Quedar amb algú amb qui estiguis a gust', auto: 'Triar tu com fer servir una estona lliure de la setmana', talk: 'Si et ve de gust, explicar a algú de confiança com estàs', keep: "Continuar amb el que t'ha funcionat aquestes setmanes", form: 'Respondre el proper formulari per veure la teva evolució' },
+        es: { opt: 'Pensar en algo de las próximas semanas que te haga ilusión', util: 'Echar una mano a alguien del equipo con algo que se te dé bien', calma: 'Reservar cada día un rato sin pantallas para desconectar', afr: 'Partir lo que te preocupa en pasos pequeños y empezar por uno', clar: 'Mantener un horario de sueño regular', rel: 'Quedar con alguien con quien estés a gusto', auto: 'Elegir tú cómo usar un rato libre de la semana', talk: 'Si te apetece, contarle a alguien de confianza cómo estás', keep: 'Seguir con lo que te ha funcionado estas semanas', form: 'Responder el próximo formulario para ver tu evolución' },
+        fr: { opt: 'Penser à quelque chose des prochaines semaines qui te fait envie', util: "Donner un coup de main à quelqu'un de l'équipe pour quelque chose que tu fais bien", calma: 'Garder chaque jour un moment sans écrans pour décrocher', afr: "Découper ce qui t'inquiète en petites étapes et commencer par une", clar: 'Garder des horaires de sommeil réguliers', rel: "Voir quelqu'un avec qui tu te sens bien", auto: 'Choisir toi-même comment utiliser un moment libre de ta semaine', talk: "Si tu en as envie, dire à quelqu'un de confiance comment tu vas", keep: 'Continuer ce qui a marché pour toi ces semaines-ci', form: 'Répondre au prochain formulaire pour voir ton évolution' },
+        en: { opt: "Thinking of something in the coming weeks you're looking forward to", util: "Giving a teammate a hand with something you're good at", calma: 'Setting aside some screen-free time each day to switch off', afr: 'Breaking what worries you into small steps and starting with one', clar: 'Keeping a regular sleep schedule', rel: 'Meeting up with someone you feel good around', auto: 'Choosing for yourself how to spend some free time this week', talk: 'If you feel like it, telling someone you trust how you are', keep: 'Keeping up what has worked for you these weeks', form: "Answering the next form so you can see how you're doing over time" } },
+      m2IdeaWhy: { ca: (n, w) => `${n}: «${w}» al formulari.`, es: (n, w) => `${n}: «${w}» en el formulario.`, fr: (n, w) => `${n} : « ${w} » dans le formulaire.`, en: (n, w) => `${n}: “${w}” in your form.` },
+      m2Why: { ca: { talk: 'El teu benestar ha baixat respecte al teu normal.', low: 'Aquestes setmanes han estat més difícils.', keep: 'Les teves respostes són al teu normal o per sobre.', keep0: "Les teves respostes d'aquestes setmanes són bones.", form: 'Amb dos mesos més sabrem quin és el teu normal.' },
+        es: { talk: 'Tu bienestar ha bajado respecto a tu normal.', low: 'Estas semanas han sido más difíciles.', keep: 'Tus respuestas están en tu normal o por encima.', keep0: 'Tus respuestas de estas semanas son buenas.', form: 'Con dos meses más sabremos cuál es tu normal.' },
+        fr: { talk: 'Ton bien-être a baissé par rapport à ta normale.', low: 'Ces semaines ont été plus difficiles.', keep: 'Tes réponses sont dans ta normale ou au-dessus.', keep0: 'Tes réponses de ces semaines sont bonnes.', form: 'Avec deux mois de plus, on connaîtra ta normale.' },
+        en: { talk: 'Your wellbeing has dropped compared with your usual.', low: 'These weeks have been harder.', keep: 'Your answers are at your usual or above.', keep0: 'Your answers for these weeks are good.', form: "Two more months and we'll know your usual." } },
       // Evolució
       sixWeeks: { ca: '6 setmanes', es: '6 semanas', fr: '6 semaines', en: '6 weeks' },
       trendReading: { ca: 'Lectura de tendències', es: 'Lectura de tendencias', fr: 'Lecture des tendances', en: 'Trend reading' },
@@ -1258,22 +1274,16 @@ Reply ONLY with this JSON: {"text": "your answer", "blocs": [], "basat": ["data 
         en: 'And "estrategies": 2 or 3 recovery habit ideas for today, age-appropriate and written as conditional suggestions, each {"area": "son | desc | hidr | nutr | resp | mob | com | reg", "accio": "concrete habit, 12 words max", "motiu": "why, based on their data, 18 words max"}. Never training sessions, loads, volumes, durations or rehab exercises; no supplements or medication. If there is an open health problem, one idea must be to follow the advice of their doctor or physio.',
       },
       // Setmana: paràgraf que compara com s'ha sentit amb les dades.
-      textAskW: {
-        ca: 'Afegeix també "texto": un paràgraf de 3 a 5 frases que expliqui com ha anat la setmana en llenguatge senzill, com ho faria un bon entrenador, en to de suggeriment i sense ordres: compara com diu la persona que s\'ha sentit (formulari) amb el que mostren les seves dades diàries, sense tecnicismes (si parles de la HRV, explica-la amb paraules planeres), sense repetir totes les xifres, i marca entre dobles claudàtors les 2 o 3 idees clau.',
-        es: 'Añade también "texto": un párrafo de 3 a 5 frases que explique cómo ha ido la semana en lenguaje sencillo, como lo haría un buen entrenador, en tono de sugerencia y sin órdenes: compara cómo dice la persona que se ha sentido (formulario) con lo que muestran sus datos diarios, sin tecnicismos (si hablas de la HRV, explícala con palabras llanas), sin repetir todas las cifras, y marca entre dobles corchetes las 2 o 3 ideas clave.',
-        fr: 'Ajoute aussi "texto" : un paragraphe de 3 à 5 phrases qui explique comment s\'est passée la semaine, dans un langage simple, comme le ferait un bon entraîneur, sur le ton de la suggestion et sans ordres : compare ce que la personne dit avoir ressenti (formulaire) avec ce que montrent ses données quotidiennes, sans jargon (si tu parles de la HRV, explique-la avec des mots simples), sans répéter tous les chiffres, et mets entre doubles crochets les 2 ou 3 idées clés.',
-        en: 'Also add "texto": a paragraph of 3 to 5 sentences explaining how the week went in plain language, the way a good coach would, as suggestions and never orders: compare how the person says they felt (form) with what their daily data show, no jargon (if you mention HRV, explain it in simple words), without repeating every figure, and put the 2 or 3 key ideas inside double square brackets.',
-      },
       // Setmana en curs: només el registre diari d'aquests dies, sense formulari.
       when: {
         daily: { ca: 'per a avui', es: 'para hoy', fr: "pour aujourd'hui", en: 'for today' },
         week: { ca: 'per a la setmana que ve', es: 'para la semana que viene', fr: 'pour la semaine prochaine', en: 'for next week' },
-        month: { ca: 'per al mes que ve', es: 'para el mes que viene', fr: 'pour le mois prochain', en: 'for next month' },
+        month2: { ca: 'per a les properes setmanes', es: 'para las próximas semanas', fr: 'pour les prochaines semaines', en: 'for the coming weeks' },
         trend: { ca: 'per als propers dies', es: 'para los próximos días', fr: 'pour les prochains jours', en: 'for the next few days' },
       },
       // Informe del dia
-      head: { ca: (w, sx, d) => `Persona: ${w.name}, ${w.age} anys (${sx}). Avui és ${d}.`, es: (w, sx, d) => `Persona: ${w.name}, ${w.age} años (${sx}). Hoy es ${d}.`,
-        fr: (w, sx, d) => `Personne : ${w.name}, ${w.age} ans (${sx}). Nous sommes le ${d}.`, en: (w, sx, d) => `Person: ${w.name}, ${w.age} years old (${sx}). Today is ${d}.` },
+      // A la IA no hi va res de personal: ni nom, ni edat, ni sexe (tampoc als informes de la setmana, del mes i de tendències).
+      head: { ca: d => `Avui és ${d}.`, es: d => `Hoy es ${d}.`, fr: d => `Nous sommes le ${d}.`, en: d => `Today is ${d}.` },
       dNou: {
         ca: (v, n) => `Porta ${n} dies de dades; la franja personal es calcula amb 14 dies, així que encara no en té. Dades d'avui: FC en repòs ${v.rhr}, HRV ${v.hrv}, son ${v.son}, com està ${v.estat}.\nNo comparis amb cap franja. Dona-li la benvinguda i explica que l'app encara està aprenent com és.`,
         es: (v, n) => `Lleva ${n} días de datos; la franja personal se calcula con 14 días, así que aún no tiene. Datos de hoy: FC en reposo ${v.rhr}, HRV ${v.hrv}, sueño ${v.son}, cómo está ${v.estat}.\nNo compares con ninguna franja. Dale la bienvenida y explica que la app aún está aprendiendo cómo es.`,
@@ -1326,11 +1336,18 @@ Reply ONLY with this JSON: {"text": "your answer", "blocs": [], "basat": ["data 
         en: (h, L, st, sy) => `${h} Today's data compared with their usual range over recent weeks:\n${L}\nDay status calculated by the app: ${st} (yesterday: ${sy}).`,
       },
       // Informe de la setmana
+      // Informe de la setmana: només el que es mostra (titular i claus), comparat amb el seu normal i no amb la setmana anterior.
+      jsonW: {
+        ca: keys => `Respon amb aquest JSON, amb les claus tal qual: {"titular": "màxim 8 paraules, sense xifres", "troballes": [{"dada": "una de: ${keys}", "to": "be | vigilar | info", "text": "frase curta, màxim 14 paraules; no repeteixis la xifra, l'app ja la mostra al costat"}]}. A "to": be = va bé, vigilar = a vigilar, info = neutre. Dona de 2 a 4 troballes, de la més important a la menys, i inclou també el que va bé. Compara cada resposta amb el seu normal, no amb la setmana anterior.`,
+        es: keys => `Responde con este JSON, con las claves tal cual: {"titular": "máximo 8 palabras, sin cifras", "troballes": [{"dada": "una de: ${keys}", "to": "be | vigilar | info", "text": "frase corta, máximo 14 palabras; no repitas la cifra, la app ya la muestra al lado"}]}. En "to": be = va bien, vigilar = a vigilar, info = neutro. Da de 2 a 4 hallazgos, del más importante al menos, e incluye también lo que va bien. Compara cada respuesta con su normal, no con la semana anterior.`,
+        fr: keys => `Réponds avec ce JSON, en gardant les clés telles quelles : {"titular": "8 mots maximum, sans chiffres", "troballes": [{"dada": "une de : ${keys}", "to": "be | vigilar | info", "text": "phrase courte, 14 mots maximum ; ne répète pas le chiffre, l'app l'affiche déjà à côté"}]}. Dans "to" : be = ça va bien, vigilar = à surveiller, info = neutre. Donne de 2 à 4 constats, du plus important au moins important, et inclus aussi ce qui va bien. Compare chaque réponse à sa normale, pas à la semaine précédente.`,
+        en: keys => `Reply with this JSON, keeping the keys exactly as they are: {"titular": "8 words max, no figures", "troballes": [{"dada": "one of: ${keys}", "to": "be | vigilar | info", "text": "short sentence, 14 words max; don't repeat the figure, the app already shows it next to it"}]}. In "to": be = going well, vigilar = keep an eye on, info = neutral. Give 2 to 4 findings, most important first, and include what is going well too. Compare each answer with their usual, not with the previous week.`,
+      },
       wScale: {
-        ca: (t, v, inv, pv, nm) => `- ${t}: ${v} de 10${inv ? ' (escala invertida: 10 = extremadament cansat, més baix és millor)' : ' (més alt és millor)'}${pv != null ? `; setmana anterior ${pv}` : ''}${nm != null ? `; el seu normal (mitjana de les 4 anteriors) ${nm}` : ''}.`,
-        es: (t, v, inv, pv, nm) => `- ${t}: ${v} de 10${inv ? ' (escala invertida: 10 = extremadamente cansado, más bajo es mejor)' : ' (más alto es mejor)'}${pv != null ? `; semana anterior ${pv}` : ''}${nm != null ? `; su normal (media de las 4 anteriores) ${nm}` : ''}.`,
-        fr: (t, v, inv, pv, nm) => `- ${t} : ${v} sur 10${inv ? ' (échelle inversée : 10 = extrêmement fatigué, plus bas est mieux)' : ' (plus haut est mieux)'}${pv != null ? ` ; semaine précédente ${pv}` : ''}${nm != null ? ` ; sa normale (moyenne des 4 précédentes) ${nm}` : ''}.`,
-        en: (t, v, inv, pv, nm) => `- ${t}: ${v} out of 10${inv ? ' (inverted scale: 10 = extremely tired, lower is better)' : ' (higher is better)'}${pv != null ? `; previous week ${pv}` : ''}${nm != null ? `; their usual (average of the previous 4) ${nm}` : ''}.`,
+        ca: (t, v, inv, nm) => `- ${t}: ${v} de 10${inv ? ' (escala invertida: 10 = extremadament cansat, més baix és millor)' : ' (més alt és millor)'}${nm != null ? `; el seu normal (mitjana de les 4 anteriors) ${nm}` : ''}.`,
+        es: (t, v, inv, nm) => `- ${t}: ${v} de 10${inv ? ' (escala invertida: 10 = extremadamente cansado, más bajo es mejor)' : ' (más alto es mejor)'}${nm != null ? `; su normal (media de las 4 anteriores) ${nm}` : ''}.`,
+        fr: (t, v, inv, nm) => `- ${t} : ${v} sur 10${inv ? ' (échelle inversée : 10 = extrêmement fatigué, plus bas est mieux)' : ' (plus haut est mieux)'}${nm != null ? ` ; sa normale (moyenne des 4 précédentes) ${nm}` : ''}.`,
+        en: (t, v, inv, nm) => `- ${t}: ${v} out of 10${inv ? ' (inverted scale: 10 = extremely tired, lower is better)' : ' (higher is better)'}${nm != null ? `; their usual (average of the previous 4) ${nm}` : ''}.`,
       },
       wWords: {
         ca: (r, d, s) => `- Paraules: rendiment «${r}», descans «${d}», salut «${s}».`, es: (r, d, s) => `- Palabras: rendimiento «${r}», descanso «${d}», salud «${s}».`,
@@ -1363,25 +1380,54 @@ Reply ONLY with this JSON: {"text": "your answer", "blocs": [], "basat": ["data 
         en: (n, k, a, lo, hi, f) => `- ${n} (data "${k}"): average ${a} (range ${lo} to ${hi}); ${f} days outside their usual or borderline.`,
       },
       wMain: {
-        ca: (id, lb, w, L) => `Resum de la setmana ${id} (${lb}) de ${w.name}, ${w.age} anys. Dades del formulari setmanal i del registre diari:\n${L}`,
-        es: (id, lb, w, L) => `Resumen de la semana ${id} (${lb}) de ${w.name}, ${w.age} años. Datos del formulario semanal y del registro diario:\n${L}`,
-        fr: (id, lb, w, L) => `Résumé de la semaine ${id} (${lb}) de ${w.name}, ${w.age} ans. Données du formulaire hebdomadaire et du relevé quotidien :\n${L}`,
-        en: (id, lb, w, L) => `Summary of week ${id} (${lb}) for ${w.name}, ${w.age} years old. Data from the weekly form and the daily log:\n${L}`,
+        ca: (id, lb, L) => `Resum de la setmana ${id} (${lb}). Dades del formulari setmanal i del registre diari:\n${L}`,
+        es: (id, lb, L) => `Resumen de la semana ${id} (${lb}). Datos del formulario semanal y del registro diario:\n${L}`,
+        fr: (id, lb, L) => `Résumé de la semaine ${id} (${lb}). Données du formulaire hebdomadaire et du relevé quotidien :\n${L}`,
+        en: (id, lb, L) => `Summary of week ${id} (${lb}). Data from the weekly form and the daily log:\n${L}`,
       },
       // Informe del mes
-      mItem: {
-        ca: (i, t, a, v, p) => `- wemwbs_${i} «${t}»: ${a} (${v} de 5)${p ? `; mes anterior ${p}` : ''}.`, es: (i, t, a, v, p) => `- wemwbs_${i} «${t}»: ${a} (${v} de 5)${p ? `; mes anterior ${p}` : ''}.`,
-        fr: (i, t, a, v, p) => `- wemwbs_${i} « ${t} » : ${a} (${v} sur 5)${p ? ` ; mois précédent ${p}` : ''}.`, en: (i, t, a, v, p) => `- wemwbs_${i} "${t}": ${a} (${v} out of 5)${p ? `; previous month ${p}` : ''}.`,
+      // Informe del mes nou (prova): les 7 frases sense gènere, el seu normal, les dades dels mateixos 14 dies i les normes de seguretat. Sense nom ni sexe.
+      m2Main: {
+        ca: (p, L) => `Formulari mensual de benestar. Pregunta per les dues últimes setmanes (${p}): 7 frases d'1 (cap vegada) a 5 (sempre); més alt és millor.\n${L}`,
+        es: (p, L) => `Formulario mensual de bienestar. Pregunta por las dos últimas semanas (${p}): 7 frases de 1 (nunca) a 5 (siempre); más alto es mejor.\n${L}`,
+        fr: (p, L) => `Formulaire mensuel de bien-être. Il porte sur les deux dernières semaines (${p}) : 7 phrases de 1 (jamais) à 5 (tout le temps) ; plus haut est mieux.\n${L}`,
+        en: (p, L) => `Monthly wellbeing form. It covers the last two weeks (${p}): 7 statements from 1 (none of the time) to 5 (all of the time); higher is better.\n${L}`,
       },
-      mTotal: {
-        ca: (t, p) => `- wemwbs (total, de 7 a 35, més alt és millor): ${t}${p != null ? `; mes anterior ${p}` : ' (primer mes)'}.`, es: (t, p) => `- wemwbs (total, de 7 a 35, más alto es mejor): ${t}${p != null ? `; mes anterior ${p}` : ' (primer mes)'}.`,
-        fr: (t, p) => `- wemwbs (total, de 7 à 35, plus haut est mieux) : ${t}${p != null ? ` ; mois précédent ${p}` : ' (premier mois)'}.`, en: (t, p) => `- wemwbs (total, 7 to 35, higher is better): ${t}${p != null ? `; previous month ${p}` : ' (first month)'}.`,
+      m2Item: {
+        ca: (i, t, a, v, nm) => `- wemwbs_${i} «${t}»: ${a} (${v} de 5)${nm != null ? `; el seu normal ${nm}` : ''}.`, es: (i, t, a, v, nm) => `- wemwbs_${i} «${t}»: ${a} (${v} de 5)${nm != null ? `; su normal ${nm}` : ''}.`,
+        fr: (i, t, a, v, nm) => `- wemwbs_${i} « ${t} » : ${a} (${v} sur 5)${nm != null ? ` ; sa normale ${nm}` : ''}.`, en: (i, t, a, v, nm) => `- wemwbs_${i} "${t}": ${a} (${v} out of 5)${nm != null ? `; their usual ${nm}` : ''}.`,
       },
-      mMain: {
-        ca: (w, m, L) => `Formulari mensual de benestar mental (WEMWBS, 7 ítems d'1 a 5) de ${w.name}, ${w.age} anys, corresponent a ${m}:\n${L}\nParla només d'aquestes dades.`,
-        es: (w, m, L) => `Formulario mensual de bienestar mental (WEMWBS, 7 ítems de 1 a 5) de ${w.name}, ${w.age} años, correspondiente a ${m}:\n${L}\nHabla solo de estos datos.`,
-        fr: (w, m, L) => `Formulaire mensuel de bien-être mental (WEMWBS, 7 items de 1 à 5) de ${w.name}, ${w.age} ans (mois : ${m}) :\n${L}\nParle uniquement de ces données.`,
-        en: (w, m, L) => `Monthly mental wellbeing form (WEMWBS, 7 items from 1 to 5) for ${w.name}, ${w.age} years old, for ${m}:\n${L}\nOnly talk about these data.`,
+      m2Total: {
+        ca: (t, nm, n, pm, pt) => `- wemwbs (total, de 7 a 35): ${t}${nm != null ? `; el seu normal (mitjana dels ${n} mesos anteriors) ${nm}` : n ? '; encara no hi ha prou mesos per saber el seu normal' : ' (primer formulari)'}${pm ? `; mes anterior (${pm}) ${pt}` : ''}.`,
+        es: (t, nm, n, pm, pt) => `- wemwbs (total, de 7 a 35): ${t}${nm != null ? `; su normal (media de los ${n} meses anteriores) ${nm}` : n ? '; aún no hay suficientes meses para saber su normal' : ' (primer formulario)'}${pm ? `; mes anterior (${pm}) ${pt}` : ''}.`,
+        fr: (t, nm, n, pm, pt) => `- wemwbs (total, de 7 à 35) : ${t}${nm != null ? ` ; sa normale (moyenne des ${n} mois précédents) ${nm}` : n ? ' ; pas encore assez de mois pour connaître sa normale' : ' (premier formulaire)'}${pm ? ` ; mois précédent (${pm}) ${pt}` : ''}.`,
+        en: (t, nm, n, pm, pt) => `- wemwbs (total, 7 to 35): ${t}${nm != null ? `; their usual (average of the previous ${n} months) ${nm}` : n ? '; not enough months yet to know their usual' : ' (first form)'}${pm ? `; previous month (${pm}) ${pt}` : ''}.`,
+      },
+      m2Pend: { ca: m => `- Formulari sense respondre: ${m}. No te n'inventis les dades.`, es: m => `- Formulario sin responder: ${m}. No inventes sus datos.`, fr: m => `- Formulaire sans réponse : ${m}. N'invente pas ses données.`, en: m => `- Form not answered: ${m}. Don't make up its data.` },
+      m2Prev: { ca: s => `- Mesos anteriors (total de 7 a 35): ${s}.`, es: s => `- Meses anteriores (total de 7 a 35): ${s}.`, fr: s => `- Mois précédents (total de 7 à 35) : ${s}.`, en: s => `- Previous months (total 7 to 35): ${s}.` },
+      m2Health: { ca: '- Ara té un problema de salut en curs (privat: no saps quin és). No en parlis i fes servir un to tranquil.', es: '- Ahora tiene un problema de salud en curso (privado: no sabes cuál). No lo menciones y usa un tono tranquilo.',
+        fr: "- Elle a en ce moment un problème de santé en cours (privé : tu ne sais pas lequel). N'en parle pas et garde un ton calme.", en: "- They currently have an ongoing health problem (private: you don't know which). Don't mention it and keep a calm tone." },
+      m2Sup: {
+        ca: "- L'app ja li mostra un missatge fix d'ajuda, amb qui en pot parlar i telèfons. No donis telèfons ni recursos, no parlis de salut mental i fes servir un to breu, proper i tranquil.",
+        es: '- La app ya le muestra un mensaje fijo de ayuda, con quién puede hablarlo y teléfonos. No des teléfonos ni recursos, no hables de salud mental y usa un tono breve, cercano y tranquilo.',
+        fr: "- L'app lui affiche déjà un message fixe d'aide, avec à qui en parler et des numéros. Ne donne ni numéros ni ressources, ne parle pas de santé mentale et garde un ton bref, chaleureux et calme.",
+        en: "- The app already shows them a fixed support message, with who to talk to and phone numbers. Don't give numbers or resources, don't talk about mental health, and keep the tone short, warm and calm.",
+      },
+      m2Texto: { ca: 'Afegeix també "texto": 2 o 3 frases curtes, en llenguatge senzill i en to positiu i proper, sobre com han anat aquestes dues setmanes respecte al seu normal (què puja i què baixa). Sense ordres ni xifres; marca entre dobles claudàtors les 2 o 3 idees clau.',
+        es: 'Añade también "texto": 2 o 3 frases cortas, en lenguaje sencillo y en tono positivo y cercano, sobre cómo han ido estas dos semanas respecto a su normal (qué sube y qué baja). Sin órdenes ni cifras; marca entre dobles corchetes las 2 o 3 ideas clave.',
+        fr: 'Ajoute aussi "texto" : 2 ou 3 phrases courtes, en langage simple et sur un ton positif et proche, sur la façon dont se sont passées ces deux semaines par rapport à sa normale (ce qui monte et ce qui baisse). Sans ordres ni chiffres ; mets entre doubles crochets les 2 ou 3 idées clés.',
+        en: 'Also add "texto": 2 or 3 short sentences, in plain language and a warm, positive tone, about how these two weeks went compared with their usual (what went up and what went down). No orders and no numbers; put the 2 or 3 key ideas in double square brackets.' },
+      m2Rules: {
+        ca: "Normes d'aquest informe: compara només amb els seus mesos anteriors; digues «coincideix amb», mai «per» ni «perquè» (no atribueixis causes); no facis servir paraules clíniques (depressió, ansietat, estrès, trastorn); no la comparis amb altres persones ni amb valors de població; no copiïs les frases del formulari.",
+        es: 'Normas de este informe: compara solo con sus meses anteriores; di «coincide con», nunca «por» ni «porque» (no atribuyas causas); no uses palabras clínicas (depresión, ansiedad, estrés, trastorno); no la compares con otras personas ni con valores de población; no copies las frases del formulario.',
+        fr: "Règles de ce rapport : compare seulement avec ses mois précédents ; dis « coïncide avec », jamais « à cause de » ni « parce que » (n'attribue pas de causes) ; n'utilise pas de mots cliniques (dépression, anxiété, stress, trouble) ; ne la compare ni à d'autres personnes ni à des valeurs de population ; ne recopie pas les phrases du formulaire.",
+        en: 'Rules for this report: compare only with their previous months; say "coincides with", never "because" or "due to" (do not attribute causes); do not use clinical words (depression, anxiety, stress, disorder); do not compare them with other people or population values; do not copy the statements from the form.',
+      },
+      m2Idees: {
+        ca: 'Afegeix també "idees": 1 o 2 idees d\'hàbits senzills per a les properes setmanes, adequades a la seva edat, en condicional i lligades a les frases que han baixat o són més baixes, cadascuna {"dada": "wemwbs_N o general", "accio": "hàbit concret, màxim 12 paraules", "motiu": "per què, basat en les seves respostes, màxim 14 paraules"}. Res de teràpia, entrenaments, suplements ni medicaments.',
+        es: 'Añade también "idees": 1 o 2 ideas de hábitos sencillos para las próximas semanas, adecuadas a su edad, en condicional y ligadas a las frases que han bajado o están más bajas, cada una {"dada": "wemwbs_N o general", "accio": "hábito concreto, máximo 12 palabras", "motiu": "por qué, basado en sus respuestas, máximo 14 palabras"}. Nada de terapia, entrenamientos, suplementos ni medicamentos.',
+        fr: 'Ajoute aussi "idees" : 1 ou 2 idées d\'habitudes simples pour les prochaines semaines, adaptées à son âge, au conditionnel et liées aux phrases qui ont baissé ou qui sont les plus basses, chacune {"dada": "wemwbs_N ou general", "accio": "habitude concrète, 12 mots maximum", "motiu": "pourquoi, selon ses réponses, 14 mots maximum"}. Ni thérapie, ni entraînements, ni compléments, ni médicaments.',
+        en: 'Also add "idees": 1 or 2 simple habit ideas for the coming weeks, age-appropriate, written as conditional suggestions and linked to the statements that dropped or are lowest, each {"dada": "wemwbs_N or general", "accio": "concrete habit, 12 words max", "motiu": "why, based on their answers, 14 words max"}. No therapy, training, supplements or medication.',
       },
       // Lectura de tendències
       tMetric: {
@@ -1396,8 +1442,8 @@ Reply ONLY with this JSON: {"text": "your answer", "blocs": [], "basat": ["data 
       },
       tMiss: { ca: n => `- Dies sense registre en l'última setmana: ${n}.`, es: n => `- Días sin registro en la última semana: ${n}.`, fr: n => `- Jours sans relevé la dernière semaine : ${n}.`, en: n => `- Days not logged in the last week: ${n}.` },
       tMain: {
-        ca: (w, L) => `Tendències dels últims 28 dies de ${w.name}, ${w.age} anys:\n${L}`, es: (w, L) => `Tendencias de los últimos 28 días de ${w.name}, ${w.age} años:\n${L}`,
-        fr: (w, L) => `Tendances des 28 derniers jours de ${w.name}, ${w.age} ans :\n${L}`, en: (w, L) => `Trends over the last 28 days for ${w.name}, ${w.age} years old:\n${L}`,
+        ca: L => `Tendències dels últims 28 dies:\n${L}`, es: L => `Tendencias de los últimos 28 días:\n${L}`,
+        fr: L => `Tendances des 28 derniers jours :\n${L}`, en: L => `Trends over the last 28 days:\n${L}`,
       },
     },
   };
@@ -1415,10 +1461,16 @@ Reply ONLY with this JSON: {"text": "your answer", "blocs": [], "basat": ["data 
   // problema de salut, PB_SIM); es guarden per idioma, escenari i prova.
   get WEEKS() { const L = this.L(), sc = this.state.scenario, ps = sc === 'nou' ? 'sc' : this.state.pbSim || 'sc', ck = sc + '|' + ps, c = L._wk || (L._wk = {}); if (c[ck]) return c[ck];
     const ov = (L.WEEK_SC || {})[sc] || {}, sim = ps !== 'sc' ? (L.PB_SIM || {})[ps] : null, mg = (W, o) => (o ? { ...W, ...o, v: { ...W.v, ...o.v }, w: { ...W.w, ...o.w } } : W);
-    return (c[ck] = L.WEEKS.map(W => mg(mg(W, ov[W.id]), W.id === 38 ? sim : null))); } get MONTHS() { return this.L().MONTHS; } get WD() { return this.L().WD; } get WDL() { return this.L().WDL; }
-  get OST() { return this.L().OST; } get OST_S() { return this.L().OST_S; } get PB() { return this.L().PB; } get SCALE5() { return this.L().SCALE5; } get APSQ_ITEMS() { return this.L().APSQ_ITEMS; }
+    return (c[ck] = L.WEEKS.map(W => mg(mg(W, ov[W.id]), W.id === 38 ? sim : null))); }
+  // Mesos: amb el Mes nou (prova), l'últim formulari mensual respost canvia amb l'escenari (MONTH_SC) i amb el matràs › «Bienestar en el formulario (mes)».
+  get MONTHS() { const L = this.L(), s = this.state;
+    const sc = s.scenario, ps = s.wemSim || 'sc', ml = this.mLast(), ck = `${sc}|${ps}|${ml}`, c = L._mo || (L._mo = {}); if (c[ck]) return c[ck];
+    const ov = (L.MONTH_SC || {})[sc] || {};
+    return (c[ck] = L.MONTHS.map((M, j) => { const w = j === ml && ps !== 'sc' ? this.WEM_SIM[ps] : ov[M.k]; return w ? { ...M, wem: w } : M; })); }
+  get WD() { return this.L().WD; } get WDL() { return this.L().WDL; }
+  get OST() { return this.L().OST; } get OST_S() { return this.L().OST_S; } get PB() { return this.L().PB; } get SCALE5() { return this.L().SCALE5; }
   get PRIV() { return this.L().PRIV; } get ROLES() { return this.L().ROLES; } get WEM_SHORT() { return this.L().WEM_SHORT; }
-  get GEN() { return this.L().GEN; } get FB_MONTH() { return this.L().FB_MONTH; } get FB_TREND() { return this.L().FB_TREND; }
+  get GEN() { return this.L().GEN; } get FB_TREND() { return this.L().FB_TREND; }
   setLang(l) { try { localStorage.setItem('mt-lang', l); } catch (e) {} this.setState({ lang: l }); }
 
   componentDidMount() {
@@ -1479,6 +1531,12 @@ Reply ONLY with this JSON: {"text": "your answer", "blocs": [], "basat": ["data 
   dayH(p) { return p == null ? null : this.lerpPts(this.PH, p); }
   sH(v, min, max, inv) { let x = (v - min) / (max - min); if (inv) x = 1 - x; return this.lerpPts(this.SQ, x); }
   sTone(v, min, max, inv) { return this.tone(this.sH(v, min, max, inv)); }
+  // Benestar del formulari mensual: mai vermell, de l'àmbar al verd (triat el 02-10-2026). La part alta és la mateixa escala que sTone;
+  // per sota de l'àmbar ja no baixa més, però continua sent gradual. fill = per a barres, anells i punts grans (en clar, més lluminós).
+  wH(v, min, max) { const hh = this.lerpPts(this.SQ, Math.max(0, Math.min(1, (v - min) / (max - min)))); return hh >= .42 ? hh : .34 + hh / .42 * .08; }
+  wTone(v, min, max, fill) { return this.tone(this.wH(v, min, max), fill); }
+  // Les marques del text del benestar ([[…|!]] / [[…|~]]): àmbar, mai vermell.
+  WSEG = { '!': .34, '~': .4, '+': .97 };
   status(k, v, band) {
     const C = this.C;
     if (v === undefined) return { lv: null, label: this.t('noData'), col: C.ink3 };
@@ -1592,14 +1650,14 @@ Reply ONLY with this JSON: {"text": "your answer", "blocs": [], "basat": ["data 
     const wk2 = Math.max(this.lastWi(), s.week2);
     if (s.page === 'setmana' && this.canLive('week', sc)) want.push(this.aiKey('week2', sc, wk2));
     // Mes: el mes que es veu (mai un formulari mensual sense respondre: no s'envia a la IA).
-    if (s.page === 'mes' && this.canLive('month', sc)) want.push(this.aiKey('month', sc, Math.max(this.mLast(), Math.min(s.month, this.MONTHS.length - 1))));
+    if (s.page === 'mes' && this.canLive('month', sc)) { const mi = Math.max(this.mLast(), Math.min(s.month, this.MONTHS.length - 1)); want.push(this.aiKey('month2', sc, this.m2Extra(mi))); }
     if (s.page === 'evolucio' && this.canLive('trend', sc)) want.push(this.aiKey('trend', sc));
     want.forEach(key => { if (this.state.ai[key] || this.requested.has(key)) return; this.requested.add(key); this.fetchAI(key); });
   }
   setAI(key, entry) {
     this.setState(st => {
       const ai = { ...st.ai, [key]: entry };
-      try { const keep = {}; Object.keys(ai).forEach(k => { if (ai[k].status === 'done') keep[k] = ai[k]; }); localStorage.setItem('mt-desk-ai-v12', JSON.stringify(keep)); } catch (e) {}
+      try { const keep = {}; Object.keys(ai).forEach(k => { if (ai[k].status === 'done') keep[k] = ai[k]; }); localStorage.setItem('mt-desk-ai-v14', JSON.stringify(keep)); } catch (e) {}
       return { ai };
     });
   }
@@ -1607,21 +1665,21 @@ Reply ONLY with this JSON: {"text": "your answer", "blocs": [], "basat": ["data 
     const [kind, sc, extra] = key.split('|');
     this.setAI(key, { status: 'loading' });
     try {
-      const user = kind === 'daily' ? this.promptDaily(sc) : kind === 'week' || kind === 'week2' ? this.promptWeek(sc, +extra, kind) : kind === 'month' ? this.promptMonth(sc, +extra) : this.promptTrend(sc);
+      const user = kind === 'daily' ? this.promptDaily(sc) : kind === 'week' || kind === 'week2' ? this.promptWeek(sc, +extra, kind) : kind === 'month2' ? this.promptMonth2(sc, +String(extra).split('.')[0]) : this.promptTrend(sc);
       const raw = String(await window.claude.complete({ system: this.L().AI.system, max_tokens: 1500, messages: [{ role: 'user', content: user }] }));
       const mm = raw.match(/\{[\s\S]*\}/); if (!mm) throw new Error('json');
       const o = JSON.parse(mm[0]), allow = this.AI_KEYS[kind === 'week2' ? 'week' : kind];
       if (typeof o.titular !== 'string' || !Array.isArray(o.troballes)) throw new Error('camps');
       const tr = o.troballes.filter(t => t && typeof t.text === 'string' && allow.includes(t.dada)).slice(0, 4).map(t => ({ k: t.dada, t: t.text.trim(), to: ['be', 'vigilar', 'info'].includes(t.to) ? t.to : undefined }));
       const ac = (Array.isArray(o.accions) ? o.accions : [o.accions]).filter(x => typeof x === 'string' && x.trim()).slice(0, 2).map(x => x.trim());
-      if (!tr.length || !ac.length || !o.titular.trim()) throw new Error('buit');
-      this.setAI(key, { status: 'done', val: { titular: o.titular.replace(/\[\[|\]\]|\|[!~+]/g, '').trim(), resum: typeof o.resum === 'string' ? o.resum.trim() : '', texto: typeof o.texto === 'string' ? o.texto.trim() : '', seguiment: typeof o.seguiment === 'string' ? o.seguiment.trim() : '', estrategies: (Array.isArray(o.estrategies) ? o.estrategies : []).filter(x => x && typeof x.accio === 'string' && x.accio.trim()).slice(0, 3).map(x => ({ a: ['son', 'desc', 'hidr', 'nutr', 'mob', 'resp', 'com', 'reg'].includes(x.area) ? x.area : 'desc', t: x.accio.trim(), w: typeof x.motiu === 'string' ? x.motiu.trim() : '' })), troballes: tr, accions: ac } });
+      if (!tr.length || (!ac.length && kind !== 'week2') || !o.titular.trim()) throw new Error('buit');
+      this.setAI(key, { status: 'done', val: { titular: o.titular.replace(/\[\[|\]\]|\|[!~+]/g, '').trim(), resum: typeof o.resum === 'string' ? o.resum.trim() : '', texto: typeof o.texto === 'string' ? o.texto.trim() : '', seguiment: typeof o.seguiment === 'string' ? o.seguiment.trim() : '', estrategies: (Array.isArray(o.estrategies) ? o.estrategies : []).filter(x => x && typeof x.accio === 'string' && x.accio.trim()).slice(0, 3).map(x => ({ a: ['son', 'desc', 'hidr', 'nutr', 'mob', 'resp', 'com', 'reg'].includes(x.area) ? x.area : 'desc', t: x.accio.trim(), w: typeof x.motiu === 'string' ? x.motiu.trim() : '' })), troballes: tr, accions: ac,
+        idees: (Array.isArray(o.idees) ? o.idees : []).filter(x => x && typeof x.accio === 'string' && x.accio.trim()).slice(0, 2).map(x => ({ k: /^wemwbs_[1-7]$/.test(x.dada) ? x.dada : 'general', t: x.accio.trim(), w: typeof x.motiu === 'string' ? x.motiu.trim() : '' })) } });
     } catch (e) { this.setAI(key, { status: 'error' }); }
   }
   fallback(kind, sc, extra) {
     if (kind === 'daily') return this.fbDaily(sc);
     if (kind === 'week') return this.fbWeek(sc, extra);
-    if (kind === 'month') return this.FB_MONTH[this.MONTHS[extra].k];
     return this.FB_TREND[{ disc: 'comp', gran: 'comp', estres: 'normal', salut: 'normal' }[sc] || sc];
   }
   // Textos de reserva (quan la IA no respon), fets amb les dades i les mateixes regles que la resta de la pantalla; les idees són hàbits, mai entrenament.
@@ -1673,7 +1731,8 @@ Reply ONLY with this JSON: {"text": "your answer", "blocs": [], "basat": ["data 
     if (W.ostrc > 0) S.push(PI ? G.wPb(PI.tp.toLowerCase(), PI.det, this.OST_S[W.ostrc].toLowerCase()) : G.wOst(this.OST_S[W.ostrc].toLowerCase()));
     const fl = D.band ? this.KEYS.map(k => ({ k, n: E.past.filter(i => D.vals[k][i] != null && this.lvlOf(k, D.vals[k][i], D.band) !== 'ok').length })).sort((x, y) => y.n - x.n)[0] : null;
     const tr = [...s5.slice(0, 2).map(x => ({ k: x.q.k, to: x.h >= .6 ? 'be' : 'vigilar', t: x.h >= .6 ? G.fGood : G.fLow })), ...(W.ostrc > 0 ? [{ k: 'ostrc', to: 'vigilar', t: G.fOst }] : []), ...(fl && fl.n ? [{ k: fl.k, to: 'vigilar', t: G.fMetric(fl.n) }] : [])].slice(0, 4);
-    const HO = lab && this.healthList(sc, D, W).some(x => x.k === 'on');
+    // El titular només compta les lesions i malalties: la salut mental ja té el seu bloc a dalt i aquí no s'esmenta.
+    const HO = lab && this.physList(sc, D, W).some(x => x.k === 'on');
     return { titular: E.key === 'good' && HO ? G.wT.goodPb : G.wT[E.key] || G.wT.mid, resum: G.wResum(E.good, E.norm, E.reg), texto: S.join(' '), troballes: tr, accions: [G.wAct] };
   }
   // Informe resolt: text + a quins dies (o files) es refereix cada troballa, perquè els gràfics les puguin marcar.
@@ -1688,16 +1747,16 @@ Reply ONLY with this JSON: {"text": "your answer", "blocs": [], "basat": ["data 
   }
   daysFor(kind, k, sc, extra) {
     const D = this.data(sc);
-    if (kind === 'month' || !this.KEYS.includes(k)) return k === 'coach' ? [41] : k === 'ahir' ? [40] : [];
+    if (!this.KEYS.includes(k)) return k === 'coach' ? [41] : k === 'ahir' ? [40] : [];
     if (kind === 'week') { const a = this.WEEKS[extra].a; return Array.from({ length: 7 }, (_, j) => a + j).filter(i => this.flag(k, D.vals[k][i], D.band)); }
     const out = [];
     for (let i = 41; i >= 0; i--) { const v = D.vals[k][i]; if (i === 41) { if (v == null) break; out.unshift(i); continue; } if (this.flag(k, v, D.band)) out.unshift(i); else break; }
     return out;
   }
-  jsonAsk(kind) { const A = this.L().AI, k0 = kind === 'week2' ? 'week' : kind; return A.json(this.AI_KEYS[k0].join(', '), A.when[k0]) + (kind === 'daily' ? ' ' + A.textAsk + ' ' + A.stratAsk : kind === 'week2' ? ' ' + A.textAskW : ''); }
+  jsonAsk(kind) { const A = this.L().AI, k0 = kind === 'week2' ? 'week' : kind; if (kind === 'week2') return A.jsonW(this.AI_KEYS.week.join(', ')); return A.json(this.AI_KEYS[k0].join(', '), A.when[k0]) + (kind === 'daily' ? ' ' + A.textAsk + ' ' + A.stratAsk : kind === 'month2' ? ' ' + A.m2Texto + ' ' + A.m2Idees + ' ' + A.m2Rules : ''); }
   promptDaily(sc) {
-    const D = this.data(sc), w = this.who(sc), K = this.KEYS, A = this.L().AI, ask = this.jsonAsk('daily');
-    const head = A.head(w, w.sexe.toLowerCase(), this.dFull(41)), TC = this.caution(sc);
+    const D = this.data(sc), K = this.KEYS, A = this.L().AI, ask = this.jsonAsk('daily');
+    const head = A.head(this.dFull(41)), TC = this.caution(sc);
     const cond = TC ? `\n${A.dCaution(this.trkLabel(TC, true).toLowerCase(), this.dLong(TC.start), TC.type === 'health' ? this.OST_S[TC.W.ostrc].toLowerCase() : null)}` : '';
     if (sc === 'nou' || !D.band) return `${head}\n${A.dNou({ rhr: this.fmtT('rhr', D.vals.rhr[41]), hrv: this.fmtT('hrv', D.vals.hrv[41]), son: this.fmtT('son', D.vals.son[41]), estat: this.fmtT('estat', D.vals.estat[41]) }, D.nData)}\n${ask}`;
     if (K.every(k => D.vals[k][41] == null)) { const sy = this.dayState(sc, 40); return `${head}\n${A.dBuit(K.map(k => `${this.META[k].name} ${this.fmtT(k, D.vals[k][40])}`).join(', '), sy ? this.ST[sy].w : this.t('noDataL'))}${cond}\n${ask}`; }
@@ -1719,8 +1778,8 @@ Reply ONLY with this JSON: {"text": "your answer", "blocs": [], "basat": ["data 
     return `${A.dMain(head, lines.join('\n'), st ? this.ST[st].w : this.t('noDataL'), sy ? this.ST[sy].w : this.t('noDataL'))}${cond}\n${ask}`;
   }
   promptWeek(sc, wi, kind) {
-    const W = this.WEEKS[wi], P = this.WEEKS[wi + 1], w = this.who(sc), ws = this.weekStats(sc, W.a), A = this.L().AI, ask = this.jsonAsk(kind || 'week');
-    const NM = this.normOf(wi), L = this.SCALES.map(q => A.wScale(q.t, W.v[q.k], q.inv, P ? P.v[q.k] : null, NM ? this.decS(NM[q.k]) : null));
+    const W = this.WEEKS[wi], ws = this.weekStats(sc, W.a), A = this.L().AI, ask = this.jsonAsk(kind || 'week');
+    const NM = this.normOf(wi), L = this.SCALES.map(q => A.wScale(q.t, W.v[q.k], q.inv, NM ? this.decS(NM[q.k]) : null));
     L.push(A.wWords(W.w.rendiment, W.w.descans, W.w.salut));
     if (W.com) L.push(A.wCom(W.com));
     // Els problemes de salut amb el detall del formulari. D'un problema de salut mental, res (ni el dia): la IA només sap que n'hi ha un de privat.
@@ -1729,28 +1788,22 @@ Reply ONLY with this JSON: {"text": "your answer", "blocs": [], "basat": ["data 
     PBS.forEach(b => { const PI = this.pbInfo(b); L.push(PI ? A.wProb(lc(PI.tp), PI.det, lc(PI.mod), lc(PI.perf), lc(PI.sym), b.j ? lc(this.OST[b.ost]) : null) : A.wPriv); });
     L.push(A.wStates(ws.cnt, { fons: this.ST.fons.w, mod: this.ST.mod.w, rec: this.ST.rec.w }));
     const Db = this.data(sc).band; if (Db) this.KEYS.forEach(k => { const x = ws.m[k], b = Db[k]; L.push(A.wMetric(this.META[k].name, k, this.fmtT(k, x.avg), this.fmtT(k, b.lo), this.fmtT(k, b.hi), x.flags)); });
-    return `${A.wMain(W.id, this.weekLabel(W.a), w, L.join('\n'))}\n${ask}`;
-  }
-  promptMonth(sc, mi) {
-    const M = this.MONTHS[mi], P = this.MONTHS[mi + 1], w = this.who(sc), items = this.wemItems(sc), A = this.L().AI, ask = this.jsonAsk('month');
-    const L = items.map((t, i) => A.mItem(i + 1, t, this.SCALE5[M.wem[i] - 1], M.wem[i], P ? this.SCALE5[P.wem[i] - 1] : null));
-    L.push(A.mTotal(this.sum(M.wem), P ? this.sum(P.wem) : null));
-    return `${A.mMain(w, M.name, L.join('\n'))}\n${ask}`;
+    return `${A.wMain(W.id, this.weekLabel(W.a), L.join('\n'))}\n${ask}`;
   }
   promptTrend(sc) {
-    const D = this.data(sc), w = this.who(sc), a = this.sentsStats(sc, 28), A = this.L().AI, ask = this.jsonAsk('trend');
+    const D = this.data(sc), a = this.sentsStats(sc, 28), A = this.L().AI, ask = this.jsonAsk('trend');
     const avg = xs => { const p = xs.filter(v => v != null); return p.length ? p.reduce((s, x) => s + x, 0) / p.length : null; };
     const L = this.KEYS.map(k => A.tMetric(this.META[k].name, k, this.fmtT(k, avg(D.vals[k].slice(35))), this.fmtT(k, avg(D.vals[k].slice(14, 35)))));
     L.push(A.tSents(a.k, a.n, a.better, a.worse));
     const miss = D.pos.slice(35).filter(p => p == null).length;
     if (miss) L.push(A.tMiss(miss));
-    return `${A.tMain(w, L.join('\n'))}\n${ask}`;
+    return `${A.tMain(L.join('\n'))}\n${ask}`;
   }
-  wemItems(sc) { return this.L().WEM(this.who(sc).fem); }
   // [[xifra|marca]] → xifra destacada amb el to que li correspon.
-  segs(text) {
-    const C = this.C, out = [], re = /\[\[([^\]|]+?)(?:\|([!~+]))?\]\]/g, s = String(text || '');
-    const col = { '': C.ink, '!': this.tone(this.LV.bad), '~': this.tone(this.LV.mid), '+': this.tone(.97) };
+  // well = text del benestar mensual: les marques ! i ~ en àmbar (mai vermell).
+  segs(text, well) {
+    const C = this.C, out = [], re = /\[\[([^\]|]+?)(?:\|([!~+]))?\]\]/g, s = String(text || ''), W = this.WSEG;
+    const col = well ? { '': C.ink, '!': this.tone(W['!']), '~': this.tone(W['~']), '+': this.tone(W['+']) } : { '': C.ink, '!': this.tone(this.LV.bad), '~': this.tone(this.LV.mid), '+': this.tone(.97) };
     let last = 0, m, i = 0;
     while ((m = re.exec(s))) { if (m.index > last) out.push(h('span', { key: i++ }, s.slice(last, m.index))); out.push(h('span', { key: i++, style: { color: col[m[2] || ''], fontWeight: 600, whiteSpace: m[1].length <= 14 ? 'nowrap' : 'normal' } }, m[1])); last = re.lastIndex; }
     if (last < s.length) out.push(h('span', { key: i++ }, s.slice(last)));
@@ -1781,6 +1834,14 @@ Reply ONLY with this JSON: {"text": "your answer", "blocs": [], "basat": ["data 
       body: ['M19 14c1.5-1.5 3-3.2 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.8 0-3 .5-4.5 2-1.5-1.5-2.7-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4 3 5.5l7 7Z', 'M3.2 12h6.3l.5-1 2 4.5 2-7 1.5 3.5h5.3'].map(P),
       heart: ['M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z'].map(P),
       phone: ['M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z'].map(P),
+      // Frases del formulari mensual (idees del Mes).
+      sunrise: ['M12 2v8', 'm4.93 10.93 1.41 1.41', 'M2 18h2', 'M20 18h2', 'm19.07 10.93-1.41 1.41', 'M22 22H2', 'm8 6 4-4 4 4', 'M16 18a4 4 0 0 0-8 0'].map(P),
+      helping: ['M11 12h2a2 2 0 1 0 0-4h-3c-.6 0-1.1.2-1.4.6L3 14', 'm7 18 1.6-1.4c.3-.4.8-.6 1.4-.6h4c1.1 0 2.1-.4 2.8-1.2l4.6-4.4a2 2 0 0 0-2.75-2.91l-4.2 3.9', 'm2 13 6 6'].map(P),
+      waves: ['M2 6c.6.5 1.2 1 2.5 1C7 7 7 5 9.5 5c2.6 0 2.4 2 5 2 2.5 0 2.5-2 5-2 1.3 0 1.9.5 2.5 1', 'M2 12c.6.5 1.2 1 2.5 1 2.5 0 2.5-2 5-2 2.6 0 2.4 2 5 2 2.5 0 2.5-2 5-2 1.3 0 1.9.5 2.5 1', 'M2 18c.6.5 1.2 1 2.5 1 2.5 0 2.5-2 5-2 2.6 0 2.4 2 5 2 2.5 0 2.5-2 5-2 1.3 0 1.9.5 2.5 1'].map(P),
+      mountain: ['m8 3 4 8 5-5 5 15H2L8 3z'].map(P),
+      bulb: ['M15 14c.2-1 .7-1.7 1.5-2.5 1-.9 1.5-2.2 1.5-3.5A6 6 0 0 0 6 8c0 1 .2 2.2 1.5 3.5.7.7 1.3 1.5 1.5 2.5', 'M9 18h6', 'M10 22h4'].map(P),
+      compass: [h('circle', { key: 'c', cx: 12, cy: 12, r: 10 }), P('m16.24 7.76-1.804 5.411a2 2 0 0 1-1.265 1.265L7.76 16.24l1.804-5.411a2 2 0 0 1 1.265-1.265z')],
+      talk: ['M7.9 20A9 9 0 1 0 4 16.1L2 22Z'].map(P),
       users: [h('circle', { key: 'c', cx: 9, cy: 7, r: 4 }), ...['M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2', 'M22 21v-2a4 4 0 0 0-3-3.87', 'M16 3.13a4 4 0 0 1 0 7.75'].map(P)],
       form: [h('rect', { key: 'r', x: 8, y: 2, width: 8, height: 4, rx: 1 }), ...['M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2', 'M9 12h6', 'M9 16h4'].map(P)],
     }[name];
@@ -1824,11 +1885,6 @@ Reply ONLY with this JSON: {"text": "your answer", "blocs": [], "basat": ["data 
         return h('button', { key: o.k, role: 'tab', 'aria-selected': a, disabled: dis, onClick: () => { if (!dis) on(o.k); }, className: a || dis ? '' : 'mt-sg',
           style: { border: 'none', borderRadius: this.G.segIn, padding: '5px 11px', fontSize: 13, fontWeight: 500, cursor: dis ? 'not-allowed' : 'pointer', background: a ? C.s3 : 'transparent', color: a ? C.ink : dis ? this.fg(.25) : C.ink2, boxShadow: a ? `0 1px 2px ${this.sh(.4)}, inset 0 0 0 1px ${this.ov(.07)}` : 'none', transition: 'background .2s, color .2s' } }, o.t); }));
   }
-  stepper(label, onPrev, onNext) {
-    const C = this.C, btn = (dir, fn) => h('button', { key: dir, disabled: !fn, onClick: fn || undefined, className: fn ? 'mt-btn' : '', 'aria-label': this.t(dir === 'p' ? 'prev' : 'next'),
-      style: { width: 32, height: 32, display: 'flex', alignItems: 'center', justifyContent: 'center', border: `1px solid ${C.line2}`, borderRadius: this.G.ctrl, background: 'transparent', color: fn ? C.ink2 : this.fg(.2), cursor: fn ? 'pointer' : 'default', padding: 0 } }, this.icon(dir === 'p' ? 'left' : 'right', 16));
-    return h('div', { key: 'stp', style: { display: 'flex', alignItems: 'center', gap: 10 } }, btn('p', onPrev), h('span', { style: { minWidth: 170, textAlign: 'center', fontSize: 14, fontWeight: 500 } }, label), btn('n', onNext));
-  }
   coachGlyph(c, x, y, r, key) {
     if (c == null) return null;
     if (c === 'res') return h('line', { key, x1: x - r, x2: x + r, y1: y, y2: y, stroke: this.C.ink3, strokeWidth: 1.5, strokeLinecap: 'round' });
@@ -1853,7 +1909,6 @@ Reply ONLY with this JSON: {"text": "your answer", "blocs": [], "basat": ["data 
   sideOpen() { return this.G.gpt && this.state.side !== 'closed' && this.state.vw >= 1000; }
   sideW() { return !this.G.gpt ? 76 : this.sideOpen() ? 260 : 56; }
   geom() { const vw = this.state.vw, avail = Math.max(640, vw - this.sideW() - (this.chatPush() ? this.chatDock().w : 0)), pad = avail > 1100 ? 40 : 28, cw = Math.min(this.G.gpt ? 1120 : 1280, avail - pad * 2); return { pad, cw, cols: cw >= 1000 ? 4 : 2, stack: cw < 900 }; }
-  grid2(a, b, ratio, key) { const g = this.geom(); return h('div', { key: key || 'g2', style: { display: 'grid', gridTemplateColumns: g.stack ? 'minmax(0,1fr)' : ratio, gap: 16, alignItems: 'stretch' } }, a, b); }
   // Cada bloc queda per sobre del següent (zIndex), perquè un desplegable o un detall que sobresurt no quedi tapat pel bloc de sota.
   stack(items) { const gap = 32, L = items.filter(Boolean); return L.map((el, i) => h('div', { key: 's' + i, className: 'mt-in', style: { position: 'relative', zIndex: L.length - i, animationDelay: `${i * 55}ms`, marginTop: i > 1 ? gap : 0 } }, el)); }
   headEl(title, sub, right) {
@@ -1877,7 +1932,7 @@ Reply ONLY with this JSON: {"text": "your answer", "blocs": [], "basat": ["data 
     const v = useTween(p.v == null ? null : p.v, p.dur || 900, p.init), hh = v == null ? null : this.hOf(p.k, v, p.band);
     return h('span', { style: { color: v == null ? this.C.ink3 : hh == null ? this.C.ink : this.tone(hh) } }, this.fmtV(p.k, v == null ? null : this.roundM(p.k, v)));
   };
-  NumS = p => { const v = useTween(p.v, 900, p.init); return h('span', { style: { color: this.sTone(v, p.min, p.max, p.inv) } }, String(Math.round(v))); };
+  NumS = p => { const v = useTween(p.v, 900, p.init); return h('span', { style: { color: p.well ? this.wTone(v, p.min, p.max) : this.sTone(v, p.min, p.max, p.inv) } }, String(Math.round(v))); };
   // Posició d'avui dins la franja personal (on cau el valor respecte al teu normal).
   Bullet = p => {
     const C = this.C, { k, v, band, ring } = p, b = band ? band[k] : null;
@@ -1893,25 +1948,6 @@ Reply ONLY with this JSON: {"text": "your answer", "blocs": [], "basat": ["data 
         pos != null ? h('span', { style: { position: 'absolute', left: pct(pos), top: 0, width: 14, height: 14, marginLeft: -7, borderRadius: this.G.mk, background: this.toneOf(k, pos, band), boxShadow: `0 0 0 2px ${ring || C.s1}` } }) : null),
       h('div', { style: { position: 'relative', height: 13, marginTop: 5, fontSize: 11, color: C.ink3, fontVariantNumeric: 'tabular-nums' } },
         edge.map(([x, t, tr], j) => h('span', { key: j, style: { position: 'absolute', left: pct(x), transform: tr, whiteSpace: 'nowrap' } }, t))));
-  };
-  // Fila de qüestionari: valor anterior (cercle buit) → valor actual (cercle ple), animat.
-  DumbRow = p => {
-    const C = this.C, pos = useTween(p.v, 900, p.prev != null ? p.prev : p.v), span = p.max - p.min;
-    const pct = x => `${((x - p.min) / span) * 100}%`, col = this.sTone(pos, p.min, p.max, p.inv), d = p.prev != null ? p.v - p.prev : null;
-    const ticks = Array.from({ length: span + 1 }, (_, j) => p.min + j);
-    const a = p.prev != null ? Math.min(p.prev, pos) : pos, b = p.prev != null ? Math.max(p.prev, pos) : pos;
-    return h('div', { id: p.id, className: 'mt-row', style: { display: 'grid', gridTemplateColumns: `${p.labelW || 190}px minmax(0,1fr) 104px`, alignItems: 'center', gap: 22, padding: '11px 12px', margin: '0 -12px', borderRadius: this.G.inner, background: p.on ? this.ov(.045) : 'transparent' } },
-      h('div', { style: { display: 'flex', alignItems: 'center', gap: 10, minWidth: 0 } }, (p.badges || []).map(n => this.badge(n, p.focus === n, 18)),
-        h('div', { style: { minWidth: 0 } }, h('div', { style: { fontSize: 14, lineHeight: 1.35 } }, p.label), p.hint ? h('div', { style: { marginTop: 2, fontSize: 12, color: C.ink3 } }, p.hint) : null)),
-      h('div', { style: { position: 'relative', height: 26 } },
-        ticks.map(t => h('span', { key: t, style: { position: 'absolute', left: pct(t), top: 5, bottom: 5, width: 1, background: C.grid } })),
-        h('span', { style: { position: 'absolute', left: 0, right: 0, top: 12, height: 2, borderRadius: 1, background: this.ov(.06) } }),
-        p.prev != null ? h('span', { style: { position: 'absolute', left: pct(a), width: `calc(${pct(b)} - ${pct(a)})`, top: 12, height: 2, background: this.ov(.3) } }) : null,
-        p.prev != null ? h('span', { style: { position: 'absolute', left: pct(p.prev), top: 7, width: 12, height: 12, marginLeft: -6, borderRadius: this.G.mk, boxSizing: 'border-box', border: `1.5px solid ${C.ink3}`, background: C.s1 } }) : null,
-        h('span', { style: { position: 'absolute', left: pct(pos), top: 6, width: 14, height: 14, marginLeft: -7, borderRadius: this.G.mk, background: col, boxShadow: `0 0 0 2px ${C.s1}` } })),
-      h('div', { style: { textAlign: 'right', whiteSpace: 'nowrap' } },
-        h('span', { style: { fontSize: 17, fontWeight: 600, color: col } }, String(p.v)), h('span', { style: { fontSize: 12, color: C.ink3 } }, ` /${p.max}`),
-        h('div', { style: { marginTop: 1, fontSize: 12, color: C.ink3 } }, d == null ? this.t('firstEntryL') : d === 0 ? this.t('same') : this.t('vsPrev', `${d > 0 ? '+' : '−'}${Math.abs(d)}`))));
   };
 
   // ── Gràfics ─────────────────────────────────────────────────────────
@@ -2211,11 +2247,6 @@ Reply ONLY with this JSON: {"text": "your answer", "blocs": [], "basat": ["data 
         if (t.to === 'vigilar' && fl.length) { const up = this.DEF[k].worse === 'up'; let wi = fl[0]; fl.forEach(i => { if (up ? D.vals[k][i] > D.vals[k][wi] : D.vals[k][i] < D.vals[k][wi]) wi = i; }); return val(D.vals[k][wi], this.t('worstDay', this.dLong(wi))); }
         return val(avg(idx.map(i => D.vals[k][i])), this.t('weekMean'));
       }
-    }
-    if (kind === 'month') {
-      const M = this.MONTHS[extra], P = this.MONTHS[extra + 1], mm = /^wemwbs_(\d)$/.exec(k);
-      if (k === 'wemwbs') { const tt = this.sum(M.wem), pt = P ? this.sum(P.wem) : null; return { label: this.t('wellTotal'), value: String(tt), unit: '/35', ctx: pt == null ? this.t('firstMonth') : tt === pt ? this.t('sameMonth', P.name) : this.t('vsMonth', `${tt > pt ? '+' : '−'}${Math.abs(tt - pt)}`, P.name), col: this.sTone(tt, 7, 35) }; }
-      if (mm) { const j = +mm[1] - 1, v = M.wem[j], pv = P ? P.wem[j] : null; return { label: this.WEM_SHORT[j], value: String(v), unit: '/5', ctx: this.SCALE5[v - 1] + (pv != null && pv !== v ? this.t('before', this.SCALE5[pv - 1].toLowerCase()) : ''), col: this.sTone(v, 1, 5) }; }
     }
     if (kind === 'trend') {
       if (k === 'sents') { const st = this.sentsStats(sc, 28); return t.to === 'vigilar' ? { label: this.L().CHIP.sents, value: String(st.n - st.k), unit: this.t('days'), ctx: this.t('noMatchOf', st.n), col: C.ink } : { label: this.L().CHIP.sents, value: String(st.k), unit: this.t('ofNDays', st.n), ctx: this.t('match'), col: C.ink }; }
@@ -2540,8 +2571,6 @@ Reply ONLY with this JSON: {"text": "your answer", "blocs": [], "basat": ["data 
   }
   // Estat d'un qüestionari segons el dia d'enviament (avui = 41): abans d'enviar-se no és pendent; des del dia que s'envia i fins que es respon, sí.
   formState(sendDay, done) { if (done) return 'done'; const d = 41 - sendDay; return d < 0 ? 'future' : d <= 1 ? 'new' : 'late'; }
-  // Informe ja disponible (IA en directe si està feta; si no, el de reserva). A Avui no demanem informes setmanals/mensuals nous.
-  lastReport(kind, sc, extra) { const fb = this.fallback(kind, sc, extra); if (!this.canLive(kind, sc)) return fb; const e = this.state.ai[this.aiKey(kind, sc, extra)]; return e && e.status === 'done' ? e.val : fb; }
   // «Els teus qüestionaris», a tota l'amplada de l'informe del dia (sota el veredicte i el text, perquè no baixin quan el text és llarg).
   // Cada targeta: titular de l'últim informe i les notes en barres del seu color (sense comparar amb l'anterior); al peu, quan toca el següent
   // o l'avís de pendent / sense respondre amb «Respondre» (Google Form). Clic a la targeta → Setmana / Mes; clic a una nota → la seva fila.
@@ -2580,8 +2609,8 @@ Reply ONLY with this JSON: {"text": "your answer", "blocs": [], "basat": ["data 
       mo = card('m', this.t('monthlyShort'), null, null, first(this.t('firstMonthSoon', this.dLong(47))), null, foot(47, P.formMonthly, pendM));
     } else {
       // El titular setmanal és el mateix que el de Setmana (informe de la setmana nova; si encara no n'hi ha, el de reserva).
-      const W = this.WEEKS[wi], R2 = this.reportWeek2(sc, wi, true), rw = R2.loading ? this.fbWeek(sc, wi, true) : R2.val, M = this.MONTHS[mi], rm = this.lastReport('month', sc, mi), tt = this.sum(M.wem), wellCol = this.sTone(tt, 7, 35);
-      const lowest = M.wem.map((x, j) => ({ j, v: x, col: this.sTone(x, 1, 5) })).sort((a, b) => a.v - b.v).filter(x => x.v <= 3).slice(0, 2);
+      const W = this.WEEKS[wi], R2 = this.reportWeek2(sc, wi, true), rw = R2.loading ? this.fbWeek(sc, wi, true) : R2.val, M = this.MONTHS[mi], rm = (r2 => (r2.loading ? this.fbMonth2(sc, mi) : r2.val))(this.reportMonth2(sc, mi)), tt = this.sum(M.wem), wellCol = this.wTone(tt, 7, 35);
+      const lowest = M.wem.map((x, j) => ({ j, v: x, col: this.wTone(x, 1, 5) })).sort((a, b) => a.v - b.v).filter(x => x.v <= 3).slice(0, 2);
       wk = card('w', `${this.t('weeklyShort')} · ${this.t('weekN', W.id)}`, () => this.goWeek(wi, 'form'), this.t('seeWeek'), rw.titular,
         h('div', { style: { display: 'flex', flexDirection: 'column', gap: 2 } }, this.SCALES.map(q => barRow(q.t, W.v[q.k], 10, this.sTone(W.v[q.k], 1, 10, q.inv), q.k, () => this.goWeek(wi, 'q-' + q.k)))),
         foot(wSend, P.formWeekly, pendW));
@@ -3738,13 +3767,15 @@ Reply ONLY with this JSON: {"text": "your answer", "blocs": [], "basat": ["data 
     const met = ks => { if (!B) return null; const ds = past.filter(i => ks.some(k => D.vals[k][i] != null)); if (!ds.length) return null;
       const ok = ds.filter(i => ks.filter(k => D.vals[k][i] != null).every(k => this.lvlOf(k, D.vals[k][i], B) === 'ok')).length;
       return { n: ds.length, ok, d: ok / ds.length }; };
-    const fa = met(['rhr', 'hrv']), so = met(['son']), sonAvg = avg(past.map(i => D.vals.son[i]).filter(v => v != null)), sd = past.filter(i => D.pos[i] != null);
-    const nf = sd.filter(i => D.st[i] === 'fons').length, st = B && sd.length ? { n: sd.length, ok: nf, d: nf / sd.length } : null;
+    // Si el formulari marca un problema de salut, la parella Salut no dona veredicte (les dades no veuen una lesió: «et notes pitjor» no tindria sentit).
+    // Els dies en Precaució no compten com a Òptim (la mateixa regla que Avui).
+    const pbW = this.pbList(W).length > 0, fa = met(['rhr', 'hrv']), so = met(['son']), sonAvg = avg(past.map(i => D.vals.son[i]).filter(v => v != null)), sd = past.filter(i => D.pos[i] != null);
+    const nf = sd.filter(i => this.dayState(sc, i) === 'fons').length, st = B && sd.length ? { n: sd.length, ok: nf, d: nf / sd.length } : null;
     return [
       { k: 'fatiga', data: this.t('vsHrRhr'), M: fa, sum: fa ? this.t('vsDays', fa.ok, fa.n) : null },
       { k: 'descans', data: this.META.son.name, M: so, sum: so ? this.t('vsSleep', this.fmtV('son', this.roundM('son', sonAvg)), so.ok, so.n) : null },
       { k: 'salut', data: this.t('daysState'), M: st, sum: st ? this.t('vsState', this.ST.fons.w, st.ok, st.n) : null },
-    ].map(r => { const f = fOf(r.k), d = r.M ? r.M.d : null; return { ...r, f, d, m: res(f, d), miss: r.M ? past.length - r.M.n : 0 }; });
+    ].map(r => { const f = fOf(r.k), d = r.M ? r.M.d : null; return { ...r, f, d, m: r.k === 'salut' && pbW && d != null ? 'pb' : res(f, d), miss: r.M ? past.length - r.M.n : 0 }; });
   }
   // L'entrenador aquella setmana: què li vas dir més sovint, en quants dies no quadra amb l'estat de les teves dades i la frase del parell que més es repeteix.
   coachStats(sc, D, a) {
@@ -3759,7 +3790,7 @@ Reply ONLY with this JSON: {"text": "your answer", "blocs": [], "basat": ["data 
     const nm = this.normOf(wi), ok = this.tone(.9), amb = this.tone(.47);
     const label = (q, v) => [q.t, ' ', h('span', { key: 'v', style: { color: this.sTone(v, 1, 10, q.inv) } }, String(v))];
     const HI = this.healthInfo(sc, D, W), health = HI ? { id: 'h', to: 'ost', icon: HI.k === 'on' ? 'alert' : 'check', col: HI.col, label: HI.what, text: [HI.status || this.t('since', this.dLong(HI.st)), HI.more ? this.t('pbPlus', HI.more) : null].filter(Boolean).join(' · '), warn: HI.k === 'on', priv: HI.more > 0 } : null;
-    const V = this.wkVs(sc, D, W), cs = this.coachStats(sc, D, W.a), nMis = V.filter(r => r.m && r.m !== 'ok').length + (cs.mis >= 2 ? 1 : 0);
+    const V = this.wkVs(sc, D, W), cs = this.coachStats(sc, D, W.a), nMis = V.filter(r => r.m && r.m !== 'ok' && r.m !== 'pb').length + (cs.mis >= 2 ? 1 : 0);
     const vs = V.some(r => r.m) ? (nMis ? { id: 'vs', to: 'vs', icon: 'alert', col: amb, label: this.t('kVsL'), text: this.t('kVsNo', nMis), warn: true } : { id: 'vs', to: 'vs', icon: 'check', col: ok, label: this.t('kVsL'), text: this.t('kVsOk') }) : null;
     const ai = R && !R.loading && !R.auto && R.val && Array.isArray(R.val.troballes) ? R.val.troballes : null;
     if (ai) {
@@ -3809,18 +3840,21 @@ Reply ONLY with this JSON: {"text": "your answer", "blocs": [], "basat": ["data 
   // ── El que vas dir vs les teves dades (hipòtesi 2): per a cada parella, dues barres a la mateixa escala (triat el 30-09-2026 entre barres,
   // escala i resum). Files: fatiga ↔ FC i HRV, descans ↔ son, salut ↔ estat dels dies i entrenador ↔ estat dels dies.
   // f = com va el que vas dir (0–1, més = millor; la fatiga girada) · d = com van les dades (la part de dies al teu normal) · m = 'ok' / 'worse' / 'better'
-  // (entrenador: 'ok' / 'no'). Entrenador: la mitjana del que li vas dir (Bé / Regular / Malament) vs els dies en Òptim.
+  // (entrenador: 'ok' / 'no'). Entrenador: la mitjana del que li vas dir (Bé / Regular / Malament) vs els dies en Òptim; «No quadra» a partir de 2 dies, com a la clau de dalt.
   vsRows(sc, D, W) {
     const V = this.wkVs(sc, D, W), cs = this.coachStats(sc, D, W.a), st = V[2], past = Array.from({ length: 7 }, (_, j) => W.a + j).filter(i => i <= 41);
     const rows = V.map(r => { const q = this.SCALES.find(y => y.k === r.k);
       return { ...r, name: q.t, said: `${W.v[r.k]}/10`, word: W.w[r.k] ? this.t('q', W.w[r.k]) : null, fcol: this.sTone(W.v[r.k], 1, 10, q.inv), dval: r.M ? (r.k === 'descans' ? this.t('vsNightsN', r.M.ok, r.M.n) : r.sum) : null }; });
     const LV = { be: .9, reg: .47, mal: .12 }, said = past.map(i => D.coach[i]).filter(c => LV[c] != null);
-    rows.push({ k: 'coach', name: this.t('vsCoach'), f: said.length ? this.sum(said.map(c => LV[c])) / said.length : null, d: st.d, M: st.M, m: cs.cmp ? (cs.mis ? 'no' : 'ok') : null, data: st.data, cs,
+    rows.push({ k: 'coach', name: this.t('vsCoach'), f: said.length ? this.sum(said.map(c => LV[c])) / said.length : null, d: st.d, M: st.M, m: cs.cmp ? (cs.mis >= 2 ? 'no' : 'ok') : null, data: st.data, cs,
       said: cs.top ? this.t('vsSaidTop', this.COACH[cs.top.c].t, cs.top.n, cs.nSaid) : null, word: null, fcol: cs.top ? this.tone(this.COACH[cs.top.c].h) : null, dval: st.sum, miss: 0 });
     return rows;
   }
   vsVerdict(r) {
     const C = this.C; if (r.m == null) return this.missChip(this.t(this.data(this.state.scenario).band ? 'noReg' : 'calculating'));
+    // Has marcat un problema de salut al formulari: sense veredicte, amb la creu del bloc Salut.
+    if (r.m === 'pb') return h('span', { style: { display: 'inline-flex', alignItems: 'center', gap: 6, flex: 'none', fontSize: 13.5, fontWeight: 600, color: C.ink, whiteSpace: 'nowrap' } },
+      h('span', { style: { width: 18, height: 18, flex: 'none', borderRadius: this.G.badge, background: this.ov(.12), color: C.ink, display: 'inline-flex', alignItems: 'center', justifyContent: 'center' } }, this.icon('plus', 11, 2.6)), this.t('vsPb'));
     const ok = r.m === 'ok', txt = r.k === 'coach' ? (ok ? this.t('vsCoachOk') : this.t('vsCoachNo', r.cs.mis)) : this.t(ok ? 'vsMatch' : r.m === 'worse' ? 'vsWorse' : 'vsBetter');
     return h('span', { style: { display: 'inline-flex', alignItems: 'center', gap: 6, flex: 'none', fontSize: 13.5, fontWeight: 600, color: C.ink, whiteSpace: 'nowrap' } },
       h('span', { style: { width: 18, height: 18, flex: 'none', borderRadius: this.G.badge, background: ok ? this.tone(.9) : this.tone(.47), color: C.dark ? C.bg : '#FFFFFF', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', fontSize: 12, fontWeight: 800 } }, ok ? this.icon('check', 11, 2.8) : '≠'), txt);
@@ -3865,7 +3899,7 @@ Reply ONLY with this JSON: {"text": "your answer", "blocs": [], "basat": ["data 
       if (r.k === 'com') return h('div', { key: 'c', style: { ...pos, padding: '0 0 10px' } }, h('p', { style: { margin: 0, paddingLeft: 14, borderLeft: `2px solid ${this.ov(.16)}`, fontSize: 14.5, lineHeight: 1.55, color: C.ink, textWrap: 'pretty' } }, W.com));
       if (r.k === 'ost') return h('div', { key: 'o', id: W.ostrc > 0 ? undefined : 'mt-wk-ost', style: { ...pos, display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, padding: '12px', margin: '4px -12px 0', borderTop: `1px solid ${C.line}`, borderRadius: this.G.inner || 6 } },
         h('span', { style: { fontSize: 15, fontWeight: 600, color: C.ink } }, this.t('participation')),
-        h('span', { style: { display: 'inline-flex', alignItems: 'center', gap: 8, fontSize: 14.5, fontWeight: 600, color: C.ink, textAlign: 'right' } }, this.dot(this.tone(this.OST_H[W.ostrc]), 8), W.ostrc === 0 ? this.t('pbNone') : this.OST_S[W.ostrc]));
+        h('span', { style: { display: 'inline-flex', alignItems: 'center', gap: 8, fontSize: 14.5, fontWeight: 600, color: C.ink, textAlign: 'right' } }, this.dot(this.tone(this.OST_H[W.ostrc]), 8), W.ostrc === 0 ? this.t('pbNone') : this.OST[W.ostrc]));
       const q = r.q, v = W.v[q.k], w = W.w[q.k] || null, col = this.sTone(v, 1, 10, q.inv), j = this.SCALES.indexOf(q);
       const name = h('span', { style: { minWidth: 0, display: 'flex', alignItems: 'baseline', gap: 8, flexWrap: 'wrap' } },
         h('span', { style: { fontSize: 15, fontWeight: 600, color: C.ink } }, q.t),
@@ -4003,7 +4037,8 @@ Reply ONLY with this JSON: {"text": "your answer", "blocs": [], "basat": ["data 
           h('span', { style: { display: 'inline-flex' } }, this.icon('phone', 14, 2)), this.t('menPh'), tel('024', this.t('menPh024')), h('span', { style: { color: C.ink3 } }, '·'), tel('112'))));
   }
   // Avui, dalt de tot: el bloc de salut mental, només si l'últim formulari setmanal el marca en curs.
-  wellBlockEl(sc) { if (sc === 'nou') return null; const D = this.data(sc), W = this.WEEKS[this.lastWi()], M = this.menOf(sc, D, W); return M && M.k === 'on' ? this.menBlockEl(sc, D, W) : null; }
+  // Amb el Mes nou (prova), si no n'hi ha cap de salut mental: el bloc d'ajuda de la zona baixa del formulari mensual (mai tots dos alhora).
+  wellBlockEl(sc) { if (sc === 'nou') return null; const D = this.data(sc), W = this.WEEKS[this.lastWi()], M = this.menOf(sc, D, W); return M && M.k === 'on' ? this.menBlockEl(sc, D, W) : this.wemSupHoy(); }
   // Capçalera comuna: què és a l'esquerra i, a la dreta, com ha acabat («Va acabar en 3 dies» / «En curs · dia 5»).
   healthHead(HI) {
     const C = this.C;
@@ -4084,19 +4119,6 @@ Reply ONLY with this JSON: {"text": "your answer", "blocs": [], "basat": ["data 
   }
   // ── Pàgina: Mes ──────────────────────────────────────────────────────
   setMonth(j) { this.setState({ month: j, hoverF: null, pinF: null }); }
-  pageMes(sc, D, g) {
-    if (sc === 'nou') return this.stack([this.headEl(this.t('month'), null), this.emptyEl(this.t('firstMonthlyT'), this.t('firstMonthlyP'), this.wemItems(sc))]);
-    const C = this.C, s = this.state, n = this.MONTHS.length, ml = this.mLast(), mi = Math.max(ml, Math.min(s.month, n - 1)), M = this.MONTHS[mi], P = this.MONTHS[mi + 1] || null, R = this.reportData('month', sc, mi), f = this.focusN(), items = this.wemItems(sc);
-    const right = this.stepper(M.Name, mi < n - 1 ? () => this.setMonth(mi + 1) : null, mi > ml ? () => this.setMonth(mi - 1) : null);
-    const rep = this.reportEl({ title: this.t('monthReport'), actLabel: this.t('nextMonth'), actTone: this.sTone(this.sum(M.wem), 7, 35), meta: `${M.Name} · ${this.t('formSentM', this.dm(M.sent, M.m))}`, left: this.monthLeftEl(M, P, mi, R), R, basis: [this.t('wemTitle')] });
-    const rowsOn = j => R.findings.filter(x => x.rows.includes(j + 1)).map(x => x.n);
-    const wem = this.box({ st: { padding: '20px 24px 12px' }, title: this.t('wemTitle') },
-      h('div', { style: { marginTop: 12, display: 'grid', gridTemplateColumns: '300px minmax(0,1fr) 104px', gap: 22, fontSize: 11, color: C.ink3 } }, h('span'),
-        h('div', { style: { position: 'relative', height: 14 } }, this.SCALE5.map((t, j) => h('span', { key: j, style: { position: 'absolute', left: `${j * 25}%`, transform: j === 0 ? 'none' : j === 4 ? 'translateX(-100%)' : 'translateX(-50%)', whiteSpace: 'nowrap' } }, t))), h('span')),
-      items.map((t, j) => h(this.DumbRow, { key: `w${j}-${M.k}`, labelW: 300, label: t, v: M.wem[j], prev: P ? P.wem[j] : null, min: 1, max: 5, badges: rowsOn(j), focus: f, on: rowsOn(j).includes(f) })),
-      h('div', { style: { marginTop: 6, padding: '12px 0 8px', borderTop: `1px solid ${C.line}`, display: 'flex', justifyContent: 'space-between', fontSize: 13, color: C.ink2 } }, h('span', null, 'Total'), h('span', { style: { fontWeight: 600, color: C.ink, fontVariantNumeric: 'tabular-nums' } }, `${this.sum(M.wem)} /35`)));
-    return this.stack([this.headEl(this.t('month'), ml ? this.monthPendEl() : null, right), rep, wem, this.grid2(this.apsqEl(M, P), this.infoEl(M), 'minmax(0,7fr) minmax(0,5fr)')]);
-  }
   // Sota el títol de Mes, si l'últim formulari mensual està sense respondre: l'avís amb «Respondre» (Google Form), com a Setmana.
   monthPendEl() {
     const C = this.C, M = this.MONTHS[0], send = 17, col = this.tone(.15), A = this.alertC(col, .12);
@@ -4105,41 +4127,245 @@ Reply ONLY with this JSON: {"text": "your answer", "blocs": [], "basat": ["data 
       h('span', { style: { fontSize: 13, color: C.ink2 } }, `${this.cap(this.t('sentOn', this.dLong(send)))} · ${this.t('agoDays', 41 - send)}`),
       this.formBtn((this.props || {}).formMonthly, this.t('answerNow'), 'mb'));
   }
-  monthLeftEl(M, P, mi, R) {
-    const C = this.C, tot = this.sum(M.wem), pt = P ? this.sum(P.wem) : null, f = this.focusN(), bs = R.findings.filter(x => x.k === 'wemwbs').map(x => x.n);
-    const cols = this.MONTHS.map((m, j) => ({ m, j })).reverse(), ml = this.mLast();
-    return h('div', null,
-      h('div', { style: { display: 'flex', alignItems: 'center', gap: 8 } }, this.lab(this.t('mentalWell')), bs.map(n => this.badge(n, f === n, 18))),
-      h('div', { style: { marginTop: 10, display: 'flex', alignItems: 'baseline', gap: 6 } }, h('span', { style: { fontSize: 52, fontWeight: 600, letterSpacing: '-.03em', lineHeight: 1 } }, h(this.NumS, { key: M.k, v: tot, init: pt != null ? pt : 7, min: 7, max: 35 })), h('span', { style: { fontSize: 16, color: C.ink3 } }, '/35')),
-      h('div', { style: { marginTop: 8, fontSize: 14, color: C.ink2 } }, pt == null ? this.t('firstMonthReg') : tot === pt ? this.t('sameMonth', P.name) : this.t('vsMonthL', `${tot > pt ? '+' : '−'}${Math.abs(tot - pt)}`, P.name)),
-      h('div', { style: { marginTop: 22, display: 'flex', alignItems: 'flex-end', gap: 10, height: 116 } },
-        cols.map(c => { if (c.j < ml) return h('div', { key: c.m.k, style: { flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'flex-end', gap: 6, height: '100%' } },
-            h('span', { style: { fontSize: 12, color: C.ink3 } }, '—'), h('span', { style: { width: '100%', maxWidth: 38, height: 22, borderRadius: `${this.G.bar + 1}px ${this.G.bar + 1}px ${Math.min(2, this.G.bar)}px ${Math.min(2, this.G.bar)}px`, boxSizing: 'border-box', border: `1px dashed ${this.alpha(this.tone(.15), .8)}` } }),
-            h('span', { style: { fontSize: 11.5, color: C.ink } }, c.m.ab));
-          const t = this.sum(c.m.wem), hh = Math.max(6, (t - 7) / 28 * 84), sel = c.j === mi, col = this.sTone(t, 7, 35);
-          return h('button', { key: c.m.k, onClick: () => this.setMonth(c.j), style: { flex: 1, border: 'none', background: 'transparent', padding: 0, cursor: 'pointer', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'flex-end', gap: 6, height: '100%' } },
-            h('span', { style: { fontSize: 12, fontWeight: 600, color: sel ? C.ink : C.ink3, fontVariantNumeric: 'tabular-nums' } }, String(t)),
-            h('span', { style: { width: '100%', maxWidth: 38, height: hh, borderRadius: `${this.G.bar + 1}px ${this.G.bar + 1}px ${Math.min(2, this.G.bar)}px ${Math.min(2, this.G.bar)}px`, background: sel ? col : this.alpha(col, .3), transformOrigin: 'bottom', animation: `mtGrowY .6s cubic-bezier(.2,.7,.2,1) ${(.2 + c.j * .05).toFixed(2)}s both`, transition: 'background .3s' } }),
-            h('span', { style: { fontSize: 11.5, color: sel ? C.ink : C.ink3 } }, c.m.ab)); }),
-        h('div', { key: 'set', style: { flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'flex-end', gap: 6, height: '100%' } },
-          h('span', { style: { fontSize: 12, color: C.ink3 } }, '—'), h('span', { style: { width: '100%', maxWidth: 38, height: 22, borderRadius: `${this.G.bar + 1}px ${this.G.bar + 1}px ${Math.min(2, this.G.bar)}px ${Math.min(2, this.G.bar)}px`, boxSizing: 'border-box', border: `1px dashed ${this.ov(.2)}` } }), h('span', { style: { fontSize: 11.5, color: C.ink3 } }, this.cap(this.L().MS[8])))),
-      h('div', { style: { marginTop: 12, fontSize: 12, color: C.ink3 } }, this.t('septArrives')));
+
+  // ── Mes (oficial des del 02-10-2026; abans, versió de prova «Mes nuevo») ───────────────────────────────────────────────────────────
+  // Pla aprovat el 02-10-2026 (Drive: «Pantalla Mes: plan de diseño»). Només parla del formulari mensual: les 7 frases de benestar, que pregunten
+  // per les DUES ÚLTIMES SETMANES (el període surt al selector, «18–31 ago», i es compta des del dia que respons). Mai l'APSQ ni el text lliure,
+  // ni les dades del rellotge ni l'entrenador («Tu vs el teu cos» es va treure el 02-10-2026).
+  // Et compares amb tu: el teu normal = la mitjana dels teus mesos anteriors (fins a 3; en calen 2). Canvi clar = 3 punts o més.
+  // El benestar mai surt en vermell: va de l'àmbar al verd (wTone).
+  // Avisos, sempre amb text fix i mai de la IA, només amb l'últim formulari respost:
+  // · baixada clara (3 punts o més per sota del teu normal) → sota el text de dalt, amb qui en pots parlar, sense telèfons;
+  // · zona baixa (total ≤ 19: la zona que els autors de l'escala lliguen a malestar alt) → el bloc d'ajuda amb els telèfons, dalt de tot
+  //   de Mes i d'Avui. Mai alhora que el de salut mental del formulari setmanal: només en surt un.
+  // De dalt a baix: (ajuda) · el teu benestar (número i barra amb el teu normal) + titular + text curt · Les teves respostes (files amb barra
+  // curta) · Idees per a les properes setmanes · Mes a mes (només el total, en una línia; només per mirar).
+  WEM_SIM = { baj: [3, 3, 2, 3, 3, 4, 3], low: [2, 3, 2, 2, 3, 3, 2] };
+  setWemSim(k) { this.setState({ wemSim: k, month: 0, moPick: false, chatLog: [] }); this.go('mes'); }
+  pageMes(sc, D, g) {
+    const s = this.state, title = this.t('month');
+    if (sc === 'nou') return this.stack([this.headEl(title, this.mNextEl(sc), null), this.emptyMonthF()]);
+    const n = this.MONTHS.length, ml = this.mLast(), mi = Math.max(ml, Math.min(s.month, n - 1)), M = this.MONTHS[mi], N = this.mNorm(mi), R = this.reportMonth2(sc, mi);
+    // «Basat en…»: el formulari mensual i el teu normal (amb quants mesos).
+    const basis = [this.t('m2BForm'), ...(N ? [this.t('m2BNorm', N.n)] : [])];
+    // Dalt de tot, només amb l'últim formulari respost: el bloc de salut mental (formulari setmanal) o, si no n'hi ha, el de la zona baixa.
+    const Wl = this.WEEKS[this.lastWi()], men = mi === ml ? this.menOf(sc, D, Wl) : null, top = men && men.k === 'on' ? this.menBlockEl(sc, D, Wl) : mi === ml && this.mLvl(M, N) === 'low' ? this.wemSupEl() : null;
+    return this.stack([this.headEl(title, this.mNextEl(sc), this.monthPickEl(mi, ml, n)), top, this.mesHeroF(sc, D, M, mi, N, R, basis), this.mesAnswersEl(M, N), this.mesIdeasEl(R), this.mesEvoEl(mi)]);
   }
-  apsqEl(M, P) {
-    const C = this.C, tot = this.sum(M.apsq), pt = P ? this.sum(P.apsq) : null;
-    return this.box({ st: { padding: '20px 24px 14px' }, title: this.t('apsqTitle') },
-      h('div', { style: { marginTop: 14, display: 'flex', alignItems: 'baseline', gap: 8 } }, h('span', { style: { fontSize: 28, fontWeight: 600, letterSpacing: '-.02em' } }, String(tot)), h('span', { style: { fontSize: 14, color: C.ink3 } }, '/50'),
-        pt != null ? h('span', { style: { marginLeft: 8, fontSize: 13, color: C.ink3 } }, tot === pt ? this.t('sameMonth', P.name).replace(/^./, c => c.toLowerCase()) : this.t('vsMonthL', `${tot > pt ? '+' : '−'}${Math.abs(tot - pt)}`, P.name)) : null),
-      h('div', { style: { marginTop: 10 } }, this.APSQ_ITEMS.map((t, j) => { const v = M.apsq[j];
-        return h('div', { key: j, style: { display: 'grid', gridTemplateColumns: 'minmax(0,1fr) auto 104px', alignItems: 'center', gap: 16, padding: '9px 0', borderTop: `1px solid ${C.line}` } },
-          h('span', { style: { fontSize: 13, color: C.ink2, lineHeight: 1.4 } }, t),
-          h('span', { style: { display: 'flex', gap: 4 } }, [1, 2, 3, 4, 5].map(q => h('span', { key: q, style: { width: 8, height: 8, borderRadius: '50%', background: q <= v ? this.fg(.7) : this.ov(.1) } }))),
-          h('span', { style: { fontSize: 12, color: C.ink3, textAlign: 'right', whiteSpace: 'nowrap' } }, this.SCALE5[v - 1])); })));
-  }
-  infoEl(M) {
+  // Sota el títol: quan arriba el proper formulari mensual o, si l'últim està sense respondre, l'avís amb «Respondre» (Google Form).
+  mNextEl(sc) { if (sc !== 'nou' && this.mLast() > 0) return this.monthPendEl(); return h('span', { style: { color: this.C.ink2 } }, this.t('nextFormOn', this.dLong(47), this.t('inDays', 47 - 41))); }
+  // Esportista nou: encara no hi ha cap formulari mensual; només quan arriba el primer (en discontinu, com tot el que encara no hi és).
+  emptyMonthF() {
     const C = this.C;
-    return this.box({ st: { padding: '20px 24px 22px' }, title: this.t('infoTitle') },
-      M.info ? h('p', { style: { margin: '18px 0 0', paddingLeft: 14, borderLeft: `2px solid ${this.ov(.14)}`, fontSize: 16, lineHeight: 1.6, textWrap: 'pretty' } }, M.info) : h('p', { style: { margin: '18px 0 0', fontSize: 14, color: C.ink3 } }, this.t('noInfo')));
+    return h('div', { style: { display: 'flex', alignItems: 'center', gap: 14, padding: '26px 24px', borderRadius: this.G.card, border: `1.5px dashed ${this.ov(.22)}` } },
+      h('span', { style: { display: 'flex', color: C.ink3 } }, this.icon('month', 22, 1.8)), h('span', { style: { fontSize: 16, fontWeight: 600, color: C.ink } }, this.t('firstMonthlyT')));
+  }
+  // Dia en què es respon: amb dades reals, la marca de temps del formulari (M.resp = [mes, dia]); al prototip, el dia que arriba.
+  // Els 14 dies per què pregunta el formulari es compten cap enrere des d'aquell dia.
+  mDate(M, back) { const r = M.resp || [M.m, M.sent]; return new Date(2026, r[0], r[1] - (back || 0)); }
+  mDay(M, j) { const d = this.mDate(M, 13 - j), wd = (d.getDay() + 6) % 7; return { n: d.getDate(), wd, long: `${this.WDL[wd]} ${d.getDate()} ${this.L().MS[d.getMonth()]}` }; }
+  // «18–31 ago» (o «18 jul – 1 ago»).
+  mPer(M) { const a = this.mDate(M, 13), b = this.mDate(M), MS = this.L().MS; return a.getMonth() === b.getMonth() ? `${a.getDate()}–${b.getDate()} ${MS[b.getMonth()]}` : `${a.getDate()} ${MS[a.getMonth()]} – ${b.getDate()} ${MS[b.getMonth()]}`; }
+  // El teu normal al formulari mensual: la mitjana dels teus mesos anteriors (fins a 3; en calen 2 com a mínim). Només et compares amb tu.
+  mNorm(mi) { const P = this.MONTHS.slice(mi + 1, mi + 4); if (P.length < 2) return null; return { t: this.sum(P.map(m => this.sum(m.wem))) / P.length, w: P[0].wem.map((_, j) => this.sum(P.map(m => m.wem[j])) / P.length), n: P.length }; }
+  // El total respecte al teu normal: igual (menys d'1 punt), una mica (1–2) o clarament (3 o més) per sobre o per sota. El primer formulari, el teu punt de partida.
+  mCmp(M, N, first) {
+    const C = this.C; if (first) return { k: 'first', col: C.ink }; if (!N) return { k: 'calc', col: C.ink };
+    const d = this.sum(M.wem) - N.t, a = Math.abs(d); if (a < 1) return { k: 'same', d, col: C.ink };
+    return { k: (d > 0 ? 'up' : 'dn') + (a < 3 ? '1' : ''), d, col: this.tone(d > 0 ? .9 : a < 3 ? .47 : this.WSEG['!']) };
+  }
+  // Avís: 'low' (total ≤ 19) · 'drop' (3 punts o més per sota del teu normal) · null.
+  mLvl(M, N) { const t = this.sum(M.wem); return t <= 19 ? 'low' : N && t - N.t <= -3 ? 'drop' : null; }
+  // Amb qui en pots parlar (el detall, en passar el ratolí) i els telèfons d'ajuda: els mateixos del bloc de salut mental.
+  helpChips() {
+    const C = this.C, ico = ['user', 'users', 'plus'];
+    return this.t('menWho').map((w, j) => h('span', { key: 'hw' + j, title: w[1], style: { display: 'inline-flex', alignItems: 'center', gap: 7, padding: '5px 11px', borderRadius: this.G.inner || 8, background: C.bg, border: `1px solid ${C.line2}`, fontSize: 13.5, fontWeight: 600, color: C.ink, whiteSpace: 'nowrap' } }, this.icon(ico[j], 14, 2), w[0]));
+  }
+  helpPhones() {
+    const C = this.C, tel = (n, sub) => h('a', { key: n, href: 'tel:' + n, style: { color: C.ink, fontWeight: 700, textDecoration: 'none', whiteSpace: 'nowrap' } }, n, sub ? h('span', { style: { fontWeight: 500 } }, ` (${sub})`) : null);
+    return h('div', { style: { marginTop: 10, display: 'flex', alignItems: 'center', gap: '4px 8px', flexWrap: 'wrap', fontSize: 13.5, lineHeight: 1.45, color: C.ink } },
+      h('span', { style: { display: 'inline-flex' } }, this.icon('phone', 14, 2)), this.t('menPh'), tel('024', this.t('menPh024')), h('span', { style: { color: C.ink3 } }, '·'), tel('112'));
+  }
+  // Zona baixa a l'últim formulari mensual: el mateix bloc compacte que el de salut mental, amb text fix (mai de la IA).
+  wemSupEl() {
+    const C = this.C, A = this.alertC(this.tone(.47));
+    return h('div', { id: 'mt-wsup', style: this.card({ padding: '14px 18px', display: 'grid', gridTemplateColumns: '28px minmax(0,1fr)', gap: 12, alignItems: 'start', borderColor: A.bd, background: `linear-gradient(${A.bg}, ${A.bg}), ${C.s1}`, animation: 'mtIn .45s cubic-bezier(.2,.7,.2,1) both' }) },
+      h('span', { style: { width: 28, height: 28, flex: 'none', borderRadius: this.G.badge, background: A.ic, color: A.icFg, display: 'inline-flex', alignItems: 'center', justifyContent: 'center' } }, this.icon('heart', 14, 2.2)),
+      h('div', { style: { minWidth: 0 } },
+        h('div', { style: { minHeight: 28, display: 'flex', alignItems: 'center', fontSize: 15.5, fontWeight: 600, lineHeight: 1.3, color: C.ink, textWrap: 'pretty' } }, this.t('m2SupT')),
+        h('div', { style: { fontSize: 14, lineHeight: 1.45, color: C.ink, textWrap: 'pretty' } }, this.t('m2SupB')),
+        h('div', { style: { marginTop: 10, display: 'flex', flexWrap: 'wrap', gap: 6 } }, this.helpChips()),
+        this.helpPhones()));
+  }
+  // A Avui: només si l'últim formulari mensual està respost (amb un de sense respondre, l'anterior ja no és d'ara) i és a la zona baixa.
+  wemSupHoy() { if (this.mLast() > 0) return null; const M = this.MONTHS[0]; return M && this.mLvl(M, this.mNorm(0)) === 'low' ? this.wemSupEl() : null; }
+  // Informe del mes nou: IA en directe si n'hi ha; si no, el de reserva fet amb les dades. Mai d'un formulari sense respondre (ensureAI).
+  m2Extra(mi) { return `${mi}.${this.state.wemSim || 'sc'}.${this.mLast()}`; }
+  reportMonth2(sc, mi) {
+    const fb = this.fbMonth2(sc, mi), out = (val, auto) => ({ loading: false, val, auto });
+    if (!this.canLive('month', sc)) return out(fb, true);
+    const e = this.state.ai[this.aiKey('month2', sc, this.m2Extra(mi))];
+    if (!e || e.status === 'loading') return { loading: true, val: null };
+    if (e.status !== 'done') return out(fb, true);
+    const has = e.val.idees && e.val.idees.length;
+    return out({ ...e.val, texto: e.val.texto || fb.texto, idees: has ? e.val.idees : fb.idees, ideesFb: !has });
+  }
+  // Text de reserva (sense IA), fet amb les dades: titular, un text curt (com estàs respecte al teu normal, què puja i què baixa i, si toca, una
+  // frase de tancament) i idees d'hàbits lligades a les frases que baixen (o a les més baixes, si encara no hi ha normal).
+  fbMonth2(sc, mi) {
+    const M = this.MONTHS[mi], N = this.mNorm(mi), lvl = mi === this.mLast() ? this.mLvl(M, N) : null, first = mi === this.MONTHS.length - 1;
+    const T = this.t('m2T'), X = this.t('m2Tx'), I = this.t('m2Idea'), Y = this.t('m2Why'), S = this.WEM_SHORT, it = M.wem.map((v, j) => ({ j, v, g: N ? v - N.w[j] : 0 })), key = j => 'wemwbs_' + (j + 1);
+    const down = N ? it.filter(x => x.g <= -.75).sort((a, b) => a.g - b.g || a.j - b.j) : [], up = N ? it.filter(x => x.g >= .75).sort((a, b) => b.g - a.g || a.j - b.j) : [];
+    const strong = it.slice().sort((a, b) => b.v - a.v || a.j - b.j)[0], low = it.filter(x => x.v <= 2).sort((a, b) => a.v - b.v || a.j - b.j);
+    const titular = down.length ? T.down(S[down[0].j]) : up.length ? T.up(S[up[0].j]) : N ? T.stable : first ? T.first : T.calc;
+    const nm = xs => xs.slice(0, xs.length <= 3 ? 3 : 2).map(x => S[x.j]), parts = [X.lead[this.mCmp(M, N, first).k]];
+    if (N) parts.push(up.length || down.length ? X.change(nm(up), nm(down), up.length, down.length) : X.same);
+    else { if (strong.v >= 4) parts.push(X.strong(S[strong.j])); if (low.length) parts.push(X.lowest(low.slice(0, 2).map(x => S[x.j]))); }
+    if (lvl) parts.push(X.end[lvl]);
+    const IK = ['opt', 'util', 'calma', 'afr', 'clar', 'rel', 'auto'], id = [];
+    if (lvl) id.push({ k: 'talk', t: I.talk, w: lvl === 'low' ? Y.low : Y.talk });
+    (N ? down : low).slice(0, 2).forEach(x => id.push({ k: key(x.j), t: I[IK[x.j]], w: this.t('m2IdeaWhy', S[x.j], this.SCALE5[x.v - 1]) }));
+    if (!id.length) id.push(first ? { k: 'form', t: I.form, w: Y.form } : { k: 'keep', t: I.keep, w: N ? Y.keep : Y.keep0 });
+    return { titular, texto: parts.filter(Boolean).join(' '), resum: '', troballes: [], accions: [], idees: id.slice(0, 3) };
+  }
+  // Prompt del mes nou: només el formulari mensual. Les 7 frases sense gènere (la IA no sap el nom ni el sexe, només l'edat), el teu normal i els
+  // mesos anteriors. Res del rellotge, de l'entrenador ni dels formularis setmanals; només, pel to, si ara hi ha un problema de salut en curs (sense
+  // dir quin: el tracta com a privat i no l'esmenta).
+  promptMonth2(sc, mi) {
+    const D = this.data(sc), M = this.MONTHS[mi], N = this.mNorm(mi), A = this.L().AI, F = this.L().WEM_N, prev = this.MONTHS.slice(mi + 1, mi + 4), L = [];
+    M.wem.forEach((v, j) => L.push(A.m2Item(j + 1, F[j], this.SCALE5[v - 1].toLowerCase(), v, N ? this.decS(N.w[j]) : null)));
+    L.push(A.m2Total(this.sum(M.wem), N ? this.decS(N.t) : null, N ? N.n : prev.length, null, null));
+    if (prev.length) L.push(A.m2Prev(prev.map(m => `${m.name} ${this.sum(m.wem)}`).join(', ')));
+    if (this.mLast() > 0) L.push(A.m2Pend(this.MONTHS.slice(0, this.mLast()).map(m => m.name).join(', ')));
+    if (mi === this.mLast() && this.healthList(sc, D, this.WEEKS[this.lastWi()]).some(x => x.k === 'on')) L.push(A.m2Health);
+    if (mi === this.mLast() && this.mLvl(M, N) === 'low') L.push(A.m2Sup);
+    return `${A.m2Main(this.mPer(M), L.join('\n'))}\n${this.jsonAsk('month2')}`;
+  }
+  // Tria de mes (com a Setmana): fletxes ‹ › i, al mig, el mes amb els seus 14 dies; en clicar-hi, la llista de tots els formularis mensuals
+  // amb el total (del seu color) i com era respecte al teu normal. El que està sense respondre, en discontinu i amb «Respondre» (Google Form).
+  monthPickEl(mi, ml, n) {
+    const C = this.C, M = this.MONTHS[mi], open = !!this.state.moPick, close = () => this.setState({ moPick: false }), W2 = this.t('m2Cmp');
+    const arrow = (dir, fn) => h('button', { key: dir, disabled: !fn, onClick: fn ? () => { close(); fn(); } : undefined, className: fn ? 'mt-btn' : '', 'aria-label': this.t(dir === 'p' ? 'prev' : 'next'),
+      style: { width: 32, height: 32, flex: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', border: `1px solid ${C.line2}`, borderRadius: this.G.ctrl, background: 'transparent', color: fn ? C.ink : this.fg(.2), cursor: fn ? 'pointer' : 'default', padding: 0 } }, this.icon(dir === 'p' ? 'left' : 'right', 16));
+    const item = j => { const m = this.MONTHS[j], on = j === mi, t = this.sum(m.wem), cp = this.mCmp(m, this.mNorm(j), j === n - 1);
+      return h('button', { key: m.k, className: on ? '' : 'mt-pr', onClick: () => { close(); this.setMonth(j); }, style: { display: 'grid', gridTemplateColumns: 'minmax(0,1fr) 16px', gap: '3px 10px', alignItems: 'center', width: '100%', padding: '9px 12px', border: 'none', borderRadius: 10, background: on ? this.ov(.08) : 'transparent', color: C.ink, fontFamily: 'inherit', textAlign: 'left', cursor: 'pointer' } },
+        h('span', { style: { fontSize: 14, fontWeight: 600 } }, `${m.Name} · ${this.mPer(m)}`),
+        h('span', { style: { display: 'flex' } }, on ? this.icon('check', 14, 2.4) : null),
+        h('span', { style: { gridColumn: '1 / -1', display: 'flex', gap: '2px 10px', flexWrap: 'wrap', fontSize: 13, fontWeight: 500 } },
+          h('span', { style: { color: this.wTone(t, 7, 35), fontVariantNumeric: 'tabular-nums' } }, `${t}/35`), cp.k === 'calc' ? null : h('span', { style: { color: cp.col } }, W2[cp.k]))); };
+    const pend = j => { const m = this.MONTHS[j], rc = this.tone(.15);
+      return h('div', { key: 'pd' + m.k, style: { display: 'grid', gridTemplateColumns: 'minmax(0,1fr) auto', gap: '3px 10px', alignItems: 'center', padding: '9px 12px', marginBottom: 4, borderRadius: 10, border: `1px dashed ${this.alpha(rc, .6)}` } },
+        h('span', { style: { fontSize: 14, fontWeight: 600, color: C.ink } }, `${m.Name} · ${this.mPer(m)}`),
+        h('span', { style: { gridRow: '1 / 3', gridColumn: 2 } }, this.formBtn((this.props || {}).formMonthly, this.t('fillForm'), 'pm' + m.k)),
+        h('span', { style: { display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 13, fontWeight: 600, color: rc } }, this.dot(rc, 7), this.t('overdueL'))); };
+    const list = []; for (let j = 0; j < ml; j++) list.push(pend(j)); for (let j = ml; j < n; j++) list.push(item(j));
+    return h('div', { key: 'mpk', style: { position: 'relative', display: 'flex', alignItems: 'center', gap: 8 } },
+      arrow('p', mi < n - 1 ? () => this.setMonth(mi + 1) : null),
+      h('button', { className: 'mt-btn', 'aria-expanded': open, 'aria-haspopup': 'listbox', onClick: () => this.setState(st => ({ moPick: !st.moPick })), style: { display: 'inline-flex', alignItems: 'center', gap: 8, height: 32, padding: '0 12px', border: `1px solid ${C.line2}`, borderRadius: this.G.ctrl, background: open ? this.ov(.06) : 'transparent', color: C.ink, fontFamily: 'inherit', fontSize: 14, fontWeight: 600, cursor: 'pointer', whiteSpace: 'nowrap' } },
+        `${M.Name} · ${this.mPer(M)}`, h('span', { style: { display: 'flex', transition: 'transform .2s', transform: open ? 'rotate(180deg)' : 'none' } }, this.icon('chevD', 14, 2.2))),
+      arrow('n', mi > ml ? () => this.setMonth(mi - 1) : null),
+      open ? h('div', { key: 'bd', onClick: close, style: { position: 'fixed', inset: 0, zIndex: 40 } }) : null,
+      open ? h('div', { key: 'pop', role: 'listbox', style: { position: 'absolute', right: 0, top: 40, zIndex: 41, width: 300, maxHeight: 380, overflowY: 'auto', padding: 6, boxSizing: 'border-box', borderRadius: 14, background: C.pop, backdropFilter: 'blur(14px)', WebkitBackdropFilter: 'blur(14px)', border: `1px solid ${C.line2}`, boxShadow: `0 18px 50px ${this.sh(.5)}`, animation: 'mtIn .18s cubic-bezier(.2,.7,.2,1) both' } }, list) : null);
+  }
+  // Dalt de tot, sense targeta: el teu benestar (el total, del seu color, i respecte al teu normal), una barra que s'omple amb la marca del teu
+  // normal, el titular (amb «Basat en…» en passar el ratolí) i un text curt (de la IA o, sense IA, fet amb les dades), que no repeteix el que ja
+  // ensenya «Les teves respostes». Amb una baixada clara, amb qui en pots parlar (text fix, sense telèfons). A sota, l'avís «Orientatiu…».
+  mesHeroF(sc, D, M, mi, N, R, basis) {
+    const C = this.C, g = this.geom(), tot = this.sum(M.wem), col = this.wTone(tot, 7, 35), cmp = this.mCmp(M, N, mi === this.MONTHS.length - 1), lvl = mi === this.mLast() ? this.mLvl(M, N) : null, W2 = this.t('m2Cmp');
+    const sk = (w, hh, d) => h('div', { key: w + d, style: { height: hh, width: w, borderRadius: 999, background: `linear-gradient(90deg, ${this.ov(.05)}, ${this.ov(.1)}, ${this.ov(.05)})`, backgroundSize: '1200px 100%', animation: `mtShim 1.6s linear ${d}s infinite` } });
+    const big = { display: 'block', fontFamily: this.G.display, fontWeight: 600, letterSpacing: '-.02em', lineHeight: 1.1 };
+    const numEl = h('button', { key: 'nb', onClick: () => this.flashTo('mt-mo-form'), style: { padding: 0, border: 'none', background: 'transparent', textAlign: 'left', fontFamily: 'inherit', color: 'inherit', cursor: 'pointer', animation: 'mtIn .5s cubic-bezier(.2,.7,.2,1) .05s both' } },
+      h('span', { style: { display: 'flex', alignItems: 'baseline', gap: 6 } },
+        h('span', { style: { ...big, fontSize: g.stack ? 40 : 52, letterSpacing: '-.03em', lineHeight: 1, fontVariantNumeric: 'tabular-nums' } }, h(this.NumS, { key: M.k + tot, v: tot, init: N ? Math.round(N.t) : 7, min: 7, max: 35, well: true })),
+        h('span', { style: { fontSize: 16, fontWeight: 500, color: C.ink2 } }, '/35')),
+      h('span', { style: { display: 'block', marginTop: 6, fontSize: 14, fontWeight: 500, color: C.ink } }, this.t('wellS')));
+    const cmpEl = h('div', { key: 'cp' + cmp.k, style: { minWidth: 0, animation: 'mtIn .5s cubic-bezier(.2,.7,.2,1) .13s both' } },
+      cmp.k === 'calc' ? this.missChip(this.t('nmCalc'), 'l') : h('span', { style: { ...big, fontSize: g.stack ? 24 : 30, color: cmp.col } }, W2[cmp.k]),
+      N ? h('span', { style: { display: 'block', marginTop: 6, fontSize: 14, fontWeight: 500, color: C.ink } }, this.t('nmVal', this.decS(N.t))) : null);
+    const barEl = h('div', { key: 'br', style: { position: 'relative', marginTop: 18, maxWidth: 560, height: 8, borderRadius: 4, background: this.ov(.08) } },
+      h('span', { style: { position: 'absolute', left: 0, top: 0, bottom: 0, width: `${(tot / 35) * 100}%`, borderRadius: 4, background: col, transformOrigin: 'left', animation: 'mtGrowX .7s cubic-bezier(.2,.7,.2,1) .15s both' } }),
+      N ? h('span', { title: this.t('nmVal', this.decS(N.t)), style: { position: 'absolute', left: `${(N.t / 35) * 100}%`, top: -5, width: 3, height: 18, marginLeft: -1.5, borderRadius: 2, background: C.ink, boxShadow: `0 0 0 2px ${C.bg}` } }) : null);
+    const v = R.loading ? null : R.val, tit = v ? v.titular : null, txt = v ? v.texto : null;
+    const titEl = R.loading ? h('div', { key: 'tl', style: { marginTop: 26 } }, sk('40%', 18, 0))
+      : h('div', { key: 'tt' + tit, style: { marginTop: 26, animation: 'mtIn .45s cubic-bezier(.2,.7,.2,1) .2s both' } }, this.basisTip({ basis }, tit, { display: 'inline-block', fontFamily: this.G.display, fontSize: 22, fontWeight: 600, letterSpacing: '-.01em', lineHeight: 1.3, color: C.ink }));
+    const textEl = R.loading ? h('div', { key: 'tl2', style: { marginTop: 14, display: 'grid', gap: 10, maxWidth: 720 } }, sk('92%', 13, .08), sk('64%', 13, .16))
+      : txt ? h('div', { key: 'tx' + mi }, h(this.ClampBox, { max: 124 }, h('p', { style: { margin: '10px 0 0', maxWidth: 720, fontSize: 16, lineHeight: 1.75, color: C.ink, textWrap: 'pretty', animation: 'mtIn .45s cubic-bezier(.2,.7,.2,1) .26s both' } }, this.segs(txt, true)))) : null;
+    const A = this.alertC(this.tone(.47));
+    const dropEl = lvl === 'drop' ? h('div', { key: 'dp', style: { marginTop: 16, display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: '8px 10px', padding: '10px 12px 10px 14px', borderRadius: this.G.inner || 8, background: A.bg, border: `1px solid ${A.bd}`, animation: 'mtIn .45s cubic-bezier(.2,.7,.2,1) .4s both' } },
+      h('span', { style: { display: 'inline-flex', alignItems: 'center', gap: 8, fontSize: 14, fontWeight: 600, color: C.ink } }, h('span', { style: { width: 22, height: 22, flex: 'none', borderRadius: this.G.badge, background: A.ic, color: A.icFg, display: 'inline-flex', alignItems: 'center', justifyContent: 'center' } }, this.icon('heart', 12, 2.2)), this.t('m2DropT')),
+      ...this.helpChips()) : null;
+    return h('section', { id: 'mt-mo-top' }, h('div', { key: 'tp', style: { display: 'flex', flexWrap: 'wrap', alignItems: 'flex-end', gap: '16px 56px' } }, numEl, cmpEl), barEl, titEl, textEl, dropEl,
+      h('div', { key: 'nt', style: { marginTop: 18, textAlign: 'center', fontSize: 12, color: C.ink3, textWrap: 'balance' } }, this.t('note')));
+  }
+  // Les teves respostes: les 7 frases en files compactes, com les targetes de «Els teus qüestionaris» d'Avui: el nom (la frase sencera del
+  // formulari, en passar el ratolí) i, al costat, l'etiqueta només si puja o baixa respecte al teu normal (¾ de punt o més); una barra curta que
+  // s'omple segons la resposta, amb una marca on és el teu normal, i la resposta del seu color. Sense vermell: el benestar va de l'àmbar al verd.
+  mesAnswersEl(M, N) {
+    const C = this.C, F = this.L().WEM_N, S = this.WEM_SHORT, narrow = this.geom().cw < 600;
+    const head = h('div', { key: 'hd', style: { display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap', padding: '10px 0 6px', fontSize: 13, color: C.ink2 } }, this.t('answeredOnS', this.mDay(M, 13).long));
+    const rows = M.wem.map((v, j) => {
+      const col = this.wTone(v, 1, 5), nm = N ? N.w[j] : null, d = nm == null ? null : v - nm, ch = d != null && Math.abs(d) >= .75, up = d > 0, tip = nm != null ? this.t('nmVal', this.decS(nm)) : undefined;
+      const tag = ch ? h('span', { title: tip, style: { display: 'inline-flex', alignItems: 'center', gap: 5, fontSize: 12.5, fontWeight: 600, color: this.tone(up ? .9 : this.WSEG['!']), whiteSpace: 'nowrap' } }, h('span', { style: { fontSize: 9 } }, up ? '▲' : '▼'), this.t(up ? 'nmMore' : 'nmLess')) : null;
+      return h('div', { key: j, id: 'mt-mo-q-' + j, style: { display: 'grid', gridTemplateColumns: narrow ? 'minmax(0,1fr) auto' : 'minmax(0,1fr) minmax(140px,240px) 124px', gridTemplateAreas: narrow ? '"n v" "b b"' : '"n b v"', alignItems: 'center', gap: narrow ? '6px 12px' : '4px 20px', padding: '9px 12px', margin: '0 -12px', borderTop: j ? `1px solid ${C.line}` : 'none', borderRadius: this.G.inner || 6 } },
+        h('span', { style: { gridArea: 'n', minWidth: 0, display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: '2px 12px' } },
+          h('span', { title: F[j], style: { minWidth: 0, fontSize: 15, fontWeight: 600, color: C.ink, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', cursor: 'help' } }, S[j]), tag),
+        h('div', { title: tip, style: { gridArea: 'b', position: 'relative', height: 8, borderRadius: 4, background: this.ov(.08) } },
+          h('span', { style: { position: 'absolute', left: 0, top: 0, bottom: 0, width: `${v * 20}%`, borderRadius: 4, background: col, transformOrigin: 'left', animation: `mtGrowX .6s cubic-bezier(.2,.7,.2,1) ${(.1 + j * .05).toFixed(2)}s both` } }),
+          nm != null ? h('span', { style: { position: 'absolute', left: `${nm * 20}%`, top: -5, width: 3, height: 18, marginLeft: -1.5, borderRadius: 2, background: C.ink, boxShadow: `0 0 0 2px ${C.s1}` } }) : null),
+        h('span', { style: { gridArea: 'v', textAlign: 'right', fontSize: 15, fontWeight: 600, color: col, whiteSpace: 'nowrap' } }, this.SCALE5[v - 1]));
+    });
+    return this.box({ id: 'mt-mo-form', title: this.t('wkAnswers'), st: { padding: '4px 24px 10px' } }, head, ...rows);
+  }
+  // Mes a mes: una targeta per mes (triat el 02-10-2026 entre línia, columnes i targetes), com «Aquesta setmana» d'Avui.
+  mesEvoEl(mi) { return this.box({ id: 'mt-mo-evo', title: this.t('m2ByMonth'), st: { padding: 14 } }, this.monthCardsEl(mi)); }
+  // De més antic a més nou: el total, una barra i com era respecte al seu normal. Clic → s'obre aquell mes a la pàgina; el triat, amb la vora del seu color.
+  // El que falta, en discontinu amb «Respondre». Si n'hi ha molts, la fila es desplaça de costat dins la targeta.
+  monthCardsEl(mi) {
+    const C = this.C, ml = this.mLast(), n = this.MONTHS.length, list = this.MONTHS.map((m, j) => ({ m, j, pend: j < ml })).reverse(), WS = this.t('m2CmpS');
+    return h('div', { style: { overflowX: 'auto', margin: -2, padding: 2 } }, h('div', { style: { display: 'grid', gridTemplateColumns: `repeat(${list.length}, minmax(118px, 1fr))`, gap: 10 } }, list.map((x, q) => {
+      if (x.pend) return h('div', { key: x.m.k, style: { minWidth: 0, display: 'flex', flexDirection: 'column', gap: 8, padding: 14, borderRadius: this.G.inner || 14, border: `1px dashed ${this.alpha(this.tone(.15), .6)}`, animation: `mtIn .4s cubic-bezier(.2,.7,.2,1) ${(.05 + q * .05).toFixed(2)}s both` } },
+        h('span', { style: { fontSize: 13.5, fontWeight: 600, color: C.ink } }, x.m.Name),
+        h('span', { style: { display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 13, fontWeight: 600, color: this.tone(.15) } }, this.dot(this.tone(.15), 7), this.t('overdueL')),
+        h('div', { style: { marginTop: 'auto' } }, this.formBtn((this.props || {}).formMonthly, this.t('fillForm'), 'pc' + x.m.k)));
+      const t = this.sum(x.m.wem), col = this.wTone(t, 7, 35), sel = x.j === mi, cp = this.mCmp(x.m, this.mNorm(x.j), x.j === n - 1);
+      return h('button', { key: x.m.k, className: 'mt-fcard', onClick: () => this.setMonth(x.j), 'aria-pressed': sel, style: { minWidth: 0, display: 'flex', flexDirection: 'column', gap: 6, padding: 14, borderRadius: this.G.inner || 14, border: `1px solid ${sel ? this.alpha(col, .9) : C.line2}`, background: C.bg, textAlign: 'left', fontFamily: 'inherit', color: 'inherit', cursor: 'pointer', animation: `mtIn .4s cubic-bezier(.2,.7,.2,1) ${(.05 + q * .05).toFixed(2)}s both` } },
+        h('span', { style: { fontSize: 13.5, fontWeight: sel ? 700 : 600, color: C.ink } }, x.m.Name),
+        h('span', { style: { display: 'flex', alignItems: 'baseline', gap: 4 } }, h('span', { style: { fontSize: 26, fontWeight: 600, letterSpacing: '-.02em', lineHeight: 1.1, color: col, fontVariantNumeric: 'tabular-nums' } }, String(t)), h('span', { style: { fontSize: 12.5, color: C.ink2 } }, '/35')),
+        h('span', { style: { display: 'block', position: 'relative', height: 6, borderRadius: 3, background: this.ov(.08) } }, h('span', { style: { position: 'absolute', left: 0, top: 0, bottom: 0, width: `${(t / 35) * 100}%`, borderRadius: 3, background: col } })),
+        h('span', { style: { marginTop: 2, fontSize: 12.5, fontWeight: 600, color: cp.k === 'calc' || cp.k === 'first' ? C.ink2 : cp.col } }, WS[cp.k]));
+    })));
+  }
+  // Idees per a les properes setmanes: són recomanacions, no tasques (sense caselles ni comptador). Disseny «Destacada» (triat el 02-10-2026):
+  // la primera en gran i les altres al costat, les dues targetes de la mateixa alçada. Si tot va bé, la idea «continuar» surt amb un cercle
+  // verd amb la marca, que no es pot marcar.
+  // Icones: una per frase del formulari, que diu de què va (optimisme → sortida del sol, sentir-te útil → mà que ajuda, calma → ones,
+  // afrontar problemes → muntanya, claredat → bombeta, relacions → persones, autonomia → brúixola, parlar-ne → bafarada). Ja no fan servir
+  // els colors de la FC, la HRV o el son, que a la resta de l'app volen dir una altra cosa. Estil negre (triat el 03-10-2026 entre negre, color i
+  // només la icona): rajola negra amb vora fina i la icona en blanc, com les targetes negres de l'app (en clar, la rajola clara i la icona fosca).
+  mesIdeasEl(R) {
+    const C = this.C, g = this.geom(), v = R.loading ? null : R.val, list = v && v.idees ? v.idees : null, S = this.WEM_SHORT;
+    const IC = ['sunrise', 'helping', 'waves', 'mountain', 'bulb', 'users', 'compass'];
+    const look = x => { const m = /^wemwbs_([1-7])$/.exec(x.k || ''); if (m) { const j = +m[1] - 1; return { ic: IC[j], area: S[j], j }; }
+      return x.k === 'talk' ? { ic: 'talk', area: this.t('arCom') } : x.k === 'form' ? { ic: 'month', area: this.t('monthlyShort') } : x.k === 'keep' ? { ic: 'check', area: this.t('wellS'), ok: true } : { ic: 'sunrise', area: this.t('wellS') }; };
+    const colOf = L => (L.ok ? this.tone(.9) : C.ink);
+    const byAI = !R.loading && !R.auto && v && !v.ideesFb ? this.tag(this.t('byAI')) : null;
+    const head = this.secHead(h('span', { style: { display: 'inline-flex', alignItems: 'center', gap: 10 } }, this.t('m2Ideas'), byAI));
+    if (!list) return h('div', null, head, h('div', { style: { height: 88, borderRadius: this.G.card, border: `1px solid ${C.line}`, background: C.s1 } }));
+    const ico = (L, n) => {
+      if (L.ok) return h('span', { style: { width: n, height: n, flex: 'none', borderRadius: this.G.badge, background: this.toneF(.9), color: C.dark ? C.bg : '#FFFFFF', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' } }, this.icon('check', Math.round(n * .45), 2.6));
+      return h('span', { style: { width: n, height: n, flex: 'none', boxSizing: 'border-box', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', borderRadius: this.G.inner || 12, background: C.bg, border: `1px solid ${C.line2}`, color: C.ink } }, this.icon(L.ic, Math.round(n * .5), 1.8));
+    };
+    const area = (L, fs) => h('span', { style: { display: 'block', fontSize: fs || 12.5, fontWeight: 600, color: colOf(L) } }, L.area);
+    const txt = (x, fs) => h('span', { style: { display: 'block', fontSize: fs || 16, fontWeight: 600, lineHeight: 1.4, color: C.ink, textWrap: 'pretty' } }, x.t);
+    const why = (x, sty) => (x.w ? h('span', { style: { display: 'block', fontSize: 14, lineHeight: 1.5, color: C.ink2, textWrap: 'pretty', ...sty } }, x.w) : null);
+    const anim = i => `mtIn .4s cubic-bezier(.2,.7,.2,1) ${(.08 + i * .06).toFixed(2)}s both`;
+    const row = (x, i, n) => { const L = look(x); return h('div', { key: i, style: { display: 'grid', gridTemplateColumns: `${n}px minmax(0,1fr)`, gap: 14, alignItems: 'start', padding: '14px 0', borderTop: i ? `1px solid ${C.line}` : 'none', animation: anim(i + 1) } },
+      ico(L, n), h('span', { style: { minWidth: 0, display: 'flex', flexDirection: 'column', gap: 3 } }, area(L), txt(x), why(x))); };
+    const [f, ...rest] = list, L = look(f);
+    const feat = h('div', { key: 'f', style: this.card({ padding: '20px 22px', display: 'flex', flexDirection: 'column', gap: 12, animation: anim(0) }) },
+      h('span', { style: { display: 'flex', alignItems: 'center', gap: 12 } }, ico(L, 40), area(L, 13.5)), txt(f, 20), why(f, { marginTop: 'auto', fontSize: 14.5 }));
+    return h('div', null, head, h('div', { style: { display: 'grid', gridTemplateColumns: rest.length && !g.stack ? 'minmax(0,1.25fr) minmax(0,1fr)' : 'minmax(0,1fr)', gap: 12, alignItems: 'stretch' } }, feat,
+      rest.length ? h('div', { key: 'r', style: this.card({ padding: '2px 20px' }) }, rest.map((x, i) => row(x, i, 32))) : null));
   }
 
   // ── Pàgina: Evolució ─────────────────────────────────────────────────
@@ -4283,7 +4509,7 @@ Reply ONLY with this JSON: {"text": "your answer", "blocs": [], "basat": ["data 
   pickScn(k) { this.setState(st => ({ scenario: k, chatLog: [], hoverF: null, pinF: null, week2: -1, month: 0, visit: st.visit + 1, range: k === 'nou' ? 7 : st.range, evoRange: k === 'nou' ? 7 : st.evoRange === 7 ? 28 : st.evoRange })); }
   setProtoHidden(v) { try { localStorage.setItem('mt-proto-hidden', v ? '1' : '0'); } catch (e) {} this.setState({ pHidden: v, pOpen: false }); }
   // Control temporal del prototip: botó flotant per canviar d'escenari (tecla E per amagar-lo o recuperar-lo).
-  // ── Xat «Pregunta a les teves dades» (versió de prova: matràs › «Probar chat», 30-09-2026; botó flotant, 01-10-2026) ─────────────────────
+  // ── Xat «Pregunta a les teves dades» (oficial des del 02-10-2026; fet el 30-09-2026, botó flotant l'01-10-2026) ─────────────────────────
   // Triat: preguntes suggerides + text lliure · un botó flotant a totes les pàgines (finestra petita → vista general a la dreta) · resposta amb text, targetes o gràfics ·
   // comparar períodes, dades entre si, formularis en el temps i abans/després d'un problema.
   // · Les suggerides depenen del que estàs veient i es responen amb les dades i les regles de l'app (sense IA), com els textos de reserva.
@@ -4291,14 +4517,13 @@ Reply ONLY with this JSON: {"text": "your answer", "blocs": [], "basat": ["data 
   // · La IA no dibuixa ni calcula: tria peces d'un catàleg (targetes, línia, comparar, setmanes) i l'app les omple amb les dades reals.
   // · No es guarda res: la conversa viu a l'estat i s'esborra en canviar d'escenari. Autolesió o suïcidi → resposta fixa amb qui en
   //   parlar i els telèfons, sense IA. Mai a la IA: APSQ, textos lliures, HRV setmanal, detall de salut mental ni el nom del deportista.
-  setChatLab(on) { try { localStorage.setItem('mt-desk-chatlab', on ? '1' : '0'); } catch (e) {} this.setState({ chatLab: on, chatOpen: on, chatBig: false, chatLog: [] }); }
   // Sempre s'obre petit (la finestra sobre el botó); en tancar, torna a petit.
   chatSet(open) { this.setState({ chatOpen: open, chatBig: false }); }
   // Vista general: el xat a la dreta, de dalt a baix, amb l'amplada que arrossegues (de 380 px, la de per defecte, fins al que deixa 640 px a la pàgina).
   // Si a la pantalla no hi cap, va per sobre de la pàgina (i es pot fer tan gran com tota la zona de la pàgina).
   chatDock() { const s = this.state, room = s.vw - this.sideW(), push = room - 640 >= 380, max = push ? room - 640 : Math.max(380, room);
     return { push, min: 380, max, w: Math.round(Math.min(max, Math.max(380, s.chatPx || 380))) }; }
-  chatPush() { const s = this.state; return !!(s.chatLab && s.chatOpen && s.chatBig && this.chatDock().push); }
+  chatPush() { const s = this.state; return !!(s.chatOpen && s.chatBig && this.chatDock().push); }
   setChatPx(px, save) { this.setState({ chatPx: px }); if (save) try { localStorage.setItem('mt-desk-chatw', String(px)); } catch (e) {} }
   // Setmana de referència: la que es veu a Setmana; a les altres pàgines, l'últim formulari respost.
   chatW() { const s = this.state, n = this.WEEKS.length, lwi = this.lastWi(); if (s.scenario === 'nou') return null; return this.WEEKS[s.page === 'setmana' ? Math.max(lwi, Math.min(s.week2 < 0 ? lwi : s.week2, n - 1)) : lwi]; }
@@ -4327,7 +4552,7 @@ Reply ONLY with this JSON: {"text": "your answer", "blocs": [], "basat": ["data 
   // Preguntes suggerides segons la pàgina (i, amb un problema de salut, primer la d'abans i durant).
   chatSuggest(sc) {
     const s = this.state, H = this.chatPb(sc);
-    const by = { avui: ['q_hoy', 'q_son7', 'q_feel'], setmana: ['q_wk_prev', 'q_fat_weeks', 'q_vs'], mes: ['q_wem', 'q_feel', 'q_son7'], evolucio: ['q_hrv28', 'q_son_hrv', 'q_feel'] }[s.page] || ['q_hoy', 'q_son7', 'q_wem'];
+    const by = { avui: ['q_hoy', 'q_son7', 'q_feel'], setmana: ['q_wk_prev', 'q_fat_weeks', 'q_vs'], mes: ['q_wem', 'q_wem_ch', 'q_son7'], evolucio: ['q_hrv28', 'q_son_hrv', 'q_feel'] }[s.page] || ['q_hoy', 'q_son7', 'q_wem'];
     if (sc === 'nou') return ['q_hoy', 'q_son7'];
     // A Avui, mentre el seguiment de salut hi surt (en curs o acabat fa 7 dies o menys); a Setmana, si el formulari que veus en té.
     return (s.page === 'avui' && H && (H.k === 'on' || 41 - H.end <= 7)) || (s.page === 'setmana' && H) ? ['q_problem', ...by.slice(0, 2)] : by;
@@ -4361,7 +4586,7 @@ Reply ONLY with this JSON: {"text": "your answer", "blocs": [], "basat": ["data 
     }
     if (id === 'q_vs') {
       const W = this.chatW(); if (!W) return none;
-      const V = this.wkVs(sc, D, W), withD = V.filter(r => r.m), ok = withD.filter(r => r.m === 'ok').length, mis = withD.filter(r => r.m !== 'ok').map(r => this.SCALES.find(q => q.k === r.k).t.toLowerCase());
+      const V = this.wkVs(sc, D, W), withD = V.filter(r => r.m && r.m !== 'pb'), ok = withD.filter(r => r.m === 'ok').length, mis = withD.filter(r => r.m !== 'ok').map(r => this.SCALES.find(q => q.k === r.k).t.toLowerCase());
       return { texto: !withD.length ? this.t('chA_nou') : this.t('chA_vs', W.id, ok, withD.length) + (mis.length ? ' ' + this.t('chA_vsMis', mis.join(this.t('andW'))) : ''), blocs: [], basat: [this.t('weekN', W.id), ...band], seguents: ['q_wk_prev', 'q_feel'] };
     }
     if (id === 'q_problem') {
@@ -4375,7 +4600,14 @@ Reply ONLY with this JSON: {"text": "your answer", "blocs": [], "basat": ["data 
       const ms = this.MONTHS.slice(this.mLast()), M = ms[0], P = ms[1];
       if (!M) return none;
       const t0 = this.sum(M.wem), p0 = P ? this.sum(P.wem) : null;
-      return { texto: this.t('chA_wem', M.Name, t0, P ? P.name : null, p0 == null ? 0 : t0 - p0), blocs: [{ tipus: 'setmanes', dada: 'wemwbs' }], basat: [this.t('wemTitle')], seguents: ['q_feel', 'q_hoy'] };
+      return { texto: this.t('chA_wem', M.Name, t0, P ? P.name : null, p0 == null ? 0 : t0 - p0), blocs: [{ tipus: 'setmanes', dada: 'wemwbs' }], basat: [this.t('wemTitle')], seguents: ['q_wem_ch', 'q_hoy'] };
+    }
+    if (id === 'q_wem_ch') {
+      const ml = this.mLast(), M = this.MONTHS[ml]; if (!M) return none;
+      const N = this.mNorm(ml), S = this.WEM_SHORT;
+      if (!N) return { texto: this.t('chA_wemNoNorm'), blocs: [{ tipus: 'setmanes', dada: 'wemwbs' }], basat: [this.t('m2BForm')], seguents: ['q_wem', 'q_hoy'] };
+      const it = M.wem.map((v, j) => ({ j, g: v - N.w[j] })), up = it.filter(x => x.g >= .75).sort((a, b) => b.g - a.g || a.j - b.j).slice(0, 2).map(x => S[x.j]), down = it.filter(x => x.g <= -.75).sort((a, b) => a.g - b.g || a.j - b.j).slice(0, 2).map(x => S[x.j]);
+      return { texto: this.t('chA_wemCh', M.Name, up, down), blocs: [], basat: [this.t('m2BForm'), this.t('m2BNorm', N.n)], seguents: ['q_wem', 'q_son7'] };
     }
     if (id === 'q_hrv28') {
       const a = avg('hrv', '7d'), b = avg('hrv', 'ant21');
@@ -4396,6 +4628,7 @@ Reply ONLY with this JSON: {"text": "your answer", "blocs": [], "basat": ["data 
       ['q_hrv28', /hrv|variabilit/],
       ['q_son7', ca ? /\bson\b|dorm/ : /sueñ|dorm|sommeil|sleep/],
       ['q_fat_weeks', /fatig|cansa|tired/],
+      ['q_wem_ch', /(canvi|cambi|chang).*(benestar|bienestar|bien-être|wellbeing|well-being)|(benestar|bienestar|bien-être|wellbeing|well-being).*(canvi|cambi|chang)/],
       ['q_wem', /benestar|bienestar|bien-être|wellbeing|well-being|\bmes\b|\bmois\b|month/],
       ['q_wk_prev', /setmana passada|semana pasada|semana anterior|setmana anterior|semaine derni|semaine précéd|last week|previous week/],
       ['q_vs', /entrenador|entraîneur|coach|vaig dir|dije|j'ai dit|i said|quadr|cuadr/],
@@ -4529,7 +4762,7 @@ Reply ONLY with this JSON: {"text": "your answer", "blocs": [], "basat": ["data 
     if (b.tipus === 'setmanes') {
       const k = b.dada, isM = k === 'wemwbs', sq = scale(k); if (!isM && !sq) return null;
       const lw = isM ? this.mLast() : this.lastWi(), list = (isM ? this.MONTHS : this.WEEKS).map((x, q) => ({ x, pend: q < lw })).reverse(), n = list.length;
-      const mn = isM ? 7 : 1, mx = isM ? 35 : 10, val = x => (isM ? this.sum(x.wem) : x.v[k]), colOf = v => this.sTone(v, mn, mx, !isM && sq.inv);
+      const mn = isM ? 7 : 1, mx = isM ? 35 : 10, val = x => (isM ? this.sum(x.wem) : x.v[k]), colOf = v => (isM ? this.wTone(v, mn, mx) : this.sTone(v, mn, mx, sq.inv));
       const W0 = W1, H0 = 118, pl = 12, pr = 12, pt = 24, pbm = 24, iw = W0 - pl - pr, ih = H0 - pt - pbm, X = q => pl + (q + .5) * iw / n, Y = v => pt + (1 - (v - mn) / (mx - mn)) * ih;
       const pts = list.map((e, q) => (e.pend ? null : [X(q), Y(val(e.x))])).filter(Boolean);
       return frame(isM ? this.t('mentalWell') : sq.t, well(h('svg', { viewBox: `0 0 ${W0} ${H0}`, width: '100%', style: { display: 'block', overflow: 'visible' } },
@@ -4558,7 +4791,7 @@ Reply ONLY with this JSON: {"text": "your answer", "blocs": [], "basat": ["data 
       style: { position: 'fixed', right: 20, bottom: 20, zIndex: 58, width: 48, height: 48, padding: 0, borderRadius: '50%', border: 'none', background: C.ink, color: C.bg, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', boxShadow: `0 10px 28px ${this.sh(.4)}` } },
       this.icon(on ? 'chevD' : 'chat', 20, 2));
   }
-  chatEl(sc) { const s = this.state; return s.chatLab ? [this.chatFabEl(), s.chatOpen ? h(this.ChatPanel, { key: 'chat', sc }) : null] : null; }
+  chatEl(sc) { const s = this.state; return [this.chatFabEl(), s.chatOpen ? h(this.ChatPanel, { key: 'chat', sc }) : null]; }
   // El panell: capçalera (títol, ampliar o reduir i ✕), la conversa (o les preguntes suggerides) i, a baix, on escriure.
   // Cada resposta: la teva pregunta com a títol (en passar el ratolí, «Basat en…»), el text, les peces i 2–3 preguntes per seguir. Sense bombolles.
   ChatPanel = p => {
@@ -4633,7 +4866,7 @@ Reply ONLY with this JSON: {"text": "your answer", "blocs": [], "basat": ["data 
   protoEl(sc) {
     const s = this.state, C = this.C;
     if (s.pHidden) return h('div', { key: 'proto-h', className: 'mt-hc', title: 'Mostrar escenario (tecla E)', onClick: () => this.setProtoHidden(false),
-      style: { position: 'fixed', right: s.chatLab && s.chatOpen && s.chatBig ? this.chatDock().w : 0, bottom: 0, width: 36, height: 36, zIndex: 60, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' } },
+      style: { position: 'fixed', right: s.chatOpen && s.chatBig ? this.chatDock().w : 0, bottom: 0, width: 36, height: 36, zIndex: 60, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' } },
       h('span', { className: 'mt-dot', style: { width: 6, height: 6, borderRadius: '50%', background: C.ink } }));
     const dotOf = k => { const p = k === 'nou' ? null : this.data(k).pos[41]; return p == null ? this.fg(.3) : this.tone(this.dayH(p)); };
     const rows = this.SCN.map(x => { const on = x.k === sc;
@@ -4649,7 +4882,11 @@ Reply ONLY with this JSON: {"text": "your answer", "blocs": [], "basat": ["data 
       h('div', { style: { ...foot, cursor: 'default', flexDirection: 'column', alignItems: 'stretch', gap: 6 } }, h('span', null, 'Salud en el formulario (semana 38)'),
         h('span', { style: { display: 'flex', gap: 4 } }, [['sc', 'Escenario'], ['les', 'Lesión'], ['men', 'Mental'], ['dos', 'Dos']].map(([k, lb]) => { const on = (s.pbSim || 'sc') === k;
           return h('button', { key: k, onClick: () => this.setPbSim(k), style: { flex: 1, height: 22, padding: '0 6px', borderRadius: 6, border: `1px solid ${C.line2}`, background: on ? C.ink : 'transparent', color: on ? C.bg : C.ink2, fontFamily: 'inherit', fontSize: 11.5, fontWeight: 700, cursor: 'pointer' } }, lb); }))),
-      h('button', { className: 'mt-pr', onClick: () => this.setChatLab(!s.chatLab), style: { ...foot, color: s.chatLab ? C.ink : C.ink2 } }, h('span', null, 'Probar chat'), h('span', null, s.chatLab ? this.icon('check', 13) : '')),
+      // Mes: l'avís del formulari mensual (baixada clara o zona baixa), per provar-lo amb qualsevol escenari.
+      [['Bienestar en el formulario (mes)', [['sc', 'Escenario'], ['baj', 'Bajada'], ['low', 'Zona baja']], s.wemSim || 'sc', k => this.setWemSim(k)]].map(([t, opts, cur, fn]) =>
+        h('div', { key: t, style: { ...foot, cursor: 'default', flexDirection: 'column', alignItems: 'stretch', gap: 6 } }, h('span', null, t),
+          h('span', { style: { display: 'flex', gap: 4 } }, opts.map(([k, lb]) => { const on = cur === k;
+            return h('button', { key: k, onClick: () => fn(k), style: { flex: 1, height: 22, padding: '0 6px', borderRadius: 6, border: `1px solid ${C.line2}`, background: on ? C.ink : 'transparent', color: on ? C.bg : C.ink2, fontFamily: 'inherit', fontSize: 11.5, fontWeight: 700, cursor: 'pointer' } }, lb); })))),
       h('button', { className: 'mt-pr', onClick: () => this.setState(st => ({ simOverdue: !st.simOverdue })), style: { ...foot, color: s.simOverdue ? C.ink : C.ink2 } }, h('span', null, 'Simular cuestionarios sin responder'), h('span', null, s.simOverdue ? this.icon('check', 13) : '')),
       h('a', { className: 'mt-pr', href: './Max%20Tracking%20-%20M%C3%B3vil.dc.html', target: '_blank', rel: 'noopener', style: foot }, h('span', null, 'Abrir versión móvil'), h('span', null, '↗')),
       h('button', { className: 'mt-pr', onClick: () => this.setProtoHidden(true), style: foot }, h('span', null, 'Ocultar botón'), h('span', { style: { fontFamily: this.MONO, fontSize: 10, padding: '2px 5px', border: `1px solid ${C.line2}`, borderRadius: 4, color: C.ink3 } }, 'E'))) : null;
@@ -4657,7 +4894,7 @@ Reply ONLY with this JSON: {"text": "your answer", "blocs": [], "basat": ["data 
       style: { width: 40, height: 40, borderRadius: '50%', border: `1px solid ${C.line2}`, background: C.pop, backdropFilter: 'blur(10px)', WebkitBackdropFilter: 'blur(10px)', color: C.ink, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', boxShadow: `0 8px 24px ${this.sh(.35)}`, padding: 0 } },
       this.icon('flask', 17));
     return [s.pOpen ? h('div', { key: 'pbd', onClick: () => this.setState({ pOpen: false }), style: { position: 'fixed', inset: 0, zIndex: 59 } }) : null,
-      h('div', { key: 'proto', style: { position: 'fixed', right: !s.chatLab ? 20 : s.chatOpen && s.chatBig ? Math.min(this.chatDock().w + 20, s.vw - 60) : 80, bottom: 20, zIndex: 60, transition: 'right .3s cubic-bezier(.2,.7,.2,1)' } }, panel, btn)];
+      h('div', { key: 'proto', style: { position: 'fixed', right: s.chatOpen && s.chatBig ? Math.min(this.chatDock().w + 20, s.vw - 60) : 80, bottom: 20, zIndex: 60, transition: 'right .3s cubic-bezier(.2,.7,.2,1)' } }, panel, btn)];
   }
 
   renderVals() {
