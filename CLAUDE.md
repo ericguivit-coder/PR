@@ -159,7 +159,16 @@ Habrá una segunda app, para los entrenadores y **sobre todo para el preparador 
   - El titular de reserva (`fbWeek`) solo cuenta lesiones y enfermedades (`physList`): con salud mental no dice «con un problema de salud en curso».
   6. «Semana a semana» (`WeekAnswersF` con `mode: 'panel'`): solo para mirar, no cambia la página. La semana sin responder es una columna en discontinuo.
 
-**Evolución**, **Privacidad**, **Ajustes**: existen.
+**Evolución** (`pageEvol`, repasada con el criterio de Semana el 04-10-2026). Selector de 7 días, 28 días o 6 semanas. De arriba abajo:
+- Informe «Lectura de tendencias»:
+  - A la izquierda, la tarjeta «Cómo te sientes vs datos» (`trendLeftEl`). Es la clave ① y no se repite en las tarjetas de la derecha (`skipK: 'sents'` en `aiCards`).
+  - A la derecha, el titular, el texto, 2 claves y «Los próximos días».
+  - La reserva sin IA es `fbTrend`: se hace con los datos (sensación vs datos; FC, HRV y sueño de esta semana frente a las 3 anteriores; días sin registro). `FB_TREND` solo queda para «Deportista nuevo».
+- «Día a día» (`LineMulti`, familia `f`): en la HRV, la línea es la media de 7 días con la etiqueta directa «Media de 7 días», y cada día es un punto. El estado de cada dato va con su color y la diferencia con ayer en blanco.
+- «Cómo te sientes vs qué dicen los datos» (`LineSents`, familia `d`): sin leyenda. Mejor / Tu normal / Peor a la izquierda y «Tú» / «Tu cuerpo» al final de las líneas, como en Hoy.
+- No hay puntos que laten en ninguna página: `pingEl` no dibuja nada.
+
+**Privacidad**, **Ajustes**: existen. Ya no nombran el APSQ (04-10-2026).
 
 **Mes** (`pageMes`, oficial desde el 02-10-2026; el Mes antiguo, con el APSQ, el texto libre y el informe en tarjetas, se borró). Hecho con el plan del Drive «Pantalla Mes: plan de diseño (2 oct 2026)», que sustituye a la sección 8 del plan v2. Maquetas: https://claude.ai/artifact/JvG3jDXCxxJwRjd5a6tWQk. Se abre en el último mes respondido: el que falta sale en discontinuo, con el aviso «Sin responder» (`monthPendEl`).
 - **Solo habla del formulario mensual:** las 7 frases de bienestar (escala corta de Warwick-Edinburgh, 1–5, total 7–35). El APSQ y el texto libre nunca llegan a la app ni a la IA. «Tú vs tu cuerpo» y lo del entrenador se quitaron.
@@ -226,7 +235,7 @@ Habrá una segunda app, para los entrenadores y **sobre todo para el preparador 
 
 - Chat: la IA real solo existe dentro del host (`window.claude`); en local responden las sugeridas.
 - Aviso automático al especialista (idea del usuario, 02-10-2026): por decidir quién lo recibe, qué lo dispara y si el deportista lo ve en la app. Iría fuera de la app (en la hoja de respuestas de los Google Forms), porque la app no recibe el APSQ ni el texto libre.
-- Privacidad: la fila «Informes de la IA → Entrenador»; el APSQ todavía se nombra en la tabla de Privacidad («Formulario mensual») y en Ajustes › Sobre la IA (debe desaparecer).
+- Privacidad: la fila «Informes de la IA → Entrenador».
 - Semana, por decidir con el usuario:
   - las 3 palabras son texto libre: si alguien escribe algo de salud mental, sale en grande y llega a la IA;
   - las fichas de una lesión dicen «Bien» (son los datos del cuerpo, no la lesión).

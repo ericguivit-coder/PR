@@ -21,7 +21,6 @@ button{font:inherit;color:inherit}
 @keyframes mtGrowX{from{transform:scaleX(0)}to{transform:scaleX(1)}}
 @keyframes mtPop{from{opacity:0;transform:scale(.3)}to{opacity:1;transform:scale(1)}}
 @keyframes mtShim{0%{background-position:-600px 0}100%{background-position:600px 0}}
-@keyframes mtPing{0%{transform:scale(1);opacity:0}6%{opacity:var(--mt-ping-o,.85)}50%{opacity:calc(var(--mt-ping-o,.85) * .55)}85%{opacity:0}100%{transform:scale(3.2);opacity:0}}
 @keyframes mtSheen{0%{stroke-dashoffset:.16;opacity:0}3%{opacity:1}30%{opacity:1}34%{stroke-dashoffset:-1.02;opacity:0}100%{stroke-dashoffset:-1.02;opacity:0}}
 @keyframes mtBeat{0%,100%{opacity:1}50%{opacity:var(--mt-beat-o,.5)}}
 @keyframes mtFlashRow{0%{opacity:0}18%{opacity:1}100%{opacity:0}}
@@ -65,7 +64,7 @@ button{font:inherit;color:inherit}
 @keyframes mtUnfold{from{max-height:0;opacity:0;margin-top:0;padding-top:0;padding-bottom:0}to{max-height:360px;opacity:1}}
 .mt-bs .mt-bstip{opacity:0;visibility:hidden;transform:translateY(4px);transition:opacity .15s,transform .15s,visibility .15s}.mt-bs:hover .mt-bstip,.mt-bs:focus-visible .mt-bstip{opacity:1;visibility:visible;transform:none}
 :focus-visible{outline:2px solid var(--mt-fg7);outline-offset:2px}
-@media (prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.001ms!important;animation-delay:0s!important;transition-duration:.001ms!important}.mt-ping,.mt-sheen{display:none}}
+@media (prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.001ms!important;animation-delay:0s!important;transition-duration:.001ms!important}.mt-sheen{display:none}}
 </style>
 </helmet>
 <div style="{{ rootSt }}">{{ rail }}<main ref="{{ mainRef }}" class="mt-scroll" style="{{ mainSt }}" onscroll="{{ onMainScroll }}">{{ top }}{{ page }}</main>{{ proto }}</div>
@@ -414,7 +413,7 @@ class Component extends DCLogic {
       { t: { ca: 'Dades diàries', es: 'Datos diarios', fr: 'Données quotidiennes', en: 'Daily data' }, s: { ca: 'FC en repòs, HRV, son i com estàs', es: 'FC en reposo, HRV, sueño y cómo estás', fr: 'FC au repos, HRV, sommeil et comment tu vas', en: 'Resting HR, HRV, sleep and how you feel' }, r: ['yes', 'yes', 'code'] },
       { t: { ca: "Comunicació amb l'entrenador", es: 'Comunicación con el entrenador', fr: "Communication avec l'entraîneur", en: 'Communication with your coach' }, s: { ca: 'El que li dius cada dia', es: 'Lo que le dices cada día', fr: 'Ce que tu lui dis chaque jour', en: 'What you tell them each day' }, r: ['yes', 'yes', 'code'] },
       { t: { ca: 'Formulari setmanal', es: 'Formulario semanal', fr: 'Formulaire hebdomadaire', en: 'Weekly form' }, s: { ca: 'Rendiment, fatiga, descans, salut, organització i participació', es: 'Rendimiento, fatiga, descanso, salud, organización y participación', fr: 'Performance, fatigue, repos, santé, organisation et participation', en: 'Performance, fatigue, rest, health, organisation and participation' }, r: ['yes', 'no', 'code'] },
-      { t: { ca: 'Formulari mensual', es: 'Formulario mensual', fr: 'Formulaire mensuel', en: 'Monthly form' }, s: { ca: 'Benestar mental (WEMWBS) i esforç psicològic (APSQ)', es: 'Bienestar mental (WEMWBS) y esfuerzo psicológico (APSQ)', fr: 'Bien-être mental (WEMWBS) et effort psychologique (APSQ)', en: 'Mental wellbeing (WEMWBS) and psychological strain (APSQ)' }, r: ['yes', 'no', 'code'] },
+      { t: { ca: 'Formulari mensual', es: 'Formulario mensual', fr: 'Formulaire mensuel', en: 'Monthly form' }, s: { ca: 'Benestar mental (WEMWBS)', es: 'Bienestar mental (WEMWBS)', fr: 'Bien-être mental (WEMWBS)', en: 'Mental wellbeing (WEMWBS)' }, r: ['yes', 'no', 'code'] },
       { t: { ca: 'Informes de la IA', es: 'Informes de la IA', fr: "Rapports de l'IA", en: 'AI reports' }, s: { ca: "El que l'app t'explica", es: 'Lo que la app te explica', fr: "Ce que l'app t'explique", en: 'What the app tells you' }, r: ['yes', 'no', 'no'] },
     ],
     ROLES: [
@@ -457,6 +456,13 @@ class Component extends DCLogic {
         wResum: (g, a, b) => `${g} de 5 respostes bé · dades al teu normal ${a} de ${b} dies.`,
         fLow: "Una de les notes més baixes d'aquesta setmana.", fGood: 'Una bona nota aquesta setmana.', fMetric: n => `${n} ${n === 1 ? 'dia' : 'dies'} fora del teu normal o al límit.`, fOst: 'Problema de salut marcat al formulari.',
         wAct: "Si alguna cosa no et quadra, en podeu parlar amb l'entrenador.",
+        tr: { T: { calm: 'Tendència estable', warn: "Algunes dades s'allunyen del teu normal", worse: 'Et sents pitjor del que diuen les dades', better: 'Et sents millor del que diuen les dades', miss: 'Tendència estable, amb dies sense registre' },
+          R: { calm: 'El que sents i el que diuen les dades van de la mà, i els valors es mantenen dins del teu normal.', calmF: 'El que sents i el que diuen les dades van de la mà.', warn: l => `${l}, fora del teu normal els últims dies.`, worse: (k, n) => `En ${k} de ${n} dies t'has sentit pitjor del que diuen les dades.`, better: (k, n) => `En ${k} de ${n} dies t'has sentit millor del que diuen les dades.`, miss: n => `Aquesta última setmana falten ${n} dies de registre.` },
+          F: { ok: (k, n) => `El que sents coincideix amb les dades en ${k} de ${n} dies.`, worse: (k, n) => `En ${k} de ${n} dies t'has sentit pitjor del que diuen les dades.`, better: (k, n) => `En ${k} de ${n} dies t'has sentit millor del que diuen les dades.` },
+          run: n => `${n} dies seguits fora del teu normal.`, inb: 'Es manté dins la teva franja.',
+          mv: { rhr: { up: 'Més alta que les setmanes anteriors.', down: 'Més baixa que les setmanes anteriors.' }, hrv: { up: 'Més alta que les setmanes anteriors.', down: 'Més baixa que les setmanes anteriors.' }, son: { up: 'Dorms més que les setmanes anteriors.', down: 'Dorms menys que les setmanes anteriors.' } },
+          miss: 'Els dies sense registre no compten per a les tendències.',
+          A: { calm: 'Continua així i mira com va evolucionant.', warn: "Mira com evolucionen aquests dies i, si continuen fora del teu normal, en podeu parlar amb l'entrenador.", feel: "Si et torna a passar, en podeu parlar amb l'entrenador." } },
         idea: { doc: ['Seguir les indicacions del metge o del fisio', (d, w) => (w ? `${w} · des del ${d}.` : `Tens un problema de salut obert des del ${d}.`)], son: ['Podries anar a dormir una mica abans aquesta nit', m => `Aquesta nit has dormit ${m} min menys que la teva mitjana.`], desc: ['Et pot anar bé reservar estones de descans avui', s => `${s}: val la pena donar temps al cos per recuperar-se.`], resp: ['Uns minuts de respiració lenta abans de dormir et poden ajudar', 'Ajuda el cos a baixar revolucions quan la HRV està baixa.'], com: ["Si et ve de gust, explica a l'entrenador com et trobes", 'Avui et trobes pitjor que de costum.'], reg: ["Quan puguis, fer el registre d'avui", "Sense les dades d'avui no podem adaptar aquestes idees."], regNou: ['Fer el registre cada matí a la mateixa hora', "Així les teves dades seran comparables d'un dia a l'altre."], sonReg: ['Mantenir un horari de son regular', 'Ajuda que el teu normal sigui més fiable.'], hidr: ["Beure aigua abans, durant i després d'entrenar", 'Mantenir-te hidratat ajuda a recuperar.'], hidrS: ['Beure aigua sovint al llarg del dia', 'Ajuda el cos a recuperar-se.'], mob: ["Uns minuts de mobilitat suau després d'entrenar", 'Ajuda a recuperar sense afegir càrrega.'], nutr: ["Un àpat amb hidrats i proteïna després d'entrenar", 'Ajuda el cos a recuperar energia.'] },
       },
       es: {
@@ -483,6 +489,13 @@ class Component extends DCLogic {
         wResum: (g, a, b) => `${g} de 5 respuestas bien · datos en tu normal ${a} de ${b} días.`,
         fLow: 'Una de las notas más bajas de esta semana.', fGood: 'Una buena nota esta semana.', fMetric: n => `${n} ${n === 1 ? 'día' : 'días'} fuera de tu normal o al límite.`, fOst: 'Problema de salud marcado en el formulario.',
         wAct: 'Si algo no te cuadra, podéis hablarlo con el entrenador.',
+        tr: { T: { calm: 'Tendencia estable', warn: 'Algunos datos se alejan de tu normal', worse: 'Te sientes peor de lo que dicen los datos', better: 'Te sientes mejor de lo que dicen los datos', miss: 'Tendencia estable, con días sin registro' },
+          R: { calm: 'Lo que sientes y lo que dicen los datos van de la mano, y los valores se mantienen dentro de tu normal.', calmF: 'Lo que sientes y lo que dicen los datos van de la mano.', warn: l => `${l}, fuera de tu normal los últimos días.`, worse: (k, n) => `En ${k} de ${n} días te has sentido peor de lo que dicen los datos.`, better: (k, n) => `En ${k} de ${n} días te has sentido mejor de lo que dicen los datos.`, miss: n => `Esta última semana faltan ${n} días de registro.` },
+          F: { ok: (k, n) => `Lo que sientes coincide con los datos en ${k} de ${n} días.`, worse: (k, n) => `En ${k} de ${n} días te has sentido peor de lo que dicen los datos.`, better: (k, n) => `En ${k} de ${n} días te has sentido mejor de lo que dicen los datos.` },
+          run: n => `${n} días seguidos fuera de tu normal.`, inb: 'Se mantiene dentro de tu franja.',
+          mv: { rhr: { up: 'Más alta que las semanas anteriores.', down: 'Más baja que las semanas anteriores.' }, hrv: { up: 'Más alta que las semanas anteriores.', down: 'Más baja que las semanas anteriores.' }, son: { up: 'Duermes más que las semanas anteriores.', down: 'Duermes menos que las semanas anteriores.' } },
+          miss: 'Los días sin registro no cuentan para las tendencias.',
+          A: { calm: 'Sigue así y mira cómo va evolucionando.', warn: 'Mira cómo evolucionan estos días y, si siguen fuera de tu normal, podéis hablarlo con el entrenador.', feel: 'Si te vuelve a pasar, podéis hablarlo con el entrenador.' } },
         idea: { doc: ['Seguir las indicaciones del médico o del fisio', (d, w) => (w ? `${w} · desde el ${d}.` : `Tienes un problema de salud abierto desde el ${d}.`)], son: ['Podrías acostarte un poco antes esta noche', m => `Anoche dormiste ${m} min menos que tu media.`], desc: ['Te puede ir bien reservar ratos de descanso hoy', s => `${s}: vale la pena dar tiempo al cuerpo para recuperarse.`], resp: ['Unos minutos de respiración lenta antes de dormir te pueden ayudar', 'Ayuda al cuerpo a bajar revoluciones cuando la HRV está baja.'], com: ['Si te apetece, cuéntale al entrenador cómo te encuentras', 'Hoy te encuentras peor de lo habitual.'], reg: ['Cuando puedas, hacer el registro de hoy', 'Sin los datos de hoy no podemos adaptar estas ideas.'], regNou: ['Hacer el registro cada mañana a la misma hora', 'Así tus datos serán comparables de un día a otro.'], sonReg: ['Mantener un horario de sueño regular', 'Ayuda a que tu normal sea más fiable.'], hidr: ['Beber agua antes, durante y después de entrenar', 'Mantenerte hidratado ayuda a recuperar.'], hidrS: ['Beber agua a menudo a lo largo del día', 'Ayuda al cuerpo a recuperarse.'], mob: ['Unos minutos de movilidad suave después de entrenar', 'Ayuda a recuperar sin añadir carga.'], nutr: ['Una comida con hidratos y proteína después de entrenar', 'Ayuda al cuerpo a recuperar energía.'] },
       },
       fr: {
@@ -509,6 +522,13 @@ class Component extends DCLogic {
         wResum: (g, a, b) => `${g} réponses sur 5 bonnes · données dans ta normale ${a} jours sur ${b}.`,
         fLow: 'Une des notes les plus basses de la semaine.', fGood: 'Une bonne note cette semaine.', fMetric: n => `${n} ${n === 1 ? 'jour' : 'jours'} hors de ta normale ou à la limite.`, fOst: 'Problème de santé signalé dans le formulaire.',
         wAct: 'Si quelque chose ne colle pas, vous pouvez en parler avec ton entraîneur.',
+        tr: { T: { calm: 'Tendance stable', warn: "Certaines données s'éloignent de ta normale", worse: 'Tu te sens moins bien que ne le disent les données', better: 'Tu te sens mieux que ne le disent les données', miss: 'Tendance stable, avec des jours sans relevé' },
+          R: { calm: 'Ton ressenti et les données vont de pair, et les valeurs restent dans ta normale.', calmF: 'Ton ressenti et les données vont de pair.', warn: l => `${l}, hors de ta normale ces derniers jours.`, worse: (k, n) => `Tu t'es senti moins bien que ne le disent les données ${k} jours sur ${n}.`, better: (k, n) => `Tu t'es senti mieux que ne le disent les données ${k} jours sur ${n}.`, miss: n => `Cette dernière semaine, il manque ${n} jours de relevé.` },
+          F: { ok: (k, n) => `Ton ressenti concorde avec les données ${k} jours sur ${n}.`, worse: (k, n) => `Tu t'es senti moins bien que ne le disent les données ${k} jours sur ${n}.`, better: (k, n) => `Tu t'es senti mieux que ne le disent les données ${k} jours sur ${n}.` },
+          run: n => `${n} jours d'affilée hors de ta normale.`, inb: 'Reste dans ta fourchette.',
+          mv: { rhr: { up: 'Plus haute que les semaines précédentes.', down: 'Plus basse que les semaines précédentes.' }, hrv: { up: 'Plus haute que les semaines précédentes.', down: 'Plus basse que les semaines précédentes.' }, son: { up: 'Tu dors plus que les semaines précédentes.', down: 'Tu dors moins que les semaines précédentes.' } },
+          miss: 'Les jours sans relevé ne comptent pas pour les tendances.',
+          A: { calm: 'Continue comme ça et regarde comment ça évolue.', warn: "Regarde comment ça évolue ces jours-ci et, si ça reste hors de ta normale, tu peux en parler avec ton entraîneur.", feel: "Si ça se reproduit, tu peux en parler avec ton entraîneur." } },
         idea: { doc: ['Suivre les indications du médecin ou du kiné', (d, w) => (w ? `${w} · depuis le ${d}.` : `Tu as un problème de santé en cours depuis le ${d}.`)], son: ['Tu pourrais te coucher un peu plus tôt ce soir', m => `Cette nuit, tu as dormi ${m} min de moins que ta moyenne.`], desc: ["Ça peut t'aider de garder des moments de repos aujourd'hui", s => `${s} : ça vaut la peine de laisser à ton corps le temps de récupérer.`], resp: ["Quelques minutes de respiration lente avant de dormir peuvent t'aider", 'Ça aide le corps à ralentir quand la HRV est basse.'], com: ['Si tu en as envie, dis à ton entraîneur comment tu te sens', "Aujourd'hui, tu te sens moins bien que d'habitude."], reg: ['Quand tu peux, faire le relevé du jour', 'Sans les données du jour, on ne peut pas adapter ces idées.'], regNou: ['Faire ton relevé chaque matin à la même heure', "Ainsi, tes données seront comparables d'un jour à l'autre."], sonReg: ['Garder des horaires de sommeil réguliers', 'Ça rend ta normale plus fiable.'], hidr: ["Boire de l'eau avant, pendant et après l'entraînement", 'Rester hydraté aide à récupérer.'], hidrS: ["Boire de l'eau souvent dans la journée", 'Ça aide ton corps à récupérer.'], mob: ["Quelques minutes de mobilité douce après l'entraînement", 'Ça aide à récupérer sans ajouter de charge.'], nutr: ["Un repas avec des glucides et des protéines après l'entraînement", "Ça aide ton corps à refaire le plein d'énergie."] },
       },
       en: {
@@ -535,42 +555,17 @@ class Component extends DCLogic {
         wResum: (g, a, b) => `${g} of 5 answers good · data at your usual on ${a} of ${b} days.`,
         fLow: "One of this week's lowest scores.", fGood: 'A good score this week.', fMetric: n => `${n} ${n === 1 ? 'day' : 'days'} outside your usual or borderline.`, fOst: 'Health problem reported in the form.',
         wAct: "If something doesn't add up, you can talk it over with your coach.",
+        tr: { T: { calm: 'A stable trend', warn: 'Some data are drifting from your usual', worse: 'You feel worse than the data say', better: 'You feel better than the data say', miss: 'A stable trend, with days not logged' },
+          R: { calm: 'How you feel and what the data say go hand in hand, and your values stay within your usual.', calmF: 'How you feel and what the data say go hand in hand.', warn: l => `${l}, outside your usual in the last few days.`, worse: (k, n) => `You felt worse than the data say on ${k} of ${n} days.`, better: (k, n) => `You felt better than the data say on ${k} of ${n} days.`, miss: n => `${n} days weren't logged this last week.` },
+          F: { ok: (k, n) => `How you feel matches the data on ${k} of ${n} days.`, worse: (k, n) => `You felt worse than the data say on ${k} of ${n} days.`, better: (k, n) => `You felt better than the data say on ${k} of ${n} days.` },
+          run: n => `${n} days in a row outside your usual.`, inb: 'Stays within your range.',
+          mv: { rhr: { up: 'Higher than previous weeks.', down: 'Lower than previous weeks.' }, hrv: { up: 'Higher than previous weeks.', down: 'Lower than previous weeks.' }, son: { up: 'You sleep more than previous weeks.', down: 'You sleep less than previous weeks.' } },
+          miss: "Days not logged don't count towards trends.",
+          A: { calm: 'Keep it up and see how it develops.', warn: "Watch how these develop over the next few days and, if they stay outside your usual, talk it over with your coach.", feel: "If it happens again, talk it over with your coach." } },
         idea: { doc: ['Follow the advice of your doctor or physio', (d, w) => (w ? `${w} · since ${d}.` : `You've had an open health problem since ${d}.`)], son: ['You could go to bed a little earlier tonight', m => `Last night you slept ${m} min less than your average.`], desc: ['Setting aside some rest time today may help', s => `${s}: it's worth giving your body time to recover.`], resp: ['A few minutes of slow breathing before bed may help', 'It helps your body wind down when your HRV is low.'], com: ['If you feel like it, tell your coach how you feel', 'Today you feel worse than usual.'], reg: ["When you can, log today's data", "Without today's data we can't tailor these ideas."], regNou: ['Logging every morning at the same time', 'That way your data are comparable from day to day.'], sonReg: ['Keeping a regular sleep schedule', 'It makes your usual range more reliable.'], hidr: ['Drinking water before, during and after training', 'Staying hydrated helps you recover.'], hidrS: ['Drinking water often through the day', 'It helps your body recover.'], mob: ['A few minutes of gentle mobility after training', 'It helps recovery without adding load.'], nutr: ['A meal with carbs and protein after training', 'It helps your body refuel.'] },
       },
     },
     FB_TREND: {
-      normal: {
-        titular: { ca: 'Tendència estable i sensacions encertades', es: 'Tendencia estable y sensaciones acertadas', fr: 'Tendance stable et ressenti juste', en: 'A stable trend and accurate feelings' },
-        resum: { ca: 'El que sents i el que diuen les dades van de la mà, i els valors es mantenen dins del teu normal.', es: 'Lo que sientes y lo que dicen los datos van de la mano, y los valores se mantienen dentro de tu normal.', fr: 'Ton ressenti et les données vont de pair, et les valeurs restent dans ta normale.', en: 'How you feel and what the data say go hand in hand, and your values stay within your usual.' },
-        troballes: [
-          { k: 'sents', to: 'be', t: { ca: 'Et coneixes bé: gairebé sempre el que sents coincideix amb les dades.', es: 'Te conoces bien: casi siempre lo que sientes coincide con los datos.', fr: 'Tu te connais bien : ton ressenti concorde presque toujours avec les données.', en: 'You know yourself well: how you feel almost always matches the data.' } },
-          { k: 'hrv', to: 'be', d: [35, 36, 37, 38, 39, 40, 41], t: { ca: 'Aquesta setmana, una mica més alta que les tres anteriors.', es: 'Esta semana, algo más alta que las tres anteriores.', fr: 'Cette semaine, un peu plus haute que les trois précédentes.', en: 'This week, a little higher than the previous three.' } },
-          { k: 'son', to: 'vigilar', d: [35, 36, 37, 38, 39, 40, 41], t: { ca: 'Baixa lleugerament respecte a les setmanes anteriors.', es: 'Baja ligeramente respecto a las semanas anteriores.', fr: 'En légère baisse par rapport aux semaines précédentes.', en: 'Slightly down on previous weeks.' } }],
-        accions: [{ ca: "Continua així i vigila que les nits no s'escurcin gaire més.", es: 'Sigue así y vigila que las noches no se acorten mucho más.', fr: 'Continue comme ça et veille à ce que tes nuits ne raccourcissent pas davantage.', en: "Keep it up and make sure your nights don't get much shorter." }] },
-      descans: {
-        titular: { ca: 'Tres dies de baixada seguida', es: 'Tres días de bajada seguida', fr: "Trois jours de baisse d'affilée", en: 'Three days of steady decline' },
-        resum: { ca: "Des de dilluns, la FC en repòs puja i l'HRV baixa cada dia.", es: 'Desde el lunes, la FC en reposo sube y la HRV baja cada día.', fr: 'Depuis lundi, la FC au repos monte et la HRV baisse chaque jour.', en: 'Since Monday, your resting HR has risen and your HRV has fallen every day.' },
-        troballes: [
-          { k: 'rhr', to: 'vigilar', m: 'run', d: [38, 39, 40, 41], t: { ca: 'Puja cada dia des de dilluns.', es: 'Sube cada día desde el lunes.', fr: 'Elle monte chaque jour depuis lundi.', en: 'Up every day since Monday.' } },
-          { k: 'hrv', to: 'vigilar', m: 'run', d: [38, 39, 40, 41], t: { ca: 'Fa el camí contrari: baixa cada dia.', es: 'Hace el camino contrario: baja cada día.', fr: 'Elle fait le chemin inverse : elle baisse chaque jour.', en: 'Going the other way: down every day.' } },
-          { k: 'sents', to: 'be', d: [41], t: { ca: 'Avui el que sents i les dades diuen el mateix: toca recuperar.', es: 'Hoy lo que sientes y los datos dicen lo mismo: toca recuperar.', fr: "Aujourd'hui, ton ressenti et les données disent la même chose : il faut récupérer.", en: 'Today how you feel and the data agree: time to recover.' } }],
-        accions: [{ ca: "Si demà les dades no milloren, parla-ho amb l'entrenador per ajustar la setmana.", es: 'Si mañana los datos no mejoran, háblalo con el entrenador para ajustar la semana.', fr: "Si demain les données ne s'améliorent pas, parles-en à ton entraîneur pour ajuster la semaine.", en: "If the data don't improve tomorrow, talk to your coach about adjusting the week." }] },
-      comp: {
-        titular: { ca: 'Et sents millor del que diuen les dades', es: 'Te sientes mejor de lo que dicen los datos', fr: 'Tu te sens mieux que ce que disent les données', en: 'You feel better than the data say' },
-        resum: { ca: 'Aquesta setmana et trobes molt bé, però dorms menys i la FC en repòs puja.', es: 'Esta semana te encuentras muy bien, pero duermes menos y la FC en reposo sube.', fr: 'Cette semaine, tu te sens très bien, mais tu dors moins et ta FC au repos monte.', en: 'This week you feel very good, but you are sleeping less and your resting HR is rising.' },
-        troballes: [
-          { k: 'sents', to: 'vigilar', d: [38, 39, 40, 41], t: { ca: 'Et sents millor del que diuen les dades, sobretot aquesta setmana.', es: 'Te sientes mejor de lo que dicen los datos, sobre todo esta semana.', fr: 'Tu te sens mieux que ce que disent les données, surtout cette semaine.', en: 'You feel better than the data say, especially this week.' } },
-          { k: 'son', to: 'vigilar', d: [35, 36, 37, 38, 39, 40, 41], t: { ca: 'Dorms menys que les tres setmanes anteriors.', es: 'Duermes menos que las tres semanas anteriores.', fr: 'Tu dors moins que les trois semaines précédentes.', en: 'You are sleeping less than in the previous three weeks.' } },
-          { k: 'rhr', to: 'vigilar', d: [35, 36, 37, 38, 39, 40, 41], t: { ca: 'Més alta que les setmanes anteriors.', es: 'Más alta que las semanas anteriores.', fr: 'Plus haute que les semaines précédentes.', en: 'Higher than in previous weeks.' } }],
-        accions: [{ ca: 'Prioritza el son fins que les dades tornin a la teva franja.', es: 'Prioriza el sueño hasta que los datos vuelvan a tu franja.', fr: "Donne la priorité au sommeil jusqu'à ce que les données reviennent dans ta plage.", en: 'Put sleep first until your data are back in range.' }] },
-      buit: {
-        titular: { ca: 'Tendència estable, amb dies sense registre', es: 'Tendencia estable, con días sin registro', fr: 'Tendance stable, avec des jours sans relevé', en: 'A stable trend, with some days not logged' },
-        resum: { ca: 'Els dies que tenim són bons, però en falten uns quants.', es: 'Los días que tenemos son buenos, pero faltan unos cuantos.', fr: 'Les jours dont on dispose sont bons, mais il en manque quelques-uns.', en: 'The days we have look good, but a few are missing.' },
-        troballes: [
-          { k: 'reg', to: 'vigilar', d: [36, 37, 41], t: { ca: 'Els dies sense dades no compten per a les tendències.', es: 'Los días sin datos no cuentan para las tendencias.', fr: 'Les jours sans données ne comptent pas pour les tendances.', en: "Days without data don't count towards trends." } },
-          { k: 'sents', to: 'be', t: { ca: 'Els dies amb dades, el que sents i les dades coincideixen gairebé sempre.', es: 'Los días con datos, lo que sientes y los datos coinciden casi siempre.', fr: 'Les jours avec des données, ton ressenti et les données concordent presque toujours.', en: 'On days with data, how you feel and the data almost always match.' } },
-          { k: 'hrv', to: 'be', d: [35, 36, 37, 38, 39, 40, 41], t: { ca: 'Es manté dins la teva franja.', es: 'Se mantiene dentro de tu franja.', fr: 'Elle reste dans ta plage.', en: 'Staying within your range.' } }],
-        accions: [{ ca: 'Intenta fer el registre cada matí: com més dies, més fiable és la lectura.', es: 'Intenta hacer el registro cada mañana: cuantos más días, más fiable es la lectura.', fr: 'Essaie de faire ton relevé chaque matin : plus il y a de jours, plus la lecture est fiable.', en: 'Try to log every morning: the more days, the more reliable the reading.' }] },
       nou: {
         titular: { ca: 'Encara no hi ha prou dies per veure tendències', es: 'Aún no hay suficientes días para ver tendencias', fr: "Il n'y a pas encore assez de jours pour voir des tendances", en: 'Not enough days yet to see trends' },
         resum: { ca: "D'aquí a nou dies podrem calcular la teva franja i veure com evolucionen les dades.", es: 'Dentro de nueve días podremos calcular tu franja y ver cómo evolucionan los datos.', fr: 'Dans neuf jours, on pourra calculer ta plage et voir comment évoluent les données.', en: "In nine days we'll be able to calculate your range and see how your data change." },
@@ -1148,7 +1143,7 @@ class Component extends DCLogic {
       aiReads: { ca: 'La IA llegeix', es: 'La IA lee', fr: "L'IA lit", en: 'The AI reads' },
       aiReadsT: { ca: ': el registre diari, el formulari setmanal i el benestar mental (WEMWBS).', es: ': el registro diario, el formulario semanal y el bienestar mental (WEMWBS).', fr: ' : le relevé quotidien, le formulaire hebdomadaire et le bien-être mental (WEMWBS).', en: ': the daily log, the weekly form and mental wellbeing (WEMWBS).' },
       aiNot: { ca: 'No llegeix', es: 'No lee', fr: 'Elle ne lit pas', en: "It doesn't read" },
-      aiNotT: { ca: ": l'APSQ, la informació complementària ni l'HRV setmanal.", es: ': el APSQ, la información complementaria ni la HRV semanal.', fr: " : l'APSQ, les informations complémentaires ni la HRV hebdomadaire.", en: ': the APSQ, the additional information or the weekly HRV.' },
+      aiNotT: { ca: ": l'HRV setmanal.", es: ': la HRV semanal.', fr: " : la HRV hebdomadaire.", en: ': the weekly HRV.' },
       version: { ca: 'Max Tracking 0.9 · Projecte de recerca de Batxillerat', es: 'Max Tracking 0.9 · Proyecto de investigación de Bachillerato', fr: 'Max Tracking 0.9 · Projet de recherche de lycée', en: 'Max Tracking 0.9 · Sixth-form research project' },
     },
 
@@ -1678,7 +1673,32 @@ Reply ONLY with this JSON: {"text": "your answer", "blocs": [], "basat": ["data 
   fallback(kind, sc, extra) {
     if (kind === 'daily') return this.fbDaily(sc);
     if (kind === 'week') return this.fbWeek(sc, extra);
-    return this.FB_TREND[{ disc: 'comp', gran: 'comp', estres: 'normal', salut: 'normal' }[sc] || sc];
+    return sc === 'nou' || !this.data(sc).band ? this.FB_TREND.nou : this.fbTrend(sc);
+  }
+  // Lectura de tendències de reserva, feta amb les dades: sensació vs dades, FC, HRV i son d'aquesta setmana contra les tres anteriors, i dies sense registre.
+  // Només descriu (sense causes) i, si alguna cosa no quadra, remet a parlar-ho amb l'entrenador.
+  fbTrend(sc) {
+    const D = this.data(sc), B = D.band, G = this.GEN.tr, st = this.sentsStats(sc, 28), K3 = ['rhr', 'hrv', 'son'];
+    const avg = xs => { const p = xs.filter(v => v != null); return p.length ? this.sum(p) / p.length : null; };
+    const miss = D.pos.slice(35).filter(p => p == null).length;
+    // Dies seguits fora del teu normal fins avui; un dia sense dada no trenca la ratxa.
+    const runOf = k => { const d = []; for (let i = 41; i >= 0; i--) { const x = D.vals[k][i]; if (x == null) continue; if (!this.flag(k, x, B)) break; d.unshift(i); } return d; };
+    const C = [];
+    K3.forEach(k => { const d = runOf(k), a7 = avg(D.vals[k].slice(35)), p21 = avg(D.vals[k].slice(14, 35));
+      if (d.length >= 2) C.push({ k, to: 'vigilar', m: 'run', d, t: G.run(d.length), s: 100 + d.length });
+      else if (a7 != null && p21 != null && Math.abs(a7 - p21) >= (B[k].hi - B[k].lo) / 4) { const up = a7 > p21, bad = B[k].worse === 'up' ? up : !up; C.push({ k, to: bad ? 'vigilar' : 'be', d: [35, 36, 37, 38, 39, 40, 41], t: G.mv[k][up ? 'up' : 'down'], s: bad ? 50 : 20 }); } });
+    C.sort((a, b) => b.s - a.s);
+    const outNow = K3.filter(k => runOf(k).length >= 2), mn = Math.max(3, Math.ceil(st.n * .15)), fw = st.worse >= mn && st.worse > st.better, fb = st.better >= mn && st.better > st.worse;
+    const key = outNow.length ? 'warn' : fw ? 'worse' : fb ? 'better' : miss >= 2 ? 'miss' : 'calm';
+    const tr = [];
+    if (st.n) tr.push({ k: 'sents', to: fw || fb ? 'vigilar' : 'be', t: (fw ? G.F.worse : fb ? G.F.better : G.F.ok)(fw ? st.worse : fb ? st.better : st.k, st.n) });
+    // Amb 2 dies o més sense registre, això va abans que les dades: és el que més canvia la lectura.
+    if (miss >= 2) tr.push({ k: 'reg', to: 'vigilar', t: G.miss });
+    C.slice(0, 2).forEach(({ s, ...f }) => tr.push(f));
+    // Fins a 2 targetes de dades: si no n'hi ha prou de destacades, les que aquesta setmana es mantenen dins la franja (de mitjana).
+    ['hrv', 'son', 'rhr'].filter(k => !C.some(c => c.k === k)).forEach(k => { const a7 = avg(D.vals[k].slice(35)); if (tr.length < (st.n ? 3 : 2) && a7 != null && a7 >= B[k].lo && a7 <= B[k].hi) tr.push({ k, to: 'be', t: G.inb }); });
+    if (miss === 1) tr.push({ k: 'reg', to: 'vigilar', t: G.miss });
+    return { titular: G.T[key], resum: { calm: C.some(c => c.to === 'vigilar') ? G.R.calmF : G.R.calm, warn: G.R.warn(this.cap(this.listL(outNow))), worse: G.R.worse(st.worse, st.n), better: G.R.better(st.better, st.n), miss: G.R.miss(miss) }[key], troballes: tr.slice(0, 3), accions: [key === 'warn' ? G.A.warn : fw || fb ? G.A.feel : G.A.calm] };
   }
   // Textos de reserva (quan la IA no respon), fets amb les dades i les mateixes regles que la resta de la pantalla; les idees són hàbits, mai entrenament.
   fbDaily(sc) {
@@ -1900,7 +1920,8 @@ Reply ONLY with this JSON: {"text": "your answer", "blocs": [], "basat": ["data 
   lgCoach() { return h('span', { key: 'lc', style: { display: 'inline-flex', alignItems: 'center', gap: 12, flexWrap: 'wrap' } }, h('span', null, this.t('coachC')), ['be', 'reg', 'mal', 'res'].map(c => this.lgItem('c' + c, this.coachIcon(c, 11), this.COACH[c].t))); }
   focusN() { const s = this.state; return s.hoverF != null ? s.hoverF : s.pinF; }
   // Pols d'avui: una ona que surt del punt d'avui cada 2,4 s (amagada si el sistema demana menys moviment).
-  pingEl(x, y, col, r, key, delay) { return h('circle', { key, className: 'mt-ping', cx: x, cy: y, r, fill: 'none', stroke: col, strokeWidth: this.C.dark ? 1.6 : 2.2, vectorEffect: 'non-scaling-stroke', style: { pointerEvents: 'none', transformBox: 'fill-box', transformOrigin: 'center', animation: `mtPing 2.4s cubic-bezier(.2,.6,.3,1) ${delay || 1.6}s infinite both` } }); }
+  // Sense ones ni punts que llateixen: el punt d'avui es queda quiet (els usos continuen cridant-lo i no dibuixa res).
+  pingEl() { return null; }
   // Dies consecutius agrupats en trams [inici, fi] (en posicions del gràfic), per marcar només els dies que toca.
   dayRuns(days, idx) { const js = days.map(i => idx.indexOf(i)).filter(j => j >= 0).sort((x, y) => x - y), out = []; js.forEach(j => { const r = out[out.length - 1]; if (r && j === r[1] + 1) r[1] = j; else out.push([j, j]); }); return out; }
   // Amb ChatGPT, barra lateral oberta (260 px) o plegada en icones (56 px; a menys de 1000 px sempre plegada); amb els altres estils, el rail de 76 px.
@@ -2688,13 +2709,13 @@ Reply ONLY with this JSON: {"text": "your answer", "blocs": [], "basat": ["data 
   periodTone(sc, idx) { const ps = idx.map(i => this.data(sc).pos[i]).filter(p => p != null); return ps.length ? this.tone(this.dayH(this.sum(ps) / ps.length)) : null; }
   // Anàlisi de la IA: una fitxa per troballa, amb la dada i el valor primer, i a sota les accions.
   aiCards(R, o) {
-    const C = this.C, f = this.focusN(), n = R.findings.length, g = this.geom(), rw = g.stack ? g.cw - 56 : g.cw * 2 / 3 - 56, fit = Math.max(1, Math.floor((rw + 10) / 180)), cols = n <= fit ? n : n === 4 ? 2 : fit;
+    const C = this.C, f = this.focusN(), FL = R.findings.filter(fd => fd.k !== o.skipK), n = FL.length, g = this.geom(), rw = g.stack ? g.cw - 56 : g.cw * 2 / 3 - 56, fit = Math.max(1, Math.floor((rw + 10) / 180)), cols = n <= fit ? n : n === 4 ? 2 : fit;
     return h(React.Fragment, null, this.aiHead(R.val),
-      h('div', { style: { marginTop: 18, display: 'grid', gridTemplateColumns: `repeat(${cols}, minmax(0,1fr))`, gap: 10 } }, R.findings.map((fd, i) => { const ev = fd.ev, on = f === fd.n;
+      h('div', { style: { marginTop: 18, display: 'grid', gridTemplateColumns: `repeat(${cols}, minmax(0,1fr))`, gap: 10 } }, FL.map((fd, i) => { const ev = fd.ev, on = f === fd.n;
         return h('button', { key: fd.n, ...this.fProps(fd, o), style: { display: 'flex', flexDirection: 'column', minWidth: 0, padding: '14px 16px 16px', borderRadius: this.G.inner, border: `1px solid ${on ? this.ov(.24) : this.G.border ? C.line : 'transparent'}`, background: on ? this.ov(.05) : this.ov(this.G.border ? .02 : .035), textAlign: 'left', font: 'inherit', color: 'inherit', cursor: 'pointer', transition: 'background .15s, border-color .15s', animation: `mtIn .4s cubic-bezier(.2,.7,.2,1) ${(.15 + i * .08).toFixed(2)}s both` } },
           h('div', { style: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 8 } }, h('span', { style: { fontSize: 12.5, fontWeight: 500, color: C.ink2 } }, ev.label), this.badge(fd.n, on, 18)),
           h('div', { style: { marginTop: 10, display: 'flex', alignItems: 'baseline', flexWrap: 'wrap', gap: '0 5px' } }, h('span', { style: { fontSize: 26, fontWeight: 600, letterSpacing: '-.02em', lineHeight: 1.05, color: ev.col } }, ev.value), ev.unit ? h('span', { style: { fontSize: 13, color: C.ink3 } }, ev.unit) : null),
-          h('div', { style: { marginTop: 6, fontSize: 12, color: C.ink3 } }, ev.ctx),
+          h('div', { style: { marginTop: 6, fontSize: 12, color: C.ink2 } }, ev.ctx),
           h('div', { style: { marginTop: 12, paddingTop: 12, borderTop: `1px solid ${C.line}`, fontSize: 14, lineHeight: 1.45, textWrap: 'pretty' } }, this.segs(fd.text))); })),
       this.actionsBox(R.val.accions, o.actLabel, o.actTone));
   }
@@ -3099,7 +3120,9 @@ Reply ONLY with this JSON: {"text": "your answer", "blocs": [], "basat": ["data 
           if (k !== 'estat') [[a, b.hi], [c, b.lo]].forEach(([yy, vv], q) => kids.push(h('text', { key: `be${k}${q}`, x: Lw - 8, y: yy + 3.5, textAnchor: 'end', fill: C.ink3, style: { fontSize: 10, fontVariantNumeric: 'tabular-nums' } }, this.fmtV(k, vv)))); }
         kids.push(h('line', { key: 'mn' + k, x1: Lw, x2: Lw + iw, y1: Y(mean), y2: Y(mean), stroke: this.fg(.45), strokeWidth: 1.2, strokeDasharray: '5 4' }));
         marks.filter(m => m.k === k).forEach(m => this.markCols(kids, [m], idx, Lw - slot / 2, slot, y0 + 8, PH - 12, focus, 0, 0, true, bpos));
-        const runs = this.sRuns(gp, vals, X, Y), id = uid + k, grp = []; let dcol = fam === 'e' ? `url(#${id}t)` : this.idCol(k);
+        // HRV: la línia principal és la mitjana de 7 dies (la d'un sol dia salta molt) i cada dia queda com un punt. Calen 3 dies amb dada a la finestra.
+        const avg7 = k === 'hrv' && fam === 'f', mv = avg7 ? idx.map(i => { const w = D.vals[k].slice(Math.max(0, i - 6), i + 1).filter(x => x != null); return w.length >= 3 ? this.sum(w) / w.length : null; }) : vals;
+        const runs = this.sRuns(gp, mv, X, Y), id = uid + k, grp = []; let dcol = fam === 'e' ? `url(#${id}t)` : this.idCol(k);
         this.gapZones(gp, kids, defs, id + 'z', this.gapsOf(vals).flatMap(g => g.miss).concat(this.edgeMiss(vals)), X, slot, y0 + 6, PH - 10);
         if (!pres.length) kids.push(h('text', { key: 'nd' + k, x: Lw + iw / 2, y: (pt + pb) / 2 + 4, textAnchor: 'middle', fill: C.ink3, style: { fontSize: 12 } }, this.t('noData')));
         const tv = tJ >= 0 ? vals[tJ] : null;
@@ -3117,9 +3140,11 @@ Reply ONLY with this JSON: {"text": "your answer", "blocs": [], "basat": ["data 
           const ym = Y(mean), om = Math.max(0, Math.min(1, (ym - pt) / (pb - pt || 1)));
           defs.push(h('linearGradient', { key: 'g' + k, id: id + 'g', gradientUnits: 'userSpaceOnUse', x1: 0, y1: pt, x2: 0, y2: pb }, h('stop', { offset: 0, stopColor: col, stopOpacity: this.areaA(col, .26) }), h('stop', { offset: om, stopColor: col, stopOpacity: 0 }), h('stop', { offset: 1, stopColor: col, stopOpacity: this.areaA(col, .26) })));
           runs.forEach((rr, q) => { if (rr.length > 1) grp.push(h('path', { key: `a${k}${q}`, d: this.areaD(rr, ym), fill: `url(#${id}g)` }), h('path', { key: `l${k}${q}`, d: this.polyD(rr), fill: 'none', stroke: col, strokeWidth: 2.25, strokeLinejoin: 'round', strokeLinecap: 'round', pathLength: 1, style: { strokeDasharray: 1, animation: `mtDraw 1.1s cubic-bezier(.4,0,.2,1) ${(r * .08).toFixed(2)}s both` } })); });
-          vals.forEach((x, j) => { if (x == null || idx[j] === 41) return; const lv = this.lvlOf(k, x, band), out = lv && lv !== 'ok'; if (out || n <= 14) kids.push(h('circle', { key: `f${k}${j}`, cx: X(j), cy: Y(x), r: out ? 3.6 : 3, fill: out ? tc(x) : col, stroke: C.s1, strokeWidth: 1.5 })); });
+          vals.forEach((x, j) => { if (x == null || idx[j] === 41) return; const lv = this.lvlOf(k, x, band), out = lv && lv !== 'ok'; if (out || n <= 14 || avg7) kids.push(h('circle', { key: `f${k}${j}`, cx: X(j), cy: Y(x), r: out ? 3.6 : avg7 ? 2.4 : 3, fill: out ? tc(x) : col, fillOpacity: out || !avg7 ? 1 : .6, stroke: C.s1, strokeWidth: 1.5 })); });
+          // Etiqueta directa de la mitjana, al final de la línia (sense llegenda).
+          if (avg7) { let lm = n - 1; while (lm > 0 && mv[lm] == null) lm--; if (mv[lm] != null) kids.push(h('text', { key: 'm7' + k, x: tJ >= 0 ? X(tJ) - cw / 2 - 28 : X(lm) - 8, y: Y(mv[lm]) - 10, textAnchor: 'end', fill: col, stroke: C.s1, strokeWidth: 4, strokeLinejoin: 'round', paintOrder: 'stroke', style: { fontSize: 10.5, fontWeight: 600, animation: 'mtFade .5s 1s both' } }, this.t('meanN', 7))); }
         }
-        this.gapGroup(gp, kids, defs, id + 'gm', vals, X, grp, gi); this.gapDecor(gp, kids, id, vals, X, Y, dcol, 2.25);
+        this.gapGroup(gp, kids, defs, id + 'gm', mv, X, grp, gi); this.gapDecor(gp, kids, id, mv, X, Y, dcol, 2.25);
         const lj = n - 1; if (vals[lj] != null && idx[lj] === 41) { const col = fam === 'e' || fam === 'g' ? tc(vals[lj]) : this.idCol(k); kids.push(h('circle', { key: 'e' + k, cx: X(lj), cy: Y(vals[lj]), r: 5, fill: col, stroke: C.s1, strokeWidth: 2.5 }), this.pingEl(X(lj), Y(vals[lj]), col, 5, 'p' + k, 1.8)); }
         kids.push(h('text', { key: 'mnl' + k, x: Lw - 8, y: Y(mean) + 3.5, textAnchor: 'end', fill: C.ink, style: { fontSize: 10.5, fontWeight: 600, fontVariantNumeric: 'tabular-nums' } }, this.fmtV(k, mean)));
         if (tv != null) this.pill(kids, 'tg' + k, X(tJ) + cw / 2 + 6, Y(tv), this.fmtV(k, tv), fam === 'e' || fam === 'g' ? tc(tv) : this.idCol(k), C.bg, 'start');
@@ -3128,10 +3153,10 @@ Reply ONLY with this JSON: {"text": "your answer", "blocs": [], "basat": ["data 
         if (fam === 'f') kids.push(h('rect', { key: 'ik' + k, x: 0, y: y0 + 14, width: 12, height: 3, rx: 1.5, fill: this.idCol(k) }));
         kids.push(h('text', { key: 'ln' + k, x: fam === 'f' ? 20 : 0, y: y0 + 19, fill: C.ink2, style: { fontSize: 13, fontWeight: 500 } }, meta.name));
         kids.push(h('text', { key: 'lv' + k, x: 0, y: y0 + 47, style: { fontSize: 22, fontWeight: 600 } }, h('tspan', { fill: x == null ? C.ink3 : st.col }, this.fmtV(k, x)), x != null ? h('tspan', { fill: C.ink3, dx: 5, style: { fontSize: 12, fontWeight: 400 } }, meta.unit) : null));
-        kids.push(h('text', { key: 'ls' + k, x: 0, y: y0 + 66, fill: C.ink3, style: { fontSize: 11.5 } }, st.label));
+        kids.push(h('text', { key: 'ls' + k, x: 0, y: y0 + 66, fill: x == null ? C.ink3 : st.col, style: { fontSize: 11.5, fontWeight: 500 } }, st.label));
         let pj = rj - 1; while (pj >= 0 && vals[pj] == null && rj - pj < 8) pj--; const pv = pj >= 0 ? vals[pj] : null;
         if (x != null && pv != null) { const dd = x - pv, mag = k === 'son' ? Math.round(Math.abs(dd) * 60) : k === 'estat' ? Math.round(Math.abs(dd) * 10) : Math.round(Math.abs(dd)), yest = pj === rj - 1 && ri === 41, good = this.DEF[k].worse === 'up' ? dd < 0 : dd > 0;
-          kids.push(h('text', { key: 'ld' + k, x: 0, y: y0 + 84, fill: C.ink3, style: { fontSize: 11.5, fontVariantNumeric: 'tabular-nums' } }, mag === 0 ? this.t(yest ? 'sameYest' : 'samePrev') : [h('tspan', { key: 'a', fill: this.tone(good ? .9 : .15), style: { fontSize: 9 } }, dd > 0 ? '▲ ' : '▼ '), `${this.delta(k, x, pv)} ${this.t(yest ? 'vsYest' : 'vsPrevDay')}`])); }
+          kids.push(h('text', { key: 'ld' + k, x: 0, y: y0 + 84, fill: C.ink2, style: { fontSize: 11.5, fontVariantNumeric: 'tabular-nums' } }, mag === 0 ? this.t(yest ? 'sameYest' : 'samePrev') : [h('tspan', { key: 'a', fill: this.tone(good ? .9 : .15), style: { fontSize: 9 } }, dd > 0 ? '▲ ' : '▼ '), `${this.delta(k, x, pv)} ${this.t(yest ? 'vsYest' : 'vsPrevDay')}`])); }
         const lc = fam === 'e' || fam === 'g' ? null : this.idCol(k);
         hrows.push({ y0, y1: y0 + PH, pt: j => (vals[j] != null ? [X(j), Y(vals[j])] : null), col: j => (vals[j] == null ? C.ink3 : lc || tc(vals[j])),
           tip: j => { const v = vals[j], s2 = this.status(k, v, band), head = this.tipHead(h('span', { style: { width: 12, height: 3, borderRadius: 2, background: lc || C.ink2 } }), meta.name, idx[j]);
@@ -3142,7 +3167,8 @@ Reply ONLY with this JSON: {"text": "your answer", "blocs": [], "basat": ["data 
                 h('span', { style: { display: 'inline-flex', alignItems: 'baseline', gap: 5 } }, h('span', { style: { fontSize: 24, fontWeight: 600, letterSpacing: '-.01em', color: C.ink, fontVariantNumeric: 'tabular-nums', lineHeight: 1 } }, this.fmtV(k, v)), h('span', { style: { color: C.ink3, fontSize: 12.5 } }, k === 'estat' ? '/5' : meta.unit)),
                 h('span', { style: { display: 'inline-flex', alignItems: 'center', gap: 6, padding: '3px 8px', borderRadius: this.G.tag, background: this.alpha(s2.col, .16), color: C.ink, fontSize: 11.5, fontWeight: 500, whiteSpace: 'nowrap' } }, this.dot(s2.col, 6), s2.label)),
               b ? h('div', { key: 'r', style: { marginTop: 12 } }, this.miniRange(k, v, k === 'estat' ? 3.5 : b.lo, k === 'estat' ? 4.5 : b.hi, mean, s2.col, lc || C.ink2, 200)) : null,
-              h('div', { key: 'c', style: { marginTop: 10, paddingTop: 8, borderTop: `1px solid ${C.line}` } }, b ? this.cmpRow(k, this.t('cmpMean'), v, mean, 'm') : null, pv != null ? this.cmpRow(k, this.t(pj === j - 1 && idx[j] === 41 ? 'vsYest' : 'vsPrevDay'), v, pv, 'p') : null),
+              h('div', { key: 'c', style: { marginTop: 10, paddingTop: 8, borderTop: `1px solid ${C.line}` } }, b ? this.cmpRow(k, this.t('cmpMean'), v, mean, 'm') : null, pv != null ? this.cmpRow(k, this.t(pj === j - 1 && idx[j] === 41 ? 'vsYest' : 'vsPrevDay'), v, pv, 'p') : null,
+                avg7 && mv[j] != null ? h('div', { key: 'm7', style: { marginTop: 4, display: 'flex', justifyContent: 'space-between', gap: 10, color: C.ink2 } }, h('span', null, this.t('meanN', 7)), h('span', { style: { color: C.ink, fontWeight: 600, fontVariantNumeric: 'tabular-nums' } }, `${this.fmtV(k, mv[j])} ${meta.unit}`)) : null),
               this.dayFoot(D.pos[idx[j]], D.coach[idx[j]])]; } });
       });
       kids.push(h('text', { key: 'date', x: 0, y: 16, fill: C.ink, style: { fontSize: 13, fontWeight: 600 } }, ri === 41 ? this.t('todayD', this.dLong(ri)) : this.cap(this.dLong(ri))));
@@ -3221,13 +3247,14 @@ Reply ONLY with this JSON: {"text": "your answer", "blocs": [], "basat": ["data 
   LineSents = p => {
     const C = this.C, [ref, W] = useWidth(), [hov, setHov] = React.useState(null), uid = 'ls' + React.useId().replace(/[^a-zA-Z0-9]/g, '');
     const { feel, obj, est, idx, marks, focus, fam } = p, n = idx.length, gp = p.gap || this.gapMode();
-    const padL = 12, padR = 118, padT = 24, ph = 200, axY = padT + ph + 24, H = axY + 8, iw = Math.max(40, W - padL - padR), X = j => padL + (n === 1 ? iw / 2 : j * iw / (n - 1)), slot = iw / Math.max(1, n - 1);
+    // Família D (la triada): sense llegenda. Mejor / Tu normal / Peor a l'esquerra i «Tu» / «El teu cos» a l'extrem de la línia, com al gràfic d'Avui.
+    const dd = fam === 'd', padL = dd ? 88 : 12, padR = dd ? 92 : 118, padT = 24, ph = 200, axY = padT + ph + 24, H = axY + 8, iw = Math.max(40, W - padL - padR), X = j => padL + (n === 1 ? iw / 2 : j * iw / (n - 1)), slot = iw / Math.max(1, n - 1);
     const lo = -2.8, hi = 2.4, Y = z => padT + (1 - (z - lo) / (hi - lo)) * ph, base = padT + ph, kids = [], defs = [], warn = C.dark ? this.tone(.47) : this.toneF(.47), feelC = fam === 'e' ? null : C.ink, dataC = this.idCol('data');
     const fc = z => this.tone(this.lerpPts(this.QH, z)), word = z => (z == null ? this.t('noDataL') : z >= .5 ? this.t('wAbove') : z <= -.5 ? this.t('wBelow') : this.t('wNormal'));
     const both = j => feel[j] != null && obj[j] != null, miss = j => both(j) && Math.abs(feel[j] - obj[j]) >= 1.2, todayJ = idx[n - 1] === 41 && feel[n - 1] != null ? n - 1 : -1;
     kids.push(h('rect', { key: 'nb', x: padL, y: Y(1), width: iw, height: Y(-1) - Y(1), fill: this.ov(.035) }));
     kids.push(h('line', { key: 'z', x1: padL, x2: padL + iw, y1: Y(0), y2: Y(0), stroke: this.fg(.26), strokeDasharray: '3 5' }));
-    [[this.t('better'), 1.8], [this.t('yourUsual'), 0], [this.t('worse'), -2.1]].forEach(([t, z], i) => kids.push(h('text', { key: 'yl' + i, x: padL + iw + 12, y: Y(z) + 4, fill: i === 1 ? C.ink2 : C.ink3, style: { fontSize: 11 } }, i !== 1 ? h('tspan', { fill: this.tone(i ? .12 : .92), style: { fontSize: 9 } }, i ? '▼ ' : '▲ ') : null, t)));
+    [[this.t('better'), 1.8], [this.t('yourUsual'), 0], [this.t('worse'), -2.1]].forEach(([t, z], i) => kids.push(h('text', { key: 'yl' + i, x: dd ? padL - 12 : padL + iw + 12, y: Y(z) + 4, textAnchor: dd ? 'end' : 'start', fill: i === 1 ? C.ink2 : C.ink3, style: { fontSize: 11 } }, i !== 1 ? h('tspan', { fill: this.tone(i ? .12 : .92), style: { fontSize: 9 } }, i ? '▼ ' : '▲ ') : null, t)));
     this.markCols(kids, marks, idx, padL - slot / 2, slot, padT, ph, focus, 0, 0, true);
     { const any = feel.map((z, j) => (z != null || obj[j] != null ? 1 : null)); this.gapZones(gp, kids, defs, uid + 'z', this.gapsOf(any).flatMap(g => g.miss).concat(this.edgeMiss(any)), X, slot, padT, ph); }
     const fR = this.sRuns(gp, feel, X, Y), oR = this.sRuns(gp, obj, X, Y), gF = [], gO = [];
@@ -3263,6 +3290,10 @@ Reply ONLY with this JSON: {"text": "your answer", "blocs": [], "basat": ["data 
     if (fam !== 'g') { this.gapGroup(gp, kids, defs, uid + 'mkf', feel, X, gF); this.gapDecor(gp, kids, uid + 'f', feel, X, Y, fam === 'e' ? `url(#${uid}fg)` : feelC, 2.75); }
     if (fam !== 'g') for (let j = 0; j < n; j++) if (miss(j)) kids.push(h('circle', { key: 'mf' + j, cx: X(j), cy: Y(feel[j]), r: 4, fill: fam === 'e' ? fc(feel[j]) : feelC, stroke: C.s1, strokeWidth: 2 }), h('circle', { key: 'mo' + j, cx: X(j), cy: Y(obj[j]), r: 3.5, fill: fam === 'e' ? this.fg(.6) : dataC, stroke: C.s1, strokeWidth: 2 }));
     if (todayJ >= 0) this.endDot(kids, X(todayJ), Y(feel[todayJ]), fam === 'e' ? fc(feel[todayJ]) : fam === 'g' ? (feel[todayJ] >= 0 ? this.tone(.92) : this.tone(.12)) : feelC, 'end', true);
+    if (dd) { const lj = n - 1, lf = feel[lj], lo2 = obj[lj]; let yf = lf != null ? Y(lf) : null, yo = lo2 != null ? Y(lo2) : null;
+      if (yf != null && yo != null && Math.abs(yf - yo) < 13) { const m = (yf + yo) / 2, up = lf >= lo2; yf = up ? m - 6.5 : m + 6.5; yo = up ? m + 6.5 : m - 6.5; }
+      if (yf != null) kids.push(h('text', { key: 'tf', x: X(lj) + 16, y: yf + 4, fill: feelC, style: { fontSize: 11.5, fontWeight: 600 } }, this.t('fvYou')));
+      if (yo != null) kids.push(h('text', { key: 'to', x: X(lj) + 16, y: yo + 4, fill: dataC, style: { fontSize: 11.5, fontWeight: 600 } }, this.t('fvData'))); }
     if (hov != null) { kids.push(h('line', { key: 'cur', x1: X(hov), x2: X(hov), y1: padT - 4, y2: base, stroke: this.fg(.3) })); if (feel[hov] != null) kids.push(h('circle', { key: 'hf', cx: X(hov), cy: Y(feel[hov]), r: 5, fill: C.s1, stroke: fam === 'e' ? fc(feel[hov]) : feelC, strokeWidth: 2.5 })); if (obj[hov] != null) kids.push(h('circle', { key: 'ho', cx: X(hov), cy: Y(obj[hov]), r: 4.5, fill: C.s1, stroke: fam === 'e' ? this.fg(.6) : dataC, strokeWidth: 2.25 })); }
     this.lineAxisX(kids, idx, X, axY);
     kids.push(h('rect', { key: 'ov', x: padL - 10, y: 0, width: iw + 20, height: H, fill: 'transparent', style: { cursor: 'crosshair' },
@@ -3274,12 +3305,8 @@ Reply ONLY with this JSON: {"text": "your answer", "blocs": [], "basat": ["data 
         h('div', { key: 'b', style: { marginTop: 6, display: 'flex', gap: 8, alignItems: 'center' } }, h('span', { style: { width: 12, height: 3, borderRadius: 2, background: fam === 'e' ? (f == null ? C.ink3 : fc(f)) : feelC } }), h('span', null, `${this.t('rowFeel')}: `, h('b', { style: { color: C.ink, fontWeight: 600 } }, est[hov] != null ? `${est[hov]}/5` : '—'), ` · ${word(f)}`)),
         h('div', { key: 'c', style: { marginTop: 4, display: 'flex', gap: 8, alignItems: 'center' } }, h('span', { style: { width: 12, height: 3, borderRadius: 2, background: fam === 'e' ? this.fg(.6) : dataC } }), `${this.t('rowData')}: ${word(o)}`),
         bb ? h('div', { key: 'd', style: { marginTop: 8, paddingTop: 8, borderTop: `1px solid ${C.line}`, color: same ? C.ink2 : C.ink } }, same ? this.t('match') : this.t('noMatch')) : null]); }
-    let rjS = hov; if (rjS == null) { rjS = n - 1; while (rjS > 0 && feel[rjS] == null) rjS--; }
-    const nMis = feel.filter((_, j) => miss(j)).length;
-    const legend = fam === 'd' ? this.lineLegend([{ k: 'f', col: feelC, name: this.t('rowFeel'), primary: true, val: est[rjS] != null ? `${est[rjS]}/5` : '—', valCol: feel[rjS] != null ? fc(feel[rjS]) : C.ink3 },
-      { k: 'o', col: dataC, name: this.t('rowData'), val: obj[rjS] != null ? word(obj[rjS]) : '—', valCol: obj[rjS] != null ? fc(obj[rjS]) : C.ink3 },
-      { k: 'm', col: this.alpha(warn, .7), name: this.t('noMatch'), val: `${nMis} ${this.t('days')}`, valCol: C.ink }]) : fam === 'g' ? this.lineLegend([{ k: 'u', col: this.tone(.92), name: this.t('lvUp'), primary: true }, { k: 'd', col: this.tone(.12), name: this.t('lvDown'), primary: true }, { k: 'o', col: this.fg(.5), name: this.t('rowData') }, { k: 'm', col: warn, name: this.t('noMatch') }]) : this.lineLegend([{ k: 'f', col: fam === 'e' ? `linear-gradient(90deg, ${this.tone(.12)}, ${this.tone(.5)}, ${this.tone(.92)})` : feelC, name: this.t('rowFeel'), primary: true }, { k: 'o', col: fam === 'e' ? this.fg(.5) : dataC, name: this.t('rowData') }, { k: 'm', col: this.alpha(warn, .7), name: this.t('noMatch') }].concat(fam === 'f' ? [{ k: 'y', col: this.alpha(this.tone(.9), .45), name: this.t('match') }] : []));
-    return h('div', null, legend, h('div', { ref, style: { position: 'relative', height: H, marginTop: 14 } }, W ? [h('svg', { key: 'svg', width: W, height: H, viewBox: `0 0 ${W} ${H}`, style: { display: 'block', overflow: 'visible', fontFamily: this.SANS } }, h('defs', null, defs), kids), tip] : null));
+    const legend = dd ? null : fam === 'g' ? this.lineLegend([{ k: 'u', col: this.tone(.92), name: this.t('lvUp'), primary: true }, { k: 'd', col: this.tone(.12), name: this.t('lvDown'), primary: true }, { k: 'o', col: this.fg(.5), name: this.t('rowData') }, { k: 'm', col: warn, name: this.t('noMatch') }]) : this.lineLegend([{ k: 'f', col: fam === 'e' ? `linear-gradient(90deg, ${this.tone(.12)}, ${this.tone(.5)}, ${this.tone(.92)})` : feelC, name: this.t('rowFeel'), primary: true }, { k: 'o', col: fam === 'e' ? this.fg(.5) : dataC, name: this.t('rowData') }, { k: 'm', col: this.alpha(warn, .7), name: this.t('noMatch') }].concat(fam === 'f' ? [{ k: 'y', col: this.alpha(this.tone(.9), .45), name: this.t('match') }] : []));
+    return h('div', null, legend, h('div', { ref, style: { position: 'relative', height: H, marginTop: dd ? 0 : 14 } }, W ? [h('svg', { key: 'svg', width: W, height: H, viewBox: `0 0 ${W} ${H}`, style: { display: 'block', overflow: 'visible', fontFamily: this.SANS } }, h('defs', null, defs), kids), tip] : null));
   };
 
   // Família G · «borsa»: una línia amb resplendor, el difuminat característic cap avall i etiquetes als eixos en passar el ratolí.
@@ -4070,7 +4097,7 @@ Reply ONLY with this JSON: {"text": "your answer", "blocs": [], "basat": ["data 
         h('div', { style: { display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', flexWrap: 'wrap', gap: '2px 6px' } },
           h('span', { style: { fontSize: 13.5, fontWeight: 600, color: C.ink, whiteSpace: 'nowrap' } }, late ? this.t('weekN', this.WEEKS[this.lastWi()].id + 1) : this.cap(this.dShort(q.i))),
           late ? null : h('span', { style: { fontSize: 11.5, fontWeight: 700, color: C.ink2, whiteSpace: 'nowrap' } }, this.t('hpReviewTag'))),
-        h('div', { style: { marginTop: 10, display: 'flex', alignItems: 'center', gap: 6, fontSize: 14, fontWeight: 600, lineHeight: 1.25, color: late ? rc : C.ink } }, late ? this.dot(rc, 8) : this.icon('form', 14, 2), this.t(late ? 'overdueL' : 'hpReview'))); };
+        h('div', { style: { marginTop: 10, display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: '4px 6px', fontSize: 14, fontWeight: 600, lineHeight: 1.25, color: late ? rc : C.ink } }, late ? this.dot(rc, 8) : this.icon('form', 14, 2), h('span', { style: { minWidth: 0, overflowWrap: 'anywhere' } }, this.t(late ? 'overdueL' : 'hpReview')))); };
     // Una fila contínua de dies (del primer dia fins avui o fins que s'acaba) i la revisió just al final. Amb dos problemes comparteixen les dates:
     // els mateixos dies queden un sobre l'altre i el que va començar després comença més a la dreta. Si no hi caben, continuen a la fila de sota.
     const g = this.geom(), s0 = Math.min(...HL.map(x => x.st)), e0 = Math.max(...HL.map(x => x.end)), nDays = e0 - s0 + 1, N = nDays + (HL.some(x => x.next != null) ? 1 : 0);
@@ -4378,9 +4405,9 @@ Reply ONLY with this JSON: {"text": "your answer", "blocs": [], "basat": ["data 
   pageEvol(sc, D, g) {
     const C = this.C, s = this.state, nou = sc === 'nou', range = nou ? 7 : s.evoRange, idx = Array.from({ length: range }, (_, j) => 42 - range + j), R = this.reportData('trend', sc), f = this.focusN();
     const right = this.seg([{ k: 7, t: this.t('nDays', 7) }, { k: 28, t: this.t('nDays', 28), dis: nou }, { k: 42, t: this.t('sixWeeks'), dis: nou }], range, v => this.setState({ evoRange: v }));
-    const rep = this.reportEl({ title: this.t('trendReading'), actLabel: this.t('nextDays'), actTone: nou ? null : this.periodTone(sc, [35, 36, 37, 38, 39, 40, 41]), meta: nou ? this.t('fiveDays') : this.t('last28'), left: this.trendLeftEl(sc), R, basis: [...this.KEYS.map(k => this.META[k].name), this.t('coachComm')] });
+    const rep = this.reportEl({ title: this.t('trendReading'), actLabel: this.t('nextDays'), actTone: nou ? null : this.periodTone(sc, [35, 36, 37, 38, 39, 40, 41]), meta: nou ? this.t('fiveDays', D.nData) : this.t('last28'), left: this.trendLeftEl(sc, R), skipK: 'sents', R, basis: [...this.KEYS.map(k => this.META[k].name), this.t('coachComm')] });
     let sents;
-    if (nou) sents = this.emptyEl(this.t('feelVsData'), this.t('feelEmpty'));
+    if (nou) sents = this.emptyEl(this.t('feelVsData'), this.t('feelEmpty', Math.max(0, 14 - D.nData)));
     else {
       const st = this.sentsStats(sc, range), sm = R.findings.filter(x => x.k === 'sents').map(x => ({ n: x.n, days: x.days.length ? x.days : st.mis }));
       sents = this.box({ id: 'mt-evo-sents', st: { padding: '20px 24px 18px' }, title: this.t('feelVsData') },
@@ -4389,17 +4416,18 @@ Reply ONLY with this JSON: {"text": "your answer", "blocs": [], "basat": ["data 
     }
     return this.stack([this.headEl(this.t('evol'), null, right), rep, this.dayByDayEl(sc, D, R.findings), sents]);
   }
-  trendLeftEl(sc) {
+  // La targeta de l'esquerra és la troballa «sents» (porta el seu número i il·lumina els dies del gràfic de sota), així no es repeteix a les targetes de la dreta.
+  trendLeftEl(sc, R) {
     const C = this.C;
     if (sc === 'nou') return h('div', null, this.lab(this.t('feelVsDataS')), h('div', { style: { marginTop: 10, fontSize: 30, fontWeight: 600, letterSpacing: '-.02em', color: C.ink2 } }, this.t('notYet')), h('div', { style: { marginTop: 8, fontSize: 14, color: C.ink3, lineHeight: 1.45 } }, this.t('need14')));
-    const st = this.sentsStats(sc, 28);
-    return h('div', null,
-      this.lab(this.t('feelVsDataS')),
-      h('div', { style: { marginTop: 10, display: 'flex', alignItems: 'baseline', gap: 8 } }, h('span', { style: { fontSize: 52, fontWeight: 600, letterSpacing: '-.03em', lineHeight: 1 } }, String(st.k)), h('span', { style: { fontSize: 16, color: C.ink3 } }, this.t('ofNDays', st.n))),
+    const st = this.sentsStats(sc, 28), fd = R && !R.loading ? R.findings.find(x => x.k === 'sents') : null;
+    return h(fd ? 'button' : 'div', fd ? { ...this.fProps(fd), style: { display: 'block', width: '100%', padding: 0, border: 'none', background: 'transparent', textAlign: 'left', font: 'inherit', color: 'inherit', cursor: 'pointer' } } : null,
+      fd ? h('div', { style: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 8 } }, this.lab(this.t('feelVsDataS')), this.badge(fd.n, this.focusN() === fd.n, 18)) : this.lab(this.t('feelVsDataS')),
+      h('div', { style: { marginTop: 10, display: 'flex', alignItems: 'baseline', gap: 8 } }, h('span', { style: { fontSize: 52, fontWeight: 600, letterSpacing: '-.03em', lineHeight: 1 } }, String(st.k)), h('span', { style: { fontSize: 16, color: C.ink2 } }, this.t('ofNDays', st.n))),
       h('div', { style: { marginTop: 8, fontSize: 14, color: C.ink2 } }, this.t('match')),
       h('div', { style: { marginTop: 18, display: 'flex', gap: 2 } }, Array.from({ length: st.n }, (_, j) => h('span', { key: j, style: { flex: 1, height: 16, borderRadius: 2, background: j < st.k ? this.fg(.55) : this.ov(.08), transformOrigin: 'bottom', animation: `mtGrowY .3s ${(.2 + j * .02).toFixed(2)}s both` } }))),
       h('div', { style: { marginTop: 18, display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 } },
-        [[this.t('feelBetter'), st.better], [this.t('feelWorse'), st.worse]].map(([t, v]) => h('div', { key: t }, h('div', { style: { fontSize: 20, fontWeight: 600 } }, String(v)), h('div', { style: { marginTop: 3, fontSize: 12, color: C.ink3 } }, t)))));
+        [[this.t('feelBetter'), st.better], [this.t('feelWorse'), st.worse]].map(([t, v]) => h('div', { key: t }, h('div', { style: { fontSize: 20, fontWeight: 600 } }, String(v)), h('div', { style: { marginTop: 3, fontSize: 12, color: C.ink2 } }, t)))));
   }
 
   // ── Pàgina: Privacitat ───────────────────────────────────────────────
@@ -4906,7 +4934,7 @@ Reply ONLY with this JSON: {"text": "your answer", "blocs": [], "basat": ["data 
     const s = this.state, sc = s.scenario, D = this.data(sc), g = this.geom(), C = this.C;
     return {
       rootSt: { display: 'flex', height: '100vh', overflow: 'hidden', background: C.bg, color: C.ink, fontFamily: this.SANS, colorScheme: this.mode(), transition: 'background .3s, color .3s',
-        '--mt-ov4': this.ov(.04), '--mt-ov5': this.ov(.05), '--mt-ov6': this.ov(.06), '--mt-ov8': this.ov(.08), '--mt-ov10': this.ov(.085), '--mt-act': C.act || this.ov(.085), '--mt-ov18': this.ov(.18), '--mt-ink': C.ink, '--mt-ink3': C.ink3, '--mt-bg': C.bg, '--mt-fg7': this.fg(.7), '--mt-hb': C.dark ? 1.25 : .94, '--mt-ping-o': C.dark ? .85 : 1, '--mt-beat-o': C.dark ? .5 : .66 },
+        '--mt-ov4': this.ov(.04), '--mt-ov5': this.ov(.05), '--mt-ov6': this.ov(.06), '--mt-ov8': this.ov(.08), '--mt-ov10': this.ov(.085), '--mt-act': C.act || this.ov(.085), '--mt-ov18': this.ov(.18), '--mt-ink': C.ink, '--mt-ink3': C.ink3, '--mt-bg': C.bg, '--mt-fg7': this.fg(.7), '--mt-hb': C.dark ? 1.25 : .94, '--mt-beat-o': C.dark ? .5 : .66 },
       rail: this.railEl(sc), mainRef: this.mainRef, mainSt: { flex: 1, minWidth: 0, height: '100vh', overflowY: 'auto', position: 'relative' }, onMainScroll: this.onMainScroll,
       top: this.topEl(sc), page: this.pageEl(sc, D, g), proto: [s.chatOpen ? null : this.coachToastEl(sc), ...[].concat(this.chatEl(sc) || []), ...[].concat(this.protoEl(sc))],
     };
