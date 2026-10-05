@@ -42,10 +42,11 @@ Habrá una segunda app, para los entrenadores y **sobre todo para el preparador 
 | Archivo | Qué es |
 |---|---|
 | `Max Tracking - Ordenador.dc.html` | Página que abre el usuario para ordenador/iPad. Solo importa el motor y pasa las props (`athleteName`, `aiLive`, `formDaily`, `formWeekly`, `formMonthly`). |
-| `Max Tracking Escritorio.dc.html` | **El motor de ordenador/iPad (~670 KB).** Casi todo el trabajo se hace aquí. |
+| `Max Tracking Escritorio.dc.html` | **El motor de ordenador/iPad (~575 KB).** Casi todo el trabajo se hace aquí. |
 | `Max Tracking - Móvil.dc.html` + `Max Tracking.dc.html` | Versión móvil con el diseño y el modelo de datos **antiguos**. Se portará más adelante al motor nuevo; no la toques salvo que lo pida. |
 | `support.js` | Runtime de los `.dc.html` (no editar). |
-| `Max Tracking - Avui.dc.html`, `ios-frame.jsx`, `uploads/` | Restos o recursos antiguos. |
+| `ios-frame.jsx` | Marco de iPhone que usa la versión móvil antigua. |
+| `uploads/` | Capturas antiguas. |
 
 - Hay repo git y el usuario hace sus commits. **No hagas commit si no te lo pide.**
 - **Para verlo:** sirve la carpeta con `python3 -m http.server <puerto> --bind 127.0.0.1` y abre `http://127.0.0.1:<puerto>/Max%20Tracking%20-%20Ordenador.dc.html`. Si el usuario no ve un cambio, casi siempre es la caché: pídele una recarga forzada (Cmd+Shift+R; en Safari, Cmd+Option+R). Los `localStorage` son por dirección, así que en un puerto nuevo sale en catalán y con el estilo por defecto.
@@ -94,6 +95,7 @@ Habrá una segunda app, para los entrenadores y **sobre todo para el preparador 
   - `C.well` para paneles de gráfico dentro de tarjetas.
   - `alertC(col, a)` para cualquier aviso (en claro, más marcado).
   - `G.gpt` cambia la estructura: con Sencillo, `sideEl` + `topEl` + `reportChat`; con el resto, `railIcons` + `reportBox`. La barra lateral plegada no lleva el logo «MT» (redondo, parecía un segundo perfil): arriba solo el botón de abrir y abajo el perfil.
+  - `railIcons` (Híbrid, Editorial, Grafit; desde el 05-10-2026): barra de 60 px **solo con iconos** (el nombre, al pasar el ratón), sin el logo «MT». El botón de modo claro/oscuro lleva el icono `contrast`, porque el sol se confundía con Hoy.
 - **IA:** `fetchAI` → `window.claude.complete`, con respuesta en JSON y caché en `localStorage` (`mt-desk-ai-v14`; súbele la versión si cambian los datos o los prompts).
   - Prompts: `promptDaily`, `promptWeek` (tipo `week2` en Semana), `promptMonth2`, `promptTrend`.
   - **Nada personal** (desde el 03-10-2026): ningún informe envía el nombre, la edad ni el sexo (plantillas `head`, `wMain`, `tMain` y `m2Main`).
@@ -108,10 +110,17 @@ Habrá una segunda app, para los entrenadores y **sobre todo para el preparador 
   - `lastWi()` / `mLast()`: último formulario semanal / mensual respondido (con «Simular cuestionarios sin responder», el anterior).
   - `stack()`: cada bloque queda por encima del siguiente (zIndex), así los desplegables no quedan tapados.
   - `formBtn(url, …)`, `stateMark`, `markWord`.
-- **Estado persistente (`localStorage`):** `mt-lang`, `mt-desk-theme-v4`, `mt-desk-mode-v2` (claves renovadas el 03-10-2026 para que todos empiecen en Sencillo + Automático), `mt-desk-side`, `mt-desk-done`, `mt-desk-trk` (respuestas de «¿Cómo va hoy?» y «Ya estoy bien», una por problema), `mt-desk-charts-v2`, `mt-desk-ai-v14`, `mt-proto-hidden`, `mt-desk-chatw` (ancho de la vista general del chat; la conversación nunca se guarda).
+- **Tàctil (iPad, desde el 04-10-2026).** Con ratón no cambia nada.
+  - Lo que con ratón sale al pasar por encima, con el dedo sale al tocar. Lo resuelven `tapDown` / `tapUp` / `tapClick` y `tapTipEl`, a nivel de documento:
+    - el `title` de un elemento sale como globo;
+    - «Basado en…» (`.mt-bs[data-open]`) se abre al tocar.
+  - Un `title` en un botón es su nombre y no sale como globo.
+  - Si un elemento con `title` también hace algo (`data-act`, como los días de «Esta semana»), el primer toque enseña el detalle y el segundo hace la acción. Tocar fuera lo cierra.
+  - Gráficos: `...this.ptr(pick, clear)` sustituye a `onPointerMove` / `onPointerLeave` (el detalle se queda al levantar el dedo), y `this.useTapAway(ref, clear)` lo cierra al tocar fuera. Úsalos en los gráficos nuevos.
+  - Los `:hover` del CSS van dentro de `@media(hover:hover)`, porque en un iPad táctil se quedan enganchados.
+- **Estado persistente (`localStorage`):** `mt-lang`, `mt-desk-theme-v4`, `mt-desk-mode-v2` (claves renovadas el 03-10-2026 para que todos empiecen en Sencillo + Automático), `mt-desk-side`, `mt-desk-done`, `mt-desk-trk` (respuestas de «¿Cómo va hoy?» y «Ya estoy bien», una por problema), `mt-desk-ai-v14`, `mt-proto-hidden`, `mt-desk-chatw` (ancho de la vista general del chat; la conversación nunca se guarda).
 - **Matraz** (`protoEl`, tecla E). Es temporal; se quitará cuando acabe la fase de prototipo. Contiene:
   - el escenario;
-  - «Opciones de gráficos»;
   - «Salud en el formulario (semana 38)» (`pbSim`: Escenario / Lesión / Mental / Dos);
   - «Bienestar en el formulario (mes)» (`wemSim`: Escenario / Bajada / Zona baja);
   - «Simular cuestionarios sin responder» (`simOverdue`);
@@ -131,41 +140,69 @@ Habrá una segunda app, para los entrenadores y **sobre todo para el preparador 
      - «Revisión: domingo 27 · formulario semanal»;
      - sus señales desde que empezó y su mensaje (una lesión nunca «se cura» por los datos);
      - «¿Cómo va hoy?» y «Ya estoy bien»;
-     - la curva, con la vez anterior del mismo problema en discontinuo.
+     - la curva, solo de este problema. La línea discontinua de la vez anterior («Anterior (S37)») se quitó el 05-10-2026 porque no aportaba nada.
    - Si todos han terminado, sale una línea «Terminó en N días», solo si terminó en los últimos 7 días.
    - «Precaución» solo mientras hay un problema físico en curso.
 4. «Ideas para recuperarte» (`recoveryPlanEl`): hábitos que propone la IA y el hueco del preparador físico («Próximamente»).
-5. Franja «Tú vs tu cuerpo» (`feelStripEl`, id `mt-feel`).
+5. Franja «Tú vs tu cuerpo» (`feelStripEl`, id `mt-feel`). Para ir a Evolución está el enlace «Verlo en Evolución ›». Con el dedo, el gráfico sirve para mirar: un toque enseña el día y no cambia de página. Con ratón, el clic en el gráfico sigue llevando a Evolución.
 6. «Esta semana» (`weekNowEl`): nombres de los datos a la izquierda y 7 tarjetas de día negras con el borde del color de su estado, la palabra del estado, 4 barras que se llenan según el estado y la palabra del entrenador. Los días que faltan van en discontinuo. Clic en un día → Evolución › Día a día; «Ver semana» → Semana.
 7. Notificación flotante del entrenador (`coachToastEl`), solo si lo que dijo al entrenador no cuadra con el estado de sus datos. Entra deslizándose por la derecha, sigue al hacer scroll y tiene ✕. Al tocarla baja a `mt-feel`.
 
 **Semana** (`pageSetmana`, oficial desde el 30-09-2026; la antigua con anillos, «Salud y participación», «Los 7 días» y el mapa de semanas se borró).
 - Centrada en el feedback del formulario semanal. Se abre en el **último formulario respondido**. La semana en curso solo sale bajo el título: «Próximo formulario…», o el aviso con «Responder».
 - Arriba a la derecha, `weekPickEl`: flechas ‹ › y un desplegable con todas las semanas de la temporada (fechas y 3 palabras). La que está sin responder sale en discontinuo, con «Responder».
-- De arriba abajo, de más a menos importante:
+- **Estructura desde el 05-10-2026** (lienzo «Semana y Mes · boceto de estructura», https://claude.ai/artifact/FHtT2Qv97ncDDcVZQnyoh9; antes, versión de prueba en el matraz). Los datos, los textos y los bloques no cambiaron: solo cómo se colocan. Sin avisos, la página se acorta. De arriba abajo:
   1. Salud mental (`menBlockEl`, solo si hay). Es la versión **compacta** (elegida el 01-10-2026): tarjeta ámbar con desde cuándo, una frase, con quién hablar en tres botones (el detalle al pasar el ratón) y los teléfonos 024 y 112 en una línea. Para verla: matraz › «Salud en el formulario» › Mental.
-  2. Las 3 palabras en grande, el titular de la IA y 2–3 claves en tarjetas negras (`wkHeroF`, `wkKeys`).
-  3. «Salud», solo lesión o enfermedad (`weekHealthF` → `healthDays`):
+  2. El titular de la IA («Basado en…» al pasar el ratón).
+  3. Bloque principal (`wtTopEl`), en una tarjeta partida en dos:
+     - a la izquierda, «Tu semana»: las 3 palabras en grande (clic → su fila) y la barra «Estado de los días · Óptimo 6 de 7 días» (la misma cifra que la pareja Salud);
+     - a la derecha, «Lo más importante» (`wtMain`): el problema de salud en curso o la primera clave que hay que vigilar (`wkKeys`). Si no hay nada, «Nada que vigilar esta semana»;
+     - debajo, «Orientativo…».
+  4. Cinco cifras (`wtTilesEl`): tus notas frente a tu normal (`normOf`, `vsNorm`). Solo se tiñe de ámbar la que va peor. Clic → su fila. En una fila si caben (ancho ≥ 800 px); si no (iPad), 3 arriba y 2 abajo. «Menos que tu normal» pasa a dos líneas antes que salirse.
+  5. Dos columnas (`wtColsEl`):
+     - a la izquierda, «Para tener en cuenta» (o «Lo que ha ido bien», si nada va mal) con el resto de las claves. Cada fila lleva › en un círculo (`goCue`, lo mismo en «Lo más importante»): se mueve dos veces hacia la derecha cuando la lista aparece en pantalla y, con ratón, al pasar por la fila;
+     - a la derecha, «Semana a semana» en puntos (`stepEl`, con el color de `weekEval`; clic → esa semana; la que falta y la próxima, en discontinuo). Con una lesión en curso, debajo, «Revisión · domingo 27».
+  6. «El detalle», plegado (`wtFoldEl`):
+     - cada fila lleva «Ver» y una flecha en un círculo (`foldCue`), y se abre deslizándose (`foldBody`);
+     - la flecha baja y sube dos veces cuando la lista aparece en pantalla (`seenRef` pone `data-seen`), no al cargar la página;
+     - con ratón, al pasar por la fila, el círculo se ilumina y baja un poco. Lo mismo en «Ver las 7» de Mes;
+     - dentro van los bloques de siempre, sin su título ni su tarjeta (`bare`);
+     - `flashTo` abre la sección antes de ir a ella (`dSec`, `dOpen`), así los enlaces de Hoy, de las cifras y de las claves siguen funcionando.
+
+     Las secciones del detalle:
+  - «Salud», solo lesión o enfermedad (`weekHealthF` → `healthDays`):
      - nombre + «Nueva / Ha vuelto / Ha empeorado / Crónica» + estado;
      - «2.ª vez esta temporada · la anterior duró 5 días» con enlace;
      - una **fila continua** de fichas por día. Con dos problemas comparten fechas; los días sin registro van en discontinuo;
      - la ficha «Revisión · Formulario» del próximo formulario (en rojo si está sin responder);
      - «Ir al seguimiento» → Hoy, con ese problema elegido.
-  4. «Tus respuestas» (solo esta semana): «más / menos / como tu normal», con la media de las 4 anteriores (`normOf`) y una marca blanca en la barra. Al final, «Participación» con el texto largo (`OST`: «Completa, con problemas»…).
-  5. «Lo que dijiste vs tus datos» (`wkVsEl`), diseño **«Cara a cara»** (elegido el 03-10-2026 entre las dos barras de antes, una escala y la diferencia: las barras no dejaban entender la comparación). Una tarjeta negra por pareja: las dos partes con las mismas palabras (Bien / Regular / Mal, los niveles del veredicto, `vsLvl`), una al lado de la otra con = / ≠ en medio (≈ si coinciden a un nivel de distancia), y la cifra debajo de cada palabra; los días sin registro se avisan. El entrenador va día a día (`vsDaysEl` / `coachDays`): lo que le dijiste arriba y el estado de tus datos abajo, con los días que no cuadran enmarcados en ámbar y los que no se comparan (Precaución, «No le he dicho nada») atenuados. **Sin frase debajo** (la del entrenador se quitó: «sobrecarga y no aporta»). Las parejas: fatiga ↔ FC y HRV, descanso ↔ sueño, salud ↔ estado de los días, entrenador. Desde el 03-10-2026 (análisis de Semana frente al plan v2):
+  - «Tus respuestas» (solo esta semana): «más / menos / como tu normal», con la media de las 4 anteriores (`normOf`) y una marca blanca en la barra. Al final, «Participación» con el texto largo (`OST`: «Completa, con problemas»…).
+  - «Lo que dijiste vs tus datos» (`wkVsEl`), diseño **«Cara a cara»** (elegido el 03-10-2026 entre las dos barras de antes, una escala y la diferencia: las barras no dejaban entender la comparación). Una tarjeta negra por pareja: las dos partes con las mismas palabras (Bien / Regular / Mal, los niveles del veredicto, `vsLvl`), una al lado de la otra con = / ≠ en medio (≈ si coinciden a un nivel de distancia), y la cifra debajo de cada palabra; los días sin registro se avisan. El entrenador va día a día (`vsDaysEl` / `coachDays`): lo que le dijiste arriba y el estado de tus datos abajo, con los días que no cuadran enmarcados en ámbar y los que no se comparan (Precaución, «No le he dicho nada») atenuados. **Sin frase debajo** (la del entrenador se quitó: «sobrecarga y no aporta»). Las parejas: fatiga ↔ FC y HRV, descanso ↔ sueño, salud ↔ estado de los días, entrenador. Desde el 03-10-2026 (análisis de Semana frente al plan v2):
      - el estado de los días cuenta con `dayState`: un día en «Precaución» no es «Óptimo», como en Hoy;
      - si ese formulario marca un problema de salud (lesión, enfermedad o salud mental), la pareja Salud no da veredicto: «Marcaste un problema de salud» (`vsPb`), y no cuenta como diferencia en la clave «Tú vs tus datos»;
      - entrenador: «No cuadra» a partir de 2 días, igual en la clave y en la tarjeta; con 1 día, «Cuadra» (el día sigue enmarcado).
   - El titular de reserva (`fbWeek`) solo cuenta lesiones y enfermedades (`physList`): con salud mental no dice «con un problema de salud en curso».
-  6. «Semana a semana» (`WeekAnswersF` con `mode: 'panel'`): solo para mirar, no cambia la página. La semana sin responder es una columna en discontinuo.
+  - «Tus respuestas · semana a semana» (`WeekAnswersF` con `mode: 'panel'`): solo para mirar, no cambia la página. La semana sin responder es una columna en discontinuo.
 
-**Evolución** (`pageEvol`, repasada con el criterio de Semana el 04-10-2026). Selector de 7 días, 28 días o 6 semanas. De arriba abajo:
-- Informe «Lectura de tendencias»:
-  - A la izquierda, la tarjeta «Cómo te sientes vs datos» (`trendLeftEl`). Es la clave ① y no se repite en las tarjetas de la derecha (`skipK: 'sents'` en `aiCards`).
-  - A la derecha, el titular, el texto, 2 claves y «Los próximos días».
-  - La reserva sin IA es `fbTrend`: se hace con los datos (sensación vs datos; FC, HRV y sueño de esta semana frente a las 3 anteriores; días sin registro). `FB_TREND` solo queda para «Deportista nuevo».
-- «Día a día» (`LineMulti`, familia `f`): en la HRV, la línea es la media de 7 días con la etiqueta directa «Media de 7 días», y cada día es un punto. El estado de cada dato va con su color y la diferencia con ayer en blanco.
-- «Cómo te sientes vs qué dicen los datos» (`LineSents`, familia `d`): sin leyenda. Mejor / Tu normal / Peor a la izquierda y «Tú» / «Tu cuerpo» al final de las líneas, como en Hoy.
+**Evolución** (`pageEvol`). Repasada con el criterio de Semana el 04-10-2026. Desde el 05-10-2026 tiene la misma estructura que Semana y Mes: el usuario la pidió directamente en producción, sin pasar por el matraz (lienzo, fila «Evolución»). Los datos, la IA y los gráficos no cambiaron. De arriba abajo:
+1. **Cabecera:** el periodo («28 ago – 24 sep») y 7 días · 28 días · 6 semanas.
+2. **Lectura de tendencias** (`evTopEl`): «Lectura de tendencias · Análisis redactado por IA», el titular («Basado en…») y el resumen.
+3. **Bloque principal**, una tarjeta partida en dos:
+   - a la izquierda, «Tus días»: una casilla por día, del color de su estado. Sin registro, en discontinuo; con datos pero sin franja (deportista nuevo), gris liso. Debajo, la barra «Estado de los días · Óptimo N de N»;
+   - a la derecha, «Lo más importante» (`evMain`), con el número de su hallazgo y «Los próximos días». El orden es: un dato con días seguidos fuera de tu normal (`m: 'run'`), los días sin registro, la sensación y los otros cambios. Sin nada que vigilar, «Nada que vigilar estas semanas».
+4. **Cuatro cifras** (`evTilesEl`): la media de los últimos 7 días de cada dato frente a las 3 semanas anteriores (sube, baja o como antes, con la misma regla que `fbTrend`). Cada una lleva un minigráfico del periodo con tu franja (`sparkEl` → `Spark`), en curva redondeada y al ancho real de la tarjeta (05-10-2026): con 7 días, la curva del gráfico grande; con 28 días o 6 semanas, `basisPath`, que redondea las puntas. Solo se tiñe de ámbar la que va peor. Clic → su fila (`goMetric`).
+5. **Dos columnas** (`evColsEl`):
+   - «Para tener en cuenta» (o «Lo que ha ido bien»), con el resto de hallazgos, su número y la flecha › animada (`goCue`). Clic → fija el número en los gráficos y baja (`evGo`);
+   - «Tú vs tus datos» (`trendLeftEl(sc, R, true)`), con «Ver el gráfico».
+6. **Los gráficos, abiertos:** «Día a día» y «Cómo te sientes vs qué dicen los datos».
+- **Deportista nuevo** (sin 14 días de datos, sin franja ni tendencias): solo la cabecera y el aviso en discontinuo «Tu evolución estará lista el 3 de octubre» (`emptyEvoF`), como Mes. La fecha es hoy más los días que faltan, en el idioma activo (`Intl.DateTimeFormat`).
+- **Las dos columnas** (aquí, en Semana y en Mes) tienen la misma altura (`alignItems: 'stretch'`). La tarjeta más baja se estira y sus filas se reparten el espacio, así no queda un hueco debajo. Los puntos de «Semana a semana» y «Mes a mes» quedan centrados.
+- La reserva sin IA es `fbTrend`: se hace con los datos (sensación vs datos; FC, HRV y sueño de esta semana frente a las 3 anteriores; días sin registro). `FB_TREND` solo queda para «Deportista nuevo».
+- «Día a día» (`LineMulti`, un panel por dato con su color): en la HRV hay **una sola línea**, la media de 7 días, con la etiqueta directa «Media de 7 días». Desde el 05-10-2026 no lleva puntos por día: quedaban sueltos y el usuario tampoco quiso una segunda línea fina. El valor de cada día sale al pasar el ratón. El punto de «Hoy» y el del ratón van sobre la línea (`onLine`), y la etiqueta del final dice el valor de hoy (con Fatiga, 49 aunque la media esté cerca de 61). El estado de cada dato va con su color y la diferencia con ayer en blanco.
+  - Con más de 14 días (28 días, 6 semanas), el eje pone el mes en cada etiqueta («31 ago», «7 set»), también en «Cómo te sientes…». Una etiqueta que pisaría a otra no sale (`lineAxisX`).
+  - Los paneles crecen con el ancho, de 96 a 140 px.
+- «Cómo te sientes vs qué dicen los datos» (`LineSents`, dos líneas con la diferencia en ámbar): sin leyenda.
+- Días sin registro en los dos gráficos: franja rayada suave y línea de puntos entre los dos lados (`gapZones` / `gapDecor`). Las otras variantes de gráficos y la página «Opciones de gráficos» se borraron el 04-10-2026. Mejor / Tu normal / Peor a la izquierda y «Tú» / «Tu cuerpo» al final de las líneas, como en Hoy.
 - No hay puntos que laten en ninguna página: `pingEl` no dibuja nada.
 
 **Privacidad**, **Ajustes**: existen. Ya no nombran el APSQ (04-10-2026).
@@ -178,12 +215,18 @@ Habrá una segunda app, para los entrenadores y **sobre todo para el preparador 
 - Avisos con texto fijo, nunca de la IA, solo con el último formulario respondido (`mLvl`):
   - **bajada clara** (3+ puntos por debajo de tu normal): debajo del texto de arriba, con quién hablar, sin teléfonos;
   - **zona baja** (total ≤ 19): arriba del todo, el bloque de ayuda con el 024 y el 112 (`wemSupEl`), **también en Hoy** (`wemSupHoy`). Nunca a la vez que el de salud mental.
-- De arriba abajo:
+- De arriba abajo (estructura desde el 05-10-2026, la misma idea que Semana):
   - selector de mes (`monthPickEl`) y ayuda;
-  - tu bienestar: número y barra con la marca de tu normal, el titular («Basado en…» al pasar el ratón) y un texto corto de la IA (`mesHeroF`);
-  - Tus respuestas: filas compactas con barra corta y la etiqueta junto al nombre, solo si cambia (`mesAnswersEl`);
-  - Ideas para las próximas semanas (`mesIdeasEl`): son **recomendaciones, no tareas** (sin casillas ni «0 de 3 hechas»). Diseño «Destacada» (elegido el 02-10-2026): la primera en grande y las otras al lado, las dos tarjetas de la misma altura. Si todo va bien, «Seguir con lo que te ha funcionado» sale con un círculo verde con la marca, que no se puede marcar. Iconos con sentido para cada frase: amanecer (optimismo), mano que ayuda (sentirte útil), ondas (calma), montaña (afrontar problemas), bombilla (claridad), personas (relaciones), brújula (autonomía) y bocadillo (hablarlo). Ya no usan los colores de la FC, la HRV ni el sueño. Estilo negro, elegido el 03-10-2026: cuadrado negro con borde fino y el icono en blanco (en modo claro, cuadrado claro e icono oscuro);
-  - Mes a mes (`mesEvoEl` → `monthCardsEl`): solo el total. Tarjetas, elegidas el 02-10-2026 entre línea, columnas y tarjetas: una por mes, como «Esta semana», con el total, una barra y cómo estaba frente a su normal (`m2CmpS`). Al tocar una, se abre ese mes, y la elegida lleva el borde de su color. El mes sin responder va en discontinuo, con «Responder».
+  - el titular («Basado en…» al pasar el ratón), un texto corto de la IA y, con una bajada clara, con quién hablar (`mesHeroF(…, 'read')`);
+  - bloque principal, una tarjeta partida en dos:
+    - tu bienestar: número y barra con la marca de tu normal (`mesHeroF(…, 'well')`);
+    - la idea principal (`mesIdeasEl(R, 'feat')`), con «Propuestas por la IA» si viene de la IA;
+  - cuatro cifras (`mtTilesEl`): bienestar, frente a tu normal, lo más alto y lo más bajo. Solo se tiñe de ámbar lo que baja claramente;
+  - dos columnas (`mtColsEl`):
+    - Tus respuestas: filas compactas con barra corta y la etiqueta junto al nombre, solo si cambia (`mesAnswersEl`). Si ninguna frase cambia, una línea «Las 7 frases, como tu normal» con «Ver las 7», que se despliega;
+    - Mes a mes en puntos (`stepEl`): el total de cada mes; clic → ese mes; el que falta y el próximo, en discontinuo;
+  - Más ideas (`mesIdeasEl(R, 'rest')`).
+- Las ideas son **recomendaciones, no tareas** (sin casillas ni «0 de 3 hechas»). Si todo va bien, «Seguir con lo que te ha funcionado» sale con un círculo verde con la marca, que no se puede marcar. Iconos con sentido para cada frase: amanecer (optimismo), mano que ayuda (sentirte útil), ondas (calma), montaña (afrontar problemas), bombilla (claridad), personas (relaciones), brújula (autonomía) y bocadillo (hablarlo). Ya no usan los colores de la FC, la HRV ni el sueño. Estilo negro, elegido el 03-10-2026: cuadrado negro con borde fino y el icono en blanco (en modo claro, cuadrado claro e icono oscuro).
 - Cambia con los escenarios (`MONTH_SC`: normal 28, estres 21 = bajada, gran 18 = zona baja…).
 - IA: `promptMonth2` (tipo `month2`), con estas reglas:
   - recibe las frases sin nombre ni sexo (neutras, `WEM_N`), tu normal y los meses anteriores (`m2Prev`);
@@ -233,6 +276,11 @@ Habrá una segunda app, para los entrenadores y **sobre todo para el preparador 
 
 ## Pendiente
 
+- **Decisiones del 04-10-2026** (falta escribirlas en los documentos del Drive):
+  - **D4:** el registro diario será automático. FC, HRV y sueño llegan de la pulsera o el reloj. Falta decidir dónde contesta el deportista «Cómo estás» y lo que le dijo al entrenador. Va con la llamada a Oriol.
+  - **D5:** la diferencia se enseña al deportista. Lo importante es lo que pone en el formulario sobre cómo se siente frente a lo que dicen los datos de la pulsera.
+  - **Chat:** entra en el estudio, como fuente rápida y fiable. Su uso se medirá con las llamadas a la API de la IA cuando haya servidor.
+- iPad: probarlo en un iPad de verdad.
 - Chat: la IA real solo existe dentro del host (`window.claude`); en local responden las sugeridas.
 - Aviso automático al especialista (idea del usuario, 02-10-2026): por decidir quién lo recibe, qué lo dispara y si el deportista lo ve en la app. Iría fuera de la app (en la hoja de respuestas de los Google Forms), porque la app no recibe el APSQ ni el texto libre.
 - Privacidad: la fila «Informes de la IA → Entrenador».
