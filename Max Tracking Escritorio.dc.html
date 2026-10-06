@@ -74,7 +74,7 @@ button{font:inherit;color:inherit}
 </helmet>
 <div style="{{ rootSt }}">{{ rail }}<main ref="{{ mainRef }}" class="mt-scroll" style="{{ mainSt }}" onscroll="{{ onMainScroll }}">{{ top }}{{ page }}</main>{{ proto }}</div>
 </x-dc>
-<script type="text/x-dc" data-dc-script data-props="{&quot;aiLive&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;IA&quot;},&quot;athleteName&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;Martí&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Deportista&quot;},&quot;formDaily&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Formularis&quot;},&quot;formWeekly&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Formularis&quot;},&quot;formMonthly&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Formularis&quot;}}">
+<script type="text/x-dc" data-dc-script data-props="{&quot;aiLive&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;IA&quot;},&quot;athleteName&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;Martí&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Deportista&quot;},&quot;formDaily&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Formularis&quot;},&quot;formWeekly&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Formularis&quot;},&quot;formMonthly&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Formularis&quot;},&quot;sessionExcel&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Preparador&quot;},&quot;sessionTP&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Preparador&quot;}}">
 // Max Tracking · versió ordinador i iPad.
 // Estructura: navegació a l'esquerra (barra lateral amb l'estil ChatGPT, que és el de per defecte; rail d'icones amb Híbrid, Editorial i Grafit)
 // + pàgina a tota amplada. Cada pàgina comença amb l'informe de la IA.
@@ -163,13 +163,16 @@ class Component extends DCLogic {
     try { trk = JSON.parse(localStorage.getItem('mt-desk-trk') || '{}') || {}; } catch (e) { trk = {}; }
     let done = {};
     try { done = JSON.parse(localStorage.getItem('mt-desk-done') || '{}') || {}; } catch (e) { done = {}; }
+    // Ajust de la sessió d'avui que desa el preparador al seu panell (per codi d'esportista).
+    let prepAj = {};
+    try { prepAj = JSON.parse(localStorage.getItem('mt-prep-aj') || '{}') || {}; } catch (e) { prepAj = {}; }
     // Per defecte, l'estil Senzill (gpt) i el mode automàtic (segueix el sistema). Claus renovades el 03-10-2026 perquè tothom hi comenci.
     let theme = 'gpt', mode = 'auto', sysDark = true, lang = 'ca', side = 'open';
     try { theme = localStorage.getItem('mt-desk-theme-v4') || 'gpt'; mode = localStorage.getItem('mt-desk-mode-v2') || 'auto'; lang = localStorage.getItem('mt-lang') || 'ca'; side = localStorage.getItem('mt-desk-side') || 'open'; } catch (e) {}
     try { sysDark = !window.matchMedia || window.matchMedia('(prefers-color-scheme: dark)').matches; } catch (e) {}
     return { scenario: 'normal', page: 'avui', metric: 'rhr', range: 7, evoRange: 28, month: 0, hoverF: null, pinF: null,
       lang: LANG_KEYS.includes(lang) ? lang : 'ca', visit: 0, vw: window.innerWidth, vh: window.innerHeight, ai, pOpen: false, pHidden, done, trk, trkOpen: false, cvx: {}, week2: -1, pbSim: 'sc', trkSel: 0, wkPick: false, wemSim: 'sc', moPick: false, chatOpen: false, chatBig: false, chatPx, chatLog: [], theme: ['gpt', 'hibrid', 'editorial', 'grafit'].includes(theme) ? theme : 'gpt', mode: /^(dark|light|auto)$/.test(mode) ? mode : 'auto', sysDark,
-      side: side === 'closed' ? 'closed' : 'open', pick: false, scrolled: false };
+      side: side === 'closed' ? 'closed' : 'open', pick: false, scrolled: false, prepAj };
   })();
   mainRef = React.createRef();
   requested = new Set();
@@ -433,6 +436,22 @@ class Component extends DCLogic {
     ],
     // Nom de cada idioma en l'idioma actiu, en l'ordre de LANGS.
     LANG_N: { ca: ['Català', 'Castellà', 'Francès', 'Anglès'], es: ['Catalán', 'Castellano', 'Francés', 'Inglés'], fr: ['Catalan', 'Espagnol', 'Français', 'Anglais'], en: ['Catalan', 'Spanish', 'French', 'English'] },
+    // Sessió d'avui tal com arriba de TrainingPeaks, per grup (MT-07 és del grup A; MT-19, l'esportista nou, del B), i què canvia amb l'ajust del preparador.
+    // Els mateixos textos surten al panell del preparador a «Li arribarà així».
+    PREP: {
+      ses: { A: { t: 'fuerza', h: '16:00', name: { ca: 'Força tren inferior · potència', es: 'Fuerza tren inferior · potencia', fr: 'Force bas du corps · puissance', en: 'Lower-body strength · power' }, place: { ca: 'Gimnàs', es: 'Gimnasio', fr: 'Salle de sport', en: 'Gym' } },
+        B: { t: 'resis', h: '17:00', name: { ca: 'BTT · 90 min', es: 'BTT · 90 min', fr: 'VTT · 90 min', en: 'MTB · 90 min' }, place: { ca: 'Sortida des del club', es: 'Salida desde el club', fr: 'Départ du club', en: 'From the club' } } },
+      pill: { N: { ca: 'Sessió normal', es: 'Sesión normal', fr: 'Séance normale', en: 'Normal session' }, R: { ca: 'Versió reduïda', es: 'Versión reducida', fr: 'Version réduite', en: 'Reduced version' },
+        A: { ca: 'Versió alternativa', es: 'Versión alternativa', fr: 'Version alternative', en: 'Alternative version' }, D: { ca: 'Avui descanses', es: 'Hoy descansas', fr: "Aujourd'hui, repos", en: 'Rest day today' } },
+      chg: {
+        R: { fuerza: { ca: ['Fes una sèrie menys a cada exercici', 'Intensitat màxima 7 sobre 10: que et quedin unes 3 repeticions', 'Sense salts'], es: ['Haz una serie menos en cada ejercicio', 'Intensidad máxima 7 sobre 10: que te queden unas 3 repeticiones', 'Sin saltos'],
+            fr: ['Fais une série de moins par exercice', 'Intensité max. 7 sur 10 : garde environ 3 répétitions en réserve', 'Sans sauts'], en: ['Do one set fewer per exercise', 'Max intensity 7 out of 10: keep about 3 reps in reserve', 'No jumps'] },
+          resis: { ca: ['La meitat del temps', 'A ritme còmode: zona 2'], es: ['La mitad del tiempo', 'A ritmo cómodo: zona 2'], fr: ['La moitié du temps', 'Allure confortable : zone 2'], en: ['Half the time', 'At an easy pace: zone 2'] } },
+        A: { fuerza: { ca: ['Bici estàtica 30 min a ritme còmode', 'Core sense impacte'], es: ['Bici estática 30 min a ritmo cómodo', 'Core sin impacto'], fr: ["Vélo d'appartement 30 min à allure confortable", 'Gainage sans impact'], en: ['Stationary bike 30 min at an easy pace', 'Core work, no impact'] },
+          resis: { ca: ['Bici estàtica 40 min a ritme còmode', 'Mobilitat'], es: ['Bici estática 40 min a ritmo cómodo', 'Movilidad'], fr: ["Vélo d'appartement 40 min à allure confortable", 'Mobilité'], en: ['Stationary bike 40 min at an easy pace', 'Mobility'] } },
+        D: { ca: ['Avui no entrenes'], es: ['Hoy no entrenas'], fr: ["Pas d'entraînement aujourd'hui"], en: ['No training today'] },
+      },
+    },
     THEME_N: { gpt: { ca: 'Senzill', es: 'Sencillo', fr: 'Simple', en: 'Simple' }, hibrid: { ca: 'Híbrid', es: 'Híbrido', fr: 'Hybride', en: 'Hybrid' }, editorial: { ca: 'Editorial', es: 'Editorial', fr: 'Éditorial', en: 'Editorial' }, grafit: { ca: 'Grafit', es: 'Grafito', fr: 'Graphite', en: 'Graphite' } },
     // Etiqueta de les troballes que no són una dada diària ni una pregunta.
     CHIP: { coach: { ca: 'Entrenador', es: 'Entrenador', fr: 'Entraîneur', en: 'Coach' }, sents: { ca: 'Sensació vs dades', es: 'Sensación vs datos', fr: 'Ressenti vs données', en: 'Feeling vs data' },
@@ -728,7 +747,13 @@ class Component extends DCLogic {
       answerNow: { ca: 'Respon ara', es: 'Responder ahora', fr: 'Répondre maintenant', en: 'Answer now' },
       nOverdue: { ca: n => `${n} sense respondre`, es: n => `${n} sin responder`, fr: n => `${n} sans réponse`, en: n => `${n} not answered` },
       doneOf: { ca: (a, b) => `${a} de ${b} fetes`, es: (a, b) => `${a} de ${b} hechas`, fr: (a, b) => `${a} sur ${b} faites`, en: (a, b) => `${a} of ${b} done` },
-      planPrev1: { ca: 'Sessió del dia', es: 'Sesión del día', fr: 'Séance du jour', en: "Today's session" }, planPrev2: { ca: 'Exercicis i càrregues', es: 'Ejercicios y cargas', fr: 'Exercices et charges', en: 'Exercises and loads' }, planPrev3: { ca: 'Ajustos segons com arribes', es: 'Ajustes según cómo llegues', fr: 'Ajustements selon ton état', en: "Adjustments based on how you're doing" },
+      planPrev1: { ca: 'Sessió del dia', es: 'Sesión del día', fr: 'Séance du jour', en: "Today's session" },
+      ajAdj: { ca: 'Ajustada segons com arribes', es: 'Ajustada según cómo llegas', fr: 'Ajustée selon ton état', en: "Adjusted to how you're doing" },
+      ajChg: { ca: 'El que canvia avui', es: 'Lo que cambia hoy', fr: "Ce qui change aujourd'hui", en: 'What changes today' },
+      btnXls: { ca: 'Instruccions i vídeos', es: 'Instrucciones y vídeos', fr: 'Instructions et vidéos', en: 'Instructions and videos' },
+      btnTP: { ca: 'Veure a TrainingPeaks', es: 'Ver en TrainingPeaks', fr: 'Voir dans TrainingPeaks', en: 'Open in TrainingPeaks' },
+      prepAt: { ca: x => `Avui, ${x}`, es: x => `Hoy, ${x}`, fr: x => `Aujourd'hui, ${x}`, en: x => `Today, ${x}` },
+      sesLinkPending: { ca: 'Enllaç de la sessió pendent', es: 'Enlace de la sesión pendiente', fr: 'Lien de la séance à venir', en: 'Session link not set yet' },
       sentToday: { ca: 'rebut avui', es: 'recibido hoy', fr: "reçu aujourd'hui", en: 'received today' }, sentYest: { ca: 'rebut ahir', es: 'recibido ayer', fr: 'reçu hier', en: 'received yesterday' },
       sentOn: { ca: d => `rebut el ${d}`, es: d => `recibido el ${d}`, fr: d => `reçu le ${d}`, en: d => `received on ${d}` },
       qCtxW: { ca: l => `Al teu últim qüestionari setmanal vas marcar ${l}; potser et convé tenir-ho en compte avui i no exigir-te de més.`, es: l => `En tu último cuestionario semanal marcaste ${l}; quizá te conviene tenerlo en cuenta hoy y no exigirte de más.`, fr: l => `Dans ton dernier questionnaire hebdomadaire, tu as indiqué ${l} ; il vaudrait peut-être mieux en tenir compte aujourd'hui et ne pas forcer.`, en: l => `In your last weekly questionnaire you rated ${l}; it may be worth keeping that in mind today and not pushing too hard.` },
@@ -1428,11 +1453,14 @@ Reply ONLY with this JSON: {"text": "your answer", "blocs": [], "basat": ["data 
     document.addEventListener('pointerdown', this.onTapDown, true); document.addEventListener('pointerup', this.onTapUp, true); document.addEventListener('click', this.onTapClick, true); document.addEventListener('scroll', this.onTapScroll, true);
     // Mode automàtic: segueix el mode clar o fosc del sistema.
     try { this.mq = window.matchMedia('(prefers-color-scheme: dark)'); this.onMq = e => this.setState({ sysDark: e.matches }); this.mq.addEventListener('change', this.onMq); } catch (e) {}
+    // L'ajust del preparador (panell, «mt-prep-aj»): si es desa en una altra pestanya, Avui s'actualitza sol.
+    this.onStorage = e => { if (e.key !== 'mt-prep-aj' && e.key !== null) return; try { this.setState({ prepAj: JSON.parse(localStorage.getItem('mt-prep-aj') || '{}') || {} }); } catch (er) {} };
+    window.addEventListener('storage', this.onStorage);
     this.syncBody();
     this._ps = this.state;
     this.ensureAI();
   }
-  componentWillUnmount() { window.removeEventListener('resize', this.onResize); window.removeEventListener('keydown', this.onKey); document.removeEventListener('pointerdown', this.onTapDown, true); document.removeEventListener('pointerup', this.onTapUp, true); document.removeEventListener('click', this.onTapClick, true); document.removeEventListener('scroll', this.onTapScroll, true); try { this.mq.removeEventListener('change', this.onMq); } catch (e) {} }
+  componentWillUnmount() { window.removeEventListener('resize', this.onResize); window.removeEventListener('storage', this.onStorage); window.removeEventListener('keydown', this.onKey); document.removeEventListener('pointerdown', this.onTapDown, true); document.removeEventListener('pointerup', this.onTapUp, true); document.removeEventListener('click', this.onTapClick, true); document.removeEventListener('scroll', this.onTapScroll, true); try { this.mq.removeEventListener('change', this.onMq); } catch (e) {} }
   syncBody() { try { document.documentElement.style.background = this.C.bg; document.body.style.background = this.C.bg; document.documentElement.lang = this.state.lang; } catch (e) {} }
   componentDidUpdate() {
     this.ensureAI();
@@ -1811,6 +1839,8 @@ Reply ONLY with this JSON: {"text": "your answer", "blocs": [], "basat": ["data 
       compass: [h('circle', { key: 'c', cx: 12, cy: 12, r: 10 }), P('m16.24 7.76-1.804 5.411a2 2 0 0 1-1.265 1.265L7.76 16.24l1.804-5.411a2 2 0 0 1 1.265-1.265z')],
       talk: ['M7.9 20A9 9 0 1 0 4 16.1L2 22Z'].map(P),
       users: [h('circle', { key: 'c', cx: 9, cy: 7, r: 4 }), ...['M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2', 'M22 21v-2a4 4 0 0 0-3-3.87', 'M16 3.13a4 4 0 0 1 0 7.75'].map(P)],
+      sheet: ['M5 3h10l4 4v14H5z', 'M15 3v4h4', 'M8 11h8', 'M8 15h8', 'M12 11v8'].map(P), link: ['M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1', 'M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1'].map(P),
+      same: ['M5 9h14', 'M5 15h14'].map(P), trendDown: ['M3 7l6 6 4-4 8 8', 'M21 11v6h-6'].map(P), swap: ['M8 3L4 7l4 4', 'M4 7h16', 'M16 21l4-4-4-4', 'M20 17H4'].map(P),
       form: [h('rect', { key: 'r', x: 8, y: 2, width: 8, height: 4, rx: 1 }), ...['M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2', 'M9 12h6', 'M9 16h4'].map(P)],
     }[name];
     return h('svg', { width: size, height: size, viewBox: '0 0 24 24', fill: 'none', stroke: 'currentColor', strokeWidth: sw || 1.7, strokeLinecap: 'round', strokeLinejoin: 'round', style: { display: 'block', flex: 'none' } }, kids);
@@ -2379,7 +2409,7 @@ Reply ONLY with this JSON: {"text": "your answer", "blocs": [], "basat": ["data 
           h('span', { style: { width: 22, height: 22, marginTop: 2, boxSizing: 'border-box', borderRadius: this.G.badge, border: on ? 'none' : `2px solid ${this.alpha(col, .75)}`, background: on ? col : 'transparent', color: C.bg, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', transition: 'background .2s, border-color .2s' } }, on ? this.icon('check', 13, 3) : null),
           h('span', { style: { fontSize: 17, fontWeight: 500, lineHeight: 1.45, color: on ? C.ink3 : C.ink, textDecoration: on ? 'line-through' : 'none', textDecorationColor: this.ov(.35), textWrap: 'pretty', transition: 'color .2s' } }, this.segs(t))); })));
   }
-  // Pla de recuperació: a l'esquerra, estratègies de la IA (àrea + acció + per què, per marcar); a la dreta, l'espai del preparador físic.
+  // Pla de recuperació: a l'esquerra, estratègies de la IA (àrea + acció + per què, per marcar); a la dreta, les propostes del preparador físic (prepSesEl).
   recoveryPlanEl(sc, R) {
     const C = this.C, v = R.val, tone = sc === 'nou' ? C.ink2 : (this.periodTone(sc, [41]) || C.ink2), done = this.state.done || {};
     // Cada àrea amb la seva icona i un color (mai verd/àmbar/vermell, que són de l'estat).
@@ -2397,16 +2427,44 @@ Reply ONLY with this JSON: {"text": "your answer", "blocs": [], "basat": ["data 
     const progress = list && list.length ? h('span', { style: { display: 'inline-flex', alignItems: 'center', gap: 10 } },
       h('span', { style: { fontSize: 12.5, color: C.ink3, fontVariantNumeric: 'tabular-nums', whiteSpace: 'nowrap' } }, this.t('doneOf', nDone, list.length)),
       h('span', { style: { width: 64, height: 5, borderRadius: 3, background: this.ov(.08), overflow: 'hidden' } }, h('span', { style: { display: 'block', height: '100%', width: `${(nDone / list.length) * 100}%`, borderRadius: 3, background: tone, transition: 'width .35s cubic-bezier(.2,.7,.2,1)' } }))) : null;
-    const prev = [['week', 'planPrev1'], ['load', 'planPrev2'], ['sliders', 'planPrev3']];
+    const aj = (this.state.prepAj || {})[this.who(sc).code] || null;
     const cols = h('div', { style: { marginTop: 0, display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 380px), 1fr))', gap: '20px 28px', alignItems: 'start' } },
         h('div', { style: { minWidth: 0 } }, colHead(h('span', { style: { display: 'inline-flex', alignItems: 'center', gap: 10 } }, this.t('stratTitle'), this.tag(this.t('byAI'))), progress),
           h('div', { style: { marginTop: 12, display: 'flex', flexDirection: 'column', gap: 8 } }, list == null ? h('div', { style: { padding: '14px 0', fontSize: 13, color: C.ink3 } }, this.t('reading')) : list.map(item))),
-        h('div', { style: { minWidth: 0 } }, colHead(this.t('coachProps'), this.missChip(this.t('soon'))),
-          h('div', { style: { marginTop: 12, padding: '16px 18px 18px', borderRadius: this.G.inner || 8, border: `1px dashed ${this.ov(.2)}` } },
-            h('div', { style: { marginTop: 0, display: 'flex', flexDirection: 'column', gap: 8 } }, prev.map(([ic, k], i) => h('div', { key: k, style: { display: 'grid', gridTemplateColumns: '34px minmax(0,1fr)', gap: 12, alignItems: 'center', padding: '10px 12px', borderRadius: this.G.inner || 8, border: `1px dashed ${this.ov(.14)}` } },
-              h('span', { style: { width: 34, height: 34, borderRadius: this.G.inner || 8, border: `1px dashed ${this.ov(.24)}`, color: C.ink3, display: 'inline-flex', alignItems: 'center', justifyContent: 'center' } }, this.icon(ic, 16, 1.8)),
-              h('span', null, h('span', { style: { display: 'block', fontSize: 13.5, fontWeight: 500, color: C.ink2 } }, this.t(k)), h('span', { style: { display: 'block', marginTop: 6, height: 6, width: `${[62, 78, 48][i]}%`, borderRadius: 3, border: `1px dashed ${this.ov(.14)}`, boxSizing: 'border-box' } }))))))));
+        h('div', { style: { minWidth: 0 } }, colHead(this.t('coachProps'), aj && aj.at ? h('span', { style: { fontSize: 13, color: C.ink, whiteSpace: 'nowrap' } }, this.t('prepAt', aj.at)) : null), this.prepSesEl(sc, aj)));
     return h('div', null, this.secHead(this.t('planToday')), cols);
+  }
+
+  // Propostes del preparador físic (des del 06-10-2026; abans, el buit «Pròximament»). La sessió del dia arriba de TrainingPeaks; el preparador
+  // la decideix al seu panell (Normal, Reduïda, Alternativa o Descans, amb una nota) i es desa a «mt-prep-aj» pel codi de l'esportista.
+  // Sense ajust desat surt la sessió tal com és. Dos botons porten a la sessió: l'Excel amb les instruccions i els vídeos (prop sessionExcel)
+  // i TrainingPeaks (prop sessionTP); sense enllaç, el botó surt desactivat, com els dels formularis. Amb Descans no surt el de l'Excel.
+  PREP_G = { 'MT-07': 'A', 'MT-19': 'B' };
+  prepSesEl(sc, aj) {
+    const C = this.C, P = this.L().PREP, g = this.PREP_G[this.who(sc).code] || 'A', S = P.ses[g], v = aj ? aj.v : null;
+    const chg = v === 'R' || v === 'A' ? (P.chg[v][S.t] || []) : v === 'D' ? P.chg.D : [];
+    const pill = v ? h('span', { style: { display: 'inline-flex', alignItems: 'center', gap: 6, height: 26, padding: '0 10px', borderRadius: this.G.tag, background: C.ink, color: C.bg, fontSize: 12.5, fontWeight: 600, whiteSpace: 'nowrap' } },
+      this.icon({ N: 'same', R: 'trendDown', A: 'swap', D: 'pause' }[v], 12, 2.4), P.pill[v]) : null;
+    const link = (url, label, ic, primary, key) => {
+      const st = { display: 'flex', alignItems: 'center', gap: 10, minWidth: 0, height: 42, padding: '0 14px', borderRadius: this.G.ctrl, boxSizing: 'border-box', textDecoration: 'none', fontSize: 14.5, fontWeight: 600,
+        ...(primary ? { background: C.ink, color: C.bg, border: `1px solid ${C.ink}` } : { background: 'transparent', color: C.ink, border: `1px solid ${C.line2}` }) };
+      const kids = [h('span', { key: 'i', style: { display: 'inline-flex' } }, this.icon(ic, 16, 1.9)), h('span', { key: 't', style: { minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' } }, label), h('span', { key: 'e', style: { marginLeft: 'auto', display: 'inline-flex' } }, this.icon('ext', 13, 2.2))];
+      return url ? h('a', { key, className: 'mt-frow', href: url, target: '_blank', rel: 'noopener', style: st }, kids)
+        : h('span', { key, title: this.t('sesLinkPending'), 'aria-disabled': 'true', style: { ...st, opacity: .45, cursor: 'not-allowed' } }, kids); };
+    return h('div', { style: { marginTop: 12, padding: '16px 14px', borderRadius: this.G.inner || 8, border: `1px solid ${C.line2}`, background: C.s1 } },
+      h('div', { style: { display: 'grid', gridTemplateColumns: '40px minmax(0,1fr)', gap: 14, alignItems: 'start' } },
+        h('span', { style: { width: 40, height: 40, boxSizing: 'border-box', borderRadius: this.G.inner || 12, background: C.bg, border: `1px solid ${C.line2}`, color: C.ink, display: 'inline-flex', alignItems: 'center', justifyContent: 'center' } }, this.icon(S.t === 'fuerza' ? 'load' : 'move', 19, 1.9)),
+        h('span', { style: { minWidth: 0 } },
+          h('span', { style: { display: 'block', fontSize: 12, fontWeight: 600, letterSpacing: '.01em', color: C.ink } }, `${this.t('planPrev1')} · ${S.h} · ${S.place}`),
+          h('span', { style: { display: 'block', marginTop: 3, fontSize: 17, fontWeight: 600, lineHeight: 1.3, color: C.ink, textWrap: 'pretty' } }, S.name),
+          v ? h('span', { style: { display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: 8, marginTop: 8 } }, pill, v !== 'N' ? h('span', { style: { fontSize: 13.5, color: C.ink } }, this.t('ajAdj')) : null) : null)),
+      chg.length || (aj && aj.note) ? h('div', { style: { marginTop: 14, paddingTop: 12, borderTop: `1px solid ${C.line}` } },
+        chg.length ? h('span', { style: { display: 'block', fontSize: 12, fontWeight: 600, letterSpacing: '.01em', color: C.ink } }, this.t('ajChg')) : null,
+        chg.map((x, i) => h('span', { key: i, style: { display: 'flex', alignItems: 'flex-start', gap: 10, marginTop: 8, fontSize: 14.5, lineHeight: 1.4, color: C.ink } },
+          h('span', { style: { width: 6, height: 6, flex: 'none', marginTop: 8, borderRadius: '50%', background: C.ink } }), h('span', { style: { minWidth: 0, textWrap: 'pretty' } }, x))),
+        aj && aj.note ? h('span', { style: { display: 'block', marginTop: chg.length ? 12 : 0, fontSize: 14, lineHeight: 1.5, color: C.ink, textWrap: 'pretty' } }, `«${aj.note}»`) : null) : null,
+      h('div', { style: { display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 260px), 1fr))', gap: 8, marginTop: 14 } },
+        v === 'D' ? null : link(this.props.sessionExcel, this.t('btnXls'), 'sheet', true, 'x'), link(this.props.sessionTP, this.t('btnTP'), 'link', v === 'D', 'tp')));
   }
 
   toggleDone(key) { this.setState(st => { const nx = { ...(st.done || {}) }; if (nx[key]) delete nx[key]; else nx[key] = 1; try { localStorage.setItem('mt-desk-done', JSON.stringify(nx)); } catch (e) {} return { done: nx }; }); }
@@ -4336,6 +4394,7 @@ Reply ONLY with this JSON: {"text": "your answer", "blocs": [], "basat": ["data 
             return h('button', { key: k, onClick: () => fn(k), style: { flex: 1, height: 22, padding: '0 6px', borderRadius: 6, border: `1px solid ${C.line2}`, background: on ? C.ink : 'transparent', color: on ? C.bg : C.ink2, fontFamily: 'inherit', fontSize: 11.5, fontWeight: 700, cursor: 'pointer' } }, lb); })))),
       h('button', { className: 'mt-pr', onClick: () => this.setState(st => ({ simOverdue: !st.simOverdue })), style: { ...foot, color: s.simOverdue ? C.ink : C.ink2 } }, h('span', null, 'Simular cuestionarios sin responder'), h('span', null, s.simOverdue ? this.icon('check', 13) : '')),
       h('a', { className: 'mt-pr', href: './Max%20Tracking%20-%20M%C3%B3vil.dc.html', target: '_blank', rel: 'noopener', style: foot }, h('span', null, 'Abrir versión móvil'), h('span', null, '↗')),
+      h('a', { className: 'mt-pr', href: './Max%20Tracking%20-%20Preparador.dc.html', target: '_blank', rel: 'noopener', style: foot }, h('span', null, 'Abrir el panel del preparador'), h('span', null, '↗')),
       h('button', { className: 'mt-pr', onClick: () => this.setProtoHidden(true), style: foot }, h('span', null, 'Ocultar botón'), h('span', { style: { fontFamily: this.MONO, fontSize: 10, padding: '2px 5px', border: `1px solid ${C.line2}`, borderRadius: 4, color: C.ink3 } }, 'E'))) : null;
     const btn = h('button', { key: 'pb', className: 'mt-pb', 'data-open': s.pOpen ? '' : undefined, title: 'Escenario del prototipo · E para ocultar', onClick: () => this.setState({ pOpen: !s.pOpen }),
       style: { width: 40, height: 40, borderRadius: '50%', border: `1px solid ${C.line2}`, background: C.pop, backdropFilter: 'blur(10px)', WebkitBackdropFilter: 'blur(10px)', color: C.ink, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', boxShadow: `0 8px 24px ${this.sh(.35)}`, padding: 0 } },

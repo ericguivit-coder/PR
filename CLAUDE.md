@@ -27,7 +27,52 @@ Reglas:
 
 ## La otra app: entrenadores y preparador físico
 
-Habrá una segunda app, para los entrenadores y **sobre todo para el preparador físico**, conectada con esta. Todavía no existe: de momento es contexto para pensar mejores ideas (añadido el 01-10-2026). El 05-10-2026 el usuario pidió empezar el **diseño del panel del preparador**, primero como bocetos en un lienzo. No programes nada de ella si el usuario no lo pide.
+Una segunda app, para los entrenadores y **sobre todo para el preparador físico**, conectada con esta. Primero fue contexto para pensar ideas (01-10-2026); el 05-10-2026 empezó su diseño como bocetos en un lienzo, y el **06-10-2026 pasó a la versión oficial del prototipo**, en este proyecto y con archivos propios (sección siguiente).
+
+- **Panel del preparador, versión oficial** (06-10-2026; plan en el Drive: «Panel del preparador: plan de la versión oficial (6 oct 2026)», 01 Planificació, id `14IMiTsTga3vPpoUDcp_bN1P1eEyyGGmIYJeu5FE8wL0`). El usuario decidió que viva aquí, en archivos propios y no dentro del motor del deportista.
+  - **Archivos:** `Max Tracking - Preparador.dc.html` (la página que se abre) importa `Max Tracking Panel.dc.html` (el motor). Mismo estilo de código que el motor del deportista: React sin JSX, comentarios en catalán, textos en `TX` con `{ ca, es, fr, en }` y `t()`.
+  - **Pantallas** (todas hechas el 06-10-2026, a partir de la versión 3 del lienzo; en el menú, Sesiones lleva lo que queda por decidir y Avisos lo que queda por revisar):
+    - **Estructura:** barra lateral, barra de arriba (buscador ⌘K, hora de los datos y Todos · Grupo A · Grupo B) y el botón del chat.
+      - Desde el 06-10-2026 la barra lateral se pliega, como en la app del deportista: un botón arriba la cierra y queda una columna de iconos, con el nombre al pasar el ratón.
+      - Plegada, no lleva logo arriba; un punto de color avisa de lo que queda por decidir (Sesiones) y por revisar (Avisos).
+      - Se recuerda (`mt-prep-side`). Sin elegir, está abierta a partir de 1180 px; por debajo de 1000 px, siempre plegada.
+    - **Inicio:** estado del equipo, resumen de la IA, cuatro cifras (cada una lleva a su lista), avisos, sesiones de hoy y próximos días.
+    - **Deportistas:** la lista entera con buscador, filtros (con aviso, por decidir, lesión o enfermedad, sin datos) y orden por atención o por nombre; con «Todos», separada por grupos.
+    - **Ficha:** cuatro pestañas (Resumen, Sesiones, Datos de 28 días y Salud y notas) y, a la derecha, «Sesión de hoy»: la IA sugiere el ajuste y el preparador decide, con una nota, y guarda.
+    - **Avisos:** por revisar, revisados y todos, con filtro por tipo. Cada uno dice qué sugirió la IA y qué se decidió (aceptada o cambiada). El historial de la semana es `HIST`. El «Ya estoy bien» del deportista lo confirma el preparador.
+    - **Semana:** todo el equipo día a día, con el estado y el ajuste de cada día. A la derecha:
+      - la semana hasta hoy;
+      - del formulario 38, la escala que más se aleja del normal de cada uno (2 puntos o más), nunca quién no ha respondido.
+    - **Sesiones:** el calendario de TrainingPeaks por grupos, solo para mirar, y la sesión elegida a la derecha.
+    - **Sesión y adaptaciones:** el Excel, cómo se adapta y, si es de hoy, el ajuste de cada deportista con la sugerencia de la IA; se guardan todos a la vez. Si es pasada, cómo se ajustó; si es futura, que se ajusta ese día; si es de descanso, que no hay nada que ajustar.
+    - **Experimento (H1):**
+      - 8 casos anónimos (`EXP`, deportistas A–H), con el formato asignado alternando: notas, como ahora, o panel. No lo elige el preparador.
+      - Se guardan la decisión, el tiempo y la seguridad de 1 a 5 (`mt-prep-exp`). Al final sale la tabla de resultados.
+      - En el formato panel no sale la sugerencia de la IA (sigue por decidir).
+    - **Chat «Pregunta sobre el equipo»:**
+      - las preguntas sugeridas las responde la app con los datos del grupo elegido, con la fila de 7 días de cada deportista;
+      - el texto libre va a la IA (`window.claude`, solo dentro del host) con códigos, nunca nombres; sin IA, responde la sugerida más parecida y lo dice;
+      - no responde nada de salud mental, de lo que dijo al entrenador (H2) ni de quién no ha respondido (H4): `chatRisk`, con un texto fijo.
+    - Los botones a TrainingPeaks y al Excel salen desactivados en el panel, porque falta decidir cómo se conecta con TrainingPeaks.
+  - **Ajustes:**
+    - modo oscuro, claro o automático (automático por defecto);
+    - **cuatro estilos**, cada uno en claro y en oscuro: Azul marino (el de la versión 3, por defecto), Grafito, Negro (como la app del deportista: botón principal blanco en oscuro y negro en claro) y Pizarra suave. Salen de la página «Modo oscuro · opciones» del lienzo; el usuario pidió poder elegirlos en Ajustes;
+    - idioma (catalán por defecto, castellano, francés e inglés; el preparador trabaja en francés);
+    - perfil;
+    - qué lee y qué no lee la IA.
+  - **Datos inventados** (`ATH`, `WEEK`, `seriesOf`):
+    - 20 deportistas en los grupos A y B, con código (`MT-01`…). Martí R. es `MT-07`, el mismo código que el deportista de la app; Nora G., la nueva, es `MT-19`.
+    - Hoy es el jueves 24 sep, como en la app del deportista.
+    - Cada uno tiene 28 días de FC, HRV y sueño, con su franja (media ± 1 desviación típica, con el mismo ancho mínimo).
+    - Las sesiones de la semana llegan como de TrainingPeaks.
+    - Los resúmenes de la IA son textos hechos con los datos.
+  - **Reglas que aplica:** el orden es por atención, nunca por valores; la IA recibe códigos, no nombres; el preparador ve solo la matriz prudente (más abajo), y los días sin datos salen como hueco en discontinuo o ratllado.
+  - **Conexión con la app del deportista:**
+    - Al guardar el ajuste en la Ficha, se escribe en `localStorage` `mt-prep-aj` (por código: `{ v, note, at, sug }`). La app del deportista lo lee en Hoy y se actualiza sola si el panel está abierto en otra pestaña (evento `storage`).
+    - Al guardar, el aviso queda revisado (`mt-prep-rev`).
+    - Solo funciona en el mismo navegador; con servidor irá por la base de datos.
+  - **Estado persistente del panel:** `mt-prep-style`, `mt-prep-mode`, `mt-prep-lang`, `mt-prep-grp`, `mt-prep-side`, `mt-prep-aj`, `mt-prep-rev`, `mt-prep-exp` y `mt-prep-proto-hidden`. La conversación del chat no se guarda.
+  - **Botón del prototipo** (matraz, solo en castellano, tecla E, a la izquierda del chat): abrir la app del deportista, borrar los ajustes y avisos revisados y reiniciar el experimento, para repetir la demostración. En la app del deportista, el matraz tiene «Abrir el panel del preparador».
 - **Bocetos** (lienzo «Panel del preparador · bocetos», https://claude.ai/artifact/HZX7TJ7SXXvTSqSwATbtdy). Usan 20 deportistas inventados (grupos A y B), el estilo Sencillo y la fecha de hoy del prototipo (jueves 24 sep).
   - La **primera versión** (lista de los 20, tarjetas por estado, fichas A/B) no le gustó al usuario. Pidió algo más profesional, que informe más que actúe, fácil de navegar con muchos deportistas y sin cargar la pantalla de deportistas. Se borró del lienzo.
   - La **segunda versión** (05-10-2026) se inspira en la estructura de un «centro de control» que pasó el usuario (sin copiarlo, sin etiquetas en mayúsculas ni leyendas). Cada pantalla está en claro y en oscuro. Falta su opinión:
@@ -43,12 +88,26 @@ Habrá una segunda app, para los entrenadores y **sobre todo para el preparador 
     - diseñar las secciones que faltan.
 
     Las pantallas, cada una en claro y en oscuro: Inicio (con «Sesiones de hoy»), chat, **Sesiones** (calendario de la semana por grupos), **Sesión y adaptaciones**, Deportistas, Ficha con pestañas, **Avisos** (pendientes e historial), **Semana** (equipo día a día), **Modo experimento** (H1) y cómo lo ve el deportista en Hoy. Falta su opinión.
-- **Modelo de sesiones (propuesta de la versión 3, aparcada):**
-  - **El preparador trabaja en TrainingPeaks** (dicho por el usuario el 06-10-2026). Por eso el panel no necesita su propio planificador de sesiones como el de la versión 3, que se queda en el lienzo solo como boceto. Se adaptará más adelante: no lo desarrolles ni lo rediseñes si el usuario no lo pide.
-  - La propuesta era esta: el preparador planifica la sesión de cada grupo y cada día, como en la hoja «U16 Planing set 26/27», compartida con el usuario en el Drive: una semana por hoja, con franjas horarias, actividad (carrera o bici, gimnasio, BTT, rollers…) y el material obligatorio.
-  - Cada sesión tiene tres versiones: **Normal, Reducida y Alternativa**, con series, cargas y descansos.
-  - Adaptar la sesión a un deportista es elegir su versión (o **Descanso**). La IA sugiere cuál; el preparador decide.
-  - El deportista ve en Hoy su sesión del día, la versión y los ejercicios con sus cargas. Son los huecos que ya preveía la app: «Sesión del día», «Ejercicios y cargas» y «Ajustes según cómo llegues».
+- **Sesiones con TrainingPeaks** (06-10-2026; en el lienzo, página de la versión 3: Sesiones, Sesión y adaptaciones, Ficha y «Así lo ve el deportista»):
+  - **El preparador planifica en TrainingPeaks.** Cada sesión lleva un enlace a un Excel con las instrucciones y los vídeos. Ese Excel no está en el Drive del usuario. El panel **no crea ni edita sesiones**: las lee de TrainingPeaks, y el calendario de Sesiones es solo para mirar.
+  - En el panel solo se decide el **ajuste de cada deportista** sobre esa sesión (el Excel es el mismo para todo el grupo):
+    - Normal: como en el Excel;
+    - Reducida: qué cambia (una serie menos, intensidad máxima, sin saltos…);
+    - Alternativa: qué hace en su lugar, con otro Excel si hace falta;
+    - Descanso: hoy no entrena.
+
+    La IA sugiere el ajuste y el preparador decide (H1).
+  - **El deportista** ve en Hoy («Propuestas del preparador físico») la sesión del día, su ajuste, lo que cambia hoy y la nota. Lleva dos botones que le llevan a la sesión: «Instrucciones y vídeos» abre el Excel y «Ver en TrainingPeaks» la abre allí. Los ejercicios no se copian en la app. Si falta el enlace, el botón sale desactivado, como los de los formularios.
+  - **Por decidir con el preparador:**
+    - cómo llegan las sesiones a la app: la conexión directa con TrainingPeaks (hay que confirmar si la dan), el calendario que exporta TrainingPeaks o pegar el enlace a mano;
+    - dónde mira el deportista la sesión: si es en TrainingPeaks, el ajuste también tendría que llegar allí;
+    - si el Excel es uno por sesión o uno por semana.
+  - El **planificador propio** de la versión 3 (crear sesiones con tres versiones y los ejercicios con sus cargas) está aparcado en la página «Planificador propio · aparcado» del lienzo. No lo retomes si el usuario no lo pide.
+  - Otras hojas del preparador en el Drive, compartidas con el usuario:
+    - «CALCUL RM»: una pestaña por deportista, con su 1RM y los kilos para cada porcentaje;
+    - «Explication RPE / RIR / POURCENTAGE»: la tabla de RPE, repeticiones en reserva y porcentajes.
+
+    Sirven para hablar su idioma en los ajustes (por ejemplo, «RPE máximo 7»).
 - **Decisiones del 05-10-2026 sobre el panel** (segunda ronda de preguntas):
   - **Avisos: se revisan y salen.** Cada aviso dice qué pasa, desde cuándo y qué ajuste sugiere la IA. Sale de la lista al marcarlo como revisado o al guardar el ajuste en la ficha, y queda en el historial.
   - **Qué es un aviso:** lesión o enfermedad en curso; varios días seguidos en Recuperación (H3); un dato 2 días o más fuera de su franja; la vuelta de una lesión; 2 días o más sin datos de la pulsera; un problema nuevo en el formulario. Nunca: salud mental, quién no responde (H4) ni lo que dijo al entrenador (H2).
@@ -59,10 +118,10 @@ Habrá una segunda app, para los entrenadores y **sobre todo para el preparador 
 - **Funciones que conectarán las dos apps** (se irán añadiendo más poco a poco):
   - **Lo que manda el preparador** (decidido el 05-10-2026). Llega desde su app, no de Google Forms.
     - Lo principal es el **ajuste del día**: Normal, Reducido, Descanso o Alternativo, con una nota si quiere. El deportista lo ve en Hoy. Es lo que mide H1, porque deja registrada cada decisión.
-    - Si quiere, también **ejercicios o rutinas**. Salen en «Ideas para recuperarte» (`recoveryPlanEl`), en el hueco «Propuestas del preparador físico» que ahora pone «Próximamente».
+    - Desde el 06-10-2026 sale en «Ideas para recuperarte» › «Propuestas del preparador físico» (`prepSesEl`), con la sesión del día de TrainingPeaks. Los ejercicios no se mandan: están en el Excel de la sesión.
   - **Lesiones compartidas:** si el deportista la comparte, el preparador sigue la lesión (el Seguimiento de Hoy, con «¿Cómo va hoy?» y «Ya estoy bien») y guía la vuelta a entrenar.
   - **Avisos al entrenador:** cuando un deportista acumula cansancio (H3) o marca un problema nuevo en el formulario semanal.
-- **Privacidad: lo elige el deportista.** Cada deportista decide en Privacidad qué comparte con el entrenador y el preparador. **La salud mental no se comparte nunca.** Falta decidir qué se comparte si el deportista no toca nada. La tabla que hay ahora en Privacidad (`pagePriv`) dice otra cosa (datos diarios y «lo que le dices», sí; formularios e informes de la IA, no): habrá que cambiarla cuando exista la otra app.
+- **Privacidad: lo elige el deportista.** Cada deportista decide en Privacidad qué comparte con el entrenador y el preparador. **La salud mental no se comparte nunca.** Falta decidir qué se comparte si el deportista no toca nada. La tabla que hay ahora en Privacidad (`pagePriv`) dice otra cosa (datos diarios y «lo que le dices», sí; formularios e informes de la IA, no). El panel ya existe, así que hay que cambiarla para que diga lo que ve el preparador. Falta que Oriol valide la matriz; pregunta al usuario antes de tocarla.
 - **Qué ve el preparador mientras Oriol no valide la matriz** (decidido el 05-10-2026). Se usa el borrador del «Plan de los paneles» (§4), que es lo más prudente:
   - **Sí ve:** los datos físicos, el estado del día, rendimiento, fatiga y descanso, y la participación y el tipo de problema (lesión o enfermedad).
   - **No ve:** lo que el deportista dijo al entrenador, la diferencia entre eso y sus datos, las palabras y el comentario, el bienestar mensual, la salud mental ni quién no ha respondido.
@@ -76,7 +135,9 @@ Habrá una segunda app, para los entrenadores y **sobre todo para el preparador 
 
 | Archivo | Qué es |
 |---|---|
-| `Max Tracking - Ordenador.dc.html` | Página que abre el usuario para ordenador/iPad. Solo importa el motor y pasa las props (`athleteName`, `aiLive`, `formDaily`, `formWeekly`, `formMonthly`). |
+| `Max Tracking - Ordenador.dc.html` | Página que abre el usuario para ordenador/iPad. Solo importa el motor y pasa las props (`athleteName`, `aiLive`, `formDaily`, `formWeekly`, `formMonthly`, y `sessionExcel` / `sessionTP`: los enlaces de la sesión del día). |
+| `Max Tracking - Preparador.dc.html` | Página del **panel del preparador físico** (ordenador/iPad). Solo importa su motor. |
+| `Max Tracking Panel.dc.html` | **El motor del panel del preparador** (desde el 06-10-2026; ver «La otra app»). |
 | `Max Tracking Escritorio.dc.html` | **El motor de ordenador/iPad (~575 KB).** Casi todo el trabajo se hace aquí. |
 | `Max Tracking - Móvil.dc.html` + `Max Tracking.dc.html` | Versión móvil con el diseño y el modelo de datos **antiguos**. Se portará más adelante al motor nuevo; no la toques salvo que lo pida. |
 | `support.js` | Runtime de los `.dc.html` (no editar). |
@@ -154,7 +215,7 @@ Habrá una segunda app, para los entrenadores y **sobre todo para el preparador 
   - Si un elemento con `title` también hace algo (`data-act`, como los días de «Esta semana»), el primer toque enseña el detalle y el segundo hace la acción. Tocar fuera lo cierra.
   - Gráficos: `...this.ptr(pick, clear)` sustituye a `onPointerMove` / `onPointerLeave` (el detalle se queda al levantar el dedo), y `this.useTapAway(ref, clear)` lo cierra al tocar fuera. Úsalos en los gráficos nuevos.
   - Los `:hover` del CSS van dentro de `@media(hover:hover)`, porque en un iPad táctil se quedan enganchados.
-- **Estado persistente (`localStorage`):** `mt-lang`, `mt-desk-theme-v4`, `mt-desk-mode-v2` (claves renovadas el 03-10-2026 para que todos empiecen en Sencillo + Automático), `mt-desk-side`, `mt-desk-done`, `mt-desk-trk` (respuestas de «¿Cómo va hoy?» y «Ya estoy bien», una por problema), `mt-desk-ai-v14`, `mt-proto-hidden`, `mt-desk-chatw` (ancho de la vista general del chat; la conversación nunca se guarda).
+- **Estado persistente (`localStorage`):** `mt-lang`, `mt-desk-theme-v4`, `mt-desk-mode-v2` (claves renovadas el 03-10-2026 para que todos empiecen en Sencillo + Automático), `mt-desk-side`, `mt-desk-done`, `mt-desk-trk` (respuestas de «¿Cómo va hoy?» y «Ya estoy bien», una por problema), `mt-desk-ai-v14`, `mt-proto-hidden`, `mt-desk-chatw` (ancho de la vista general del chat; la conversación nunca se guarda). Lee además `mt-prep-aj`, el ajuste que guarda el panel del preparador (no lo escribe nunca).
 - **Matraz** (`protoEl`, tecla E). Es temporal; se quitará cuando acabe la fase de prototipo. Contiene:
   - el escenario;
   - «Salud en el formulario (semana 38)» (`pbSim`: Escenario / Lesión / Mental / Dos);
@@ -179,7 +240,12 @@ Habrá una segunda app, para los entrenadores y **sobre todo para el preparador 
      - la curva, solo de este problema. La línea discontinua de la vez anterior («Anterior (S37)») se quitó el 05-10-2026 porque no aportaba nada.
    - Si todos han terminado, sale una línea «Terminó en N días», solo si terminó en los últimos 7 días.
    - «Precaución» solo mientras hay un problema físico en curso.
-4. «Ideas para recuperarte» (`recoveryPlanEl`): hábitos que propone la IA y el hueco del preparador físico («Próximamente»).
+4. «Ideas para recuperarte» (`recoveryPlanEl`): a la izquierda, los hábitos que propone la IA. A la derecha, desde el 06-10-2026, «Propuestas del preparador físico» (`prepSesEl`), que sustituye al hueco «Próximamente»:
+   - la sesión del día tal como llega de TrainingPeaks (`TX.PREP.ses`, por grupo: MT-07 es del A y MT-19 del B);
+   - el ajuste que guardó el preparador en su panel (`mt-prep-aj`), con «Ajustada según cómo llegas», «Lo que cambia hoy» (`TX.PREP.chg`, en segunda persona; el panel enseña las mismas frases) y la nota;
+   - dos botones que llevan a la sesión: «Instrucciones y vídeos» (prop `sessionExcel`; con Descanso no sale) y «Ver en TrainingPeaks» (prop `sessionTP`). Sin enlace salen desactivados, como los de los formularios, y se apilan si no caben.
+
+   Sin ajuste guardado, sale la sesión tal cual. Arriba a la derecha va la hora del ajuste.
 5. Franja «Tú vs tu cuerpo» (`feelStripEl`, id `mt-feel`). Para ir a Evolución está el enlace «Verlo en Evolución ›». Con el dedo, el gráfico sirve para mirar: un toque enseña el día y no cambia de página. Con ratón, el clic en el gráfico sigue llevando a Evolución.
 6. «Esta semana» (`weekNowEl`): nombres de los datos a la izquierda y 7 tarjetas de día negras con el borde del color de su estado, la palabra del estado, 4 barras que se llenan según el estado y la palabra del entrenador. Los días que faltan van en discontinuo. Clic en un día → Evolución › Día a día; «Ver semana» → Semana.
 7. Notificación flotante del entrenador (`coachToastEl`), solo si lo que dijo al entrenador no cuadra con el estado de sus datos. Entra deslizándose por la derecha, sigue al hacer scroll y tiene ✕. Al tocarla baja a `mt-feel`.
@@ -312,6 +378,27 @@ Habrá una segunda app, para los entrenadores y **sobre todo para el preparador 
 
 ## Pendiente
 
+- **Panel del preparador: plan para que sea más claro** (pedido el 06-10-2026; solo plan, la versión oficial no se toca hasta que se apruebe).
+  - El plan está en el Drive: «Panel del preparador: plan para que sea más claro (6 oct 2026)», 01 Planificació, id `1zWUfQzKI0YjkHh9CG07dqokGleUqd-LAf-Q04Qqhiu0`.
+  - Los bocetos están en el lienzo, página «Inicio más claro · propuesta», que se abre por defecto. Son dos:
+    - A · Por sesión, la recomendada: una tarjeta por sesión de hoy;
+    - B · Una sola lista.
+  - La idea de los dos: Inicio responde «¿a quién ajusto la sesión de hoy y cómo?».
+    - Los avisos pasan a ser el motivo del ajuste.
+    - Cada dato sale una sola vez.
+    - Los motivos llevan números (FC +4 lpm, HRV −8 ms…).
+    - Se decide en la misma fila: IA: Reducida · Aceptar · Otra.
+  - Por decidir con el usuario:
+    - A o B;
+    - aceptar con un clic o con confirmación (H1: que no se acepte sin mirar);
+    - si se quita «Sesión y adaptaciones» para hoy;
+    - si Avisos pasa a «Historial»;
+    - unificar las palabras en «ajuste».
+- **Panel del preparador (versión oficial):**
+  - en el Experimento, si el formato panel enseña la sugerencia de la IA (ahora no);
+  - qué estilo va por defecto (ahora, Azul marino);
+  - la tabla de Privacidad de la app del deportista (ver «La otra app»);
+  - para la demostración, poner los enlaces de la sesión en las props `sessionExcel` y `sessionTP` de «Max Tracking - Ordenador».
 - **Decisiones del 04 y el 05-10-2026.** Están escritas en el Drive, en «Decisiones de diseño (5 oct 2026): D4, D5, chat y panel del preparador» (01 Planificació, id `1Zzn6mWL-Tn0c0b2jv9QtOwMF0jRmYb9I7M5BPVWy-HE`).
   - **D4, a medias:** el registro diario será automático. FC, HRV y sueño llegan de la pulsera o el reloj. El 4 oct se concretó que «Cómo estás» lo calcula la IA y que lo que dijo al entrenador sale del formulario. Quedan dos problemas:
     - «Cómo estás» es la parte «Tú» de «Tú vs tu cuerpo» (Hoy) y de «Cómo te sientes vs qué dicen los datos» (Evolución): calculado con los mismos datos, compararía datos con datos;
