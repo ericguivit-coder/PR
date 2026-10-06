@@ -14,6 +14,8 @@ La app sirve a 4 hipótesis:
 
 Reglas:
 - Cada deportista se compara **solo consigo mismo**: franja personal de 28 días, con un mínimo de 14 días de datos (`bandFrom`). Sin franja → «Calculando».
+  - La franja es la media de esos 28 días ± 1 desviación típica, con un ancho mínimo para los datos que casi no cambian (`FLOOR`: FC 1,5 lpm, HRV 3 ms, sueño 15 min, cómo estás 0,5).
+  - Qué es mejor (`DEF.worse`): la FC en reposo y la fatiga, cuanto más bajas; la HRV, el sueño y cómo estás, cuanto más altos.
 - **La app no recoge datos propios.** Todo llega de Google Forms: diario, semanal (con OSTRC) y mensual (WEMWBS). Nunca hagas pantallas de formulario, previsualizaciones de preguntas ni bloques de «responde aquí». Los botones «Responder» abren el Google Form (props `formDaily` / `formWeekly` / `formMonthly`) y se desactivan si no hay enlace.
 - La IA **sugiere, nunca ordena**. No diagnostica, no sustituye al entrenador y siempre dice qué datos ha usado («Basado en…», visible al pasar el ratón por el título del informe). El aviso «Orientativo, no es un diagnóstico médico…» se queda visible.
 - **Nunca** aparecen en la app el **APSQ** ni el **texto libre mensual**. `hrv_semanal` nunca va a la IA.
@@ -25,13 +27,46 @@ Reglas:
 
 ## La otra app: entrenadores y preparador físico
 
-Habrá una segunda app, para los entrenadores y **sobre todo para el preparador físico**, conectada con esta. Todavía no existe: de momento es contexto para pensar mejores ideas (añadido el 01-10-2026). No empieces nada de ella si el usuario no lo pide.
+Habrá una segunda app, para los entrenadores y **sobre todo para el preparador físico**, conectada con esta. Todavía no existe: de momento es contexto para pensar mejores ideas (añadido el 01-10-2026). El 05-10-2026 el usuario pidió empezar el **diseño del panel del preparador**, primero como bocetos en un lienzo. No programes nada de ella si el usuario no lo pide.
+- **Bocetos** (lienzo «Panel del preparador · bocetos», https://claude.ai/artifact/HZX7TJ7SXXvTSqSwATbtdy). Usan 20 deportistas inventados (grupos A y B), el estilo Sencillo y la fecha de hoy del prototipo (jueves 24 sep).
+  - La **primera versión** (lista de los 20, tarjetas por estado, fichas A/B) no le gustó al usuario. Pidió algo más profesional, que informe más que actúe, fácil de navegar con muchos deportistas y sin cargar la pantalla de deportistas. Se borró del lienzo.
+  - La **segunda versión** (05-10-2026) se inspira en la estructura de un «centro de control» que pasó el usuario (sin copiarlo, sin etiquetas en mayúsculas ni leyendas). Cada pantalla está en claro y en oscuro. Falta su opinión:
+    - **Barra lateral:** Inicio, Deportistas, Avisos y Semana, y un buscador de deportistas. Arriba de cada página, Todos · Grupo A · Grupo B.
+    - **Inicio:** estado del equipo (cuántos en cada estado hoy y en los últimos 7 días) y, al lado, el resumen del día de la IA. Cuatro cifras: avisos por revisar, ajustes cambiados, lesión o enfermedad y datos de hoy. Avisos, ajustes de hoy y próximos días. La lista del equipo no sale en el inicio.
+    - **Chat «Pregunta sobre el equipo»:** botón redondo en todas las pantallas, como en la app del deportista.
+    - **Deportistas:** la lista completa, con buscador y filtros, ordenada por atención o por nombre y separada por grupos.
+    - **Ficha:** el aviso, los 7 días con el ajuste de cada día, el resumen de la IA, el ajuste con la sugerencia de la IA y los gráficos de 28 días plegados.
+  - La **tercera versión** (06-10-2026) está en la página «Versión 3 · blanco y azul» del lienzo, que se abre por defecto; la segunda queda en su propia página, como pidió el usuario. Le pareció que la segunda «no está mal», pero pidió:
+    - revisar en el Drive lo que hay sobre el preparador;
+    - que pueda poner **sesiones de entrenamiento adaptadas a cada deportista**;
+    - un estilo más afilado, limpio y compacto, en blanco y azul, con modo oscuro;
+    - diseñar las secciones que faltan.
+
+    Las pantallas, cada una en claro y en oscuro: Inicio (con «Sesiones de hoy»), chat, **Sesiones** (calendario de la semana por grupos), **Sesión y adaptaciones**, Deportistas, Ficha con pestañas, **Avisos** (pendientes e historial), **Semana** (equipo día a día), **Modo experimento** (H1) y cómo lo ve el deportista en Hoy. Falta su opinión.
+- **Modelo de sesiones (propuesta de la versión 3, aparcada):**
+  - **El preparador trabaja en TrainingPeaks** (dicho por el usuario el 06-10-2026). Por eso el panel no necesita su propio planificador de sesiones como el de la versión 3, que se queda en el lienzo solo como boceto. Se adaptará más adelante: no lo desarrolles ni lo rediseñes si el usuario no lo pide.
+  - La propuesta era esta: el preparador planifica la sesión de cada grupo y cada día, como en la hoja «U16 Planing set 26/27», compartida con el usuario en el Drive: una semana por hoja, con franjas horarias, actividad (carrera o bici, gimnasio, BTT, rollers…) y el material obligatorio.
+  - Cada sesión tiene tres versiones: **Normal, Reducida y Alternativa**, con series, cargas y descansos.
+  - Adaptar la sesión a un deportista es elegir su versión (o **Descanso**). La IA sugiere cuál; el preparador decide.
+  - El deportista ve en Hoy su sesión del día, la versión y los ejercicios con sus cargas. Son los huecos que ya preveía la app: «Sesión del día», «Ejercicios y cargas» y «Ajustes según cómo llegues».
+- **Decisiones del 05-10-2026 sobre el panel** (segunda ronda de preguntas):
+  - **Avisos: se revisan y salen.** Cada aviso dice qué pasa, desde cuándo y qué ajuste sugiere la IA. Sale de la lista al marcarlo como revisado o al guardar el ajuste en la ficha, y queda en el historial.
+  - **Qué es un aviso:** lesión o enfermedad en curso; varios días seguidos en Recuperación (H3); un dato 2 días o más fuera de su franja; la vuelta de una lesión; 2 días o más sin datos de la pulsera; un problema nuevo en el formulario. Nunca: salud mental, quién no responde (H4) ni lo que dijo al entrenador (H2).
+  - **Navegación:** la lista completa en su propia página, con buscador; el inicio queda limpio.
+  - **IA:** resumen diario del equipo (por grupo), chat sobre el equipo y **sugerir el ajuste**. La IA sugiere y explica por qué; el preparador acepta o elige otro. Se guarda si aceptó la sugerencia o la cambió, así H1 mide también a la IA.
+  - Reglas que siguen: el orden es por lo que pide atención, nunca por valores; la IA recibe códigos y la app pone los nombres; lo pendiente de Oriol, en discontinuo.
 
 - **Funciones que conectarán las dos apps** (se irán añadiendo más poco a poco):
-  - **Propuestas del preparador:** manda ejercicios o rutinas, y salen en «Ideas para recuperarte» (`recoveryPlanEl`), en el hueco «Propuestas del preparador físico» que ahora pone «Próximamente». Llegan desde su app, no de Google Forms.
+  - **Lo que manda el preparador** (decidido el 05-10-2026). Llega desde su app, no de Google Forms.
+    - Lo principal es el **ajuste del día**: Normal, Reducido, Descanso o Alternativo, con una nota si quiere. El deportista lo ve en Hoy. Es lo que mide H1, porque deja registrada cada decisión.
+    - Si quiere, también **ejercicios o rutinas**. Salen en «Ideas para recuperarte» (`recoveryPlanEl`), en el hueco «Propuestas del preparador físico» que ahora pone «Próximamente».
   - **Lesiones compartidas:** si el deportista la comparte, el preparador sigue la lesión (el Seguimiento de Hoy, con «¿Cómo va hoy?» y «Ya estoy bien») y guía la vuelta a entrenar.
   - **Avisos al entrenador:** cuando un deportista acumula cansancio (H3) o marca un problema nuevo en el formulario semanal.
 - **Privacidad: lo elige el deportista.** Cada deportista decide en Privacidad qué comparte con el entrenador y el preparador. **La salud mental no se comparte nunca.** Falta decidir qué se comparte si el deportista no toca nada. La tabla que hay ahora en Privacidad (`pagePriv`) dice otra cosa (datos diarios y «lo que le dices», sí; formularios e informes de la IA, no): habrá que cambiarla cuando exista la otra app.
+- **Qué ve el preparador mientras Oriol no valide la matriz** (decidido el 05-10-2026). Se usa el borrador del «Plan de los paneles» (§4), que es lo más prudente:
+  - **Sí ve:** los datos físicos, el estado del día, rendimiento, fatiga y descanso, y la participación y el tipo de problema (lesión o enfermedad).
+  - **No ve:** lo que el deportista dijo al entrenador, la diferencia entre eso y sus datos, las palabras y el comentario, el bienestar mensual, la salud mental ni quién no ha respondido.
+  - En los bocetos, lo pendiente de Oriol sale marcado.
 - **En el estudio sirve a H1 y H3:** el entrenador planifica con la evolución analizada por la IA, no con puntuaciones sueltas (H1), y recibe los avisos de cansancio acumulado (H3).
 - **Cuidado con H2 y H4.** Si el entrenador ve los datos, el deportista puede cambiar lo que le cuenta (H2). Si ve quién no ha respondido y le insiste, ya no se sabe si el deportista rellena más por la app o por el entrenador (H4). Cuando propongas algo que vea el entrenador, di si puede tocar H2 o H4.
 - Mientras no se decida otra cosa, las reglas del estudio de arriba también valen para la otra app: la IA sugiere y no diagnostica, no se atribuyen causas, y nunca salen el APSQ ni el texto libre mensual.
@@ -65,6 +100,7 @@ Habrá una segunda app, para los entrenadores y **sobre todo para el preparador 
   - «Pantalla Mes: plan de diseño (2 oct 2026)»: sustituye a la sección 8 (Mes) de la versión 2.
   - «App del deportista: en qué punto estamos (análisis, 2 oct 2026)»: el plan comparado con el código, con la lista de pendientes.
   - «Plan de los paneles: preparador físico y especialista»: decisiones D1–D7, qué ve cada rol y fases.
+  - «Decisiones de diseño (5 oct 2026): D4, D5, chat y panel del preparador»: D4 a medias, D5, el chat, el diseño congelado y qué manda y qué ve el preparador. Si no coincide con los dos documentos de arriba, manda este.
 
 ## Cómo está hecho el motor (`Max Tracking Escritorio.dc.html`)
 
@@ -276,10 +312,15 @@ Habrá una segunda app, para los entrenadores y **sobre todo para el preparador 
 
 ## Pendiente
 
-- **Decisiones del 04-10-2026** (falta escribirlas en los documentos del Drive):
-  - **D4:** el registro diario será automático. FC, HRV y sueño llegan de la pulsera o el reloj. Falta decidir dónde contesta el deportista «Cómo estás» y lo que le dijo al entrenador. Va con la llamada a Oriol.
-  - **D5:** la diferencia se enseña al deportista. Lo importante es lo que pone en el formulario sobre cómo se siente frente a lo que dicen los datos de la pulsera.
+- **Decisiones del 04 y el 05-10-2026.** Están escritas en el Drive, en «Decisiones de diseño (5 oct 2026): D4, D5, chat y panel del preparador» (01 Planificació, id `1Zzn6mWL-Tn0c0b2jv9QtOwMF0jRmYb9I7M5BPVWy-HE`).
+  - **D4, a medias:** el registro diario será automático. FC, HRV y sueño llegan de la pulsera o el reloj. El 4 oct se concretó que «Cómo estás» lo calcula la IA y que lo que dijo al entrenador sale del formulario. Quedan dos problemas:
+    - «Cómo estás» es la parte «Tú» de «Tú vs tu cuerpo» (Hoy) y de «Cómo te sientes vs qué dicen los datos» (Evolución): calculado con los mismos datos, compararía datos con datos;
+    - el formulario semanal no pregunta qué le dijo al entrenador.
+
+    Opciones: un Google Form diario muy corto, o sacarlo del formulario semanal. Se cierra después de la llamada con Oriol.
+  - **D5:** la diferencia se enseña al deportista. Lo importante es lo que pone en el formulario sobre cómo se siente frente a lo que dicen los datos de la pulsera. Falta justificarlo en la metodología: se mide si la diferencia baja con el tiempo.
   - **Chat:** entra en el estudio, como fuente rápida y fiable. Su uso se medirá con las llamadas a la API de la IA cuando haya servidor.
+  - **Diseño de la app del deportista congelado (05-10-2026)**, menos lo que depende de D4. A partir de ahora, solo errores.
 - iPad: probarlo en un iPad de verdad.
 - Chat: la IA real solo existe dentro del host (`window.claude`); en local responden las sugeridas.
 - Aviso automático al especialista (idea del usuario, 02-10-2026): por decidir quién lo recibe, qué lo dispara y si el deportista lo ve en la app. Iría fuera de la app (en la hoja de respuestas de los Google Forms), porque la app no recibe el APSQ ni el texto libre.
