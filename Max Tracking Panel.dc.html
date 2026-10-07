@@ -1786,6 +1786,7 @@ Responde solo con JSON: {"texto": "2 o 3 frases", "codigos": ["MT-07"]}`;
     const it = { display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10, width: '100%', boxSizing: 'border-box', padding: '8px 10px', border: 'none', borderRadius: 8, background: 'transparent', cursor: 'pointer', fontSize: 12.5, color: C.ink, textDecoration: 'none', textAlign: 'left' };
     const panel = s.pOpen ? h('div', { key: 'pp', style: { position: 'absolute', right: 0, bottom: 50, width: 270, padding: 6, boxSizing: 'border-box', borderRadius: 12, background: C.s1, border: `1px solid ${C.line2}`, boxShadow: `0 18px 50px ${C.pop}` } },
       h('div', { style: { padding: '6px 10px 8px', fontSize: 12, color: C.ink2 } }, 'Prototipo'),
+      h('a', { className: 'mt-hov', href: './Max%20Tracking%20-%20Preparador%20nuevo.dc.html', target: '_blank', rel: 'noopener', style: it }, h('span', null, 'Abrir el panel nuevo (en construcción)'), h('span', null, '↗')),
       h('a', { className: 'mt-hov', href: './Max%20Tracking%20-%20Ordenador.dc.html', target: '_blank', rel: 'noopener', style: it }, h('span', null, 'Abrir la app del deportista'), h('span', null, '↗')),
       h('button', { type: 'button', className: 'mt-hov', onClick: () => this.resetDemo(), style: it }, h('span', null, 'Borrar ajustes y avisos revisados'), h('span', null, '')),
       h('button', { type: 'button', className: 'mt-hov', onClick: () => { this.resetExp(); this.setState({ pOpen: false }); }, style: it }, h('span', null, 'Reiniciar el experimento'), h('span', null, '')),

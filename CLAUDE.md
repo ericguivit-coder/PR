@@ -131,13 +131,152 @@ Una segunda app, para los entrenadores y **sobre todo para el preparador físico
 - Mientras no se decida otra cosa, las reglas del estudio de arriba también valen para la otra app: la IA sugiere y no diagnostica, no se atribuyen causas, y nunca salen el APSQ ni el texto libre mensual.
 - **Para qué sirve este contexto:** al pensar ideas para la app del deportista, mira si tienen otra mitad en la del preparador (algo que manda, que ve o que le avisa) y dilo al proponerlas.
 
+## Rediseño del panel del preparador (especificación del 06-10-2026)
+
+- **Cualquier cambio del panel del preparador sigue la especificación** «Panel del preparador · Especificación de rediseño UX/UI» (versión 1, 6 oct 2026), en el Drive del usuario (Mi unidad), id `1nCFHR7yVxmkK2QNVrSmprj8dCFIlG2csksRjq-zKmKw`.
+  - Se lee con el conector de Google Drive. No hay copia en el repo, porque el usuario quiere los documentos en el Drive.
+  - Sustituye al plan «para que sea más claro» y a sus bocetos A/B (ver «Pendiente»): responde a sus preguntas abiertas.
+  - Va **por fases, de la 0 a la 9**. No se pasa a la siguiente hasta que se cumplen los criterios de aceptación de la anterior y el usuario lo confirma.
+  - Estado (06-10-2026): **fases 0 a 4 hechas**; la 5 (la ficha del deportista) empieza cuando el usuario revise la 4.
+- **Fase 1, los datos y los cálculos** (en `Max Tracking Panel nuevo.dc.html`; todavía sin pantallas):
+  - **Datos** (`ATH`, `SES_WEEK`, `PAST`, `FEED`, `FORM`, `RULES0`): la única fuente.
+    - Los estados de los deportistas ya no llevan «P». La lesión o enfermedad va en `salut` (`des`, `fi`, `aj`), y la participación de cada semana sale de `part`.
+    - Las sesiones son una semana tipo que se repite. Las decisiones de días anteriores están en `PAST`; el motivo no se escribe, sale de las reglas.
+    - Roc D. sigue (`MT-20`).
+  - **Cálculos, funciones puras:**
+    - `classify(a, día, reglas)` aplica la tabla «Cuándo se crea un pendiente». `boardOf` hace el tablero de hoy, y de él salen todos los recuentos (`countsOf`), así que Hoy, la barra lateral y los filtros siempre coinciden.
+    - También: `nextLimit`, `ajOn` (el ajuste de cada día), `historyOf`, `weekSum` y `upcoming`.
+    - La sugerencia de la IA (`aiSug`) es una simulación con reglas.
+  - **Interpretación de la regla «Moderado y la IA sugiere Normal»:** solo rebaja a «A vigilar» el caso de 2 o más días seguidos fuera de su normal. Un Moderado de un solo día no sale en ninguna lista. Con eso salen 4 pendientes (Martí, Arnau, Júlia, Abril), 2 automáticos (Pol: Descanso; Laia: Alternativa) y 1 a vigilar (Biel), como pide la especificación.
+  - **Hora simulada:** empieza a las 8:30 y avanza con el reloj real. Con la hora real, por la tarde no quedaría nada por decidir. Una sesión que ya ha empezado sin decisión queda «Sin decidir».
+  - **Guardar:** `withDecision` / `withUndo` sobre `mt-prep-aj`, la misma clave y el mismo formato `{ v, note, at, sug, src }` que lee la app del deportista. `mt-prep-rev` ya no se usa.
+  - **Comprobación** (`#/comprobacion`): enseña las cifras con los datos de hoy y deja probar un cambio en memoria (el estado de hoy de un deportista, los umbrales y «Ya estoy bien» de Laia). Es en castellano, como el matraz, y se quitará cuando haya pantallas.
+- **Fase 2, el sistema visual** (06-10-2026). El usuario eligió **un solo estilo** (el de la especificación; los cuatro estilos del panel actual no pasan al nuevo), **un color fijo por estado** (no la escala continua) y **leyenda solo en la vista Semana de Deportistas**.
+  - **Colores:** `TOKENS` (claro y oscuro) se convierten en variables CSS (`--bg`, `--text`, `--opt`…) con `data-theme` en `.mtp`. Ningún componente lleva un color escrito, y se comprueba con un script.
+    - Claro = el de la especificación. Oscuro = la misma gama, hecho para el panel.
+    - Modo claro, oscuro o automático (`mt-prep-mode`, compartido con el panel actual).
+  - **Ajustes de color sobre la especificación**, comprobados con contraste WCAG y daltonismo simulado (Machado 2009):
+    - Estados: Óptimo `#2F855A` → `#1E9E78`, Moderado `#D4A72C` → `#E0B12E`, Recuperación `#C53030` → `#B91C1C`. Con deuteranopía, Óptimo y Recuperación casi se confundían (ΔE00 13); ahora cada pareja pasa de 20 con los tres tipos de daltonismo, en claro y en oscuro.
+    - La línea discontinua de «sin datos» pasa de `#98A2B3` a `#8A94A6`, para llegar a 3:1.
+    - En oscuro, el azul de los botones es `#3A68D6` y al pasar el ratón se oscurece.
+    - El texto de un estado va siempre del color del texto, nunca del color del estado (el amarillo no llega a 4,5:1). En claro, los rellenos de estado llevan un borde fino para que el amarillo se vea sobre el blanco.
+    - Todos los textos llegan a 4,5:1 y los iconos y líneas, a 3:1.
+  - **Componentes** (clases `mtp-…` en el helmet; espacios en múltiplos de 4 px):
+    - estado (punto + texto) y celda de día (`data-s`; F = día que no ha llegado, vacío y sin borde);
+    - chip de ajuste (icono + texto) y chip Pendiente;
+    - botones principal, secundario, terciario y solo icono, de 36 px (32 en las tablas);
+    - control segmentado de los cuatro ajustes, con la sugerencia en discontinuo y «Sugerido»;
+    - tabla, aviso con Deshacer (abajo a la izquierda, 10 s), estado vacío, carga (bloques grises con un fundido suave), aviso ámbar, leyenda, marca de salud (`bandage` / `thermometer`) y punto azul de nuevo.
+    - Las piezas se hacen una sola vez en el componente (`stChip`, `ajChip`, `pendChip`, `seg`, `toastEl`, `emptyEl`, `week7`, `ajToday`, `motive`, `deltas`…).
+  - **Letra:** Inter, de Google Fonts, con cifras tabulares (`.num` y las tablas).
+  - **Iconos:** Lucide 1.52.0 (ISC), copiados en `ICONS`, con trazo de 1,5. Los cuatro de los ajustes (`AJ_ICON`: equal, trending-down, arrow-left-right, moon) no se usan para nada más, y el de pausa ya no existe.
+  - **Textos de los componentes** en `TX`, en los cuatro idiomas: estados, ajustes, motivos en una línea, «Pendiente», «Sugerido», «Confirmar …», «Deshacer»…
+  - **Página de estilos** (`#/estilos`, en castellano): todos los componentes en claro y en oscuro, uno al lado del otro, con los colores, el contraste de cada texto y los estados vistos con daltonismo.
+- **Fase 3, la navegación** (06-10-2026). Las dos barras y el asistente se hacen una sola vez y salen en todas las pantallas.
+  - **Barra lateral** (`sideEl`), de 224 px con icono y texto:
+    - arriba, Hoy (con el número de pendientes del grupo elegido, de `countsOf`, igual que Hoy), Deportistas y Sesiones; abajo, Ajustes y el menú de usuario;
+    - se pliega a 64 px solo con iconos, y cada uno dice su nombre al pasar el ratón. Se recuerda en `mt-prep-side`; por defecto, abierta.
+  - **Menú de usuario** (`userMenuEl`): el nombre (prop `coachName` de la página; sin nombre, «Preparador físico»), el tema (claro, oscuro o automático, `mt-prep-mode`), el idioma (`mt-prep-lang`; catalán por defecto) y «Cerrar sesión», desactivado en el prototipo.
+  - **Barra de arriba** (`topEl`):
+    - buscador ⌘K de deportistas (todos, de cualquier grupo) y de las sesiones de la semana, que se mueve con las flechas y abre con Intro;
+    - la hora de los datos (`freshEl`): en ámbar y con «Actualizar» si tienen más de 2 horas; si falla la conexión con las pulseras o con TrainingPeaks, lo dice con el último dato bueno;
+    - el grupo (Todos · Grupo A · Grupo B), que vale para todo el panel, se recuerda (`mt-prep-grp`) y sale en el título de la página («Deportistas · Grupo A»).
+  - **Direcciones:**
+    - `#/hoy`, `#/hoy/historial`, `#/deportistas` (vista Lista) y `#/deportistas/semana`;
+    - `#/deportista/MT-07`, `#/sesiones`, `#/sesion/27-A` (día-grupo), `#/ajustes` y `#/ajustes/experimento`;
+    - las del prototipo: `#/estilos` y `#/comprobacion`.
+    - Las antiguas llevan a su sitio nuevo (`ROUTE_ALIAS`): avisos → historial de Hoy, semana → vista Semana, exp → Experimento en Ajustes. Una dirección desconocida va a Hoy.
+    - Las pantallas que faltan dicen «En construcción · llega en la fase N» (en castellano).
+  - **Asistente** (`asstEl`), un solo acceso: el botón azul de abajo a la derecha abre un panel lateral derecho de 400 px.
+    - Sabe la pantalla y el deportista que se miran: en la ficha añade «¿Por qué está así …?» y «¿Qué ajustes ha tenido … esta semana?».
+    - Las sugeridas las responde la app con los datos (`chatRecipe`).
+    - El texto libre va a la IA (`window.claude`, solo dentro del host) con códigos, nunca nombres (`chatPrompt`); sin IA, responde la sugerida más parecida.
+    - No responde nada de salud mental, H2 ni H4 (`chatRisk`). La conversación no se guarda.
+  - **Matraz** (temporal, en castellano, tecla E): estilos, comprobación, hora simulada (8:30, 10:30, 15:05 y 16:05), simular un error con las pulseras o con TrainingPeaks, borrar los ajustes guardados, abrir la app del deportista y volver al panel actual.
+  - **Se borra al aprobar** el panel nuevo: el motor actual (`Max Tracking Panel.dc.html`, con Avisos, Semana y el Experimento en el menú), que se sustituye por el nuevo, y la página `Max Tracking - Preparador nuevo.dc.html`. Ahora no se borra nada, y no hay versiones de iPad ni de móvil del preparador.
+- **Fase 4, el componente de decisión y Hoy** (06-10-2026).
+  - **Componente de decisión** (`decisionEl`): el mismo para Hoy, la ficha (fase 5) y el detalle de sesión (fase 7).
+    - Primera línea: nombre (enlace a la ficha), punto azul si es nuevo de hoy, estado (punto + palabra) y motivo corto (`motiveShort`: «3 días seguidos», «desde el miércoles»).
+    - Debajo, «Sugerencia: Reducida» con el porqué en datos (`deltas`: «FC +3 lpm · HRV −10 ms…», en color de texto, no gris; «Basado en…» al pasar el ratón).
+    - Sin datos: «Sin sugerencia» y «Pedir que sincronice» (solo en el estado de la página: no se guarda ni avisa a nadie).
+    - El control de los cuatro ajustes, con la sugerencia preseleccionada (discontinua + «Sugerido»), y «Confirmar [ajuste]».
+    - «Le llegará: …», con las reglas de cada tipo de sesión (`TX.RED` / `ALT` / `PRE`; editables en la fase 8), y «Añadir nota» (140 caracteres), solo cuando hay un ajuste elegido.
+    - Estados: pendiente, confirmado (ajuste, hora y «Cambiar»), automático (motivo y «Cambiar»), bloqueado («Sin decidir · La sesión ya ha empezado»).
+  - **Confirmar** (`confirm`) es la única acción. Guarda en `mt-prep-aj` `{ v, note, at, sug, src: 'prep', was, auto }` (`was` = lo que decían las reglas, `auto` = el automático que se cambió), y la app del deportista lo ve.
+    - Sale el aviso «Martí R. · Reducida confirmada» con «Deshacer» 10 s (`showToast(texto, deshacer)`), y el foco pasa al pendiente siguiente.
+    - **Sin «Confirmar sugerencias (n)»** (decisión de la fase 0).
+  - **Hoy** (`pageHoy`):
+    - **Cabecera:** título con el grupo, «2 de 6 decididos» con barra, «Decide antes de las 15:00 · sesión, grupo» (en ámbar y «Límite pasado» si ya pasó) y el botón de los atajos.
+    - **Pendientes** en una tarjeta por sesión, por hora límite; dentro, por atención (`attRank`). Al pulsar la fila (o con Espacio) se abre el resumen de datos (`dataSumEl`):
+      - las 3 medidas con los 7 días y su normal (`spark`);
+      - el formulario de la semana 38 (rendimiento, fatiga y descanso: matriz prudente);
+      - la nota del especialista (`NOTES`) y «Ver ficha completa».
+    - **Bloques plegados:** Ajustes automáticos, A vigilar («Ajustar igualmente») y Decididos hoy (con el enlace al Historial). «Cambiar» abre el componente entero (`compactEl`).
+    - **Columna derecha** de 288 px:
+      - Estado del equipo: número grande, barra y recuentos que llevan a `#/deportistas?estado=O|M|R|sin`;
+      - Resumen («Redactado por IA», hecho con los datos en el prototipo, 3 frases como mucho, sin nombres): cambio desde ayer, la media del grupo que más días lleva empeorando (`groupTrend`) y la semana frente a la anterior;
+      - Próximos.
+    - Sin pendientes: «Todo decidido para hoy · Siguiente sesión: …».
+  - **Historial** (`pageHist`, `#/hoy/historial`): los 28 días, con filtros por motivo (y su número). Cada fila dice qué sugirió la IA, la decisión, si fue «como la sugerencia» o «distinta» (H1) y la hora; los automáticos y los «Sin decidir», marcados.
+  - **Teclado en Hoy:** J/K para moverse, 1–4 para elegir el ajuste, Intro para confirmar, Espacio para los datos y ? para la ayuda. Nunca mientras se escribe.
+  - Comprobado:
+    - los 4 pendientes se deciden sin salir de Hoy, con el ratón y con el teclado;
+    - el contador baja y el deportista pasa a Decididos hoy; Deshacer lo devuelve;
+    - no salen «Aviso», «Por decidir», «Revisar», «Aceptar» ni «Guardar»;
+    - a 1280 px, el control y el botón caben en una línea en los cuatro idiomas.
+- **Las reglas del estudio siguen mandando.** Si la especificación choca con ellas, pregunta antes.
+- **Decisiones del usuario (06-10-2026, fase 0)** sobre los choques con el estudio:
+  - **Experimento (H1):** el «Laboratorio» que la especificación manda borrar es esta pantalla. Sale de la barra lateral, pero no se borra: se abre desde Ajustes.
+  - **No hay «Confirmar sugerencias (n)»:** cada deportista se confirma uno a uno, para que no se acepte la IA sin mirar (H1).
+  - **Estados del panel = los de la app del deportista:** Óptimo, Moderado, Recuperación, Calculando y Sin datos. La lesión o enfermedad va como marca aparte y «Precaución» no sale en el panel. Donde la especificación dice «Recuperación o Precaución», vale solo Recuperación.
+  - **Motor nuevo aparte:** `Max Tracking - Preparador nuevo.dc.html` (página) + `Max Tracking Panel nuevo.dc.html` (motor), que se abre desde el matraz del panel actual.
+    - El panel actual no se toca hasta que el usuario apruebe el nuevo. Entonces el nuevo lo sustituye y se borran el viejo y la página «nuevo».
+    - Dentro del motor, las secciones hacen de los archivos de la especificación: datos, cálculos, guardado, textos, componentes y pantallas.
+    - Cada pantalla tiene su dirección con # (`#/hoy`, `#/deportista/MT-07`…).
+- **Choques que quedan para más adelante:**
+  - «Añadir sesión» (fase 7) deshace la decisión de que el panel no crea sesiones (las lee de TrainingPeaks). Pregunta al llegar.
+  - El resumen desplegable de Hoy («el último formulario») solo enseña lo de la matriz prudente: rendimiento, fatiga, descanso, participación y tipo de problema.
+  - El texto secundario en gris (`#667085`) se sigue como dice la especificación: el panel actual ya lo usaba y el usuario lo aprobó (versión 3).
+- **Errores de la especificación** (comprobados en el código):
+  - «Roc D.» sí existe: es `MT-20`, del grupo B. No se borra. El fallo es que «anterior» da la vuelta al llegar al primero de la lista.
+  - El panel ya es un solo archivo: no hay versiones de iPad ni de móvil del preparador que borrar.
+  - Las cifras no se contradicen por estar en archivos distintos, sino porque cada pantalla cuenta a su manera: avisos revisados o no, selecciones sin guardar y la barra lateral, que cuenta los 20 aunque haya un grupo elegido.
+
+### Principios que no se negocian
+
+1. **Una decisión, un componente.** La decisión sobre un deportista se toma con el mismo componente esté donde esté (Hoy, ficha o detalle de sesión). Nunca se hacen versiones distintas de ese bloque.
+2. **Un solo concepto de tarea.** Si el preparador tiene que hacer algo, es un **Pendiente**. No hay otros nombres para lo mismo.
+3. **Una sola fuente de datos.** Ningún número se escribe a mano: todo recuento sale de funciones que leen los mismos datos.
+4. **Solo se pide decisión cuando hace falta.** Si una regla clara lo resuelve, el sistema lo resuelve y lo muestra como «automático», con opción de cambiarlo.
+5. **La IA sugiere y explica; el preparador decide.** Cada sugerencia dice en una línea el porqué, con datos («FC +2 lpm, HRV −6 ms, 3 días seguidos»).
+6. **El color nunca va solo.** Todo estado de color lleva texto o un icono.
+7. **Un botón principal por zona.** En cada bloque, como mucho un botón azul relleno.
+8. **Solo escritorio.** El panel se diseña para pantallas de 1280 px o más. No hay versión de iPad ni de móvil del preparador.
+
+### Glosario: palabras que cambian
+
+| Antes | Ahora |
+|---|---|
+| Aviso, Por decidir, Por revisar | Pendiente |
+| Aceptar, Marcar como revisado, Guardar, Revisar, el check sin texto | Confirmar (y «Ver detalle» para abrir la ficha) |
+| IA: Reducida | Sugerencia: Reducida |
+| Revisados hoy | Decididos hoy |
+| 1 ajustada, 2 ajustadas | 1 ajuste, 2 ajustes |
+| Sin Excel | Sin instrucciones |
+| Nuevo (etiqueta) | Se quita: lo nuevo de hoy lleva un punto azul junto al nombre |
+| Inicio | Hoy |
+| Franja / su normal | En los textos, siempre «su normal»; «franja», solo en la leyenda de las gráficas |
+
+Las palabras nuevas van en los cuatro idiomas (`TX`); el preparador trabaja en francés.
+
 ## Archivos
 
 | Archivo | Qué es |
 |---|---|
 | `Max Tracking - Ordenador.dc.html` | Página que abre el usuario para ordenador/iPad. Solo importa el motor y pasa las props (`athleteName`, `aiLive`, `formDaily`, `formWeekly`, `formMonthly`, y `sessionExcel` / `sessionTP`: los enlaces de la sesión del día). |
 | `Max Tracking - Preparador.dc.html` | Página del **panel del preparador físico** (ordenador/iPad). Solo importa su motor. |
-| `Max Tracking Panel.dc.html` | **El motor del panel del preparador** (desde el 06-10-2026; ver «La otra app»). |
+| `Max Tracking Panel.dc.html` | **El motor del panel del preparador** (desde el 06-10-2026; ver «La otra app»). El matraz enlaza con el panel nuevo. |
+| `Max Tracking - Preparador nuevo.dc.html` + `Max Tracking Panel nuevo.dc.html` | **Panel del preparador nuevo, en construcción** (rediseño por fases, desde el 06-10-2026; ver «Rediseño del panel del preparador»). Cuando el usuario lo apruebe, sustituye a los dos de arriba. |
 | `Max Tracking Escritorio.dc.html` | **El motor de ordenador/iPad (~575 KB).** Casi todo el trabajo se hace aquí. |
 | `Max Tracking - Móvil.dc.html` + `Max Tracking.dc.html` | Versión móvil con el diseño y el modelo de datos **antiguos**. Se portará más adelante al motor nuevo; no la toques salvo que lo pida. |
 | `support.js` | Runtime de los `.dc.html` (no editar). |
@@ -378,22 +517,8 @@ Una segunda app, para los entrenadores y **sobre todo para el preparador físico
 
 ## Pendiente
 
-- **Panel del preparador: plan para que sea más claro** (pedido el 06-10-2026; solo plan, la versión oficial no se toca hasta que se apruebe).
-  - El plan está en el Drive: «Panel del preparador: plan para que sea más claro (6 oct 2026)», 01 Planificació, id `1zWUfQzKI0YjkHh9CG07dqokGleUqd-LAf-Q04Qqhiu0`.
-  - Los bocetos están en el lienzo, página «Inicio más claro · propuesta», que se abre por defecto. Son dos:
-    - A · Por sesión, la recomendada: una tarjeta por sesión de hoy;
-    - B · Una sola lista.
-  - La idea de los dos: Inicio responde «¿a quién ajusto la sesión de hoy y cómo?».
-    - Los avisos pasan a ser el motivo del ajuste.
-    - Cada dato sale una sola vez.
-    - Los motivos llevan números (FC +4 lpm, HRV −8 ms…).
-    - Se decide en la misma fila: IA: Reducida · Aceptar · Otra.
-  - Por decidir con el usuario:
-    - A o B;
-    - aceptar con un clic o con confirmación (H1: que no se acepte sin mirar);
-    - si se quita «Sesión y adaptaciones» para hoy;
-    - si Avisos pasa a «Historial»;
-    - unificar las palabras en «ajuste».
+- **Panel del preparador: rediseño por fases** (especificación del 06-10-2026; ver «Rediseño del panel del preparador»). Fases 0 a 4 hechas; la fase 5 (la ficha del deportista) empieza cuando el usuario revise la 4.
+  - Sustituye al plan «Panel del preparador: plan para que sea más claro (6 oct 2026)» (01 Planificació, id `1zWUfQzKI0YjkHh9CG07dqokGleUqd-LAf-Q04Qqhiu0`) y a sus bocetos A/B del lienzo (página «Inicio más claro · propuesta»).
 - **Panel del preparador (versión oficial):**
   - en el Experimento, si el formato panel enseña la sugerencia de la IA (ahora no);
   - qué estilo va por defecto (ahora, Azul marino);

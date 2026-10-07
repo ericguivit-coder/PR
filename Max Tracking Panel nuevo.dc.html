@@ -1,0 +1,1518 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet data-dc-atomics>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+/* Classes dels components (el «components.css» de l'especificació). Només fan servir variables (--nom), que surten de TOKENS (secció 4 del
+   motor): cap color escrit aquí. Els efectes «:hover» van dins @media(hover:hover). Sense ombres, menys als menús i avisos que suren (--pop). */
+html,body{margin:0}
+body{-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale}
+.mtp{font-family:'Inter',ui-sans-serif,-apple-system,system-ui,'Segoe UI',Helvetica,Arial,sans-serif;font-size:14px;line-height:1.5;color:var(--text);background:var(--bg)}
+.mtp *,.mtp *::before,.mtp *::after{box-sizing:border-box}
+.mtp button,.mtp input,.mtp select{font:inherit;color:inherit}
+.mtp .num,.mtp table{font-variant-numeric:tabular-nums}
+.mtp :focus-visible{outline:2px solid var(--focus);outline-offset:2px}
+.mtp h1{margin:0;font-size:24px;font-weight:600;line-height:1.25;letter-spacing:-.01em}
+.mtp h2{margin:0;font-size:16px;font-weight:600;line-height:1.35}
+.mtp .t-sec{font-size:13px;color:var(--text2)}
+.mtp .t-lab{font-size:12px;font-weight:500;color:var(--text2)}
+.mtp .t-big{font-size:28px;font-weight:600;line-height:1.1;letter-spacing:-.02em}
+.mtp .t-name{font-weight:500}
+.mtp a{color:var(--link)}
+.mtp-ic{display:block;flex:none;fill:none;stroke:currentColor;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round}
+/* Estat: punt + text (el text, sempre del color del text). Cel·la: el dia a la matriu i als 7 dies. F = dia que no ha arribat: buit i sense vora. */
+.mtp-st{display:inline-flex;align-items:center;gap:8px;font-size:13px;font-weight:500;white-space:nowrap;color:var(--text)}
+.mtp-dot{display:inline-block;flex:none;width:8px;height:8px;border-radius:50%}
+.mtp-cell{display:inline-block;flex:none;width:16px;height:16px;border-radius:4px}
+.mtp-dot[data-s=O],.mtp-cell[data-s=O]{background:var(--opt);box-shadow:inset 0 0 0 1px var(--stEdge)}
+.mtp-dot[data-s=M],.mtp-cell[data-s=M]{background:var(--mod);box-shadow:inset 0 0 0 1px var(--stEdge)}
+.mtp-dot[data-s=R],.mtp-cell[data-s=R]{background:var(--rec);box-shadow:inset 0 0 0 1px var(--stEdge)}
+.mtp-dot[data-s=C],.mtp-cell[data-s=C]{background:var(--calc);border:1px dashed var(--miss)}
+.mtp-dot[data-s=N],.mtp-cell[data-s=N]{border:1.5px dashed var(--miss)}
+/* Ajust: icona + text, fons gris clar. Pendent: àmbar. «Normal» sense res a decidir: text gris, sense xip. */
+.mtp-aj{display:inline-flex;align-items:center;gap:4px;height:24px;padding:0 8px;border-radius:6px;background:var(--ajBg);color:var(--ajText);font-size:13px;font-weight:500;white-space:nowrap}
+.mtp-aj .mtp-ic{color:var(--ajIcon)}
+.mtp-pend{display:inline-flex;align-items:center;height:24px;padding:0 8px;border-radius:6px;background:var(--pendBg);color:var(--pendText);box-shadow:inset 0 0 0 1px var(--pendLine);font-size:13px;font-weight:500;white-space:nowrap}
+.mtp-plain{font-size:13px;color:var(--text2)}
+/* Marca de salut (a part de l'estat) i punt blau de «nou d'avui» */
+.mtp-health{display:inline-flex;align-items:center;gap:8px;font-size:13px;color:var(--text)}
+.mtp-health .mtp-ic{color:var(--icon)}
+.mtp-new{display:inline-block;flex:none;width:6px;height:6px;border-radius:50%;background:var(--primary)}
+/* Botons: principal (un per zona), secundari, terciari (només text blau) i només icona (sempre amb títol i aria-label). 36 px; 32 a les taules.
+   Els espais, en múltiples de 4 px (4, 8, 12, 16, 24, 32, 48), com diu l'especificació. */
+.mtp-btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;height:36px;padding:0 16px;border-radius:8px;border:1px solid transparent;background:transparent;color:var(--text);font-size:14px;font-weight:500;line-height:1;white-space:nowrap;text-decoration:none;cursor:pointer;transition:background-color .12s,border-color .12s}
+.mtp-btn.sm{height:32px;padding:0 12px;font-size:13px}
+.mtp-btn.pri{background:var(--primary);color:var(--onPrimary)}
+.mtp-btn.sec{background:var(--surface);border-color:var(--borderStrong);color:var(--text)}
+.mtp-btn.ter{padding:0 6px;color:var(--link)}
+.mtp-btn.icon{width:36px;padding:0}
+.mtp-btn.icon.sm{width:32px}
+.mtp-btn:disabled{opacity:.45;cursor:not-allowed}
+@media(hover:hover){.mtp-btn.pri:not(:disabled):hover{background:var(--primaryHover)}.mtp-btn.sec:not(:disabled):hover,.mtp-btn.icon:not(.pri):not(:disabled):hover{background:var(--hover)}.mtp-btn.ter:not(:disabled):hover{text-decoration:underline;text-underline-offset:3px}}
+/* Control segmentat dels quatre ajustos: el suggerit per la IA, amb vora discontínua i «Suggerit». */
+.mtp-seg{display:inline-flex;gap:2px;padding:2px;border-radius:8px;background:var(--sunken);border:1px solid var(--border)}
+.mtp-seg button{display:inline-flex;align-items:center;gap:4px;height:30px;padding:0 8px;border-radius:6px;border:1px solid transparent;background:transparent;color:var(--text2);font-size:13px;font-weight:500;cursor:pointer;white-space:nowrap}
+.mtp-seg button[aria-checked=true]{background:var(--surface);color:var(--text);border-color:var(--borderStrong)}
+.mtp-seg button[data-sug]{border-style:dashed;border-color:var(--primary)}
+.mtp-seg .sug{margin-left:4px;font-size:11px;font-weight:500;color:var(--link)}
+@media(hover:hover){.mtp-seg button:not([aria-checked=true]):hover{color:var(--text)}}
+/* Taula */
+.mtp-table{width:100%;border-collapse:separate;border-spacing:0;background:var(--surface);border:1px solid var(--border);border-radius:8px}
+.mtp-table th{padding:10px 16px;text-align:left;font-size:12px;font-weight:500;color:var(--text2);border-bottom:1px solid var(--border);white-space:nowrap}
+.mtp-table td{padding:10px 16px;border-bottom:1px solid var(--border);vertical-align:middle}
+.mtp-table tr:last-child td{border-bottom:0}
+@media(hover:hover){.mtp-table tbody tr:hover td{background:var(--hover)}}
+/* Avís de confirmació amb Desfer (a baix a l'esquerra, 10 s) */
+.mtp-toast{display:inline-flex;align-items:center;gap:12px;padding:4px 4px 4px 16px;border-radius:8px;background:var(--surface);border:1px solid var(--border);box-shadow:var(--pop);font-size:14px;color:var(--text)}
+.mtp-toast.fixed{position:fixed;left:24px;bottom:24px;z-index:80;animation:mtpIn .2s ease-out both}
+@keyframes mtpIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+/* Estat buit i càrrega (blocs grisos amb la forma del contingut; un fos suau, sense brillantor) */
+.mtp-empty{display:flex;flex-direction:column;align-items:center;gap:8px;padding:32px 24px;text-align:center}
+.mtp-empty .mtp-ic{color:var(--icon);margin-bottom:4px}
+.mtp-skel{display:block;flex:none;background:var(--skel);border-radius:6px;animation:mtpPulse 1.6s ease-in-out infinite}
+@keyframes mtpPulse{0%,100%{opacity:1}50%{opacity:.5}}
+/* Avís àmbar: dades de fa més de 2 hores o error de sincronització */
+.mtp-warn{display:inline-flex;align-items:center;gap:8px;font-size:13px;font-weight:500;color:var(--warnText)}
+/* Llegenda: només a la vista Setmana d'Esportistes (decisió de l'usuari, fase 2) */
+.mtp-legend{display:flex;flex-wrap:wrap;align-items:center;gap:8px 16px;font-size:12px;color:var(--text2)}
+.mtp-legend>span{display:inline-flex;align-items:center;gap:8px}
+/* Camps */
+.mtp-input{height:36px;padding:0 12px;border-radius:8px;border:1px solid var(--borderStrong);background:var(--surface);color:var(--text);font-size:14px}
+.mtp-input::placeholder{color:var(--text2)}
+.mtp-kbd{display:inline-flex;align-items:center;height:20px;padding:0 6px;border:1px solid var(--border);border-radius:4px;font-size:12px;color:var(--text2)}
+/* Estructura (fase 3): barra lateral (224 px; plegada, 64 px només amb icones, sempre amb el nom en passar-hi el ratolí) + barra de dalt + la pàgina,
+   que és l'única que fa scroll. Només ordinador (1280 px o més). Els menús i el panell de l'assistent suren (--pop). */
+.mtp-shell{display:flex;height:100vh;overflow:hidden}
+.mtp-side{display:flex;flex-direction:column;gap:4px;width:224px;flex:none;height:100vh;padding:12px;border-right:1px solid var(--border);background:var(--surface)}
+.mtp-side.folded{width:64px;padding:12px 10px;align-items:center}
+.mtp-brand{display:flex;align-items:center;justify-content:space-between;gap:8px;width:100%;height:40px;padding-left:8px;margin-bottom:8px}
+.mtp-side.folded .mtp-brand{justify-content:center;padding-left:0}
+.mtp-brand b{font-size:14px;font-weight:600;letter-spacing:-.01em;white-space:nowrap}
+.mtp-nav{position:relative;display:flex;align-items:center;gap:12px;width:100%;height:36px;padding:0 12px;border:0;border-radius:8px;background:transparent;color:var(--text);font-size:14px;font-weight:500;text-align:left;text-decoration:none;cursor:pointer;white-space:nowrap}
+.mtp-nav .mtp-ic{color:var(--icon)}
+.mtp-nav[aria-current=page]{background:var(--primarySoft);color:var(--link)}
+.mtp-nav[aria-current=page] .mtp-ic{color:var(--link)}
+.mtp-side.folded .mtp-nav{width:44px;padding:0;justify-content:center}
+@media(hover:hover){.mtp-nav:not([aria-current=page]):hover{background:var(--hover)}}
+.mtp-count{margin-left:auto;min-width:20px;height:20px;padding:0 6px;border-radius:10px;background:var(--pendBg);color:var(--pendText);box-shadow:inset 0 0 0 1px var(--pendLine);font-size:12px;font-weight:600;line-height:20px;text-align:center}
+.mtp-side.folded .mtp-count{position:absolute;top:0;right:0;min-width:16px;height:16px;padding:0 4px;font-size:11px;line-height:16px}
+.mtp-col{flex:1 1 0;min-width:0;display:flex;flex-direction:column;height:100vh}
+.mtp-top{position:relative;z-index:30;display:flex;align-items:center;gap:16px;height:56px;flex:none;padding:0 32px;border-bottom:1px solid var(--border);background:var(--surface)}
+.mtp-scroll{flex:1;min-height:0;overflow-y:auto}
+.mtp-page{max-width:1440px;margin:0 auto;padding:32px;display:flex;flex-direction:column;gap:24px}
+.mtp-pop{position:absolute;z-index:50;padding:4px;border-radius:8px;background:var(--surface);border:1px solid var(--border);box-shadow:var(--pop)}
+.mtp-opt{display:flex;align-items:center;gap:12px;width:100%;min-height:36px;padding:8px 12px;border:0;border-radius:6px;background:transparent;color:var(--text);font-size:14px;text-align:left;cursor:pointer}
+.mtp-opt[aria-selected=true]{background:var(--hover)}
+@media(hover:hover){.mtp-opt:not(:disabled):hover{background:var(--hover)}}
+.mtp-fab{position:fixed;right:24px;bottom:24px;z-index:60;width:44px;height:44px;border:0;border-radius:12px;background:var(--primary);color:var(--onPrimary);display:flex;align-items:center;justify-content:center;box-shadow:var(--pop);cursor:pointer}
+@media(hover:hover){.mtp-fab:hover{background:var(--primaryHover)}}
+.mtp-drawer{position:fixed;top:0;right:0;bottom:0;z-index:70;width:400px;display:flex;flex-direction:column;background:var(--surface);border-left:1px solid var(--border);box-shadow:var(--pop);animation:mtpSlide .2s ease-out both}
+@keyframes mtpSlide{from{opacity:0;transform:translateX(12px)}to{opacity:1;transform:none}}
+.mtp-toast.fixed{left:calc(var(--sideW, 0px) + 24px)}
+/* Els enllaços que fan de menú (barra lateral, opcions) van del color del text, no del blau dels enllaços; l'actiu, en blau. */
+.mtp a.mtp-nav,.mtp a.mtp-opt{color:var(--text)}
+.mtp a.mtp-nav[aria-current=page]{color:var(--link)}
+/* Avui (fase 4): dues columnes (pendents, 2/3; estat de l'equip, resum i propers, 1/3), targetes de sessió, el component de decisió i els blocs plegats. */
+.mtp-hoy{display:grid;grid-template-columns:minmax(0,1fr) 288px;gap:32px;align-items:start}
+.mtp-card{background:var(--surface);border:1px solid var(--border);border-radius:8px;overflow:hidden}
+.mtp-card-h{display:flex;flex-wrap:wrap;align-items:center;gap:4px 8px;padding:12px 16px;border-bottom:1px solid var(--border)}
+.mtp-line{display:flex;flex-wrap:wrap;align-items:center;gap:4px 8px;min-width:0}
+.mtp-dec{display:flex;flex-direction:column;gap:12px;padding:16px;border-top:1px solid var(--border);cursor:pointer}
+.mtp-card-h+.mtp-dec{border-top:0}
+.mtp-dec.compact{gap:8px;padding:12px 16px;cursor:default}
+.mtp-dec[data-focus]{box-shadow:inset 3px 0 0 var(--primary)}
+@media(hover:hover){.mtp-dec:not(.compact):hover{background:var(--hover)}}
+.mtp-sum{display:flex;flex-direction:column;gap:16px;padding:16px;border-radius:8px;background:var(--sunken);cursor:default}
+.mtp-progress{display:inline-block;width:120px;height:6px;border-radius:3px;background:var(--sunken);overflow:hidden}
+.mtp-progress>span{display:block;height:100%;border-radius:3px;background:var(--primary);transition:width .3s}
+.mtp-dist{display:flex;gap:2px;height:8px}
+.mtp-dist>span{min-width:4px;border-radius:2px}
+.mtp-dist>span[data-s=O]{background:var(--opt)}.mtp-dist>span[data-s=M]{background:var(--mod)}.mtp-dist>span[data-s=R]{background:var(--rec)}.mtp-dist>span[data-s=X]{border:1px dashed var(--miss)}
+.mtp-fold{border:1px solid var(--border);border-radius:8px;background:var(--surface);overflow:hidden}
+.mtp-fold-h{flex:1;display:flex;align-items:center;gap:8px;min-height:44px;padding:0 16px;border:0;background:transparent;color:var(--text);font-size:14px;font-weight:600;text-align:left;cursor:pointer}
+.mtp-fold-h .mtp-ic{color:var(--icon);transition:transform .15s}
+.mtp-fold-h[aria-expanded=true] .mtp-ic{transform:rotate(90deg)}
+@media(hover:hover){.mtp-fold-h:hover{background:var(--hover)}}
+.mtp-btn[aria-pressed=true]{background:var(--primarySoft);border-color:transparent;color:var(--link)}
+@media (prefers-reduced-motion:reduce){.mtp *,.mtp *::before,.mtp *::after{animation-duration:.001ms!important;animation-iteration-count:1!important;transition-duration:.001ms!important}}
+</style>
+</helmet>
+<div style="{{ rootSt }}">{{ tokens }}{{ page }}</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{}">
+// Max Tracking · panell del preparador físic, VERSIÓ NOVA (en construcció des del 06-10-2026).
+// Segueix l'especificació del Drive «Panel del preparador · Especificación de rediseño UX/UI» (id 1nCFHR7yVxmkK2QNVrSmprj8dCFIlG2csksRjq-zKmKw),
+// fase per fase. El panell actual («Max Tracking Panel.dc.html») no es toca fins que l'usuari aprovi aquest; llavors aquest el substitueix.
+// Fet: fase 1 (les dades i els càlculs), fase 2 (el sistema visual) i fase 3 (la navegació: barra lateral, barra de dalt, adreces i l'assistent).
+// Les pantalles (Avui, Esportistes, la fitxa, Sessions, Ajustos) arriben a les fases 4 a 8; fins llavors surten «en construcció».
+// Al matràs hi ha dues pàgines del prototip, en castellà: #/estilos (tots els components en clar i en fosc) i #/comprobacion (les xifres).
+// Seccions del motor (fan dels fitxers de l'especificació):
+//   1. Dades: l'única font. És el que vindria de la base de dades, de TrainingPeaks i de les polseres (el «data.js»).
+//   2. Càlculs: funcions pures que en treuen tot el derivat: l'estat de l'equip, els pendents, els automàtics, a vigilar, els decidits,
+//      els recomptes dels filtres i el resum de la setmana (el «state.js»). Cap xifra no s'escriu a mà enlloc més.
+//   3. Desar: les decisions d'avui a localStorage, amb desfer.
+//   4. Sistema visual: els colors en variables (el «tokens.css») i les icones. Les classes dels components són a dalt, al helmet («components.css»).
+//   5. Textos: quatre idiomes (ca, es, fr, en); el preparador treballa en francès.
+//   6. Component: les pantalles.
+// Regles de l'estudi que manen per sobre de l'especificació: la IA suggereix i el preparador decideix; la IA rep codis, mai noms; el preparador
+// només veu la matriu prudent (mai la salut mental, el que l'esportista va dir a l'entrenador —H2—, qui no ha respost —H4—, les paraules,
+// el comentari ni el benestar mensual). Decisions de l'usuari: cap botó per confirmar en bloc (H1); els estats són els de l'app del deportista
+// i la lesió o la malaltia va a part, sense «Precaució»; l'Experiment (H1) es queda, fora del menú (fase 0). Un sol estil, el de l'especificació,
+// en clar, fosc i automàtic; un color fix per estat; llegenda només a la vista Setmana d'Esportistes (fase 2).
+const h = React.createElement;
+function rng(seed) { let s = seed >>> 0; return () => { s = (s * 1664525 + 1013904223) >>> 0; return s / 4294967296; }; }
+const hmMin = s => { const [hh, mm] = String(s).split(':').map(Number); return hh * 60 + mm; };
+const minHm = m => { m = Math.round(m); return `${Math.floor(m / 60)}:${String(((m % 60) + 60) % 60).padStart(2, '0')}`; };
+
+// ── 1. Dades ─────────────────────────────────────────────────────────────
+// Dies: índex 0 = dv. 28 d'agost de 2026 … 27 = dj. 24 de setembre, avui (com a l'app del deportista). Abans del 0, negatius.
+// La setmana 39 va de dl. 21 (24) a dg. 27 (30). El formulari setmanal s'envia el diumenge: el de la setmana 38, el dg. 20 (23).
+const TODAY = 27;
+const MIN_DAYS = 14;                         // dies de dades que calen per tenir franja (com a l'app del deportista)
+const FORM = { w: 38, day: 23, next: 30 };   // últim formulari setmanal respost i el proper
+// Darrera importació de cada font (dia, hora): TrainingPeaks (sessions) i les polseres (FC, HRV i son).
+const FEED = { tp: [27, '7:30'], band: [27, '8:05'] };
+// Regles dels pendents (es podran canviar a Ajustos): dies seguits fora del seu normal, dies de tornada d'una lesió que es vigilen,
+// minuts abans de la sessió per decidir (hora límit) i l'hora del resum per correu. Són la proposta de l'especificació: falta parlar-ne amb el preparador.
+const RULES0 = { outDays: 2, backDays: 7, leadMin: 60, digest: '7:30', notifyLate: true, webNotif: false };
+// Hora simulada del prototip a l'obrir (avui és un dia fix; l'hora avança amb el rellotge real). Amb l'hora real, a la tarda no quedaria res per decidir.
+const CLOCK0 = '8:30';
+
+// Esportistes (20, grups A i B). Martí R. és MT-07, el mateix codi que a l'app del deportista; Nora G. (MT-19) és la nova.
+// d = estat dels 7 últims dies (dv. 18 → dj. 24) frente a la seva franja: O Òptim, M Moderat, R Recuperació, N sense dades, C calculant.
+//     Són els estats de l'app del deportista; la lesió o la malaltia no és un estat, va a part (salut).
+// q = avui, distància de la FC en repòs, la HRV i el son a la seva franja (en mitges franges; positiu = millor; per sota de −1, fora).
+// calc = dies de dades d'un esportista nou. salut = lesió (les) o malaltia (mal) del formulari setmanal: des = des de quin dia, fi = dia que
+//     el formulari ja no la marca (s'ha acabat), aj = l'ajust que diu la fitxa de salut amb participació reduïda. Mai la salut mental.
+// part = participació (OSTRC) de les setmanes 35–38: 0 completa · 1 completa amb problemes · 2 reduïda · 3 no pot participar.
+// f = formulari de la setmana 38 (matriu prudent): rendiment, la seva normal, fatiga, normal, descans, normal.
+// sync = darrera sincronització de la polsera dels qui avui no tenen dades. note = nota de l'especialista. well = dia que va marcar «Ja estic bé».
+const ATH = [
+  { c: 'MT-01', n: 'Pol S.', g: 'A', d: 'OOOMRRR', q: [-2.2, -1.9, -1.1], salut: { t: 'mal', des: 23 }, part: [0, 0, 0, 3], f: [4, 7.0, 9, 4.6, 4, 7.2] },
+  { c: 'MT-07', n: 'Martí R.', g: 'A', d: 'OOMMRRR', q: [-2.0, -1.6, -1.3], f: [6, 7.3, 8, 4.4, 5, 7.1], note: 'marti' },
+  { c: 'MT-03', n: 'Laia P.', g: 'B', d: 'OOOOOOO', q: [.2, .1, -.3], salut: { t: 'les', des: 22, aj: 'A' }, part: [0, 0, 0, 2], f: [5, 7.4, 5, 4.8, 7, 7.0] },
+  { c: 'MT-04', n: 'Júlia M.', g: 'B', d: 'OOOOOMO', q: [.3, .2, .1], salut: { t: 'les', des: -4, fi: 23, aj: 'A' }, part: [2, 2, 1, 0], f: [6, 7.1, 5, 4.9, 7, 7.2], note: 'julia' },
+  { c: 'MT-05', n: 'Biel C.', g: 'A', d: 'OOOOOMM', q: [-.6, -1.2, .1], f: [7, 7.2, 5, 4.5, 6, 7.0] },
+  { c: 'MT-06', n: 'Arnau V.', g: 'A', d: 'OOOOONN', q: null, sync: [25, '21:40'], f: [8, 7.5, 4, 4.2, 7, 7.3] },
+  { c: 'MT-02', n: 'Abril J.', g: 'B', d: 'OOOOOOR', q: [-1.8, -.4, .2], f: [7, 7.3, 6, 4.8, 6, 7.1] },
+  { c: 'MT-08', n: 'Clara F.', g: 'B', d: 'OMOOMOM', q: [.1, -1.1, .3] },
+  { c: 'MT-09', n: 'Joel K.', g: 'A', d: 'OOOOOOM', q: [.2, .1, -1.2] },
+  { c: 'MT-19', n: 'Nora G.', g: 'B', d: 'CCCCCCC', q: null, calc: 9 },
+  { c: 'MT-11', n: 'Aina B.', g: 'A', d: 'OOOMOOO', q: [.4, .3, .2] },
+  { c: 'MT-12', n: 'Àlex N.', g: 'B', d: 'OOOOOOO', q: [.5, .4, .1] },
+  { c: 'MT-13', n: 'Carla Q.', g: 'A', d: 'OOOOOOO', q: [.3, .5, .4] },
+  { c: 'MT-14', n: 'Emma Z.', g: 'B', d: 'OOOOOOO', q: [.6, .3, .2] },
+  { c: 'MT-15', n: 'Jan L.', g: 'A', d: 'OOOOOOO', q: [.2, .4, .5] },
+  { c: 'MT-16', n: 'Mia E.', g: 'B', d: 'OONOOOO', q: [.3, .2, .6] },
+  { c: 'MT-17', n: 'Nil A.', g: 'A', d: 'OOOOOOO', q: [.4, .4, .3] },
+  { c: 'MT-18', n: 'Ona H.', g: 'B', d: 'OOOOOOO', q: [.2, .3, .4] },
+  { c: 'MT-10', n: 'Pau T.', g: 'A', d: 'OOOOOOO', q: [.7, .5, .3] },
+  { c: 'MT-20', n: 'Roc D.', g: 'B', d: 'OOOOMOO', q: [.3, .1, .2] },
+];
+// Sessions tal com arriben de TrainingPeaks: la setmana tipus (dl. → dg.) de cada grup, la mateixa totes les setmanes del prototip.
+// t = tipus (fuerza, resis, agil, tec, larga, desc = descans) · k = nom · ini / fi = hora · pl = lloc · rpe · xls = false si no porta l'Excel
+// amb les instruccions i els vídeos. Els dissabtes la sessió és dels dos grups (AB); el diumenge, descans.
+const SES_WEEK = [
+  { A: { t: 'fuerza', k: 'fzi', ini: '16:00', fi: '17:30', pl: 'gym', rpe: 7 }, B: { t: 'resis', k: 'bici', ini: '07:00', fi: '08:00', pl: 'club', rpe: 5 } },
+  { A: { t: 'resis', k: 'cursa', ini: '07:00', fi: '08:00', pl: 'pista', rpe: 6 }, B: { t: 'fuerza', k: 'fzg', ini: '16:30', fi: '18:00', pl: 'gym', rpe: 7 } },
+  { A: { t: 'agil', k: 'agil', ini: '17:00', fi: '18:00', pl: 'pab', rpe: 6 }, B: { t: 'tec', k: 'roll', ini: '17:00', fi: '18:30', pl: 'circ', rpe: 6 } },
+  { A: { t: 'fuerza', k: 'fza', ini: '16:00', fi: '17:30', pl: 'gym', rpe: 8 }, B: { t: 'resis', k: 'btt', ini: '17:00', fi: '18:30', pl: 'club', rpe: 6 } },
+  { A: { t: 'tec', k: 'roll', ini: '17:00', fi: '18:30', pl: 'circ', rpe: 6 }, B: { t: 'fuerza', k: 'fzi', ini: '16:00', fi: '17:30', pl: 'gym', rpe: 7 } },
+  { AB: { t: 'larga', k: 'larga', ini: '09:00', fi: '12:00', pl: 'club', rpe: 6, xls: false } },
+  { AB: { t: 'desc', k: 'desc' } },
+];
+// Decisions dels dies d'abans (inventades): l'ajust (v), el que va suggerir la IA (sug), qui el va decidir (prep = el preparador, auto = automàtic,
+// cap = ningú abans que comencés la sessió: «Sense decidir») i a quina hora. El motiu no s'escriu: surt de les mateixes regles que avui.
+// Els dies amb sessió sense entrada van ser Normal (si les regles hi veuen un automàtic o un pendent, en surt l'automàtic o «Sense decidir»).
+const PAST = [
+  { c: 'MT-07', day: 24, v: 'N', sug: 'N', src: 'prep', at: '9:10' }, { c: 'MT-07', day: 25, v: 'N', sug: 'R', src: 'cap' }, { c: 'MT-07', day: 26, v: 'R', sug: 'R', src: 'prep', at: '8:50' },
+  { c: 'MT-04', day: 24, v: 'R', sug: 'R', src: 'prep', at: '9:20' }, { c: 'MT-04', day: 25, v: 'R', sug: 'N', src: 'prep', at: '8:55' }, { c: 'MT-04', day: 26, v: 'R', sug: 'R', src: 'prep', at: '9:05' },
+  { c: 'MT-06', day: 26, v: 'N', sug: null, src: 'prep', at: '8:40' },
+];
+// Notes de l'especialista (inventades): dia i text. A «Salut i notes» de la fitxa sortiran amb el seu nom (futur rol d'especialista).
+const NOTES = {
+  marti: { day: 18, t: { ca: 'Pot entrenar amb normalitat. Compte amb el son a les setmanes de viatge.', es: 'Puede entrenar normal. Ojo con el sueño en las semanas de viaje.', fr: "Peut s'entraîner normalement. Attention au sommeil les semaines de déplacement.", en: 'Can train as normal. Watch sleep in travel weeks.' } },
+  julia: { day: 24, t: { ca: 'Tornada progressiva: dues setmanes sense salts.', es: 'Vuelta progresiva: dos semanas sin saltos.', fr: 'Reprise progressive : deux semaines sans sauts.', en: 'Gradual return: two weeks without jumps.' } },
+};
+
+// ── 2. Càlculs (funcions pures: reben les dades i en tornen el derivat) ──
+const KEYS3 = ['rhr', 'hrv', 'son'];
+const FLOOR = { rhr: 1.5, hrv: 3, son: .25 };     // amplada mínima de la franja, com a l'app del deportista
+function dayOf(i) { const d = new Date(2026, 7, 28 + i); return { n: d.getDate(), m: d.getMonth(), wd: (d.getDay() + 6) % 7 }; }
+function weekOf(i) { return 39 + Math.floor((i - 24) / 7); }
+function mondayOf(w) { return 24 + (w - 39) * 7; }
+function inGrp(a, g) { return !g || g === 'T' || a.g === g; }
+// La sessió del grup g el dia i (null = dia de descans). id = «dia-grup», per a l'adreça de la sessió.
+function sesOf(g, i) {
+  const w = SES_WEEK[dayOf(i).wd], x = w.AB || w[g], key = w.AB ? 'AB' : g;
+  if (!x || x.t === 'desc') return null;
+  return { id: `${i}-${key}`, day: i, g: key, src: 'tp', xls: true, ...x };
+}
+function sessionsOn(i, grp) { const w = SES_WEEK[dayOf(i).wd]; return (w.AB ? ['AB'] : ['A', 'B'].filter(g => inGrp({ g }, grp))).map(g => sesOf(g === 'AB' ? 'A' : g, i)).filter(Boolean); }
+// Sèries inventades de 28 dies amb la franja de cadascú (la seva mitjana ± 1 desviació típica, amb l'amplada mínima FLOOR).
+// Es fan a partir dels estats: un dia Òptim té les tres dades dins; un Moderat, una dada una mica fora; un de Recuperació, les dades
+// afectades (les que avui són fora) clarament fora. Avui és la q. Els 21 dies d'abans: gairebé sempre Òptim, i algun Moderat.
+const SERIES = {};
+function seriesOf(a) {
+  const key = `${a.c}|${a.d}|${a.q ? a.q.join(',') : ''}|${a.calc || ''}`;
+  if (SERIES[key]) return SERIES[key];
+  const r = rng(parseInt(a.c.slice(3), 10) * 7919 + 101), u = (lo, hi) => lo + r() * (hi - lo);
+  const mean = { rhr: 45 + Math.round(r() * 10), hrv: 52 + Math.round(r() * 30), son: 7.1 + Math.round(r() * 9) / 10 };
+  const half = { rhr: Math.max(1.4 + r() * .9, FLOOR.rhr), hrv: Math.max(3.5 + r() * 3, FLOOR.hrv), son: Math.max(.22 + r() * .14, FLOOR.son) };
+  const first = a.calc ? 28 - a.calc : 0;
+  const hit = a.q ? KEYS3.filter((k, j) => a.q[j] < -1) : [];
+  if (a.q && !hit.length) hit.push(KEYS3[a.q.indexOf(Math.min(...a.q))]);
+  if (!hit.length) hit.push('hrv');
+  const st = [], qs = { rhr: [], hrv: [], son: [] };
+  for (let i = 0; i < 28; i++) {
+    if (i < first) { st.push(null); KEYS3.forEach(k => qs[k].push(null)); continue; }
+    let c, out1 = hit[0];
+    if (i < 21) { const mod = !a.calc && r() < .12; c = a.calc ? 'C' : mod ? 'M' : 'O'; if (mod) out1 = KEYS3[Math.floor(r() * 3)]; }
+    else c = a.d[i - 21];
+    st.push(c);
+    KEYS3.forEach((k, ki) => {
+      if (c === 'N') return qs[k].push(null);
+      if (i === TODAY && a.q) return qs[k].push(a.q[ki]);
+      if (c === 'R' && hit.includes(k)) return qs[k].push(-u(1.6, 2.6));
+      if (c === 'M' && k === out1) return qs[k].push(-u(1.1, 1.45));
+      return qs[k].push(u(-.85, .85));
+    });
+  }
+  const S = { st, qs, first, mean, half };
+  KEYS3.forEach(k => { const dir = k === 'rhr' ? -1 : 1; S[k] = qs[k].map(q => (q == null ? null : mean[k] + dir * q * half[k])); });
+  return (SERIES[key] = S);
+}
+// Estat del dia i (null = encara no en tenia dades, o és un dia que no ha arribat).
+function stOn(a, i) { return i >= 0 && i <= TODAY ? seriesOf(a).st[i] : null; }
+// Dies seguits fins al dia i amb el mateix estat que aquell dia.
+function runOn(a, i) { const c = stOn(a, i); if (!c) return 0; let n = 0; for (let j = i; j >= 0 && stOn(a, j) === c; j--) n++; return n; }
+// La dada que porta més dies seguits fora del seu normal fins al dia i: { k, n }.
+function outOn(a, i) {
+  const S = seriesOf(a); let best = null;
+  KEYS3.forEach(k => { let n = 0; for (let j = i; j >= 0 && S.qs[k][j] != null && S.qs[k][j] < -1; j--) n++; if (n && (!best || n > best.n)) best = { k, n }; });
+  return best;
+}
+// Primer dia seguit sense dades fins al dia i.
+function noDataSince(a, i) { let j = i; while (j > 0 && stOn(a, j - 1) === 'N') j--; return j; }
+// Dia en què tindrà franja un esportista nou.
+function bandReady(a) { return a.calc ? TODAY + (MIN_DAYS - a.calc) : null; }
+// Problema de salut en curs el dia i (lesió o malaltia; mai la salut mental). La participació és la del formulari d'aquella setmana
+// (la setmana en curs, encara sense formulari, fa servir l'últim).
+function healthOn(a, i) {
+  const s = a.salut; if (!s || i < s.des || (s.fi != null && i >= s.fi)) return null;
+  const ost = a.part ? a.part[Math.min(3, Math.max(0, weekOf(i) - 35))] : 0;
+  return { t: s.t, ost, aj: s.aj || 'R', des: s.des };
+}
+// Tornada d'una lesió: els primers dies després que el formulari ja no la marqui.
+function backOn(a, i, days) { const s = a.salut; if (!s || s.t !== 'les' || s.fi == null) return null; const n = i - s.fi; return n >= 1 && n <= days ? { fi: s.fi, n } : null; }
+// Diferència d'avui amb el seu normal de les dades que són fora (per al «perquè» de cada suggeriment: «FC +4 lpm · HRV −7 ms»).
+// FC en pulsacions per minut, HRV en ms i son en minuts. Positiu = puja.
+function deltasOn(a, i) {
+  const S = seriesOf(a);
+  return KEYS3.filter(k => S.qs[k][i] != null && S.qs[k][i] < -1).map(k => { const d = S[k][i] - S.mean[k]; return { k, d: k === 'son' ? Math.round(d * 60) : Math.round(d) }; });
+}
+// Suggeriment de la IA. Al prototip és una simulació feta amb regles; amb dades reals el faria la IA (amb codis, mai noms) i en diria el perquè.
+// Sense dades, no en fa cap.
+function aiSug(a, i) {
+  const c = stOn(a, i), h = healthOn(a, i);
+  if (c == null || c === 'N') return null;
+  if (h && h.ost === 3) return 'D';
+  if (h && h.ost === 2) return h.aj;
+  if (c === 'C') return 'N';
+  if (h && a.well != null && i >= a.well) return 'R';
+  if (c === 'R') return 'R';
+  if (backOn(a, i, 14)) return 'R';
+  return 'N';
+}
+// Què ha de fer el preparador amb un esportista el dia i. Regles de l'especificació («Cuándo se crea un pendiente»), amb els llindars de R:
+//   pend = pendent (ha de triar l'ajust) · auto = ajust automàtic (v; es pot canviar) · watch = a vigilar, sense tasca
+//   calc = calculant el seu normal (sessió normal; surt a «Propers») · none = res · future = encara no ha arribat.
+// Quan hi caben dues regles, mana la primera. Sense sessió (descans) mai no hi ha tasca: si va malament, «a vigilar».
+// «Moderat i la IA suggereix Normal» rebaixa a «a vigilar» el cas de dies seguits fora del seu normal: amb les dades d'avui dona
+// 1 a vigilar (Biel). Un Moderat d'un sol dia no surt a cap llista.
+// m = motiu: salut (h) · well («Ja estic bé» amb una lesió) · calc · nodata (since) · rec (n dies seguits) · back (fi) · out (k, n).
+function classify(a, i, R) {
+  if (i > TODAY) return { kind: 'future', ses: sesOf(a.g, i) };
+  const ses = sesOf(a.g, i), c = stOn(a, i), h = healthOn(a, i), sug = aiSug(a, i), out = outOn(a, i), back = backOn(a, i, R.backDays);
+  const outM = out && out.n >= R.outDays ? { t: 'out', k: out.k, n: out.n } : null;
+  if (!ses) {
+    if (c === 'R') return { kind: 'watch', ses, sug, m: { t: 'rec', n: runOn(a, i), rest: true } };
+    if (outM) return { kind: 'watch', ses, sug, m: { ...outM, rest: true } };
+    return { kind: 'none', ses, sug };
+  }
+  if (h && a.well != null && i >= a.well) return { kind: 'pend', ses, sug, m: { t: 'well', h } };
+  if (h && h.ost === 3) return { kind: 'auto', ses, sug, v: 'D', m: { t: 'salut', h } };
+  if (h && h.ost === 2) return { kind: 'auto', ses, sug, v: h.aj, m: { t: 'salut', h } };
+  if (c == null) return { kind: 'none', ses, sug };
+  if (c === 'C') return { kind: 'calc', ses, sug, m: { t: 'calc', ready: bandReady(a) } };
+  if (c === 'N') return { kind: 'pend', ses, sug: null, sync: true, m: { t: 'nodata', since: noDataSince(a, i) } };
+  if (c === 'R') return { kind: 'pend', ses, sug, m: { t: 'rec', n: runOn(a, i) } };
+  if (back) return { kind: 'pend', ses, sug, m: { t: 'back', fi: back.fi } };
+  if (outM) return { kind: c === 'M' && sug === 'N' ? 'watch' : 'pend', ses, sug, m: outM };
+  if (h && h.ost === 1) return { kind: 'watch', ses, sug, m: { t: 'salut', h } };
+  return { kind: 'none', ses, sug };
+}
+const LISTED = ['pend', 'auto', 'watch'];
+// Tauler d'avui: per a cada esportista, què diuen les regles i què s'ha decidit (store = decisions d'avui). Tot el que es compta surt d'aquí.
+//   status: pend (falta decidir) · nodec (la sessió ja ha començat sense decisió: «Sense decidir») · done (confirmat pel preparador)
+//           · auto · watch · calc · none.  v = l'ajust que té avui (null mentre és pendent). lim = hora límit (minuts). isNew = no hi era ahir.
+function boardOf(ath, store, R, now) {
+  return ath.map(a => {
+    const k = classify(a, TODAY, R), dec = store[a.c] || null, ses = k.ses || null;
+    const ini = ses && ses.ini ? hmMin(ses.ini) : null, lim = ini != null ? ini - R.leadMin : null, locked = ini != null && now >= ini;
+    const status = dec ? 'done' : k.kind === 'pend' && locked ? 'nodec' : k.kind;
+    const v = dec ? dec.v : k.kind === 'auto' ? k.v : k.kind === 'pend' ? null : ses ? 'N' : null;
+    const isNew = LISTED.includes(k.kind) && !LISTED.includes(classify(a, TODAY - 1, R).kind);
+    return { a, ...k, dec, status, v, ini, lim, locked, late: lim != null && now > lim, isNew };
+  });
+}
+// Recomptes (Avui, la barra lateral i els filtres d'Esportistes surten tots d'aquí, i per això sempre coincideixen).
+//   total / resolved = «2 de 6 decidits»: els que tenen un pendent o un automàtic (o una decisió desada), i els que ja estan resolts.
+function countsOf(board, grp) {
+  const B = board.filter(x => inGrp(x.a, grp)), by = s => B.filter(x => x.status === s);
+  const st = { O: 0, M: 0, R: 0, N: 0, C: 0 };
+  B.forEach(x => { const c = stOn(x.a, TODAY); if (c in st) st[c]++; });
+  const total = B.filter(x => x.kind === 'pend' || x.kind === 'auto' || x.dec).length, open = B.filter(x => x.status === 'pend' || x.status === 'nodec').length;
+  return {
+    B, pend: by('pend'), nodec: by('nodec'), auto: by('auto'), watch: by('watch'), done: by('done'), calc: by('calc'), st, total, resolved: total - open,
+    filt: { all: B.length, pend: by('pend').length, watch: by('watch').length, salut: B.filter(x => healthOn(x.a, TODAY)).length, nd: B.filter(x => stOn(x.a, TODAY) === 'N').length },
+  };
+}
+// Pròxima hora límit: la de la sessió d'avui amb pendents que s'ha de decidir abans.
+function nextLimit(board, grp) {
+  const P = board.filter(x => inGrp(x.a, grp) && x.status === 'pend' && x.lim != null).sort((x, y) => x.lim - y.lim);
+  if (!P.length) return null;
+  const s = P[0].ses; return { ses: s, lim: P[0].lim, late: P[0].late, n: P.filter(x => x.ses.id === s.id).length };
+}
+// L'ajust que va tenir (o té) un esportista el dia i: null = sense sessió, dia que no ha arribat o pendent avui.
+// src: prep (el preparador) · auto · cap («Sense decidir»: la sessió va ser Normal) · def (Normal, sense res a decidir).
+function ajOn(a, i, store, R, now) {
+  const ses = sesOf(a.g, i);
+  if (!ses || i > TODAY) return null;
+  if (i === TODAY) { const x = boardOf([a], store, R, now)[0]; return x.v ? { v: x.v, src: x.dec ? 'prep' : x.kind === 'auto' ? 'auto' : 'def', sug: x.dec ? x.dec.sug : x.sug } : x.status === 'nodec' ? { v: 'N', src: 'cap', sug: x.sug } : null; }
+  const p = PAST.find(y => y.c === a.c && y.day === i);
+  if (p) return { v: p.v, src: p.src, sug: p.sug ?? null, at: p.at || null };
+  const k = classify(a, i, R);
+  if (k.kind === 'auto') return { v: k.v, src: 'auto', sug: k.sug };
+  if (k.kind === 'pend') return { v: 'N', src: 'cap', sug: k.sug };
+  return { v: 'N', src: 'def', sug: k.sug };
+}
+// Historial (dies from → to): el que es va decidir, amb el motiu de les mateixes regles. Els dies amb sessió normal sense res a decidir no hi surten.
+function historyOf(ath, store, R, now, from, to) {
+  const out = [];
+  for (let i = to; i >= from; i--) ath.forEach(a => {
+    const x = ajOn(a, i, store, R, now); if (!x || x.src === 'def') return;
+    const k = classify(a, i, R);
+    out.push({ a, day: i, ...x, m: k.m || null, ok: x.sug ? x.v === x.sug : null, at: i === TODAY && store[a.c] ? store[a.c].at : x.at || null });
+  });
+  return out;
+}
+// Resum de la setmana w fins avui: dies en Òptim (de tots els dies amb estat) i la diferència amb els mateixos dies de la setmana anterior.
+function weekSum(ath, w, grp) {
+  const m = mondayOf(w), days = []; for (let i = m; i <= Math.min(m + 6, TODAY); i++) days.push(i);
+  const A = ath.filter(a => inGrp(a, grp)), okOf = ds => A.reduce((t, a) => t + ds.filter(i => stOn(a, i) === 'O').length, 0);
+  const ok = okOf(days), prev = okOf(days.map(i => i - 7).filter(i => i >= 0));
+  return { w, days, tot: A.length * days.length, ok, prev, diff: ok - prev };
+}
+// Propers dies: el formulari setmanal, qui tindrà el seu normal i les lesions o malalties que es revisaran amb el formulari.
+function upcoming(ath, grp) {
+  const A = ath.filter(a => inGrp(a, grp));
+  return [{ t: 'form', day: FORM.next }, ...A.filter(a => a.calc).map(a => ({ t: 'band', a, day: bandReady(a) })), ...A.filter(a => healthOn(a, TODAY)).map(a => ({ t: 'review', a, day: FORM.next }))]
+    .sort((x, y) => x.day - y.day);
+}
+
+// Formulari de la setmana 38 (matriu prudent: rendiment, fatiga i descans, cadascun amb la seva normal). Els que no en porten a les dades,
+// inventat i sempre igual per a cada esportista; un esportista nou encara no té normal.
+function formOf(a) {
+  if (a.f) return a.f;
+  if (a.calc) return [7, null, 4, null, 8, null];
+  const r = rng(parseInt(a.c.slice(3), 10) * 131 + 7), nr = 7 + r(), nf = 4 + r(), nd = 6.8 + r();
+  return [Math.round(nr + (r() - .5) * 1.2), nr, Math.round(nf + (r() - .5) * 1.2), nf, Math.round(nd + (r() - .5) * 1.2), nd];
+}
+// Tendència d'un grup (o de tot l'equip) en una dada: quants dies seguits empitjora la mitjana fins al dia i (q mitjana; positiu = millor).
+function groupTrend(ath, grp, k, i) {
+  const A = ath.filter(a => inGrp(a, grp) && !a.calc), mean = d => { const v = A.map(a => seriesOf(a).qs[k][d]).filter(x => x != null); return v.length ? v.reduce((p, q) => p + q, 0) / v.length : null; };
+  let n = 0; for (let d = i; d > 0; d--) { const x = mean(d), y = mean(d - 1); if (x == null || y == null || x >= y) break; n++; }
+  return n;
+}
+// Ordre d'atenció dels pendents (mai per valors): Recuperació de més dies, Recuperació d'avui, «Ja estic bé», tornada d'una lesió,
+// dies fora del seu normal i sense dades.
+function attRank(x) { const m = x.m || {}; return m.t === 'rec' ? (m.n >= 2 ? 0 : 1) : m.t === 'well' ? 2 : m.t === 'back' ? 3 : m.t === 'out' ? 4 : 5; }
+
+// ── 3. Desar ─────────────────────────────────────────────────────────────
+// Decisions d'avui per codi, a «mt-prep-aj»: { v, note, at, sug, src }. És la clau que llegeix l'app del deportista a Avui (v, at i note),
+// i la que fa servir el panell actual. sug = el que suggeria la IA (H1: acceptat si v === sug). Amb servidor, anirà a la base de dades.
+const K_AJ = 'mt-prep-aj';
+function readStore() { try { const v = JSON.parse(localStorage.getItem(K_AJ) || '{}'); return v && typeof v === 'object' ? v : {}; } catch (e) { return {}; } }
+function writeStore(s) { try { localStorage.setItem(K_AJ, JSON.stringify(s)); } catch (e) {} }
+// Confirmar (l'única acció): desa l'ajust, dona el pendent per resolt i el publica a l'app del deportista. Torna l'anterior, per desfer.
+function withDecision(store, c, rec) { return { store: { ...store, [c]: rec }, prev: store[c] || null }; }
+function withUndo(store, c, prev) { const s = { ...store }; if (prev) s[c] = prev; else delete s[c]; return s; }
+
+// ── 4. Sistema visual ────────────────────────────────────────────────────
+// Tots els colors del panell surten d'aquí, com a variables CSS (--nom): cap component no en porta cap d'escrit. Clar = els de l'especificació;
+// fosc = la mateixa gamma, feta per al panell (l'especificació només diu que es manté). Comprovats el 06-10-2026 (contrast WCAG i daltonisme
+// simulat, Machado 2009); ajustos sobre l'especificació:
+//   · Òptim #2F855A → #1E9E78, Moderat #D4A72C → #E0B12E, Recuperació #C53030 → #B91C1C. Amb daltonisme (deuteranopia), Òptim i Recuperació
+//     gairebé es confonien (ΔE00 13); ara tots els parells passen de 20 amb els tres tipus de daltonisme, en clar i en fosc.
+//   · El text d'un estat sempre va del color del text, mai del de l'estat (el groc no arriba a 4,5:1). En clar, els farcits d'estat porten
+//     una vora fina (stEdge) perquè el groc es vegi sobre el blanc.
+//   · La línia discontínua de «sense dades» (miss) passa de #98A2B3 a #8A94A6, per arribar a 3:1.
+//   · En fosc, el blau dels botons és #3A68D6 (text blanc 5,1:1) i, en passar-hi el ratolí, s'enfosqueix en lloc d'aclarir-se.
+//   · No hi ha el taronja de Precaució: al panell la lesió o la malaltia va a part (decisió de la fase 0).
+const TOKENS = {
+  light: {
+    bg: '#F7F8FA', surface: '#FFFFFF', sunken: '#F2F4F7', hover: '#F2F4F7', border: '#E4E7EC', borderStrong: '#D0D5DD',
+    text: '#101828', text2: '#667085', textOff: '#98A2B3', icon: '#475467',
+    primary: '#2B59C3', primaryHover: '#244BA6', onPrimary: '#FFFFFF', link: '#2B59C3', primarySoft: '#EEF2FB', focus: '#2B59C3',
+    opt: '#1E9E78', mod: '#E0B12E', rec: '#B91C1C', stEdge: 'rgba(16,24,40,.16)', miss: '#8A94A6', calc: '#EAECF0',
+    pendText: '#B54708', pendBg: '#FFFAEB', pendLine: '#FEDF89', warnText: '#B54708',
+    ajBg: '#F2F4F7', ajText: '#101828', ajIcon: '#344054',
+    skel: '#EAECF0', overlay: 'rgba(16,24,40,.4)', pop: '0 12px 32px -4px rgba(16,24,40,.16), 0 4px 8px -2px rgba(16,24,40,.08)',
+  },
+  dark: {
+    bg: '#0B0F17', surface: '#141924', sunken: '#1B2130', hover: '#1B2130', border: '#252B37', borderStrong: '#363D4B',
+    text: '#F2F4F7', text2: '#98A2B3', textOff: '#5D6576', icon: '#B4BCC8',
+    primary: '#3A68D6', primaryHover: '#3360C9', onPrimary: '#FFFFFF', link: '#8EB0FF', primarySoft: 'rgba(77,125,235,.16)', focus: '#8EB0FF',
+    opt: '#3FC6A8', mod: '#E5B53A', rec: '#C2453E', stEdge: 'rgba(0,0,0,0)', miss: '#6B7385', calc: '#252B37',
+    pendText: '#FDB022', pendBg: '#2A1F0B', pendLine: '#5B4314', warnText: '#FDB022',
+    ajBg: '#1F2533', ajText: '#F2F4F7', ajIcon: '#CDD3DC',
+    skel: '#1F2533', overlay: 'rgba(0,0,0,.55)', pop: '0 16px 40px rgba(0,0,0,.55), 0 0 0 1px rgba(255,255,255,.04)',
+  },
+};
+const TOKEN_CSS = ['light', 'dark'].map(m => `.mtp[data-theme=${m}]{color-scheme:${m};${Object.entries(TOKENS[m]).map(([k, v]) => `--${k}:${v}`).join(';')}}`).join('\n');
+// Contrast (WCAG) i daltonisme simulat (Machado 2009, severitat 1), per a la pàgina d'estils.
+const hexRgb = x => [1, 3, 5].map(i => parseInt(x.slice(i, i + 2), 16) / 255);
+const toLin = c => (c <= .04045 ? c / 12.92 : ((c + .055) / 1.055) ** 2.4), fromLin = c => (c <= .0031308 ? 12.92 * c : 1.055 * c ** (1 / 2.4) - .055);
+function lumOf(x) { const [r, g, b] = hexRgb(x).map(toLin); return .2126 * r + .7152 * g + .0722 * b; }
+function contrast(a, b) { const x = lumOf(a), y = lumOf(b); return (Math.max(x, y) + .05) / (Math.min(x, y) + .05); }
+const CVD = { deut: [[.367322, .860646, -.227968], [.280085, .672501, .047413], [-.01182, .04294, .968881]], prot: [[.152286, 1.052583, -.204868], [.114503, .786281, .099216], [-.003882, -.048116, 1.051998]] };
+function cvd(x, k) { const v = hexRgb(x).map(toLin); return '#' + CVD[k].map(r => fromLin(Math.min(1, Math.max(0, r[0] * v[0] + r[1] * v[1] + r[2] * v[2])))).map(c => Math.round(c * 255).toString(16).padStart(2, '0')).join(''); }
+// Icones: Lucide 1.52.0 (llicència ISC), traç 1,5, a 16 i 20 px. Cada icona té un sol significat a tot el panell; les quatre dels ajustos
+// (equal, trending-down, arrow-left-right, moon) només es fan servir per als ajustos.
+const ICONS = {
+  'equal': '<line x1="5" x2="19" y1="9" y2="9"/><line x1="5" x2="19" y1="15" y2="15"/>',
+  'trending-down': '<path d="M16 17h6v-6"/><path d="m22 17-8.5-8.5-5 5L2 7"/>',
+  'arrow-left-right': '<path d="M8 3 4 7l4 4"/><path d="M4 7h16"/><path d="m16 21 4-4-4-4"/><path d="M20 17H4"/>',
+  'moon': '<path d="M20.985 12.486a9 9 0 1 1-9.473-9.472c.405-.022.617.46.402.803a6 6 0 0 0 8.268 8.268c.344-.215.825-.004.803.401"/>',
+  'list-checks': '<path d="M13 5h8"/><path d="M13 12h8"/><path d="M13 19h8"/><path d="m3 17 2 2 4-4"/><path d="m3 7 2 2 4-4"/>',
+  'users': '<path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><path d="M16 3.128a4 4 0 0 1 0 7.744"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><circle cx="9" cy="7" r="4"/>',
+  'calendar-days': '<path d="M8 2v3"/><path d="M16 2v3"/><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18"/><path d="M8 13h.01"/><path d="M12 13h.01"/><path d="M16 13h.01"/><path d="M8 17h.01"/><path d="M12 17h.01"/><path d="M16 17h.01"/>',
+  'settings': '<path d="M9.671 4.136a2.34 2.34 0 0 1 4.659 0 2.34 2.34 0 0 0 3.319 1.915 2.34 2.34 0 0 1 2.33 4.033 2.34 2.34 0 0 0 0 3.831 2.34 2.34 0 0 1-2.33 4.033 2.34 2.34 0 0 0-3.319 1.915 2.34 2.34 0 0 1-4.659 0 2.34 2.34 0 0 0-3.32-1.915 2.34 2.34 0 0 1-2.33-4.033 2.34 2.34 0 0 0 0-3.831A2.34 2.34 0 0 1 6.35 6.051a2.34 2.34 0 0 0 3.319-1.915"/><circle cx="12" cy="12" r="3"/>',
+  'panel-left': '<rect width="18" height="18" x="3" y="3" rx="2"/><path d="M9 3v18"/>',
+  'circle-user-round': '<path d="M17.925 20.056a6 6 0 0 0-11.851.001"/><circle cx="12" cy="11" r="4"/><circle cx="12" cy="12" r="10"/>',
+  'chevrons-up-down': '<path d="m7 15 5 5 5-5"/><path d="m7 9 5-5 5 5"/>',
+  'log-out': '<path d="m16 17 5-5-5-5"/><path d="M21 12H9"/><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>',
+  'contrast': '<circle cx="12" cy="12" r="10"/><path d="M12 18a6 6 0 0 0 0-12v12z"/>',
+  'search': '<path d="m21 21-4.34-4.34"/><circle cx="11" cy="11" r="8"/>',
+  'clock': '<circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/>',
+  'refresh-cw': '<path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/><path d="M8 16H3v5"/>',
+  'triangle-alert': '<path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"/><path d="M12 9v4"/><path d="M12 17h.01"/>',
+  'circle-alert': '<circle cx="12" cy="12" r="10"/><line x1="12" x2="12" y1="8" y2="12"/><line x1="12" x2="12.01" y1="16" y2="16"/>',
+  'info': '<circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/>',
+  'check': '<path d="M20 6 9 17l-5-5"/>',
+  'x': '<path d="M18 6 6 18"/><path d="m6 6 12 12"/>',
+  'chevron-left': '<path d="m15 18-6-6 6-6"/>',
+  'chevron-right': '<path d="m9 18 6-6-6-6"/>',
+  'chevron-down': '<path d="m6 9 6 6 6-6"/>',
+  'chevron-up': '<path d="m18 15-6-6-6 6"/>',
+  'plus': '<path d="M5 12h14"/><path d="M12 5v14"/>',
+  'minus': '<path d="M5 12h14"/>',
+  'external-link': '<path d="M15 3h6v6"/><path d="M10 14 21 3"/><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/>',
+  'file-spreadsheet': '<path d="M6 22a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h8a2.4 2.4 0 0 1 1.704.706l3.588 3.588A2.4 2.4 0 0 1 20 8v12a2 2 0 0 1-2 2z"/><path d="M14 2v5a1 1 0 0 0 1 1h5"/><path d="M8 13h2"/><path d="M14 13h2"/><path d="M8 17h2"/><path d="M14 17h2"/>',
+  'undo-2': '<path d="M9 14 4 9l5-5"/><path d="M4 9h10.5a5.5 5.5 0 0 1 5.5 5.5a5.5 5.5 0 0 1-5.5 5.5H11"/>',
+  'circle-check': '<circle cx="12" cy="12" r="10"/><path d="m16 9-5.5 5.5L8 12"/>',
+  'history': '<path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M12 7v5l4 2"/>',
+  'pencil': '<path d="M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z"/><path d="m15 5 4 4"/>',
+  'bell': '<path d="M10.268 21a2 2 0 0 0 3.464 0"/><path d="M3.262 15.326A1 1 0 0 0 4 17h16a1 1 0 0 0 .74-1.673C19.41 13.956 18 12.499 18 8A6 6 0 0 0 6 8c0 4.499-1.411 5.956-2.738 7.326"/>',
+  'link': '<path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/>',
+  'keyboard': '<path d="M10 8h.01"/><path d="M12 12h.01"/><path d="M14 8h.01"/><path d="M16 12h.01"/><path d="M18 8h.01"/><path d="M6 8h.01"/><path d="M7 16h10"/><path d="M8 12h.01"/><rect width="20" height="16" x="2" y="4" rx="2"/>',
+  'message-circle': '<path d="M2.992 16.342a2 2 0 0 1 .094 1.167l-1.065 3.29a1 1 0 0 0 1.236 1.168l3.413-.998a2 2 0 0 1 1.099.092 10 10 0 1 0-4.777-4.719"/>',
+  'send': '<path d="M14.536 21.686a.5.5 0 0 0 .937-.024l6.5-19a.496.496 0 0 0-.635-.635l-19 6.5a.5.5 0 0 0-.024.937l7.93 3.18a2 2 0 0 1 1.112 1.11z"/><path d="m21.854 2.147-10.94 10.939"/>',
+  'watch': '<path d="M12 10v2.2l1.6 1"/><path d="m16.13 7.66-.81-4.05a2 2 0 0 0-2-1.61h-2.68a2 2 0 0 0-2 1.61l-.78 4.05"/><path d="m7.88 16.36.8 4a2 2 0 0 0 2 1.61h2.72a2 2 0 0 0 2-1.61l.81-4.05"/><circle cx="12" cy="12" r="6"/>',
+  'bandage': '<path d="M10 10.01h.01"/><path d="M10 14.01h.01"/><path d="M14 10.01h.01"/><path d="M14 14.01h.01"/><path d="M18 6v12"/><path d="M6 6v12"/><rect x="2" y="6" width="20" height="12" rx="2"/>',
+  'thermometer': '<path d="M14 4v10.54a4 4 0 1 1-4 0V4a2 2 0 0 1 4 0Z"/>',
+  'dumbbell': '<path d="M17.596 12.768a2 2 0 1 0 2.829-2.829l-1.768-1.767a2 2 0 0 0 2.828-2.829l-2.828-2.828a2 2 0 0 0-2.829 2.828l-1.767-1.768a2 2 0 1 0-2.829 2.829z"/><path d="m2.5 21.5 1.4-1.4"/><path d="m20.1 3.9 1.4-1.4"/><path d="M5.343 21.485a2 2 0 1 0 2.829-2.828l1.767 1.768a2 2 0 1 0 2.829-2.829l-6.364-6.364a2 2 0 1 0-2.829 2.829l1.768 1.767a2 2 0 0 0-2.828 2.829z"/><path d="m9.6 14.4 4.8-4.8"/>',
+  'activity': '<path d="M22 12h-2.48a2 2 0 0 0-1.93 1.46l-2.35 8.36a.25.25 0 0 1-.48 0L9.24 2.18a.25.25 0 0 0-.48 0l-2.35 8.36A2 2 0 0 1 4.49 12H2"/>',
+  'bike': '<circle cx="18.5" cy="17.5" r="3.5"/><circle cx="5.5" cy="17.5" r="3.5"/><circle cx="15" cy="5" r="1"/><path d="M12 17.5V14l-3-3 4-3 2 3h2"/>',
+  'footprints': '<path d="M4 16v-2.38C4 11.5 2.97 10.5 3 8c.03-2.72 1.49-6 4.5-6C9.37 2 10 3.8 10 5.5c0 3.11-2 5.66-2 8.68V16a2 2 0 1 1-4 0Z"/><path d="M20 20v-2.38c0-2.12 1.03-3.12 1-5.62-.03-2.72-1.49-6-4.5-6C14.63 6 14 7.8 14 9.5c0 3.11 2 5.66 2 8.68V20a2 2 0 1 0 4 0Z"/><path d="M16 17h4"/><path d="M4 13h4"/>',
+  'zap': '<path d="M15.914 4a1.5 1.5 0 00-2.474-1.561l-9 9A1.5 1.5 0 005.5 14h4.002a.5.5 0 01.471.666L8.086 20a1.5 1.5 0 002.475 1.56l9-9A1.5 1.5 0 0018.5 10h-3.997a.5.5 0 01-.472-.667z"/>',
+  'target': '<circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/>',
+  'route': '<circle cx="6" cy="19" r="3"/><path d="M9 19h8.5a3.5 3.5 0 0 0 0-7h-11a3.5 3.5 0 0 1 0-7H15"/><circle cx="18" cy="5" r="3"/>',
+  'mountain-snow': '<path d="m8 3 4 8 5-5 5 15H2L8 3z"/><path d="M4.14 15.08c2.62-1.57 5.24-1.43 7.86.42 2.74 1.94 5.49 2 8.23.19"/>',
+  'coffee': '<path d="M10 2v2"/><path d="M14 2v2"/><path d="M16 8a1 1 0 0 1 1 1v8a4 4 0 0 1-4 4H7a4 4 0 0 1-4-4V9a1 1 0 0 1 1-1h14a4 4 0 1 1 0 8h-1"/><path d="M6 2v2"/>',
+  'flask-conical': '<path d="M14 2v6a2 2 0 0 0 .245.96l5.51 10.08A2 2 0 0 1 18 22H6a2 2 0 0 1-1.755-2.96l5.51-10.08A2 2 0 0 0 10 8V2"/><path d="M6.453 15h11.094"/><path d="M8.5 2h7"/>',
+  'clipboard-list': '<rect width="8" height="4" x="8" y="2" rx="1" ry="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><path d="M12 11h4"/><path d="M12 16h4"/><path d="M8 11h.01"/><path d="M8 16h.01"/>',
+  'arrow-up-down': '<path d="m21 16-4 4-4-4"/><path d="M17 20V4"/><path d="m3 8 4-4 4 4"/><path d="M7 4v16"/>',
+  'filter': '<path d="M10 20a1 1 0 0 0 .553.895l2 1A1 1 0 0 0 14 21v-7a2 2 0 0 1 .517-1.341L21.74 4.67A1 1 0 0 0 21 3H3a1 1 0 0 0-.742 1.67l7.225 7.989A2 2 0 0 1 10 14z"/>',
+};
+const AJ_ICON = { N: 'equal', R: 'trending-down', A: 'arrow-left-right', D: 'moon' };
+const ST_KEYS = ['O', 'M', 'R', 'C', 'N'];
+
+// ── 5. Textos ────────────────────────────────────────────────────────────
+// Cada text en català, castellà, francès i anglès: un objecte { ca, es, fr, en } es resol a l'idioma actiu (si en falta un, surt el català).
+// Les entrades amb dades són funcions. Les pàgines del prototip (Estilos i Comprobación) van en castellà, com el matràs.
+const LANG_KEYS = ['ca', 'es', 'fr', 'en'];
+function locTx(x, l) {
+  if (Array.isArray(x)) return x.map(y => locTx(y, l));
+  if (!x || typeof x !== 'object') return x;
+  const ks = Object.keys(x);
+  if (ks.length && 'ca' in x && ks.every(k => LANG_KEYS.includes(k))) return x[l] ?? x.ca;
+  const o = {}; ks.forEach(k => { o[k] = locTx(x[k], l); }); return o;
+}
+const TX = {
+  WD3: { ca: ['dl.', 'dt.', 'dc.', 'dj.', 'dv.', 'ds.', 'dg.'], es: ['lun', 'mar', 'mié', 'jue', 'vie', 'sáb', 'dom'], fr: ['lun.', 'mar.', 'mer.', 'jeu.', 'ven.', 'sam.', 'dim.'], en: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'] },
+  WDL: { ca: ['dilluns', 'dimarts', 'dimecres', 'dijous', 'divendres', 'dissabte', 'diumenge'], es: ['lunes', 'martes', 'miércoles', 'jueves', 'viernes', 'sábado', 'domingo'],
+    fr: ['lundi', 'mardi', 'mercredi', 'jeudi', 'vendredi', 'samedi', 'dimanche'], en: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'] },
+  MN: { ca: ['gener', 'febrer', 'març', 'abril', 'maig', 'juny', 'juliol', 'agost', 'setembre', 'octubre', 'novembre', 'desembre'],
+    es: ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'],
+    fr: ['janvier', 'février', 'mars', 'avril', 'mai', 'juin', 'juillet', 'août', 'septembre', 'octobre', 'novembre', 'décembre'],
+    en: ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'] },
+  // Estats del dia (els de l'app del deportista; sense Precaució) i els quatre ajustos.
+  ST: { O: { ca: 'Òptim', es: 'Óptimo', fr: 'Optimal', en: 'Optimal' }, M: { ca: 'Moderat', es: 'Moderado', fr: 'Modéré', en: 'Moderate' }, R: { ca: 'Recuperació', es: 'Recuperación', fr: 'Récupération', en: 'Recovery' },
+    C: { ca: 'Calculant', es: 'Calculando', fr: 'En calcul', en: 'Calculating' }, N: { ca: 'Sense dades', es: 'Sin datos', fr: 'Sans données', en: 'No data' } },
+  AJ: { N: { ca: 'Normal', es: 'Normal', fr: 'Normale', en: 'Normal' }, R: { ca: 'Reduïda', es: 'Reducida', fr: 'Réduite', en: 'Reduced' }, A: { ca: 'Alternativa', es: 'Alternativa', fr: 'Alternative', en: 'Alternative' }, D: { ca: 'Descans', es: 'Descanso', fr: 'Repos', en: 'Rest' } },
+  // Avís de confirmació («Martí R. · Reduïda confirmada»): cada ajust amb el seu gènere.
+  AJ_OK: { N: { ca: 'Normal confirmada', es: 'Normal confirmada', fr: 'Normale confirmée', en: 'Normal confirmed' }, R: { ca: 'Reduïda confirmada', es: 'Reducida confirmada', fr: 'Réduite confirmée', en: 'Reduced confirmed' },
+    A: { ca: 'Alternativa confirmada', es: 'Alternativa confirmada', fr: 'Alternative confirmée', en: 'Alternative confirmed' }, D: { ca: 'Descans confirmat', es: 'Descanso confirmado', fr: 'Repos confirmé', en: 'Rest confirmed' } },
+  HEALTH: { les: { ca: 'Lesió', es: 'Lesión', fr: 'Blessure', en: 'Injury' }, mal: { ca: 'Malaltia', es: 'Enfermedad', fr: 'Maladie', en: 'Illness' } },
+  // Participació (OSTRC), en minúscula, darrere del tipus de problema.
+  OSTL: { ca: ['participació completa', 'completa, amb problemes', 'participació reduïda', 'no pot participar'], es: ['participación completa', 'completa, con problemas', 'participación reducida', 'no puede participar'],
+    fr: ['participation complète', 'complète, avec des problèmes', 'participation réduite', 'ne peut pas participer'], en: ['full participation', 'full, with problems', 'reduced participation', 'cannot take part'] },
+  // Dades: a l'inici d'una frase (METC) i en curt, amb la unitat (METS, UNIT).
+  METC: { rhr: { ca: 'La FC en repòs', es: 'La FC en reposo', fr: 'La FC au repos', en: 'Resting HR' }, hrv: { ca: 'La HRV', es: 'La HRV', fr: 'La HRV', en: 'HRV' }, son: { ca: 'El son', es: 'El sueño', fr: 'Le sommeil', en: 'Sleep' } },
+  METS: { rhr: { ca: 'FC', es: 'FC', fr: 'FC', en: 'HR' }, hrv: 'HRV', son: { ca: 'son', es: 'sueño', fr: 'sommeil', en: 'sleep' } },
+  UNIT: { rhr: { ca: 'ppm', es: 'lpm', fr: 'bpm', en: 'bpm' }, hrv: 'ms', son: 'min' },
+  // Sessions de TrainingPeaks (el nom).
+  SES: { fza: { ca: 'Força tren inferior · potència', es: 'Fuerza tren inferior · potencia', fr: 'Force bas du corps · puissance', en: 'Lower-body strength · power' },
+    fzi: { ca: 'Força tren inferior', es: 'Fuerza tren inferior', fr: 'Force bas du corps', en: 'Lower-body strength' }, fzg: { ca: 'Força general', es: 'Fuerza general', fr: 'Force générale', en: 'General strength' },
+    bici: { ca: 'Bici · 20 km', es: 'Bici · 20 km', fr: 'Vélo · 20 km', en: 'Bike · 20 km' }, cursa: { ca: 'Cursa · 6 km', es: 'Carrera · 6 km', fr: 'Course · 6 km', en: 'Run · 6 km' },
+    agil: { ca: 'Agilitat i coordinació', es: 'Agilidad y coordinación', fr: 'Agilité et coordination', en: 'Agility and coordination' }, roll: { ca: 'Tècnica · rollers', es: 'Técnica · rollers', fr: 'Technique · rollers', en: 'Technique · inline skates' },
+    btt: { ca: 'BTT · 90 min', es: 'BTT · 90 min', fr: 'VTT · 90 min', en: 'MTB · 90 min' }, larga: { ca: 'Sortida llarga · BTT', es: 'Salida larga · BTT', fr: 'Sortie longue · VTT', en: 'Long ride · MTB' } },
+  // Què li arriba a l'esportista amb cada ajust, per tipus de sessió (les plantilles; a la fase 8 es podran canviar a Ajustos).
+  RED: {
+    fuerza: { ca: ['Una sèrie menys a cada exercici', 'Intensitat màxima: RPE 7', 'Sense salts'], es: ['Una serie menos en cada ejercicio', 'Intensidad máxima: RPE 7', 'Sin saltos'], fr: ['Une série de moins par exercice', 'Intensité max. : RPE 7', 'Sans sauts'], en: ['One set fewer per exercise', 'Max intensity: RPE 7', 'No jumps'] },
+    resis: { ca: ['La meitat del temps', 'Ritme còmode: zona 2'], es: ['La mitad del tiempo', 'Ritmo cómodo: zona 2'], fr: ['La moitié du temps', 'Allure confortable : zone 2'], en: ['Half the time', 'Easy pace: zone 2'] },
+    tec: { ca: ['La meitat de les sèries', 'Sense cronometrar'], es: ['La mitad de las series', 'Sin cronometrar'], fr: ['La moitié des séries', 'Sans chrono'], en: ['Half the sets', 'Not timed'] },
+    agil: { ca: ['La meitat de les sèries', 'Sense salts'], es: ['La mitad de las series', 'Sin saltos'], fr: ['La moitié des séries', 'Sans sauts'], en: ['Half the sets', 'No jumps'] },
+    larga: { ca: ['Recorregut curt: 1 h 30 min', 'Ritme còmode: zona 2'], es: ['Recorrido corto: 1 h 30 min', 'Ritmo cómodo: zona 2'], fr: ['Parcours court : 1 h 30', 'Allure confortable : zone 2'], en: ['Short route: 1 h 30 min', 'Easy pace: zone 2'] },
+  },
+  ALT: {
+    fuerza: { ca: ['Bici estàtica 30 min a zona 2', 'Core sense impacte'], es: ['Bici estática 30 min en zona 2', 'Core sin impacto'], fr: ["Vélo d'appartement 30 min en zone 2", 'Gainage sans impact'], en: ['Stationary bike 30 min in zone 2', 'Core work, no impact'] },
+    resis: { ca: ['Bici estàtica 40 min a zona 2', 'Mobilitat'], es: ['Bici estática 40 min en zona 2', 'Movilidad'], fr: ["Vélo d'appartement 40 min en zone 2", 'Mobilité'], en: ['Stationary bike 40 min in zone 2', 'Mobility'] },
+    tec: { ca: ['Bici estàtica 30 min', 'Equilibri sense patins'], es: ['Bici estática 30 min', 'Equilibrio sin patines'], fr: ["Vélo d'appartement 30 min", 'Équilibre sans patins'], en: ['Stationary bike 30 min', 'Balance work, no skates'] },
+    agil: { ca: ['Bici estàtica 30 min', 'Mobilitat'], es: ['Bici estática 30 min', 'Movilidad'], fr: ["Vélo d'appartement 30 min", 'Mobilité'], en: ['Stationary bike 30 min', 'Mobility'] },
+    larga: { ca: ['Bici estàtica 60 min a zona 2'], es: ['Bici estática 60 min en zona 2'], fr: ["Vélo d'appartement 60 min en zone 2"], en: ['Stationary bike 60 min in zone 2'] },
+  },
+  PRE: { N: { ca: 'La sessió tal com és', es: 'La sesión tal como está', fr: 'La séance telle quelle', en: 'The session as planned' }, D: { ca: 'Avui no entrena', es: 'Hoy no entrena', fr: "Pas d'entraînement aujourd'hui", en: 'No training today' } },
+  // Formulari setmanal (matriu prudent: només aquestes tres escales) i noms de les dades.
+  SCALES: [{ k: 'r', t: { ca: 'Rendiment', es: 'Rendimiento', fr: 'Performance', en: 'Performance' } }, { k: 'f', t: { ca: 'Fatiga', es: 'Fatiga', fr: 'Fatigue', en: 'Fatigue' }, inv: true }, { k: 'd', t: { ca: 'Descans', es: 'Descanso', fr: 'Repos', en: 'Rest' } }],
+  METN: { rhr: { ca: 'FC en repòs', es: 'FC en reposo', fr: 'FC au repos', en: 'Resting HR' }, hrv: 'HRV', son: { ca: 'Son', es: 'Sueño', fr: 'Sommeil', en: 'Sleep' } },
+  UI: {
+    pend: { ca: 'Pendent', es: 'Pendiente', fr: 'À décider', en: 'To decide' },
+    sug: { ca: 'Suggerit', es: 'Sugerido', fr: 'Suggéré', en: 'Suggested' },
+    confirmV: { ca: v => `Confirmar ${v}`, es: v => `Confirmar ${v}`, fr: v => `Confirmer ${v}`, en: v => `Confirm ${v}` },
+    undo: { ca: 'Desfer', es: 'Deshacer', fr: 'Annuler', en: 'Undo' }, close: { ca: 'Tancar', es: 'Cerrar', fr: 'Fermer', en: 'Close' },
+    seeDetail: { ca: 'Veure el detall', es: 'Ver detalle', fr: 'Voir le détail', en: 'See details' }, change: { ca: 'Canviar', es: 'Cambiar', fr: 'Modifier', en: 'Change' },
+    autoV: { ca: v => `Automàtic: ${v}`, es: v => `Automático: ${v}`, fr: v => `Automatique : ${v}`, en: v => `Automatic: ${v}` },
+    noDec: { ca: 'Sense decidir', es: 'Sin decidir', fr: 'Non décidé', en: 'Not decided' },
+    newToday: { ca: 'Nou avui', es: 'Nuevo hoy', fr: "Nouveau aujourd'hui", en: 'New today' },
+    allDone: { ca: 'Tot decidit per avui', es: 'Todo decidido para hoy', fr: "Tout est décidé pour aujourd'hui", en: 'Everything decided for today' },
+    nextSes: { ca: (s, t) => `Següent sessió: ${s}, ${t}`, es: (s, t) => `Siguiente sesión: ${s}, ${t}`, fr: (s, t) => `Prochaine séance : ${s}, ${t}`, en: (s, t) => `Next session: ${s}, ${t}` },
+    loading: { ca: 'Carregant', es: 'Cargando', fr: 'Chargement', en: 'Loading' },
+    dataAt: { ca: x => `Dades de les ${x}`, es: x => `Datos de las ${x}`, fr: x => `Données de ${x}`, en: x => `Data from ${x}` },
+    refresh: { ca: 'Actualitzar', es: 'Actualizar', fr: 'Actualiser', en: 'Refresh' },
+    syncErr: { ca: (w, x) => `Sense connexió amb ${w} · últimes dades de les ${x}`, es: (w, x) => `Sin conexión con ${w} · últimos datos de las ${x}`, fr: (w, x) => `Pas de connexion avec ${w} · dernières données de ${x}`, en: (w, x) => `No connection to ${w} · last data from ${x}` },
+    bands: { ca: 'les polseres', es: 'las pulseras', fr: 'les bracelets', en: 'the wearables' },
+    search: { ca: 'Cercar', es: 'Buscar', fr: 'Rechercher', en: 'Search' },
+    colAth: { ca: 'Esportista', es: 'Deportista', fr: 'Athlète', en: 'Athlete' }, colState: { ca: 'Estat avui', es: 'Estado hoy', fr: "État aujourd'hui", en: 'Status today' },
+    col7: { ca: 'Últims 7 dies', es: 'Últimos 7 días', fr: '7 derniers jours', en: 'Last 7 days' }, colWhy: { ca: 'Motiu', es: 'Motivo', fr: 'Motif', en: 'Reason' },
+    colAj: { ca: "Ajust d'avui", es: 'Ajuste de hoy', fr: 'Ajustement du jour', en: "Today's adjustment" },
+    notYet: { ca: 'Encara no ha arribat', es: 'Todavía no ha llegado', fr: 'Pas encore', en: 'Not yet' },
+    // Estructura (fase 3): barra lateral, menú d'usuari, barra de dalt i títols.
+    nav: { ca: 'Menú principal', es: 'Menú principal', fr: 'Menu principal', en: 'Main menu' },
+    today: { ca: 'Avui', es: 'Hoy', fr: "Aujourd'hui", en: 'Today' }, athletes: { ca: 'Esportistes', es: 'Deportistas', fr: 'Athlètes', en: 'Athletes' },
+    sessions: { ca: 'Sessions', es: 'Sesiones', fr: 'Séances', en: 'Sessions' }, settings: { ca: 'Ajustos', es: 'Ajustes', fr: 'Réglages', en: 'Settings' },
+    history: { ca: 'Historial', es: 'Historial', fr: 'Historique', en: 'History' }, experiment: { ca: 'Experiment (H1)', es: 'Experimento (H1)', fr: 'Expérience (H1)', en: 'Experiment (H1)' },
+    viewList: { ca: 'Llista', es: 'Lista', fr: 'Liste', en: 'List' }, viewWeek: { ca: 'Setmana', es: 'Semana', fr: 'Semaine', en: 'Week' }, viewL: { ca: 'Vista', es: 'Vista', fr: 'Vue', en: 'View' },
+    pendN: { ca: n => `${n} ${n === 1 ? 'pendent' : 'pendents'}`, es: n => `${n} ${n === 1 ? 'pendiente' : 'pendientes'}`, fr: n => `${n} à décider`, en: n => `${n} to decide` },
+    sideOpen: { ca: 'Obrir la barra lateral', es: 'Abrir la barra lateral', fr: 'Ouvrir la barre latérale', en: 'Open sidebar' },
+    sideClose: { ca: 'Plegar la barra lateral', es: 'Plegar la barra lateral', fr: 'Replier la barre latérale', en: 'Collapse sidebar' },
+    role: { ca: 'Preparador físic', es: 'Preparador físico', fr: 'Préparateur physique', en: 'Strength coach' },
+    userMenu: { ca: "Menú d'usuari", es: 'Menú de usuario', fr: 'Menu utilisateur', en: 'User menu' },
+    theme: { ca: 'Tema', es: 'Tema', fr: 'Thème', en: 'Theme' }, light: { ca: 'Clar', es: 'Claro', fr: 'Clair', en: 'Light' }, dark: { ca: 'Fosc', es: 'Oscuro', fr: 'Sombre', en: 'Dark' },
+    auto: { ca: 'Automàtic', es: 'Automático', fr: 'Automatique', en: 'Automatic' }, language: { ca: 'Idioma', es: 'Idioma', fr: 'Langue', en: 'Language' },
+    logout: { ca: 'Tancar la sessió', es: 'Cerrar sesión', fr: 'Se déconnecter', en: 'Log out' },
+    logoutOff: { ca: 'Al prototip no hi ha inici de sessió', es: 'En el prototipo no hay inicio de sesión', fr: 'Pas de connexion dans le prototype', en: 'There is no sign-in in the prototype' },
+    all: { ca: 'Tots', es: 'Todos', fr: 'Tous', en: 'All' }, group: { ca: g => `Grup ${g}`, es: g => `Grupo ${g}`, fr: g => `Groupe ${g}`, en: g => `Group ${g}` },
+    groupsAB: { ca: 'Grups A i B', es: 'Grupos A y B', fr: 'Groupes A et B', en: 'Groups A and B' }, groupF: { ca: 'Grup', es: 'Grupo', fr: 'Groupe', en: 'Group' },
+    searchPh: { ca: 'Cercar esportistes i sessions', es: 'Buscar deportistas y sesiones', fr: 'Chercher athlètes et séances', en: 'Search athletes and sessions' },
+    noMatch: { ca: 'Cap resultat', es: 'Sin resultados', fr: 'Aucun résultat', en: 'No results' },
+    dateLong: { ca: (wd, n, m) => `${wd} ${n} ${/^[aeiou]/i.test(m) ? `d'${m}` : `de ${m}`}`, es: (wd, n, m) => `${wd} ${n} de ${m}`, fr: (wd, n, m) => `${wd} ${n} ${m}`, en: (wd, n, m) => `${wd} ${n} ${m}` },
+    noAth: { ca: 'Aquest esportista no existeix', es: 'Ese deportista no existe', fr: "Cet athlète n'existe pas", en: "That athlete doesn't exist" },
+    noSes: { ca: 'Aquesta sessió no existeix', es: 'Esa sesión no existe', fr: "Cette séance n'existe pas", en: "That session doesn't exist" },
+    // Assistent: un sol accés (el botó de baix a la dreta). Sap quina pantalla i quin esportista es miren.
+    asst: { ca: 'Assistent', es: 'Asistente', fr: 'Assistant', en: 'Assistant' }, asstOpen: { ca: "Obrir l'assistent", es: 'Abrir el asistente', fr: "Ouvrir l'assistant", en: 'Open the assistant' },
+    ctx: { ca: x => `Context: ${x}`, es: x => `Contexto: ${x}`, fr: x => `Contexte : ${x}`, en: x => `Context: ${x}` },
+    asstPh: { ca: "Pregunta sobre l'equip…", es: 'Pregunta sobre el equipo…', fr: "Posez une question sur l'équipe…", en: 'Ask about the team…' }, send: { ca: 'Enviar', es: 'Enviar', fr: 'Envoyer', en: 'Send' },
+    thinking: { ca: 'Pensant…', es: 'Pensando…', fr: 'Réflexion…', en: 'Thinking…' }, chatErr: { ca: "No s'ha pogut respondre. Torna-ho a provar.", es: 'No se ha podido responder. Vuelve a intentarlo.', fr: 'Impossible de répondre. Réessayez.', en: "Couldn't answer. Please try again." },
+    chatNoAns: { ca: "Sense la IA no puc respondre aquesta pregunta. Prova amb una d'aquestes:", es: 'Sin la IA no puedo responder a esta pregunta. Prueba con una de estas:', fr: "Sans l'IA, je ne peux pas répondre à cette question. Essayez l'une de celles-ci :", en: "Without the AI I can't answer this question. Try one of these:" },
+    chatAuto: { ca: q => `Resposta automàtica a «${q}»`, es: q => `Respuesta automática a «${q}»`, fr: q => `Réponse automatique à « ${q} »`, en: q => `Automatic answer to “${q}”` },
+    chatRefuse: { ca: "Això no ho puc respondre: el panell no parla de salut mental, del que cada esportista va dir a l'entrenador ni de qui ha respost els formularis. Si et preocupa algú, parla amb l'especialista.",
+      es: 'Esto no lo puedo responder: el panel no habla de salud mental, de lo que cada deportista dijo al entrenador ni de quién ha respondido los formularios. Si te preocupa alguien, habla con el especialista.',
+      fr: "Je ne peux pas répondre à cela : le tableau ne parle pas de santé mentale, de ce que chaque athlète a dit à l'entraîneur ni de qui a répondu aux questionnaires. Si quelqu'un vous inquiète, parlez-en au spécialiste.",
+      en: "I can't answer that: the panel doesn't cover mental health, what each athlete told the coach or who has answered the forms. If you're worried about someone, talk to the specialist." },
+    disclaim: { ca: 'Orientatiu, no és un diagnòstic mèdic.', es: 'Orientativo, no es un diagnóstico médico.', fr: "À titre indicatif, ce n'est pas un diagnostic médical.", en: 'For guidance only, not a medical diagnosis.' },
+    basedOn: { ca: x => `Basat en: ${x}`, es: x => `Basado en: ${x}`, fr: x => `Basé sur : ${x}`, en: x => `Based on: ${x}` },
+    basisChat: { ca: w => `l'estat del dia i els últims 7 dies de cada esportista respecte al seu normal, els ajustos d'avui i el formulari de la setmana ${w}.`, es: w => `el estado del día y los últimos 7 días de cada deportista frente a su normal, los ajustes de hoy y el formulario de la semana ${w}.`,
+      fr: w => `l'état du jour et les 7 derniers jours de chaque athlète par rapport à sa normale, les ajustements du jour et le questionnaire de la semaine ${w}.`, en: w => `the day status and each athlete's last 7 days against their usual, today's adjustments and the week ${w} form.` },
+    qPend: { ca: 'Quins ajustos queden pendents?', es: '¿Qué ajustes quedan pendientes?', fr: 'Quels ajustements restent à décider ?', en: 'Which adjustments are still to decide?' },
+    qOut: { ca: n => `Qui porta ${n} dies o més fora del seu normal?`, es: n => `¿Quién lleva ${n} días o más fuera de su normal?`, fr: n => `Qui est hors de sa normale depuis ${n} jours ou plus ?`, en: n => `Who has been outside usual for ${n}+ days?` },
+    qTeam: { ca: "Com està l'equip avui?", es: '¿Cómo está el equipo hoy?', fr: "Comment va l'équipe aujourd'hui ?", en: 'How is the team today?' },
+    qGrp: { ca: g => `Com està el grup ${g}?`, es: g => `¿Cómo está el grupo ${g}?`, fr: g => `Comment va le groupe ${g} ?`, en: g => `How is group ${g} doing?` },
+    qBack: { ca: "Qui torna d'una lesió?", es: '¿Quién vuelve de una lesión?', fr: "Qui revient d'une blessure ?", en: 'Who is coming back from an injury?' },
+    qChange: { ca: "Què ha canviat des d'ahir?", es: '¿Qué ha cambiado desde ayer?', fr: "Qu'est-ce qui a changé depuis hier ?", en: 'What has changed since yesterday?' },
+    qNoData: { ca: 'Qui no té dades de la polsera?', es: '¿Quién no tiene datos de la pulsera?', fr: "Qui n'a pas de données du bracelet ?", en: 'Who has no wearable data?' },
+    qWhy: { ca: x => `Per què està així ${x}?`, es: x => `¿Por qué está así ${x}?`, fr: x => `Pourquoi cet état pour ${x} ?`, en: x => `Why is ${x} in this state?` },
+    qWeek: { ca: x => `Quins ajustos ha tingut ${x} aquesta setmana?`, es: x => `¿Qué ajustes ha tenido ${x} esta semana?`, fr: x => `Quels ajustements pour ${x} cette semaine ?`, en: x => `What adjustments has ${x} had this week?` },
+    aPend: { ca: (n, x) => (n ? `Queden ${n} pendents: ${x}.` : 'No queda cap ajust pendent.'), es: (n, x) => (n ? `Quedan ${n} pendientes: ${x}.` : 'No queda ningún ajuste pendiente.'), fr: (n, x) => (n ? `Il en reste ${n} à décider : ${x}.` : 'Aucun ajustement à décider.'), en: (n, x) => (n ? `${n} still to decide: ${x}.` : 'Nothing left to decide.') },
+    itemPend: { ca: (x, v) => (v ? `${x} (suggeriment: ${v})` : `${x} (sense suggeriment)`), es: (x, v) => (v ? `${x} (sugerencia: ${v})` : `${x} (sin sugerencia)`), fr: (x, v) => (v ? `${x} (suggestion : ${v})` : `${x} (sans suggestion)`), en: (x, v) => (v ? `${x} (suggestion: ${v})` : `${x} (no suggestion)`) },
+    aOut: { ca: (n, x) => (x ? `Fora del seu normal ${n} dies o més: ${x}.` : `Ningú porta ${n} dies o més fora del seu normal.`), es: (n, x) => (x ? `Fuera de su normal ${n} días o más: ${x}.` : `Nadie lleva ${n} días o más fuera de su normal.`),
+      fr: (n, x) => (x ? `Hors de leur normale depuis ${n} jours ou plus : ${x}.` : `Personne n'est hors de sa normale depuis ${n} jours ou plus.`), en: (n, x) => (x ? `Outside usual for ${n}+ days: ${x}.` : `Nobody has been outside usual for ${n}+ days.`) },
+    itemOut: { ca: (x, m, n) => `${x} (${m}, ${n} dies)`, es: (x, m, n) => `${x} (${m}, ${n} días)`, fr: (x, m, n) => `${x} (${m}, ${n} jours)`, en: (x, m, n) => `${x} (${m}, ${n} days)` },
+    aGrp: { ca: (ok, n, x) => `${ok} de ${n} estan en Òptim.${x ? ` La resta: ${x}.` : ''}`, es: (ok, n, x) => `${ok} de ${n} están en Óptimo.${x ? ` El resto: ${x}.` : ''}`, fr: (ok, n, x) => `${ok} sur ${n} sont en Optimal.${x ? ` Les autres : ${x}.` : ''}`, en: (ok, n, x) => `${ok} of ${n} are Optimal.${x ? ` The rest: ${x}.` : ''}` },
+    aBack: { ca: (b, i) => [b ? `Torna d'una lesió: ${b}.` : '', i ? `Amb una lesió en curs: ${i}.` : ''].filter(Boolean).join(' ') || "Ningú torna d'una lesió ara mateix.", es: (b, i) => [b ? `Vuelve de una lesión: ${b}.` : '', i ? `Con una lesión en curso: ${i}.` : ''].filter(Boolean).join(' ') || 'Nadie vuelve de una lesión ahora mismo.',
+      fr: (b, i) => [b ? `Revient d'une blessure : ${b}.` : '', i ? `Blessure en cours : ${i}.` : ''].filter(Boolean).join(' ') || "Personne ne revient d'une blessure en ce moment.", en: (b, i) => [b ? `Coming back from an injury: ${b}.` : '', i ? `With an ongoing injury: ${i}.` : ''].filter(Boolean).join(' ') || 'Nobody is coming back from an injury right now.' },
+    itemChg: { ca: (x, a, b) => `${x}, de ${a} a ${b}`, es: (x, a, b) => `${x}, de ${a} a ${b}`, fr: (x, a, b) => `${x}, de ${a} à ${b}`, en: (x, a, b) => `${x}, from ${a} to ${b}` },
+    aChange: { ca: x => (x ? `Canvis d'estat des d'ahir: ${x}.` : "Ningú ha canviat d'estat des d'ahir."), es: x => (x ? `Cambios de estado desde ayer: ${x}.` : 'Nadie ha cambiado de estado desde ayer.'), fr: x => (x ? `Changements d'état depuis hier : ${x}.` : "Personne n'a changé d'état depuis hier."), en: x => (x ? `Status changes since yesterday: ${x}.` : 'Nobody changed status since yesterday.') },
+    aNoData: { ca: x => (x ? `Sense dades de la polsera avui: ${x}.` : 'Avui tothom té dades de la polsera.'), es: x => (x ? `Sin datos de la pulsera hoy: ${x}.` : 'Hoy todos tienen datos de la pulsera.'), fr: x => (x ? `Pas de données du bracelet aujourd'hui : ${x}.` : "Aujourd'hui, tout le monde a des données du bracelet."), en: x => (x ? `No wearable data today: ${x}.` : 'Everyone has wearable data today.') },
+    whyState: { ca: (st, n) => (n >= 2 ? `${st} des de fa ${n} dies.` : `${st} avui.`), es: (st, n) => (n >= 2 ? `${st} desde hace ${n} días.` : `${st} hoy.`), fr: (st, n) => (n >= 2 ? `${st} depuis ${n} jours.` : `${st} aujourd'hui.`), en: (st, n) => (n >= 2 ? `${st} for ${n} days.` : `${st} today.`) },
+    whyData: { ca: x => `Avui, respecte al seu normal: ${x}.`, es: x => `Hoy, frente a su normal: ${x}.`, fr: x => `Aujourd'hui, par rapport à sa normale : ${x}.`, en: x => `Today, against their usual: ${x}.` },
+    whyIn: { ca: "Les dades d'avui són dins del seu normal.", es: 'Sus datos de hoy están dentro de su normal.', fr: 'Ses données du jour sont dans sa normale.', en: "Today's data are within their usual." },
+    aWeek: { ca: (x, l) => (l ? `${x}, aquesta setmana: ${l}.` : `${x} encara no té sessions aquesta setmana.`), es: (x, l) => (l ? `${x}, esta semana: ${l}.` : `${x} todavía no tiene sesiones esta semana.`), fr: (x, l) => (l ? `${x}, cette semaine : ${l}.` : `Pas encore de séance cette semaine pour ${x}.`), en: (x, l) => (l ? `${x}, this week: ${l}.` : `${x} has no sessions this week yet.`) },
+    autoW: { ca: 'automàtic', es: 'automático', fr: 'automatique', en: 'automatic' },
+    // Avui i el component de decisió (fase 4).
+    confirm: { ca: 'Confirmar', es: 'Confirmar', fr: 'Confirmer', en: 'Confirm' }, cancel: { ca: 'Cancel·lar', es: 'Cancelar', fr: 'Fermer', en: 'Cancel' },
+    pendH: { ca: 'Pendents', es: 'Pendientes', fr: 'À décider', en: 'To decide' },
+    decidedOf: { ca: (a, b) => `${a} de ${b} decidits`, es: (a, b) => `${a} de ${b} decididos`, fr: (a, b) => `${a} sur ${b} décidés`, en: (a, b) => `${a} of ${b} decided` },
+    limitNext: { ca: (hh, x) => `Decideix abans de les ${hh} · ${x}`, es: (hh, x) => `Decide antes de las ${hh} · ${x}`, fr: (hh, x) => `À décider avant ${hh} · ${x}`, en: (hh, x) => `Decide before ${hh} · ${x}` },
+    limitLate: { ca: (hh, x) => `Límit passat (${hh}) · ${x}`, es: (hh, x) => `Límite pasado (${hh}) · ${x}`, fr: (hh, x) => `Limite dépassée (${hh}) · ${x}`, en: (hh, x) => `Deadline passed (${hh}) · ${x}` },
+    sesLine: { ca: (g, i, l) => `${g} · ${i} · límit ${l}`, es: (g, i, l) => `${g} · ${i} · límite ${l}`, fr: (g, i, l) => `${g} · ${i} · limite ${l}`, en: (g, i, l) => `${g} · ${i} · deadline ${l}` },
+    sugLbl: { ca: 'Suggeriment:', es: 'Sugerencia:', fr: 'Suggestion :', en: 'Suggestion:' }, noSug: { ca: 'Sense suggeriment', es: 'Sin sugerencia', fr: 'Sans suggestion', en: 'No suggestion' },
+    whyInS: { ca: "dades d'avui dins del seu normal", es: 'datos de hoy dentro de su normal', fr: 'données du jour dans sa normale', en: "today's data within usual" },
+    askSync: { ca: 'Demanar que sincronitzi', es: 'Pedir que sincronice', fr: 'Demander de synchroniser', en: 'Ask to sync' },
+    askedSync: { ca: t => `Demanat a les ${t}`, es: t => `Pedido a las ${t}`, fr: t => `Demandé à ${t}`, en: t => `Asked at ${t}` },
+    willGet: { ca: x => `Li arribarà: ${x}`, es: x => `Le llegará: ${x}`, fr: x => `Ce qui lui arrivera : ${x}`, en: x => `What they'll get: ${x}` },
+    addNote: { ca: 'Afegir una nota', es: 'Añadir nota', fr: 'Ajouter une note', en: 'Add a note' }, notePh: { ca: "Nota per a l'esportista", es: 'Nota para el deportista', fr: "Note pour l'athlète", en: 'Note for the athlete' },
+    confirmedAt: { ca: t => `Confirmat a les ${t}`, es: t => `Confirmado a las ${t}`, fr: t => `Confirmé à ${t}`, en: t => `Confirmed at ${t}` },
+    locked: { ca: 'La sessió ja ha començat', es: 'La sesión ya ha empezado', fr: 'La séance a déjà commencé', en: 'The session has already started' },
+    autoH: { ca: 'Ajustos automàtics', es: 'Ajustes automáticos', fr: 'Ajustements automatiques', en: 'Automatic adjustments' }, watchH: { ca: 'A vigilar', es: 'A vigilar', fr: 'À surveiller', en: 'To watch' },
+    doneH: { ca: 'Decidits avui', es: 'Decididos hoy', fr: "Décidés aujourd'hui", en: 'Decided today' }, adjustAnyway: { ca: 'Ajustar igualment', es: 'Ajustar igualmente', fr: 'Ajuster quand même', en: 'Adjust anyway' },
+    seeFicha: { ca: 'Veure la fitxa completa', es: 'Ver ficha completa', fr: 'Voir la fiche complète', en: 'See full profile' },
+    noMoreSes: { ca: 'Avui ja no queden sessions', es: 'Hoy ya no quedan sesiones', fr: "Plus de séances aujourd'hui", en: 'No more sessions today' },
+    teamH: { ca: "Estat de l'equip", es: 'Estado del equipo', fr: "État de l'équipe", en: 'Team status' },
+    ofInOpt: { ca: n => `de ${n} en Òptim`, es: n => `de ${n} en Óptimo`, fr: n => `sur ${n} en Optimal`, en: n => `of ${n} Optimal` },
+    noState: { ca: 'sense estat', es: 'sin estado', fr: 'sans état', en: 'no status' },
+    sumH: { ca: 'Resum', es: 'Resumen', fr: 'Résumé', en: 'Summary' }, byAI: { ca: 'Redactat per IA', es: 'Redactado por IA', fr: "Rédigé par l'IA", en: 'Written by AI' },
+    basisTeam: { ca: "l'estat d'avui i d'ahir de cada esportista, les seves dades dels últims dies respecte al seu normal i els dies en Òptim d'aquesta setmana i de l'anterior.",
+      es: 'el estado de hoy y de ayer de cada deportista, sus datos de los últimos días frente a su normal y los días en Óptimo de esta semana y la anterior.',
+      fr: "l'état d'aujourd'hui et d'hier de chaque athlète, ses données des derniers jours par rapport à sa normale et les jours en Optimal cette semaine et la précédente.",
+      en: "each athlete's status today and yesterday, their recent data against their usual and the Optimal days this week and last week." },
+    sugBasis: { ca: w => `els seus últims 7 dies respecte al seu normal i el formulari de la setmana ${w}.`, es: w => `sus últimos 7 días frente a su normal y el formulario de la semana ${w}.`, fr: w => `ses 7 derniers jours par rapport à sa normale et le questionnaire de la semaine ${w}.`, en: w => `their last 7 days against their usual and the week ${w} form.` },
+    sumChg: { ca: (st, n, d) => `Avui n'hi ha ${n} en ${st}, ${d === 0 ? 'com ahir' : `${Math.abs(d)} ${d > 0 ? 'més' : 'menys'} que ahir`}.`, es: (st, n, d) => `Hoy hay ${n} en ${st}, ${d === 0 ? 'como ayer' : `${Math.abs(d)} ${d > 0 ? 'más' : 'menos'} que ayer`}.`,
+      fr: (st, n, d) => `Aujourd'hui, ${n} en ${st}, ${d === 0 ? 'comme hier' : `${Math.abs(d)} de ${d > 0 ? 'plus' : 'moins'} qu'hier`}.`, en: (st, n, d) => `${n} in ${st} today, ${d === 0 ? 'same as yesterday' : `${Math.abs(d)} ${d > 0 ? 'more' : 'fewer'} than yesterday`}.` },
+    sumTrend: { ca: (m, g, n, up) => `La mitjana de ${m} ${g} fa ${n} dies que ${up ? 'puja' : 'baixa'}.`, es: (m, g, n, up) => `La media de ${m} ${g} lleva ${n} días ${up ? 'subiendo' : 'bajando'}.`,
+      fr: (m, g, n, up) => `La moyenne de ${m} ${g} ${up ? 'monte' : 'baisse'} depuis ${n} jours.`, en: (m, g, n, up) => `Average ${m} ${g} has been ${up ? 'rising' : 'falling'} for ${n} days.` },
+    sumGrp: { ca: g => (g ? `del grup ${g}` : "de l'equip"), es: g => (g ? `del grupo ${g}` : 'del equipo'), fr: g => (g ? `du groupe ${g}` : "de l'équipe"), en: g => (g ? `in group ${g}` : 'across the team') },
+    sumWeek: { ca: (ok, tot, d) => `Aquesta setmana, ${ok} de ${tot} dies en Òptim, ${d === 0 ? "com l'anterior" : `${Math.abs(d)} ${d > 0 ? 'més' : 'menys'} que l'anterior`}.`, es: (ok, tot, d) => `Esta semana, ${ok} de ${tot} días en Óptimo, ${d === 0 ? 'como la anterior' : `${Math.abs(d)} ${d > 0 ? 'más' : 'menos'} que la anterior`}.`,
+      fr: (ok, tot, d) => `Cette semaine, ${ok} jours sur ${tot} en Optimal, ${d === 0 ? 'comme la précédente' : `${Math.abs(d)} de ${d > 0 ? 'plus' : 'moins'} que la précédente`}.`, en: (ok, tot, d) => `This week, ${ok} of ${tot} days Optimal, ${d === 0 ? 'same as last week' : `${Math.abs(d)} ${d > 0 ? 'more' : 'fewer'} than last week`}.` },
+    upH: { ca: 'Propers dies', es: 'Próximos', fr: 'Prochains jours', en: 'Coming up' }, upForm: { ca: 'Formulari setmanal', es: 'Formulario semanal', fr: 'Questionnaire hebdomadaire', en: 'Weekly form' },
+    upBand: { ca: x => `${x} tindrà el seu normal`, es: x => `${x} tendrá su normal`, fr: x => `${x} aura sa normale`, en: x => `${x} will have their usual` },
+    upReview: { ca: (x, t) => `${x}: revisió de la ${t === 'les' ? 'lesió' : 'malaltia'}`, es: (x, t) => `${x}: revisión de la ${t === 'les' ? 'lesión' : 'enfermedad'}`, fr: (x, t) => `${x} : suivi de la ${t === 'les' ? 'blessure' : 'maladie'}`, en: (x, t) => `${x}: ${t === 'les' ? 'injury' : 'illness'} review` },
+    mRecS: { ca: n => (n >= 2 ? `${n} dies seguits` : 'primer dia'), es: n => (n >= 2 ? `${n} días seguidos` : 'primer día'), fr: n => (n >= 2 ? `${n} jours de suite` : 'premier jour'), en: n => (n >= 2 ? `${n} days in a row` : 'first day') },
+    mNoDataS: { ca: d => `des de ${d}`, es: d => `desde el ${d}`, fr: d => `depuis ${d}`, en: d => `since ${d}` },
+    vsNormal: { ca: d => `${d} respecte al seu normal`, es: d => `${d} frente a su normal`, fr: d => `${d} par rapport à sa normale`, en: d => `${d} vs usual` },
+    inNormal: { ca: 'dins del seu normal', es: 'dentro de su normal', fr: 'dans sa normale', en: 'within usual' },
+    formH: { ca: w => `Formulari · setmana ${w}`, es: w => `Formulario · semana ${w}`, fr: w => `Questionnaire · semaine ${w}`, en: w => `Form · week ${w}` },
+    fMore: { ca: 'més que el seu normal', es: 'más que su normal', fr: 'plus que sa normale', en: 'more than usual' }, fLess: { ca: 'menys que el seu normal', es: 'menos que su normal', fr: 'moins que sa normale', en: 'less than usual' },
+    fSame: { ca: 'com el seu normal', es: 'como su normal', fr: 'comme sa normale', en: 'as usual' }, fNoNorm: { ca: 'encara sense normal', es: 'sin normal todavía', fr: 'pas encore de normale', en: 'no usual yet' },
+    noteH: { ca: "Nota de l'especialista", es: 'Nota del especialista', fr: 'Note du spécialiste', en: "Specialist's note" }, noNote: { ca: 'Sense notes', es: 'Sin notas', fr: 'Pas de notes', en: 'No notes' },
+    kbOpen: { ca: 'Dreceres de teclat', es: 'Atajos de teclado', fr: 'Raccourcis clavier', en: 'Keyboard shortcuts' },
+    kbNext: { ca: 'Pendent següent / anterior', es: 'Pendiente siguiente / anterior', fr: 'Suivant / précédent', en: 'Next / previous' },
+    kbPick: { ca: "Triar l'ajust", es: 'Elegir el ajuste', fr: "Choisir l'ajustement", en: 'Pick the adjustment' }, kbData: { ca: 'Veure o amagar les dades', es: 'Ver o esconder los datos', fr: 'Voir ou masquer les données', en: 'Show or hide the data' },
+    kbHelp: { ca: 'Aquesta ajuda', es: 'Esta ayuda', fr: 'Cette aide', en: 'This help' }, kEnter: { ca: 'Retorn', es: 'Intro', fr: 'Entrée', en: 'Enter' }, kSpace: { ca: 'Espai', es: 'Espacio', fr: 'Espace', en: 'Space' },
+    // Historial: el que es va decidir cada dia, amb filtres per motiu.
+    fSalut: { ca: 'Lesió o malaltia', es: 'Lesión o enfermedad', fr: 'Blessure ou maladie', en: 'Injury or illness' }, fRec: { ca: 'Recuperació seguida', es: 'Recuperación seguida', fr: 'Récupération répétée', en: 'Recovery in a row' },
+    fOut: { ca: 'Dada fora del seu normal', es: 'Dato fuera de su normal', fr: 'Donnée hors de sa normale', en: 'Data outside usual' }, fBack: { ca: "Tornada d'una lesió", es: 'Vuelta de lesión', fr: "Retour de blessure", en: 'Back from injury' },
+    fNoData: { ca: 'Sense dades', es: 'Sin datos', fr: 'Sans données', en: 'No data' }, fWell: { ca: '«Ja estic bé»', es: '«Ya estoy bien»', fr: '« Je vais bien »', en: '“I’m fine now”' },
+    filterL: { ca: 'Motiu', es: 'Motivo', fr: 'Motif', en: 'Reason' }, colDay: { ca: 'Dia', es: 'Día', fr: 'Jour', en: 'Day' }, colSug: { ca: 'Suggeriment', es: 'Sugerencia', fr: 'Suggestion', en: 'Suggestion' }, colDec: { ca: 'Decisió', es: 'Decisión', fr: 'Décision', en: 'Decision' },
+    asSug: { ca: 'com el suggeriment', es: 'como la sugerencia', fr: 'comme la suggestion', en: 'as suggested' }, diffSug: { ca: 'diferent del suggeriment', es: 'distinta de la sugerencia', fr: 'différente de la suggestion', en: 'differs from suggestion' },
+    atT: { ca: t => `a les ${t}`, es: t => `a las ${t}`, fr: t => `à ${t}`, en: t => `at ${t}` }, nothingF: { ca: 'Res amb aquest motiu', es: 'Nada con este motivo', fr: 'Rien pour ce motif', en: 'Nothing for this reason' },
+    histN: { ca: n => `${n} ${n === 1 ? 'decisió' : 'decisions'}`, es: n => `${n} ${n === 1 ? 'decisión' : 'decisiones'}`, fr: n => `${n} ${n === 1 ? 'décision' : 'décisions'}`, en: n => `${n} ${n === 1 ? 'decision' : 'decisions'}` },
+    // Motius en una línia (surten de les regles: el mateix text a Avui, Esportistes i la fitxa).
+    mRec: { ca: n => (n >= 2 ? `Recuperació · ${n} dies seguits` : 'Recuperació · primer dia'), es: n => (n >= 2 ? `Recuperación · ${n} días seguidos` : 'Recuperación · primer día'),
+      fr: n => (n >= 2 ? `Récupération · ${n} jours de suite` : 'Récupération · premier jour'), en: n => (n >= 2 ? `Recovery · ${n} days in a row` : 'Recovery · first day') },
+    mOut: { ca: (m, n, up) => `${m} porta ${n} dies per ${up ? 'sobre' : 'sota'} del seu normal`, es: (m, n, up) => `${m} lleva ${n} días por ${up ? 'encima' : 'debajo'} de su normal`,
+      fr: (m, n, up) => `${m} est ${up ? 'au-dessus' : 'en dessous'} de sa normale depuis ${n} jours`, en: (m, n, up) => `${m} has been ${up ? 'above' : 'below'} usual for ${n} days` },
+    mBack: { ca: d => `Torna d'una lesió (es va acabar el ${d})`, es: d => `Vuelve de una lesión (terminó el ${d})`, fr: d => `Revient d'une blessure (terminée le ${d})`, en: d => `Back from an injury (ended ${d})` },
+    mNoData: { ca: d => `Sense dades des de ${d}`, es: d => `Sin datos desde el ${d}`, fr: d => `Sans données depuis ${d}`, en: d => `No data since ${d}` },
+    mWell: { ca: 'Ha marcat «Ja estic bé» (lesió)', es: 'Ha marcado «Ya estoy bien» (lesión)', fr: 'A indiqué « Je vais bien » (blessure)', en: 'Marked “I’m fine now” (injury)' },
+    mCalc: { ca: d => `Calculant el seu normal · el tindrà el ${d}`, es: d => `Calculando su normal · lo tendrá el ${d}`, fr: d => `Calcul de sa normale · prête le ${d}`, en: d => `Calculating their usual · ready ${d}` },
+  },
+};
+
+// ── 6. Component ─────────────────────────────────────────────────────────
+// Estructura (fase 3): barra lateral (Avui, amb els pendents; Esportistes; Sessions; a baix, Ajustos i el menú d'usuari) + barra de dalt
+// (cercador ⌘K d'esportistes i sessions, l'hora de les dades i el grup, que val per a tot el panell i es recorda) + la pàgina.
+// Un sol accés a l'assistent: el botó de baix a la dreta, que obre un panell lateral i sap quina pantalla i quin esportista es miren.
+// Cada pantalla té la seva adreça (#/hoy, #/deportista/MT-07…). Les que encara no s'han fet surten «en construcció» (en castellà, com el matràs).
+// No hi ha Avisos, Setmana ni Laboratori: les adreces antigues porten al seu lloc nou (l'historial d'Avui, la vista Setmana d'Esportistes,
+// l'Experiment dins d'Ajustos). Les peces (xips, botons, control segmentat…) es fan una sola vegada aquí.
+const KIND_ES = { pend: 'Pendiente', nodec: 'Sin decidir', done: 'Decidido', auto: 'Automático', watch: 'A vigilar', calc: 'Calculando su normal', none: '—' };
+const LANG_N = { ca: 'Català', es: 'Castellano', fr: 'Français', en: 'English' };
+const ROUTE_ALIAS = { inicio: 'hoy', avisos: 'hoy/historial', semana: 'deportistas/semana', exp: 'ajustes/experimento', experimento: 'ajustes/experimento', laboratorio: 'ajustes/experimento', ficha: 'deportistas' };
+const PAGES = ['hoy', 'deportistas', 'deportista', 'sesiones', 'sesion', 'ajustes', 'estilos', 'comprobacion'];
+const SECTION_OF = { hoy: 'hoy', deportistas: 'deportistas', deportista: 'deportistas', sesiones: 'sesiones', sesion: 'sesiones', ajustes: 'ajustes' };
+const NAV = [['hoy', 'today', 'list-checks'], ['deportistas', 'athletes', 'users'], ['sesiones', 'sessions', 'calendar-days']];
+const SES_ICON = { fuerza: 'dumbbell', resis: 'bike', agil: 'zap', tec: 'target', larga: 'route' };
+const JOIN = { ca: 'i', es: 'y', fr: 'et', en: 'and' };
+class Component extends DCLogic {
+  state = (() => {
+    const ls = (k, d) => { try { return localStorage.getItem(k) ?? d; } catch (e) { return d; } };
+    let store = {}, sysDark = true;
+    try { store = readStore(); } catch (e) {}
+    try { sysDark = !window.matchMedia || window.matchMedia('(prefers-color-scheme: dark)').matches; } catch (e) {}
+    const mode = ls('mt-prep-mode', 'auto'), lang = ls('mt-prep-lang', 'ca'), grp = ls('mt-prep-grp', 'T');
+    return { route: this.routeOf(), store, sysDark, mode: ['light', 'dark', 'auto'].includes(mode) ? mode : 'auto', lang: LANG_KEYS.includes(lang) ? lang : 'ca',
+      grp: ['T', 'A', 'B'].includes(grp) ? grp : 'T', side: ls('mt-prep-side', 'open') === 'closed' ? 'closed' : 'open', pHidden: ls('mt-prep-proto-hidden', '0') === '1',
+      q: '', qOpen: false, qSel: 0, menu: false, asst: false, chatLog: [], chatQ: '', proto: false, feedAt: FEED.band[1], syncErr: null, tick: 0,
+      simC: '', simSt: '', simWell: false, outDays: RULES0.outDays, backDays: RULES0.backDays, useStore: false,
+      clock: { base: hmMin(CLOCK0), t0: Date.now() }, demoSel: null, toast: null,
+      sel: {}, note: {}, noteOpen: {}, open: {}, edit: {}, focus: null, fold: {}, help: false, syncReq: {}, histF: 'all' };
+  })();
+  mainRef = React.createRef();
+  searchRef = React.createRef();
+  chatRef = React.createRef();
+  componentDidMount() {
+    this.onHash = () => { const r = this.routeOf(); if (r.alias) { try { history.replaceState(null, '', `#/${r.path}`); } catch (e) {} } this.setState({ route: r, qOpen: false, menu: false, proto: false }); };
+    window.addEventListener('hashchange', this.onHash);
+    // ⌘K (o Ctrl+K): al cercador. Esc tanca el que estigui obert. Tecla E: mostra o amaga el botó del prototip.
+    this.onKey = e => {
+      if ((e.metaKey || e.ctrlKey) && (e.key === 'k' || e.key === 'K')) { e.preventDefault(); if (this.searchRef.current) this.searchRef.current.focus(); return; }
+      if (e.key === 'Escape') { this.setState({ qOpen: false, menu: false, proto: false, asst: false, help: false }); return; }
+      if (e.metaKey || e.ctrlKey || e.altKey || /^(INPUT|TEXTAREA|SELECT)$/.test((e.target && e.target.tagName) || '')) return;
+      if (e.key === 'e' || e.key === 'E') { this.setProtoHidden(!this.state.pHidden); return; }
+      // Avui: J/K (pendent següent / anterior), 1–4 (l'ajust), Intro (confirmar), Espai (les dades) i ? (l'ajuda). Mai mentre s'escriu.
+      const r = this.state.route;
+      if (r.page !== 'hoy' || r.id) return;
+      const onCtl = /^(BUTTON|A)$/.test((e.target && e.target.tagName) || ''), fx = () => (this._focus && this._c ? this._c.board.find(x => x.a.c === this._focus) : null);
+      if (e.key === '?') { e.preventDefault(); this.setState(st => ({ help: !st.help })); return; }
+      if (/^[jk]$/i.test(e.key)) { e.preventDefault(); this.moveFocus(/j/i.test(e.key) ? 1 : -1); return; }
+      if (/^[1-4]$/.test(e.key)) { const x = fx(); if (x) { e.preventDefault(); this.setState(st => ({ sel: { ...st.sel, [x.a.c]: 'NRAD'[+e.key - 1] }, focus: x.a.c })); } return; }
+      if (e.key === 'Enter' && !onCtl) { const x = fx(); if (x) { e.preventDefault(); this.confirm(this._c, x); } return; }
+      if (e.key === ' ' && !onCtl) { const x = fx(); if (x) { e.preventDefault(); this.setState(st => ({ open: { ...st.open, [x.a.c]: !st.open[x.a.c] }, focus: x.a.c })); } }
+    };
+    window.addEventListener('keydown', this.onKey);
+    // Si l'ajust es desa en una altra pestanya (el panell actual o un altre panell nou), es torna a llegir.
+    this.onStorage = e => { if (e.key === K_AJ || e.key === null) this.setState({ store: readStore() }); };
+    window.addEventListener('storage', this.onStorage);
+    try { this.mq = window.matchMedia('(prefers-color-scheme: dark)'); this.onMq = e => this.setState({ sysDark: e.matches }); this.mq.addEventListener('change', this.onMq); } catch (e) {}
+    this.tickT = setInterval(() => this.setState(st => ({ tick: st.tick + 1 })), 30000);
+    if (this.state.route.alias) this.onHash();
+    this.sync();
+  }
+  componentDidUpdate(pp, ps) {
+    this.sync();
+    if (ps && ps.route !== this.state.route && this.mainRef.current) this.mainRef.current.scrollTop = 0;
+    if (ps && ps.chatLog !== this.state.chatLog && this.chatRef.current) this.chatRef.current.scrollTop = this.chatRef.current.scrollHeight;
+    if (ps && ps.focus !== this.state.focus && this.state.focus) { const el = document.querySelector(`[data-dec="${this.state.focus}"]`); if (el && el.scrollIntoView) el.scrollIntoView({ block: 'nearest', behavior: 'smooth' }); }
+  }
+  componentWillUnmount() {
+    window.removeEventListener('hashchange', this.onHash); window.removeEventListener('keydown', this.onKey); window.removeEventListener('storage', this.onStorage);
+    try { this.mq.removeEventListener('change', this.onMq); } catch (e) {} clearInterval(this.tickT); clearTimeout(this.toastT);
+  }
+  // Adreça: #/pàgina/id. Les adreces antigues (Avisos, Setmana, Experiment…) porten al seu lloc nou.
+  routeOf() {
+    let raw = (window.location.hash || '').replace(/^#\/?/, ''), alias = false, qs = '';
+    const qi = raw.indexOf('?'); if (qi >= 0) { qs = raw.slice(qi); raw = raw.slice(0, qi); }
+    const q = {}; qs.slice(1).split('&').filter(Boolean).forEach(p => { const [k, v] = p.split('='); q[decodeURIComponent(k)] = decodeURIComponent(v || ''); });
+    const p0 = raw.split('/')[0]; if (ROUTE_ALIAS[p0]) { raw = ROUTE_ALIAS[p0]; alias = true; }
+    const [page, ...rest] = raw.split('/');
+    return PAGES.includes(page) ? { page, id: rest.length ? decodeURIComponent(rest.join('/')) : null, q, alias, path: raw + qs } : { page: 'hoy', id: null, q: {}, alias: !!page, path: 'hoy' };
+  }
+  go(path) { window.location.hash = `#/${path}`; }
+  mode() { const m = this.state.mode; return m === 'auto' ? (this.state.sysDark ? 'dark' : 'light') : m; }
+  sync() { try { const bg = TOKENS[this.mode()].bg; document.documentElement.style.background = bg; document.body.style.background = bg; document.documentElement.lang = this.state.lang; } catch (e) {} }
+  save(k, v) { try { localStorage.setItem(k, v); } catch (e) {} }
+  setMode(m) { this.save('mt-prep-mode', m); this.setState({ mode: m }); }
+  setLang(l) { this.save('mt-prep-lang', l); this.setState({ lang: l }); }
+  setGrp(g) { this.save('mt-prep-grp', g); this.setState({ grp: g }); }
+  setSide(v) { this.save('mt-prep-side', v); this.setState({ side: v }); }
+  setProtoHidden(v) { this.save('mt-prep-proto-hidden', v ? '1' : '0'); this.setState({ pHidden: v, proto: false }); }
+  resetDemo() { try { localStorage.removeItem(K_AJ); } catch (e) {} this.setState({ store: {}, proto: false, chatLog: [] }); }
+  L(l) { this._L = this._L || {}; return this._L[l] || (this._L[l] = { lang: l, ...locTx(TX, l) }); }
+  t(L, k, ...a) { const v = L.UI[k]; return typeof v === 'function' ? v(...a) : v ?? k; }
+  now() { const k = this.state.clock; return k.base + Math.floor((Date.now() - k.t0) / 60000); }
+  norm(x) { return String(x).normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase(); }
+  jn(L, arr) { return arr.length < 2 ? arr.join('') : `${arr.slice(0, -1).join(', ')} ${JOIN[L.lang]} ${arr[arr.length - 1]}`; }
+  dShort(L, i) { const d = dayOf(i); return `${L.WD3[d.wd]} ${d.n}`; }
+  dLong(L, i) { const d = dayOf(i); return `${L.WDL[d.wd]} ${d.n}`; }
+  dateLong(L, i) { const d = dayOf(i); return this.t(L, 'dateLong', L.WDL[d.wd], d.n, L.MN[d.m]); }
+  grpName(L, g) { return g === 'AB' ? this.t(L, 'groupsAB') : this.t(L, 'group', g); }
+
+  // ── Peces ──
+  icon(name, size = 16, label) { return h('svg', { className: 'mtp-ic', width: size, height: size, viewBox: '0 0 24 24', 'aria-hidden': label ? undefined : 'true', role: label ? 'img' : undefined, 'aria-label': label, dangerouslySetInnerHTML: { __html: ICONS[name] || '' } }); }
+  stChip(L, c) { return h('span', { className: 'mtp-st' }, h('span', { className: 'mtp-dot', 'data-s': c }), L.ST[c]); }
+  ajChip(L, v, auto) { return h('span', { className: 'mtp-aj' }, this.icon(AJ_ICON[v], 16), auto ? this.t(L, 'autoV', L.AJ[v]) : L.AJ[v]); }
+  pendChip(L) { return h('span', { className: 'mtp-pend' }, this.t(L, 'pend')); }
+  cell(c, tip, key) { return h('span', { key, className: 'mtp-cell', 'data-s': c || 'F', title: tip, role: 'img', 'aria-label': tip }); }
+  healthMark(L, x) { return h('span', { className: 'mtp-health' }, this.icon(x.t === 'les' ? 'bandage' : 'thermometer', 16), `${L.HEALTH[x.t]} · ${L.OSTL[x.ost]}`); }
+  newDot(L) { return h('span', { className: 'mtp-new', role: 'img', 'aria-label': this.t(L, 'newToday'), title: this.t(L, 'newToday') }); }
+  btn(kind, label, o = {}) { return h('button', { type: 'button', className: `mtp-btn ${kind}${o.sm ? ' sm' : ''}`, onClick: o.onClick, disabled: o.disabled || undefined, title: o.title }, o.icon ? this.icon(o.icon, 16) : null, label); }
+  iconBtn(name, label, o = {}) { return h('button', { type: 'button', className: `mtp-btn ${o.kind ?? 'sec'} icon${o.sm ? ' sm' : ''}`, title: label, 'aria-label': label, onClick: o.onClick, 'aria-expanded': o.expanded }, this.icon(name, o.sm ? 16 : 20)); }
+  // Els quatre ajustos com a control segmentat: el que suggereix la IA porta vora discontínua i «Suggerit», triat o no.
+  seg(L, sel, sug, pick, label) {
+    return h('div', { className: 'mtp-seg', role: 'radiogroup', 'aria-label': label }, ['N', 'R', 'A', 'D'].map(k => h('button', { key: k, type: 'button', role: 'radio', 'aria-checked': k === sel, 'data-sug': k === sug ? '' : undefined, onClick: () => pick(k) },
+      this.icon(AJ_ICON[k], 16), L.AJ[k], k === sug ? h('span', { className: 'sug' }, this.t(L, 'sug')) : null)));
+  }
+  // Control segmentat de text (grup, vista, tema).
+  segText(opts, val, pick, label, o = {}) {
+    return h('div', { className: 'mtp-seg', role: 'radiogroup', 'aria-label': label, style: o.full ? { display: 'flex', width: '100%' } : undefined }, opts.map(([k, w]) => h('button', { key: k, type: 'button', role: 'radio', 'aria-checked': k === val, onClick: () => pick(k), style: o.full ? { flex: 1, minWidth: 0, justifyContent: 'center', padding: '0 8px' } : undefined }, w)));
+  }
+  toastEl(L, text, o = {}) {
+    return h('div', { key: 'toast', className: `mtp-toast${o.fixed ? ' fixed' : ''}`, role: 'status' }, h('span', { style: { color: 'var(--icon)' } }, this.icon('check', 16)), h('span', null, text),
+      this.btn('ter sm', this.t(L, 'undo'), { onClick: o.onUndo }), this.iconBtn('x', this.t(L, 'close'), { kind: '', sm: true, onClick: o.onClose }));
+  }
+  emptyEl(L, title, text, ic = 'circle-check') { return h('div', { className: 'mtp-empty' }, this.icon(ic, 20), h('div', { style: { fontWeight: 600 } }, title), text ? h('div', { className: 't-sec' }, text) : null); }
+  skel(w, hh, key) { return h('span', { key, className: 'mtp-skel', style: { width: w, height: hh } }); }
+  motive(L, m) {
+    if (!m) return '';
+    if (m.t === 'salut') return `${L.HEALTH[m.h.t]} · ${L.OSTL[m.h.ost]}`;
+    if (m.t === 'well') return this.t(L, 'mWell');
+    if (m.t === 'calc') return this.t(L, 'mCalc', this.dShort(L, m.ready));
+    if (m.t === 'nodata') return this.t(L, 'mNoData', L.WDL[dayOf(m.since).wd]);
+    if (m.t === 'rec') return this.t(L, 'mRec', m.n);
+    if (m.t === 'back') return this.t(L, 'mBack', this.dShort(L, m.fi));
+    if (m.t === 'out') return this.t(L, 'mOut', L.METC[m.k], m.n, m.k === 'rhr');
+    return '';
+  }
+  deltas(L, a, i = TODAY) { return deltasOn(a, i).map(x => `${L.METS[x.k]} ${x.d > 0 ? '+' : '−'}${Math.abs(x.d)} ${L.UNIT[x.k]}`).join(' · '); }
+  week7(L, a, store, R, now) {
+    return h('span', { style: { display: 'inline-flex', gap: 4 } }, [21, 22, 23, 24, 25, 26, 27].map(i => { const c = stOn(a, i), x = ajOn(a, i, store, R, now);
+      return this.cell(c, [this.dLong(L, i), c ? L.ST[c] : null, x ? L.AJ[x.v] : null].filter(Boolean).join(' · '), i); }));
+  }
+  ajToday(L, x) {
+    if (x.status === 'pend') return this.pendChip(L);
+    if (x.status === 'auto') return this.ajChip(L, x.v, true);
+    if (x.status === 'done') return this.ajChip(L, x.v);
+    if (x.status === 'nodec') return h('span', { className: 'mtp-plain' }, this.t(L, 'noDec'));
+    return h('span', { className: 'mtp-plain' }, L.AJ.N);
+  }
+  showToast(text, undo) { clearTimeout(this.toastT); this._undo = undo || null; this.setState({ toast: text }); this.toastT = setTimeout(() => { this._undo = null; this.setState({ toast: null }); }, 10000); }
+
+  // ── Barra lateral ──
+  sideEl(c) {
+    const { L, K } = c, s = this.state, open = s.side === 'open', sec = SECTION_OF[s.route.page], n = K.pend.length;
+    const item = (k, tk, ic, cnt) => { const on = sec === k, label = this.t(L, tk), full = cnt ? `${label} · ${this.t(L, 'pendN', cnt)}` : label;
+      return h('a', { key: k, href: `#/${k}`, className: 'mtp-nav', 'aria-current': on ? 'page' : undefined, 'aria-label': full, title: open ? undefined : full },
+        this.icon(ic, 20), open ? h('span', null, label) : null, cnt ? h('span', { className: 'mtp-count num', 'aria-hidden': 'true' }, cnt) : null); };
+    const name = this.props.coachName || this.t(L, 'role');
+    return h('nav', { key: 'side', className: `mtp-side${open ? '' : ' folded'}`, 'aria-label': this.t(L, 'nav') },
+      h('div', { className: 'mtp-brand' }, open ? h('b', null, 'Max Tracking') : null,
+        this.iconBtn('panel-left', this.t(L, open ? 'sideClose' : 'sideOpen'), { kind: '', onClick: () => this.setSide(open ? 'closed' : 'open'), expanded: open })),
+      NAV.map(([k, tk, ic]) => item(k, tk, ic, k === 'hoy' ? n : 0)),
+      h('div', { style: { flex: 1 } }),
+      item('ajustes', 'settings', 'settings', 0),
+      h('div', { style: { position: 'relative', width: open ? '100%' : 'auto' } },
+        h('button', { type: 'button', className: 'mtp-nav', 'aria-haspopup': 'menu', 'aria-expanded': s.menu, 'aria-label': `${this.t(L, 'userMenu')} · ${name}`, title: name, onClick: () => this.setState({ menu: !s.menu }) },
+          this.icon('circle-user-round', 20), open ? h('span', { style: { flex: 1, minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis' } }, name) : null, open ? this.icon('chevrons-up-down', 16) : null),
+        s.menu ? this.userMenuEl(L, name) : null));
+  }
+  // Menú d'usuari: el nom, el tema (clar, fosc o automàtic), l'idioma i tancar la sessió (al prototip, desactivat).
+  userMenuEl(L, name) {
+    const s = this.state;
+    return h('div', { className: 'mtp-pop', role: 'menu', 'aria-label': this.t(L, 'userMenu'), style: { left: 0, bottom: 44, width: 272 } },
+      h('div', { style: { padding: '8px 12px' } }, h('div', { className: 't-name' }, name), h('div', { className: 't-sec' }, this.t(L, 'groupsAB'))),
+      h('div', { style: { padding: '4px 12px 8px', display: 'flex', flexDirection: 'column', gap: 8 } }, h('div', { className: 't-lab' }, this.t(L, 'theme')),
+        this.segText([['light', this.t(L, 'light')], ['dark', this.t(L, 'dark')], ['auto', this.t(L, 'auto')]], s.mode, m => this.setMode(m), this.t(L, 'theme'), { full: true }),
+        h('div', { className: 't-lab', style: { marginTop: 4 } }, this.t(L, 'language'))),
+      h('div', { role: 'radiogroup', 'aria-label': this.t(L, 'language') }, LANG_KEYS.map(k => h('button', { key: k, type: 'button', className: 'mtp-opt', role: 'radio', 'aria-checked': s.lang === k, lang: k, onClick: () => this.setLang(k) },
+        h('span', { style: { flex: 1 } }, LANG_N[k]), s.lang === k ? h('span', { style: { color: 'var(--link)' } }, this.icon('check', 16)) : null))),
+      h('div', { style: { height: 1, margin: '4px 0', background: 'var(--border)' } }),
+      h('button', { type: 'button', className: 'mtp-opt', role: 'menuitem', disabled: true, title: this.t(L, 'logoutOff'), style: { opacity: .45, cursor: 'not-allowed' } }, this.icon('log-out', 16), this.t(L, 'logout')));
+  }
+
+  // ── Barra de dalt ──
+  searchRes(L) {
+    const n = this.norm(this.state.q.trim()); if (!n) return [];
+    const A = ATH.filter(a => this.norm(a.n).includes(n) || this.norm(a.c).includes(n)).slice(0, 6).map(a => ({ k: `a${a.c}`, t: 'a', a, go: `deportista/${a.c}` }));
+    const S = [], m = mondayOf(weekOf(TODAY));
+    for (let i = m; i < m + 7; i++) sessionsOn(i, 'T').forEach(x => { if (this.norm(L.SES[x.k]).includes(n)) S.push({ k: `s${x.id}`, t: 's', x, go: `sesion/${x.id}` }); });
+    return [...A, ...S.slice(0, 6)];
+  }
+  openRes(r) { if (!r) return; this.setState({ q: '', qOpen: false, qSel: 0 }); if (this.searchRef.current) this.searchRef.current.blur(); this.go(r.go); }
+  topEl(c) {
+    const { L } = c, s = this.state, res = this.searchRes(L), open = s.qOpen && !!s.q.trim(), sel = Math.min(s.qSel, Math.max(0, res.length - 1));
+    const opt = (r, i) => h('button', { key: r.k, type: 'button', className: 'mtp-opt', role: 'option', 'aria-selected': i === sel, onMouseDown: e => e.preventDefault(), onClick: () => this.openRes(r), onMouseEnter: () => this.setState({ qSel: i }) },
+      r.t === 'a' ? [h('span', { key: 'n', className: 't-name', style: { flex: 1 } }, r.a.n), h('span', { key: 'g', className: 't-sec' }, this.grpName(L, r.a.g)), h('span', { key: 's' }, this.stChip(L, stOn(r.a, TODAY) || 'N'))]
+        : [h('span', { key: 'i', style: { color: 'var(--icon)' } }, this.icon(SES_ICON[r.x.t] || 'calendar-days', 16)), h('span', { key: 'n', style: { flex: 1, minWidth: 0 } }, L.SES[r.x.k]),
+          h('span', { key: 'w', className: 't-sec num', style: { whiteSpace: 'nowrap' } }, `${this.dShort(L, r.x.day)} · ${this.grpName(L, r.x.g)} · ${r.x.ini}`)]);
+    const As = res.filter(r => r.t === 'a'), Ss = res.filter(r => r.t === 's'), lab = t => h('div', { key: `l${t}`, className: 't-lab', style: { padding: '8px 12px 4px' } }, t);
+    const drop = open ? h('div', { className: 'mtp-pop', role: 'listbox', 'aria-label': this.t(L, 'searchPh'), style: { top: 44, left: 0, width: 440 } },
+      res.length ? [As.length ? lab(this.t(L, 'athletes')) : null, ...As.map((r, i) => opt(r, i)), Ss.length ? lab(this.t(L, 'sessions')) : null, ...Ss.map((r, i) => opt(r, As.length + i))]
+        : h('div', { className: 't-sec', style: { padding: '8px 12px' } }, this.t(L, 'noMatch'))) : null;
+    const onKey = e => {
+      if (e.key === 'ArrowDown') { e.preventDefault(); this.setState({ qSel: Math.min(res.length - 1, sel + 1), qOpen: true }); }
+      else if (e.key === 'ArrowUp') { e.preventDefault(); this.setState({ qSel: Math.max(0, sel - 1) }); }
+      else if (e.key === 'Enter') { e.preventDefault(); this.openRes(res[sel]); }
+      else if (e.key === 'Escape') { this.setState({ qOpen: false }); e.currentTarget.blur(); }
+    };
+    const search = h('div', { style: { position: 'relative', width: 320, flex: 'none' } },
+      h('label', { style: { display: 'flex', alignItems: 'center', gap: 8, height: 36, padding: '0 12px', borderRadius: 8, border: '1px solid var(--borderStrong)', background: 'var(--bg)', color: 'var(--text2)', cursor: 'text' } },
+        this.icon('search', 16),
+        h('input', { ref: this.searchRef, type: 'text', value: s.q, placeholder: this.t(L, 'searchPh'), 'aria-label': this.t(L, 'searchPh'), role: 'combobox', 'aria-expanded': open, autoComplete: 'off',
+          onChange: e => this.setState({ q: e.target.value, qOpen: true, qSel: 0 }), onFocus: () => this.setState({ qOpen: true }), onBlur: () => this.setState({ qOpen: false }), onKeyDown: onKey,
+          style: { flex: 1, minWidth: 0, border: 0, outline: 0, background: 'transparent', fontSize: 14, color: 'var(--text)' } }),
+        h('kbd', { className: 'mtp-kbd' }, '⌘K')), drop);
+    return h('header', { key: 'top', className: 'mtp-top' }, search, h('div', { style: { flex: 1 } }), this.freshEl(L),
+      this.segText([['T', this.t(L, 'all')], ['A', this.t(L, 'group', 'A')], ['B', this.t(L, 'group', 'B')]], s.grp, g => this.setGrp(g), this.t(L, 'groupF')));
+  }
+  // Frescor de les dades: «Dades de les 8:05». Amb més de 2 hores, en àmbar i amb «Actualitzar». Si falla una connexió, ho diu amb l'última dada bona.
+  freshEl(L) {
+    const s = this.state, at = s.feedAt;
+    if (s.syncErr) return h('span', { className: 'mtp-warn', role: 'status' }, this.icon('triangle-alert', 16), this.t(L, 'syncErr', s.syncErr === 'tp' ? 'TrainingPeaks' : this.t(L, 'bands'), s.syncErr === 'tp' ? FEED.tp[1] : at));
+    if (this.now() - hmMin(at) > 120) return h('span', { style: { display: 'inline-flex', alignItems: 'center', gap: 4 } }, h('span', { className: 'mtp-warn', role: 'status' }, this.icon('clock', 16), this.t(L, 'dataAt', at)),
+      this.btn('ter sm', this.t(L, 'refresh'), { icon: 'refresh-cw', onClick: () => this.setState({ feedAt: minHm(this.now()) }) }));
+    return h('span', { className: 't-sec num', style: { display: 'inline-flex', alignItems: 'center', gap: 8 } }, this.icon('clock', 16), this.t(L, 'dataAt', at));
+  }
+
+  // ── Assistent ──
+  live() { return (this.props.aiLive ?? true) && !!(window.claude && window.claude.complete); }
+  ctxOf(L, c) {
+    const r = this.state.route, g = this.state.grp, gw = g === 'T' ? '' : ` · ${this.t(L, 'group', g)}`;
+    if (r.page === 'deportista') { const a = ATH.find(x => x.c === r.id); if (a) return { label: a.n, ath: a }; }
+    if (r.page === 'sesion') { const x = this.sesById(r.id); if (x) return { label: `${L.SES[x.k]} · ${this.dShort(L, x.day)}`, ses: x }; }
+    const P = { hoy: 'today', deportistas: 'athletes', sesiones: 'sessions', ajustes: 'settings' }[r.page];
+    return { label: `${P ? this.t(L, P) : this.t(L, 'today')}${gw}` };
+  }
+  chatSuggest(L, c) {
+    const g = this.state.grp, ctx = this.ctxOf(L, c), page = this.state.route.page;
+    const Q = { pend: this.t(L, 'qPend'), out: this.t(L, 'qOut', RULES0.outDays), team: g === 'T' ? this.t(L, 'qTeam') : this.t(L, 'qGrp', g), back: this.t(L, 'qBack'), change: this.t(L, 'qChange'), nodata: this.t(L, 'qNoData') };
+    const order = page === 'deportistas' ? ['team', 'nodata', 'back', 'pend', 'out', 'change'] : ['pend', 'out', 'change', 'team', 'back', 'nodata'];
+    const own = ctx.ath ? [[`why:${ctx.ath.c}`, this.t(L, 'qWhy', ctx.ath.n)], [`week:${ctx.ath.c}`, this.t(L, 'qWeek', ctx.ath.n)]] : [];
+    return [...own, ...order.map(k => [k, Q[k]])];
+  }
+  // Les preguntes suggerides les respon l'app amb les dades (sense IA); el text i els esportistes que surten.
+  chatRecipe(L, id, c) {
+    const R = RULES0, B = c.board.filter(x => inGrp(x.a, this.state.grp)), [kind, code] = id.split(':'), stW = a => L.ST[stOn(a, TODAY)] || '—';
+    if (kind === 'pend') { const P = B.filter(x => x.status === 'pend'); return { text: this.t(L, 'aPend', P.length, this.jn(L, P.map(x => this.t(L, 'itemPend', x.a.n, x.sug ? L.AJ[x.sug] : null)))), codes: P.map(x => x.a.c) }; }
+    if (kind === 'out') { const O = B.map(x => ({ x, o: outOn(x.a, TODAY) })).filter(y => y.o && y.o.n >= R.outDays); return { text: this.t(L, 'aOut', R.outDays, this.jn(L, O.map(y => this.t(L, 'itemOut', y.x.a.n, L.METS[y.o.k], y.o.n)))), codes: O.map(y => y.x.a.c) }; }
+    if (kind === 'team') { const ok = B.filter(x => stOn(x.a, TODAY) === 'O'), rest = B.filter(x => stOn(x.a, TODAY) !== 'O'); return { text: this.t(L, 'aGrp', ok.length, B.length, rest.map(x => `${x.a.n} (${stW(x.a)})`).join(', ')), codes: rest.map(x => x.a.c) }; }
+    if (kind === 'back') { const b = B.filter(x => backOn(x.a, TODAY, R.backDays)), i = B.filter(x => { const hh = healthOn(x.a, TODAY); return hh && hh.t === 'les'; }); return { text: this.t(L, 'aBack', this.jn(L, b.map(x => x.a.n)), this.jn(L, i.map(x => x.a.n))), codes: [...b, ...i].map(x => x.a.c) }; }
+    if (kind === 'change') { const ch = B.filter(x => stOn(x.a, TODAY - 1) !== stOn(x.a, TODAY)); return { text: this.t(L, 'aChange', ch.map(x => this.t(L, 'itemChg', x.a.n, L.ST[stOn(x.a, TODAY - 1)] || '—', stW(x.a))).join('; ')), codes: ch.map(x => x.a.c) }; }
+    if (kind === 'nodata') { const nd = B.filter(x => stOn(x.a, TODAY) === 'N'); return { text: this.t(L, 'aNoData', this.jn(L, nd.map(x => x.a.n))), codes: nd.map(x => x.a.c) }; }
+    const x = c.board.find(y => y.a.c === code); if (!x) return { text: '', codes: [] };
+    const a = x.a;
+    if (kind === 'why') {
+      const st = stOn(a, TODAY), parts = [], d = this.deltas(L, a);
+      if (st && st !== 'C') parts.push(this.t(L, 'whyState', L.ST[st], runOn(a, TODAY)));
+      if (st && st !== 'N' && st !== 'C') parts.push(d ? this.t(L, 'whyData', d) : this.t(L, 'whyIn'));
+      if (x.m && x.m.t !== 'rec') parts.push(`${this.motive(L, x.m)}.`);
+      return { text: parts.join(' '), codes: [a.c] };
+    }
+    if (kind === 'week') {
+      const m = mondayOf(weekOf(TODAY)), it = [];
+      for (let i = m; i <= TODAY; i++) { const aj = ajOn(a, i, this.state.store, R, c.now);
+        if (aj) it.push(`${this.dShort(L, i)} ${L.AJ[aj.v]}${aj.src === 'auto' ? ` (${this.t(L, 'autoW')})` : aj.src === 'cap' ? ` (${this.t(L, 'noDec').toLowerCase()})` : ''}`);
+        else if (i === TODAY && x.status === 'pend') it.push(`${this.dShort(L, i)} ${this.t(L, 'pend').toLowerCase()}`); }
+      return { text: this.t(L, 'aWeek', a.n, it.join('; ')), codes: [a.c] };
+    }
+    return { text: '', codes: [] };
+  }
+  // Preguntes que el panell no respon mai: salut mental, el que van dir a l'entrenador (H2) i qui no ha respost (H4).
+  chatRisk(q) { return /salud mental|salut mental|sante mentale|mental health|psicol|psych|ansiet|anxi|depres|suicid|autoles|self[- ]?harm|dijo al entrenador|dit a l'entraineur|va dir a l'entrenador|told the coach|qui[e]?n no ha (respondido|contestado|rellenado)|quien no responde|qui no ha (respost|contestat|omplert)|qui n'a pas repondu|who (has ?n[o']t|hasn'?t|didn'?t) (answer|fill)|no ha respondido|not answered/.test(this.norm(q)); }
+  chatMatch(q) {
+    const t = this.norm(q);
+    if (/sin datos|sense dades|sans donnees|no data|pulsera|polsera|bracelet|wearable/.test(t)) return 'nodata';
+    if (/decid|ajust|pendient|pendent/.test(t)) return 'pend';
+    if (/lesi|blessure|injur|vuelve|torna|revient|coming back/.test(t)) return 'back';
+    if (/cambi|canvi|chang|ayer|ahir|hier|yesterday/.test(t)) return 'change';
+    if (/fuera|fora|hors|outside|seguid|seguits|de suite|in a row|dias|dies|jours|days/.test(t)) return 'out';
+    if (/grupo|grup|groupe|group|equipo|equip|equipe|team|como esta|com esta|comment va|how is/.test(t)) return 'team';
+    return null;
+  }
+  // Dades per a la IA: només codis i el que el preparador pot veure (matriu prudent). Mai noms, salut mental, el que van dir a l'entrenador ni qui no ha respost.
+  chatPrompt(q, c) {
+    const L = this.L('es'), lang = { ca: 'catalán', es: 'castellano', fr: 'francés', en: 'inglés' }[this.state.lang], ctx = this.ctxOf(L, c);
+    const rel = (k, v) => (v == null ? 'sin datos' : Math.abs(v) <= 1 ? 'dentro de su normal' : (k === 'rhr') === (v < 0) ? 'por encima de su normal' : 'por debajo de su normal');
+    const data = c.board.filter(x => inGrp(x.a, this.state.grp)).map(x => { const a = x.a, S = seriesOf(a), hh = healthOn(a, TODAY), f = a.f;
+      return { codigo: a.c, grupo: a.g, estados_7_dias: [21, 22, 23, 24, 25, 26, 27].map(i => stOn(a, i) || '-').join(''),
+        hoy: a.calc ? 'calculando su normal' : stOn(a, TODAY) === 'N' ? 'sin datos' : { fc_reposo: rel('rhr', S.qs.rhr[TODAY]), hrv: rel('hrv', S.qs.hrv[TODAY]), sueno: rel('son', S.qs.son[TODAY]) },
+        problema: hh ? `${hh.t === 'mal' ? 'enfermedad' : 'lesión'}, ${TX.OSTL.es[hh.ost]}` : backOn(a, TODAY, RULES0.backDays) ? 'vuelve de una lesión' : null,
+        formulario_semana: f ? { rendimiento: +(f[0] - f[1]).toFixed(1), fatiga: +(f[2] - f[3]).toFixed(1), descanso: +(f[4] - f[5]).toFixed(1) } : 'sin normal todavía',
+        ajuste_hoy: x.status === 'pend' ? 'pendiente' : x.status === 'auto' ? `automático ${x.v}` : x.v || 'sin sesión', sugerencia_ia: x.sug }; });
+    const td = dayOf(TODAY), d0 = dayOf(21), where = ctx.ath ? `El preparador está mirando la ficha de [${ctx.ath.c}].` : `El preparador está en la pantalla «${ctx.label}».`;
+    return `Eres el asistente del panel de un preparador físico de esquí alpino (deportistas de 14 a 20 años). Responde en ${lang} a la pregunta usando solo estos datos.
+Reglas: sugiere, no ordenes; no diagnostiques ni atribuyas causas; no hables de salud mental, de lo que cada deportista dijo al entrenador ni de quién ha respondido los formularios; compara a cada deportista solo con su propio normal; nombra a los deportistas solo por su código entre corchetes, por ejemplo [MT-07].
+Hoy es ${L.WDL[td.wd]} ${td.n} de ${L.MN[td.m]}. ${where} estados_7_dias va de ${L.WDL[d0.wd]} a ${L.WDL[td.wd]}: O óptimo, M moderado, R recuperación, N sin datos, C calculando su normal. formulario_semana = diferencia con su normal en la semana ${FORM.w} (fatiga: positivo = más fatiga). Ajustes: N normal, R reducida, A alternativa, D descanso.
+Datos: ${JSON.stringify(data)}
+Pregunta: ${q}
+Responde solo con JSON: {"texto": "2 o 3 frases", "codigos": ["MT-07"]}`;
+  }
+  async chatAsk(q, id, c) {
+    q = String(q || '').trim(); if (!q) return;
+    const add = e => this.setState(st => ({ chatLog: [...st.chatLog, e], chatQ: '' }));
+    if (id) return add({ q, id });
+    if (this.chatRisk(q)) return add({ q, refuse: true });
+    const m = this.chatMatch(q);
+    if (!this.live()) return add(m ? { q, id: m, auto: true } : { q, noAns: true });
+    const k = Date.now();
+    this.setState(st => ({ chatLog: [...st.chatLog, { q, busy: true, k }], chatQ: '' }));
+    try {
+      const raw = String(await window.claude.complete(this.chatPrompt(q, c))), js = JSON.parse(raw.slice(raw.indexOf('{'), raw.lastIndexOf('}') + 1));
+      const codes = (js.codigos || []).filter(cc => ATH.some(a => a.c === cc)), text = String(js.texto || '').replace(/\[(MT-\d+)\]/g, (mm, cc) => (ATH.find(a => a.c === cc) || {}).n || mm);
+      this.setState(st => ({ chatLog: st.chatLog.map(e => (e.k === k ? { q, ai: true, text, codes } : e)) }));
+    } catch (e) { this.setState(st => ({ chatLog: st.chatLog.map(x => (x.k === k ? { q, err: true } : x)) })); }
+  }
+  asstEl(c) {
+    const { L } = c, s = this.state;
+    if (!s.asst) return h('button', { key: 'fab', type: 'button', className: 'mtp-fab', title: this.t(L, 'asstOpen'), 'aria-label': this.t(L, 'asstOpen'), onClick: () => this.setState({ asst: true }) }, this.icon('message-circle', 20));
+    const sug = this.chatSuggest(L, c), asked = new Set(s.chatLog.filter(e => e.id).map(e => e.id)), left = sug.filter(([id]) => !asked.has(id));
+    const qBtn = ([id, q]) => h('button', { key: id, type: 'button', className: 'mtp-btn sec sm', onClick: () => this.chatAsk(q, id, c), style: { height: 'auto', minHeight: 32, padding: '6px 12px', whiteSpace: 'normal', textAlign: 'left', lineHeight: 1.35 } }, q);
+    const rows = codes => (codes && codes.length ? h('div', { style: { border: '1px solid var(--border)', borderRadius: 8, overflow: 'hidden' } }, codes.map((cc, i) => { const a = ATH.find(x => x.c === cc);
+      return h('a', { key: cc, href: `#/deportista/${cc}`, className: 'mtp-opt', style: { borderRadius: 0, borderTop: i ? '1px solid var(--border)' : 0, textDecoration: 'none', gap: 8 } },
+        h('span', { className: 't-name', style: { flex: 1, minWidth: 0 } }, a.n), this.week7(L, a, s.store, RULES0, c.now)); })) : null);
+    const entry = (e, i) => { const res = e.id ? this.chatRecipe(L, e.id, c) : e, plain = e.refuse || e.noAns || e.err || e.busy;
+      return h('div', { key: i, style: { display: 'flex', flexDirection: 'column', gap: 8, paddingTop: i ? 16 : 0, borderTop: i ? '1px solid var(--border)' : 0 } },
+        h('h3', { title: plain ? undefined : this.t(L, 'basedOn', this.t(L, 'basisChat', FORM.w)), style: { margin: 0, fontSize: 14, fontWeight: 600, lineHeight: 1.4, cursor: plain ? 'default' : 'help' } }, e.q),
+        e.auto ? h('div', { className: 't-sec' }, this.t(L, 'chatAuto', (sug.find(x => x[0] === e.id) || [])[1] || e.q)) : null,
+        h('p', { style: { margin: 0, lineHeight: 1.55, color: e.busy ? 'var(--text2)' : 'var(--text)' } }, e.busy ? this.t(L, 'thinking') : e.refuse ? this.t(L, 'chatRefuse') : e.noAns ? this.t(L, 'chatNoAns') : e.err ? this.t(L, 'chatErr') : res.text),
+        e.noAns ? h('div', { style: { display: 'flex', flexWrap: 'wrap', gap: 8 } }, sug.map(qBtn)) : rows(res.codes)); };
+    return h('aside', { key: 'asst', className: 'mtp-drawer', role: 'dialog', 'aria-label': this.t(L, 'asst') },
+      h('div', { style: { display: 'flex', alignItems: 'flex-start', gap: 12, padding: '16px 16px 12px 20px', borderBottom: '1px solid var(--border)' } },
+        h('div', { style: { flex: 1, minWidth: 0 } }, h('h2', null, this.t(L, 'asst')), h('div', { className: 't-sec' }, this.t(L, 'ctx', this.ctxOf(L, c).label))),
+        this.iconBtn('x', this.t(L, 'close'), { kind: '', sm: true, onClick: () => this.setState({ asst: false }) })),
+      h('div', { ref: this.chatRef, style: { flex: 1, minHeight: 0, overflowY: 'auto', padding: 20, display: 'flex', flexDirection: 'column', gap: 16 } },
+        s.chatLog.map(entry),
+        left.length ? h('div', { key: 'sg', style: { display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: 8 } }, (s.chatLog.length ? left.slice(0, 3) : left).map(qBtn)) : null),
+      h('form', { onSubmit: e => { e.preventDefault(); this.chatAsk(s.chatQ, null, c); }, style: { display: 'flex', flexDirection: 'column', gap: 8, padding: '12px 16px 16px', borderTop: '1px solid var(--border)', margin: 0 } },
+        h('div', { style: { display: 'flex', gap: 8 } },
+          h('input', { className: 'mtp-input', type: 'text', value: s.chatQ, maxLength: 300, placeholder: this.t(L, 'asstPh'), 'aria-label': this.t(L, 'asstPh'), onChange: e => this.setState({ chatQ: e.target.value }), style: { flex: 1, minWidth: 0 } }),
+          h('button', { type: 'submit', className: 'mtp-btn pri icon', 'aria-label': this.t(L, 'send'), title: this.t(L, 'send'), disabled: !s.chatQ.trim() || undefined }, this.icon('send', 16))),
+        h('div', { className: 't-lab' }, this.t(L, 'disclaim'))));
+  }
+
+  // ── Botó del prototip (matràs; temporal, només en castellà; tecla E per amagar-lo) ──
+  protoEl() {
+    const s = this.state;
+    if (s.pHidden) return h('button', { key: 'ph', type: 'button', title: 'Mostrar el botón del prototipo (tecla E)', 'aria-label': 'Mostrar el botón del prototipo', onClick: () => this.setProtoHidden(false),
+      style: { position: 'fixed', right: 80, bottom: 0, width: 32, height: 32, border: 0, background: 'transparent', cursor: 'pointer', zIndex: 60, display: 'flex', alignItems: 'center', justifyContent: 'center' } },
+      h('span', { style: { width: 6, height: 6, borderRadius: '50%', background: 'var(--textOff)' } }));
+    const it = (label, on, o = {}) => h(o.href ? 'a' : 'button', { key: label, type: o.href ? undefined : 'button', className: 'mtp-opt', href: o.href, target: o.ext ? '_blank' : undefined, rel: o.ext ? 'noopener' : undefined, onClick: on, 'aria-pressed': o.pressed, style: { textDecoration: 'none' } },
+      h('span', { style: { flex: 1 } }, label), o.right || null);
+    const now = minHm(this.now()), clk = t => h('button', { key: t, type: 'button', className: `mtp-btn sm ${now === t ? 'sec' : 'ter'}`, onClick: () => this.setState({ clock: { base: hmMin(t), t0: Date.now() } }) }, t);
+    const err = k => ({ pressed: s.syncErr === k, right: s.syncErr === k ? this.icon('check', 16) : null });
+    const panel = s.proto ? h('div', { key: 'pp', className: 'mtp-pop', style: { right: 0, bottom: 52, width: 300 } },
+      h('div', { className: 't-lab', style: { padding: '8px 12px 4px' } }, 'Prototipo'),
+      it('Estilos y componentes', () => this.setState({ proto: false }), { href: '#/estilos' }),
+      it('Comprobación de las cifras', () => this.setState({ proto: false }), { href: '#/comprobacion' }),
+      h('div', { key: 'clk', style: { padding: '8px 12px' } }, h('div', { className: 't-lab', style: { marginBottom: 4 } }, `Hora simulada: ${now}`), h('div', { style: { display: 'flex', flexWrap: 'wrap', gap: 4 } }, ['8:30', '10:30', '15:05', '16:05'].map(clk))),
+      it('Simular un error con las pulseras', () => this.setState({ syncErr: s.syncErr === 'band' ? null : 'band' }), err('band')),
+      it('Simular un error con TrainingPeaks', () => this.setState({ syncErr: s.syncErr === 'tp' ? null : 'tp' }), err('tp')),
+      it('Borrar los ajustes guardados', () => this.resetDemo()),
+      it('Abrir la app del deportista', null, { href: './Max%20Tracking%20-%20Ordenador.dc.html', ext: true, right: this.icon('external-link', 16) }),
+      it('Volver al panel actual', null, { href: './Max%20Tracking%20-%20Preparador.dc.html', right: this.icon('external-link', 16) }),
+      it('Ocultar el botón', () => this.setProtoHidden(true), { right: h('span', { className: 'mtp-kbd' }, 'E') })) : null;
+    return h('div', { key: 'proto', style: { position: 'fixed', right: 80, bottom: 26, zIndex: 60 } }, panel,
+      h('button', { type: 'button', className: 'mtp-btn sec icon', title: 'Prototipo (tecla E para ocultarlo)', 'aria-label': 'Prototipo', 'aria-expanded': s.proto, onClick: () => this.setState({ proto: !s.proto }), style: { width: 40, height: 40, borderRadius: '50%', boxShadow: 'var(--pop)' } },
+        this.icon('flask-conical', 20)));
+  }
+
+  // ── Component de decisió (fase 4) ──
+  // La peça central: la mateixa a Avui, la fitxa i el detall de la sessió. x = fila del tauler (boardOf). Una sola acció, Confirmar:
+  // desa l'ajust, dona el pendent per resolt i el publica a l'app del deportista; després, «Desfer» durant 10 segons. Estats: pendent
+  // (el suggeriment de la IA preseleccionat, amb vora discontínua, o «Sense suggeriment»), confirmat (l'ajust, l'hora i «Canviar»),
+  // automàtic (el motiu i «Canviar»), bloquejat (la sessió ja ha començat: només lectura). Mai es confirma en bloc (H1, decisió de la fase 0).
+  hm(v) { const t = Math.round(v * 60); return `${Math.floor(t / 60)} h ${String(t % 60).padStart(2, '0')}`; }
+  motiveShort(L, m) { if (!m) return ''; if (m.t === 'rec') return this.t(L, 'mRecS', m.n); if (m.t === 'nodata') return this.t(L, 'mNoDataS', L.WDL[dayOf(m.since).wd]); return this.motive(L, m); }
+  nameLink(L, x) { return h('a', { key: 'nm', href: `#/deportista/${x.a.c}`, className: 't-name', style: { color: 'var(--text)', textDecoration: 'none' } }, x.a.n); }
+  // Nom, punt de «nou d'avui», estat (punt + paraula) i motiu, en una línia: «Martí R. · ● Recuperació · 3 dies seguits».
+  whoLine(L, x) { const ms = this.motiveShort(L, x.m); return h('div', { className: 'mtp-line' }, this.nameLink(L, x), x.isNew ? this.newDot(L) : null, this.stChip(L, stOn(x.a, TODAY) || 'N'), ms ? h('span', null, `· ${ms}`) : null); }
+  selOf(x) { const v = this.state.sel[x.a.c]; if (v !== undefined) return v; if (x.dec) return x.dec.v; if (x.kind === 'auto') return x.v; return x.sug ?? null; }
+  noteOf(x) { const v = this.state.note[x.a.c]; return v !== undefined ? v : (x.dec && x.dec.note) || ''; }
+  // El que li arriba a l'esportista amb l'ajust triat (les regles del tipus de sessió).
+  preview(L, ses, v) { if (!v || !ses) return ''; if (v === 'N' || v === 'D') return L.PRE[v]; return ((v === 'R' ? L.RED : L.ALT)[ses.t] || []).join(' · '); }
+  dropUi(st, code) { const o = {}; ['sel', 'note', 'noteOpen', 'edit'].forEach(k => { const m = { ...st[k] }; delete m[code]; o[k] = m; }); return o; }
+  // Confirmar: desa l'ajust (i el que suggeria la IA, per a H1), el publica a l'app del deportista (mt-prep-aj) i passa al pendent següent.
+  confirm(c, x) {
+    const v = this.selOf(x); if (!v || x.locked) return;
+    const L = c.L, code = x.a.c, rec = { v, note: this.noteOf(x).trim(), at: minHm(this.now()), sug: x.sug ?? null, src: 'prep', was: x.kind, ...(x.kind === 'auto' ? { auto: x.v } : {}) };
+    const r = withDecision(this.state.store, code, rec); writeStore(r.store);
+    const order = this._pendOrder || [], i = order.indexOf(code), rest = order.filter(k => k !== code), next = rest.length ? rest[Math.min(Math.max(0, i), rest.length - 1)] : null;
+    this.setState(st => ({ store: r.store, focus: next, ...this.dropUi(st, code) }));
+    this.showToast(`${x.a.n} · ${L.AJ_OK[v]}`, () => { const back = withUndo(this.state.store, code, r.prev); writeStore(back); this.setState({ store: back, focus: code }); });
+  }
+  decisionEl(c, x, o = {}) {
+    const { L } = c, s = this.state, code = x.a.c, ses = x.ses, v = this.selOf(x), sug = x.sug;
+    const cur = x.dec ? x.dec.v : x.kind === 'auto' ? x.v : null, note = this.noteOf(x), unchanged = !!cur && v === cur && note === ((x.dec && x.dec.note) || '');
+    const sesLine = o.ses && ses ? h('div', { className: 't-sec' }, `${L.SES[ses.k]} · ${this.dShort(L, ses.day)} · ${ses.ini}`) : null;
+    if (x.locked) return h('div', { key: code, className: 'mtp-dec compact', 'data-dec': code },
+      h('div', { className: 'mtp-line', style: { justifyContent: 'space-between' } }, this.whoLine(L, x),
+        h('span', { className: 'mtp-line' }, x.v ? this.ajChip(L, x.v, x.status === 'auto') : h('span', { className: 'mtp-plain' }, this.t(L, 'noDec')), h('span', { className: 't-sec' }, this.t(L, 'locked')))), sesLine);
+    const why = sug ? h('div', { className: 'mtp-line' }, h('span', { title: this.t(L, 'basedOn', this.t(L, 'sugBasis', FORM.w)), style: { cursor: 'help' } }, `${this.t(L, 'sugLbl')} `, h('b', { style: { fontWeight: 600 } }, L.AJ[sug])),
+        h('span', null, `· ${this.deltas(L, x.a) || this.t(L, 'whyInS')}`))
+      : h('div', { className: 'mtp-line' }, h('span', null, this.t(L, 'noSug')), x.sync ? (s.syncReq[code] ? h('span', { className: 't-sec' }, `· ${this.t(L, 'askedSync', s.syncReq[code])}`)
+        : this.btn('ter sm', this.t(L, 'askSync'), { icon: 'watch', onClick: () => this.setState(st => ({ syncReq: { ...st.syncReq, [code]: minHm(this.now()) } })) })) : null);
+    const pick = k => this.setState(st => ({ sel: { ...st.sel, [code]: k }, focus: code }));
+    const noteOn = !!s.noteOpen[code] || !!note;
+    const act = h('div', { className: 'mtp-line', style: { justifyContent: 'space-between', gap: 12 } }, this.seg(L, v, sug, pick, `${this.t(L, 'colAj')} · ${x.a.n}`),
+      h('span', { className: 'mtp-line' }, o.edit ? this.btn('ter', this.t(L, 'cancel'), { onClick: () => this.setState(st => this.dropUi(st, code)) }) : null,
+        this.btn('pri', v ? this.t(L, 'confirmV', L.AJ[v]) : this.t(L, 'confirm'), { disabled: !v || unchanged, onClick: () => this.confirm(c, x) })));
+    // «Li arribarà» i «Afegir una nota» només quan hi ha un ajust triat (la nota va amb l'ajust).
+    const prev = v ? h('div', { className: 'mtp-line', style: { justifyContent: 'space-between', flexWrap: 'nowrap', gap: 12 } }, h('span', { className: 't-sec', style: { minWidth: 0 } }, this.t(L, 'willGet', this.preview(L, ses, v))),
+      noteOn ? null : this.btn('ter sm', this.t(L, 'addNote'), { icon: 'plus', onClick: () => this.setState(st => ({ noteOpen: { ...st.noteOpen, [code]: true }, focus: code })) })) : null;
+    const noteEl = noteOn ? h('input', { className: 'mtp-input', type: 'text', value: note, maxLength: 140, placeholder: this.t(L, 'notePh'), 'aria-label': this.t(L, 'notePh'), autoFocus: !note,
+      onChange: e => { const val = e.target.value; this.setState(st => ({ note: { ...st.note, [code]: val } })); }, onKeyDown: e => { if (e.key === 'Enter') { e.preventDefault(); this.confirm(c, x); } } }) : null;
+    return h('div', { key: code, className: 'mtp-dec', 'data-dec': code, 'data-focus': o.focusable && this._focus === code ? '' : undefined,
+      onClick: e => { if (e.target.closest('button, a, input, label')) return; this.setState(st => ({ focus: code, open: { ...st.open, [code]: !st.open[code] } })); } },
+      this.whoLine(L, x), sesLine, why, act, prev, noteEl, s.open[code] ? this.dataSumEl(c, x) : null);
+  }
+  // Fila curta (blocs plegats d'Avui): automàtic, a vigilar o decidit, amb «Canviar» o «Ajustar igualment», que obren el component sencer.
+  compactEl(c, x, kind) {
+    const { L } = c, s = this.state, code = x.a.c;
+    if (x.locked) return this.decisionEl(c, x);
+    if (s.edit[code]) return this.decisionEl(c, x, { edit: true });
+    const right = kind === 'auto' ? this.ajChip(L, x.v, true) : kind === 'watch' ? h('span', { className: 't-sec' }, `${this.t(L, 'sugLbl')} ${L.AJ[x.sug || 'N']}`)
+      : h('span', { className: 'mtp-line' }, this.ajChip(L, x.v), h('span', { className: 't-sec num' }, this.t(L, 'confirmedAt', x.dec.at)));
+    return h('div', { key: code, className: 'mtp-dec compact', 'data-dec': code },
+      h('div', { className: 'mtp-line', style: { justifyContent: 'space-between' } }, this.whoLine(L, x),
+        h('span', { className: 'mtp-line' }, right, this.btn('ter sm', this.t(L, kind === 'watch' ? 'adjustAnyway' : 'change'), { onClick: () => this.setState(st => ({ edit: { ...st.edit, [code]: true }, focus: code })) }))));
+  }
+  // Resum de dades que es desplega en pitjar la fila: les tres dades amb els 7 dies i la seva franja, el formulari (matriu prudent) i la nota.
+  dataSumEl(c, x) {
+    const { L } = c, a = x.a, S = seriesOf(a), f = formOf(a), N = a.note ? NOTES[a.note] : null, hh = healthOn(a, TODAY);
+    const met = k => { const v = S[k][TODAY], q = S.qs[k][TODAY], d = v == null ? 0 : v - S.mean[k], u = L.UNIT[k], mag = k === 'son' ? Math.round(Math.abs(d) * 60) : Math.round(Math.abs(d));
+      return h('div', { key: k, style: { minWidth: 0 } }, h('div', { className: 't-lab' }, L.METN[k]), h('div', { className: 'num', style: { fontWeight: 600 } }, v == null ? '—' : k === 'son' ? this.hm(v) : `${Math.round(v)} ${u}`),
+        h('div', { className: 't-sec num' }, q == null || a.calc ? '—' : Math.abs(q) <= 1 ? this.t(L, 'inNormal') : this.t(L, 'vsNormal', `${d > 0 ? '+' : '−'}${mag} ${u}`)), this.spark(S, k)); };
+    const form = L.SCALES.map((sc, j) => { const v = f[j * 2], nm = f[j * 2 + 1], dd = nm == null ? null : v - nm;
+      return h('div', { key: sc.k }, h('span', { className: 't-name' }, sc.t), ' ', h('span', { className: 'num' }, `${v}/10`), ' ', h('span', { className: 't-sec' }, `· ${dd == null ? this.t(L, 'fNoNorm') : Math.abs(dd) < .75 ? this.t(L, 'fSame') : dd > 0 ? this.t(L, 'fMore') : this.t(L, 'fLess')}`)); });
+    return h('div', { className: 'mtp-sum', onClick: e => e.stopPropagation() },
+      h('div', { style: { display: 'grid', gridTemplateColumns: 'repeat(3, minmax(0,1fr))', gap: 16 } }, KEYS3.map(met)),
+      h('div', { style: { display: 'grid', gridTemplateColumns: 'repeat(2, minmax(0,1fr))', gap: 16 } },
+        h('div', null, h('div', { className: 't-lab', style: { marginBottom: 4 } }, this.t(L, 'formH', FORM.w)), form),
+        h('div', null, h('div', { className: 't-lab', style: { marginBottom: 4 } }, N ? `${this.t(L, 'noteH')} · ${this.dShort(L, N.day)}` : this.t(L, 'noteH')),
+          N ? h('div', null, locTx(N.t, L.lang)) : hh ? this.healthMark(L, hh) : h('span', { className: 't-sec' }, this.t(L, 'noNote')))),
+      h('a', { href: `#/deportista/${a.c}`, className: 'mtp-btn ter sm', style: { alignSelf: 'flex-start', padding: 0 } }, this.t(L, 'seeFicha'), this.icon('chevron-right', 16)));
+  }
+  // Minigràfic dels 7 últims dies amb la franja (el seu normal).
+  spark(S, k) {
+    const W = 120, H = 28, v = S[k].slice(21, 28), vals = v.filter(x => x != null), lo = S.mean[k] - S.half[k], hi = S.mean[k] + S.half[k];
+    if (!vals.length) return null;
+    const mn = Math.min(lo, ...vals), mx = Math.max(hi, ...vals), pad = (mx - mn) * .15 || 1, Y = y => 3 + (1 - (y - (mn - pad)) / ((mx + pad) - (mn - pad))) * (H - 6), X = j => 3 + j * (W - 6) / 6;
+    const runs = []; let cur = []; v.forEach((y, j) => { if (y == null) { if (cur.length) runs.push(cur); cur = []; } else cur.push(`${X(j).toFixed(1)},${Y(y).toFixed(1)}`); }); if (cur.length) runs.push(cur);
+    return h('svg', { width: W, height: H, 'aria-hidden': 'true', style: { display: 'block', marginTop: 8 } },
+      h('rect', { x: 0, y: Y(hi), width: W, height: Math.max(2, Y(lo) - Y(hi)), rx: 3, style: { fill: 'var(--border)' } }),
+      runs.map((r, i) => h('polyline', { key: i, points: r.join(' '), style: { fill: 'none', stroke: 'var(--text2)', strokeWidth: 1.5, strokeLinejoin: 'round', strokeLinecap: 'round' } })),
+      v[6] != null ? h('circle', { cx: X(6), cy: Y(v[6]), r: 3, style: { fill: 'var(--text)' } }) : null);
+  }
+  moveFocus(d) { const o = this._pendOrder || []; if (!o.length) return; const i = o.indexOf(this._focus); this.setState({ focus: o[Math.max(0, Math.min(o.length - 1, i < 0 ? 0 : i + d))] }); }
+  // Dreceres de teclat d'Avui (J/K, 1–4, Intro, Espai, ?): una petita ajuda.
+  kbHelpEl(L) {
+    const s = this.state, row = (k, t) => h('div', { key: t, className: 'mtp-line', style: { justifyContent: 'space-between', gap: 16, padding: '4px 12px' } }, h('span', null, t), h('span', { className: 'mtp-line', style: { gap: 4 } }, k.map(y => h('kbd', { key: y, className: 'mtp-kbd' }, y))));
+    return h('div', { key: 'kb', style: { position: 'relative', flex: 'none', zIndex: 45 } },
+      this.iconBtn('keyboard', this.t(L, 'kbOpen'), { expanded: s.help, onClick: () => this.setState({ help: !s.help }) }),
+      s.help ? h('div', { className: 'mtp-pop', role: 'dialog', 'aria-label': this.t(L, 'kbOpen'), style: { right: 0, top: 44, width: 320, padding: '8px 4px' } },
+        h('div', { className: 't-lab', style: { padding: '4px 12px 8px' } }, this.t(L, 'kbOpen')),
+        row(['J', 'K'], this.t(L, 'kbNext')), row(['1', '2', '3', '4'], this.t(L, 'kbPick')), row([this.t(L, 'kEnter')], this.t(L, 'confirm')), row([this.t(L, 'kSpace')], this.t(L, 'kbData')), row(['?'], this.t(L, 'kbHelp'))) : null);
+  }
+  // Resum de l'equip (al prototip, fet amb les dades; tres frases com a molt, sense repetir la llista de pendents): canvis des d'ahir,
+  // la dada del grup que porta més dies empitjorant i la setmana fins avui frente a l'anterior.
+  teamSumText(c) {
+    const { L } = c, g = this.state.grp, A = ATH.filter(a => inGrp(a, g)), out = [];
+    const rT = A.filter(a => stOn(a, TODAY) === 'R').length, rY = A.filter(a => stOn(a, TODAY - 1) === 'R').length;
+    out.push(this.t(L, 'sumChg', L.ST.R, rT, rT - rY));
+    const tr = KEYS3.map(k => ({ k, n: groupTrend(ATH, g, k, TODAY) })).sort((p, q) => q.n - p.n)[0];
+    if (tr && tr.n >= 2) out.push(this.t(L, 'sumTrend', L.METS[tr.k], this.t(L, 'sumGrp', g === 'T' ? null : g), tr.n, tr.k === 'rhr'));
+    const ws = weekSum(ATH, weekOf(TODAY), g); out.push(this.t(L, 'sumWeek', ws.ok, ws.tot, ws.diff));
+    return out.slice(0, 3);
+  }
+  // Columna de la dreta d'Avui: estat de l'equip (cada recompte porta a Esportistes filtrat), el resum i els propers dies.
+  sideColEl(c) {
+    const { L, K } = c, g = this.state.grp, st = K.st, nost = st.N + st.C;
+    const items = [['O', st.O], ['M', st.M], ['R', st.R]].filter(y => y[1]);
+    const link = (k, n, label, dot) => h('a', { key: k, href: `#/deportistas?estado=${k}`, className: 'mtp-opt', style: { width: 'auto', minHeight: 32, padding: '4px 8px', textDecoration: 'none', gap: 8 } },
+      h('span', { className: 'mtp-dot', 'data-s': dot }), h('span', { className: 'num', style: { fontWeight: 600 } }, n), label);
+    const team = h('section', { key: 'team', style: { display: 'flex', flexDirection: 'column', gap: 12 } }, h('h2', null, this.t(L, 'teamH')),
+      h('div', { style: { display: 'flex', alignItems: 'baseline', gap: 8 } }, h('span', { className: 't-big num' }, st.O), h('span', { className: 't-sec' }, this.t(L, 'ofInOpt', K.filt.all))),
+      h('div', { className: 'mtp-dist', 'aria-hidden': 'true' }, [...items, ['X', nost]].filter(y => y[1]).map(([k, n]) => h('span', { key: k, 'data-s': k, style: { flex: `${n} 1 0` } }))),
+      h('div', { style: { display: 'flex', flexWrap: 'wrap', gap: 4, margin: '0 -8px' } }, items.map(([k, n]) => link(k, n, L.ST[k], k)), nost ? link('sin', nost, this.t(L, 'noState'), 'N') : null));
+    const sum = h('section', { key: 'sum', style: { display: 'flex', flexDirection: 'column', gap: 8 } },
+      h('div', { className: 'mtp-line', style: { justifyContent: 'space-between' } }, h('h2', { title: this.t(L, 'basedOn', this.t(L, 'basisTeam')), style: { cursor: 'help' } }, this.t(L, 'sumH')), h('span', { className: 't-lab' }, this.t(L, 'byAI'))),
+      h('p', { style: { margin: 0, lineHeight: 1.6 } }, this.teamSumText(c).join(' ')), h('div', { className: 't-lab' }, this.t(L, 'disclaim')));
+    const up = upcoming(ATH, g).map((x, i) => { const d = dayOf(x.day);
+      return h('div', { key: i, style: { display: 'grid', gridTemplateColumns: '40px minmax(0,1fr)', gap: 12, alignItems: 'center' } },
+        h('span', { className: 'num', style: { width: 40, height: 40, borderRadius: 8, border: '1px solid var(--border)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', lineHeight: 1.1 } },
+          h('span', { className: 't-lab' }, L.WD3[d.wd]), h('span', { style: { fontWeight: 600 } }, d.n)),
+        h('span', null, x.t === 'form' ? this.t(L, 'upForm') : x.t === 'band' ? this.t(L, 'upBand', x.a.n) : this.t(L, 'upReview', x.a.n, healthOn(x.a, TODAY).t))); });
+    return h('aside', { key: 'side', style: { display: 'flex', flexDirection: 'column', gap: 32, minWidth: 0 } }, team, sum,
+      h('section', { key: 'up', style: { display: 'flex', flexDirection: 'column', gap: 12 } }, h('h2', null, this.t(L, 'upH')), up));
+  }
+  // ── Avui (fase 4) ──
+  // Capçalera (progrés «2 de 6 decidits» i la pròxima hora límit), els pendents agrupats per sessió (el component de decisió),
+  // els blocs plegats (automàtics, a vigilar, decidits avui amb l'enllaç a l'historial) i, a la dreta, l'estat de l'equip, el resum i els propers.
+  pageHoy(c) {
+    const { L, K, board } = c, s = this.state, g = s.grp, B = board.filter(x => inGrp(x.a, g)), groups = {};
+    B.filter(x => x.status === 'pend' || x.status === 'nodec').forEach(x => { (groups[x.ses.id] = groups[x.ses.id] || { ses: x.ses, lim: x.lim, late: x.late, rows: [] }).rows.push(x); });
+    const G = Object.values(groups).sort((p, q) => p.lim - q.lim || p.ses.g.localeCompare(q.ses.g));
+    G.forEach(gr => gr.rows.sort((p, q) => (p.status === 'nodec') - (q.status === 'nodec') || attRank(p) - attRank(q) || ((q.m && q.m.n) || 0) - ((p.m && p.m.n) || 0) || p.a.n.localeCompare(q.a.n)));
+    const order = []; G.forEach(gr => gr.rows.forEach(x => { if (x.status === 'pend') order.push(x.a.c); }));
+    this._pendOrder = order; this._focus = order.includes(s.focus) ? s.focus : order[0] || null;
+    const nl = nextLimit(board, g), pct = K.total ? Math.round(K.resolved / K.total * 100) : 100;
+    const head = h('header', { key: 'h', style: { display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 16 } },
+      h('div', { style: { minWidth: 0, display: 'flex', flexDirection: 'column', gap: 8 } }, h('h1', null, `${this.t(L, 'today')} · ${this.dateLong(L, TODAY)}${g === 'T' ? '' : ` · ${this.t(L, 'group', g)}`}`),
+        h('div', { className: 'mtp-line', style: { gap: 16 } },
+          h('span', { className: 'mtp-line' }, h('span', { className: 'num', style: { fontWeight: 500 } }, this.t(L, 'decidedOf', K.resolved, K.total)),
+            h('span', { className: 'mtp-progress', role: 'progressbar', 'aria-valuemin': 0, 'aria-valuemax': K.total, 'aria-valuenow': K.resolved, 'aria-label': this.t(L, 'decidedOf', K.resolved, K.total) }, h('span', { style: { width: `${pct}%` } }))),
+          nl ? h('span', { className: nl.late ? 'mtp-warn' : 't-sec num', style: { display: 'inline-flex', alignItems: 'center', gap: 8 } }, this.icon('clock', 16),
+            this.t(L, nl.late ? 'limitLate' : 'limitNext', minHm(nl.lim), `${L.SES[nl.ses.k]}, ${this.grpName(L, nl.ses.g)}`)) : null)),
+      this.kbHelpEl(L));
+    const sesCard = gr => h('section', { key: gr.ses.id, className: 'mtp-card', 'aria-label': L.SES[gr.ses.k] },
+      h('header', { className: 'mtp-card-h' }, h('span', { style: { color: 'var(--icon)' } }, this.icon(SES_ICON[gr.ses.t] || 'calendar-days', 16)),
+        h('a', { href: `#/sesion/${gr.ses.id}`, style: { color: 'var(--text)', textDecoration: 'none', fontWeight: 600 } }, L.SES[gr.ses.k]),
+        h('span', { className: gr.late ? 'mtp-warn' : 't-sec num' }, this.t(L, 'sesLine', this.grpName(L, gr.ses.g), gr.ses.ini, minHm(gr.lim)))),
+      gr.rows.map(x => this.decisionEl(c, x, { focusable: true })));
+    const nextS = sessionsOn(TODAY, g).filter(x => hmMin(x.ini) > c.now).sort((p, q) => hmMin(p.ini) - hmMin(q.ini))[0];
+    const fold = (k, title, rows, extra) => h('div', { key: k, className: 'mtp-fold' },
+      h('div', { className: 'mtp-line', style: { flexWrap: 'nowrap', paddingRight: 8 } },
+        h('button', { type: 'button', className: 'mtp-fold-h', 'aria-expanded': !!s.fold[k], onClick: () => this.setState(st => ({ fold: { ...st.fold, [k]: !st.fold[k] } })) },
+          this.icon('chevron-right', 16), title, h('span', { className: 't-sec num', style: { fontWeight: 500 } }, rows.length)), extra || null),
+      s.fold[k] && rows.length ? rows : null);
+    const by = st => B.filter(x => x.status === st);
+    const main = h('div', { key: 'main', style: { display: 'flex', flexDirection: 'column', gap: 24, minWidth: 0 } },
+      h('div', { style: { display: 'flex', flexDirection: 'column', gap: 16 } }, h('h2', null, this.t(L, 'pendH'), ' ', h('span', { className: 't-sec num', style: { fontWeight: 500 } }, K.pend.length)),
+        G.length ? G.map(sesCard) : h('div', { key: 'empty', className: 'mtp-card' }, this.emptyEl(L, this.t(L, 'allDone'), nextS ? this.t(L, 'nextSes', L.SES[nextS.k], nextS.ini) : this.t(L, 'noMoreSes')))),
+      h('div', { style: { display: 'flex', flexDirection: 'column', gap: 8 } },
+        fold('auto', this.t(L, 'autoH'), by('auto').map(x => this.compactEl(c, x, 'auto'))),
+        fold('watch', this.t(L, 'watchH'), by('watch').map(x => this.compactEl(c, x, 'watch'))),
+        fold('done', this.t(L, 'doneH'), by('done').map(x => this.compactEl(c, x, 'done')), h('a', { href: '#/hoy/historial', className: 'mtp-btn ter sm' }, this.icon('history', 16), this.t(L, 'history')))));
+    return h('div', { className: 'mtp-page' }, head, h('div', { key: 'cols', className: 'mtp-hoy' }, main, this.sideColEl(c)));
+  }
+  // Historial: el que es va decidir cada dia (dels 28 últims), amb el motiu, el suggeriment de la IA i si es va seguir (H1). Filtres per motiu.
+  pageHist(c) {
+    const { L } = c, s = this.state, g = s.grp, f = s.histF;
+    const H = historyOf(ATH.filter(a => inGrp(a, g)), s.store, RULES0, c.now, 0, TODAY), rows = H.filter(x => f === 'all' || (x.m && x.m.t === f));
+    const F = [['all', this.t(L, 'all')], ['salut', this.t(L, 'fSalut')], ['rec', this.t(L, 'fRec')], ['out', this.t(L, 'fOut')], ['back', this.t(L, 'fBack')], ['nodata', this.t(L, 'fNoData')], ['well', this.t(L, 'fWell')]];
+    const chips = h('div', { key: 'f', role: 'group', 'aria-label': this.t(L, 'filterL'), className: 'mtp-line', style: { gap: 8 } }, F.map(([k, w]) => h('button', { key: k, type: 'button', className: 'mtp-btn sec sm', 'aria-pressed': f === k, onClick: () => this.setState({ histF: k }) },
+      w, h('span', { className: 'num', style: { opacity: .75 } }, k === 'all' ? H.length : H.filter(x => x.m && x.m.t === k).length))));
+    const dec = x => h('span', { className: 'mtp-line' }, x.src === 'cap' ? h('span', { className: 'mtp-plain' }, this.t(L, 'noDec')) : this.ajChip(L, x.v, x.src === 'auto'),
+      x.src === 'prep' && x.sug ? h('span', { className: 't-sec' }, this.t(L, x.ok ? 'asSug' : 'diffSug')) : null, x.src === 'prep' && x.at ? h('span', { className: 't-sec num' }, this.t(L, 'atT', x.at)) : null);
+    const table = h('table', { key: 't', className: 'mtp-table' }, h('thead', null, h('tr', null, ['colDay', 'colAth', 'colWhy', 'colSug', 'colDec'].map(k => h('th', { key: k }, this.t(L, k))))),
+      h('tbody', null, rows.map((x, i) => h('tr', { key: i }, h('td', { className: 'num', style: { whiteSpace: 'nowrap' } }, this.dShort(L, x.day)),
+        h('td', null, h('a', { href: `#/deportista/${x.a.c}`, className: 't-name', style: { color: 'var(--text)', textDecoration: 'none', whiteSpace: 'nowrap' } }, x.a.n)),
+        h('td', null, this.motive(L, x.m) || '—'), h('td', null, x.sug ? L.AJ[x.sug] : h('span', { className: 'mtp-plain' }, '—')), h('td', null, dec(x))))));
+    return h('div', { className: 'mtp-page' }, this.pageHead(L, this.t(L, 'history'), { crumb: this.crumb(L, 'hoy', this.t(L, 'today')), sub: this.t(L, 'histN', rows.length) }), chips,
+      rows.length ? table : h('div', { key: 'e', className: 'mtp-card' }, this.emptyEl(L, this.t(L, 'nothingF'), null, 'history')));
+  }
+
+  // ── Pàgines ──
+  sesById(id) { const m = /^(\d+)-(A|B|AB)$/.exec(id || ''); if (!m) return null; const x = sesOf(m[2] === 'AB' ? 'A' : m[2], +m[1]); return x && x.id === id ? x : null; }
+  pageHead(L, title, o = {}) {
+    const g = this.state.grp, full = o.noGrp || g === 'T' ? title : `${title} · ${this.t(L, 'group', g)}`;
+    return h('header', { key: 'ph', style: { display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', gap: 16, flexWrap: 'wrap' } },
+      h('div', { style: { minWidth: 0 } }, o.crumb || null, h('h1', null, full), o.sub ? h('p', { className: 't-sec', style: { margin: '4px 0 0' } }, o.sub) : null), o.right || null);
+  }
+  crumb(L, path, label) { return h('a', { href: `#/${path}`, className: 'mtp-btn ter sm', style: { padding: 0, height: 24, marginBottom: 4 } }, this.icon('chevron-left', 16), label); }
+  // Pantalla encara per fer: diu en quina fase arriba (en castellà, com el matràs).
+  soon(phase, icon, what) {
+    return h('div', { key: 'soon', className: 'mtp-empty', style: { border: '1px dashed var(--miss)', borderRadius: 8 } }, this.icon(icon, 20),
+      h('div', { style: { fontWeight: 600 } }, `En construcción · llega en la fase ${phase}`), h('div', { className: 't-sec', style: { maxWidth: 520 } }, what));
+  }
+  pageEl(c) {
+    const { L } = c, r = this.state.route;
+    if (r.page === 'estilos') return this.pageStyles();
+    if (r.page === 'comprobacion') return this.pageCheck();
+    const wrap = kids => h('div', { className: 'mtp-page' }, kids);
+    if (r.page === 'hoy' && r.id === 'historial') return this.pageHist(c);
+    if (r.page === 'hoy') return this.pageHoy(c);
+    if (r.page === 'deportistas') { const v = r.id === 'semana' ? 'semana' : 'lista';
+      return wrap([this.pageHead(L, this.t(L, 'athletes'), { right: this.segText([['lista', this.t(L, 'viewList')], ['semana', this.t(L, 'viewWeek')]], v, k => this.go(k === 'semana' ? 'deportistas/semana' : 'deportistas'), this.t(L, 'viewL')) }),
+        this.soon(6, 'users', v === 'semana' ? 'La matriz de todo el equipo día a día (la antigua pantalla Semana), con la leyenda.' : 'La lista del equipo con filtros, los últimos 7 días y el ajuste de hoy.')]); }
+    if (r.page === 'deportista') { const a = ATH.find(x => x.c === r.id), x = a && c.board.find(y => y.a.c === a.c);
+      if (!a) return wrap([this.pageHead(L, this.t(L, 'noAth'), { noGrp: true, crumb: this.crumb(L, 'deportistas', this.t(L, 'athletes')) })]);
+      const hh = healthOn(a, TODAY);
+      return wrap([this.pageHead(L, a.n, { noGrp: true, crumb: this.crumb(L, 'deportistas', this.t(L, 'athletes')),
+        right: h('div', { style: { display: 'flex', alignItems: 'center', gap: 16, flexWrap: 'wrap' } }, this.stChip(L, stOn(a, TODAY) || 'N'), hh ? this.healthMark(L, hh) : null, x ? this.ajToday(L, x) : null) }),
+        this.soon(5, 'circle-user-round', 'La ficha: por qué está así, sus datos de 28 días, el formulario y la salud; y, si hay un pendiente, la decisión a la derecha.')]); }
+    if (r.page === 'sesion') { const x = this.sesById(r.id);
+      if (!x) return wrap([this.pageHead(L, this.t(L, 'noSes'), { noGrp: true, crumb: this.crumb(L, 'sesiones', this.t(L, 'sessions')) })]);
+      return wrap([this.pageHead(L, L.SES[x.k], { noGrp: true, crumb: this.crumb(L, 'sesiones', this.t(L, 'sessions')), sub: `${this.dShort(L, x.day)} · ${this.grpName(L, x.g)} · ${x.ini}–${x.fi}` }),
+        this.soon(7, SES_ICON[x.t] || 'calendar-days', 'Las instrucciones, cómo se adapta y los participantes: pendientes, ajustados y sesión normal.')]); }
+    if (r.page === 'sesiones') return wrap([this.pageHead(L, this.t(L, 'sessions')), this.soon(7, 'calendar-days', 'El calendario semanal por grupos, con una línea de estado por sesión. Al pulsar una sesión se abre su detalle.')]);
+    if (r.page === 'ajustes' && r.id === 'experimento') return wrap([this.pageHead(L, this.t(L, 'experiment'), { noGrp: true, crumb: this.crumb(L, 'ajustes', this.t(L, 'settings')) }),
+      this.soon(8, 'clipboard-list', 'El experimento de la hipótesis 1 (8 casos anónimos, notas frente a panel) se traslada aquí desde el panel actual.')]);
+    if (r.page === 'ajustes') return wrap([this.pageHead(L, this.t(L, 'settings'), { noGrp: true }),
+      h('a', { key: 'exp', href: '#/ajustes/experimento', className: 'mtp-opt', style: { border: '1px solid var(--border)', background: 'var(--surface)', borderRadius: 8, padding: '12px 16px', textDecoration: 'none', maxWidth: 560 } },
+        h('span', { style: { color: 'var(--icon)' } }, this.icon('clipboard-list', 20)), h('span', { style: { flex: 1 } }, this.t(L, 'experiment')), this.icon('chevron-right', 16)),
+      this.soon(8, 'settings', 'Reglas de los pendientes, plantillas de adaptación por tipo de sesión, notificaciones, integraciones y grupos.')]);
+    return wrap([this.pageHead(L, this.t(L, 'today'))]);
+  }
+
+  // ── Pàgines del prototip (castellà) ──
+  toolHead(title) {
+    return h('header', { style: { display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap' } }, h('h1', null, title),
+      h('span', { className: 't-sec', style: { padding: '2px 8px', borderRadius: 6, border: '1px dashed var(--miss)' } }, 'Prototipo · en construcción'));
+  }
+  // Estilos: tots els components en clar i en fosc, un al costat de l'altre (el «estilos.html» de l'especificació).
+  pageStyles() {
+    const L = this.L('es'), s = this.state, R = RULES0, now = this.now(), board = boardOf(ATH, {}, R, now), K = countsOf(board, 'T');
+    const row = (kids, gap = 12) => h('div', { style: { display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap } }, kids);
+    const panel = (m, kids) => h('div', { key: m, className: 'mtp', 'data-theme': m, style: { padding: 24, borderRadius: 8, border: '1px solid var(--border)', minWidth: 0, display: 'flex', flexDirection: 'column', gap: 16 } },
+      h('div', { className: 't-lab' }, m === 'light' ? 'Claro' : 'Oscuro'), kids);
+    const sec = (title, render, stack) => h('section', { key: title, style: { display: 'flex', flexDirection: 'column', gap: 12 } }, h('h2', null, title),
+      h('div', { style: { display: 'grid', gridTemplateColumns: stack ? '1fr' : 'repeat(2, minmax(0,1fr))', gap: 16 } }, ['light', 'dark'].map(m => panel(m, render(m)))));
+    const td = dayOf(TODAY), first = st => board.find(x => x.status === st), p1 = first('pend'), nw = board.find(x => x.isNew);
+    const sug = p1 ? p1.sug : 'R', sel = s.demoSel || sug;
+    const nextS = sessionsOn(TODAY, 'T').filter(x => hmMin(x.ini) > now).sort((x, y) => hmMin(x.ini) - hmMin(y.ini)).pop();
+    const typo = () => [h('h1', { key: 1 }, `Hoy · ${L.WDL[td.wd]} ${td.n} de ${L.MN[td.m]}`), h('h2', { key: 2 }, 'Pendientes'),
+      h('p', { key: 3, style: { margin: 0 } }, 'Texto normal, 14 px. ', h('span', { className: 't-name' }, p1 ? p1.a.n : ''), ' es un nombre (14 px, medio).'),
+      h('p', { key: 4, className: 't-sec', style: { margin: 0 } }, 'Texto secundario, 13 px.'), h('div', { key: 5, className: 't-lab' }, 'Etiqueta de tabla, 12 px'),
+      h('div', { key: 6, style: { display: 'flex', alignItems: 'baseline', gap: 8 } }, h('span', { className: 't-big num' }, K.st.O), h('span', null, L.ST.O))];
+    const SW = [['bg', 'Fondo de la página'], ['surface', 'Superficie'], ['sunken', 'Fondo gris'], ['border', 'Borde'], ['borderStrong', 'Borde de campos y botones'], ['text', 'Texto principal', 'surface'],
+      ['text2', 'Texto secundario', 'surface'], ['primary', 'Azul principal'], ['link', 'Enlaces', 'surface'], ['opt', L.ST.O], ['mod', L.ST.M], ['rec', L.ST.R], ['pendText', 'Pendiente', 'pendBg'], ['warnText', 'Atención', 'surface'], ['miss', 'Línea de «sin datos»', 'surface']];
+    const colors = m => h('div', { style: { display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: 12 } }, SW.map(([k, label, on]) => { const T = TOKENS[m], r = on ? contrast(T[k], T[on]) : null;
+      return h('div', { key: k, style: { display: 'flex', alignItems: 'center', gap: 10, minWidth: 0 } }, h('span', { style: { width: 28, height: 28, flex: 'none', borderRadius: 6, background: `var(--${k})`, boxShadow: 'inset 0 0 0 1px var(--border)' } }),
+        h('span', { style: { minWidth: 0, lineHeight: 1.35 } }, h('span', { style: { display: 'block', fontSize: 13, fontWeight: 500 } }, label), h('span', { className: 't-sec num' }, `${T[k]}${r ? ` · ${r.toFixed(1).replace('.', ',')}:1` : ''}`))); }));
+    const states = m => [row(ST_KEYS.map(c => h('span', { key: c }, this.stChip(L, c))), 16),
+      row([...ST_KEYS, 'F'].map(c => h('span', { key: c, style: { display: 'inline-flex', alignItems: 'center', gap: 6 } }, this.cell(c, c === 'F' ? this.t(L, 'notYet') : L.ST[c]), h('span', { className: 't-sec' }, c === 'F' ? 'Día que no ha llegado' : L.ST[c]))), 14),
+      ...[['deut', 'Con deuteranopía'], ['prot', 'Con protanopía']].map(([k, w]) => h('div', { key: k, style: { display: 'flex', alignItems: 'center', gap: 10 } }, h('span', { className: 't-sec', style: { width: 140 } }, w),
+        ['opt', 'mod', 'rec'].map(c => h('span', { key: c, title: `${L.ST[{ opt: 'O', mod: 'M', rec: 'R' }[c]]} visto ${w.toLowerCase()}`, style: { width: 32, height: 16, borderRadius: 4, background: cvd(TOKENS[m][c], k) } }))))];
+    const ajustes = () => [row(['N', 'R', 'A', 'D'].map(v => h('span', { key: v }, this.ajChip(L, v))), 8),
+      row([h('span', { key: 's' }, this.seg(L, sel, sug, k => this.setState({ demoSel: k }), 'Ajuste de la sesión')), h('span', { key: 'b' }, this.btn('pri', this.t(L, 'confirmV', L.AJ[sel])))], 12)];
+    const marks = () => [row([h('span', { key: 'p' }, this.pendChip(L)), h('span', { key: 'a' }, this.ajChip(L, 'D', true)),
+      nw ? h('span', { key: 'n', style: { display: 'inline-flex', alignItems: 'center', gap: 6 } }, h('span', { className: 't-name' }, nw.a.n), this.newDot(L)) : null], 12),
+      row(ATH.filter(a => healthOn(a, TODAY)).map(a => h('span', { key: a.c }, this.healthMark(L, healthOn(a, TODAY)))), 16)];
+    const buttons = () => [row([this.btn('pri', this.t(L, 'confirmV', L.AJ.R)), this.btn('sec', this.t(L, 'seeDetail')), this.btn('ter', this.t(L, 'change')), this.iconBtn('search', this.t(L, 'search'))].map((x, i) => h(React.Fragment, { key: i }, x))),
+      row([this.btn('pri', this.t(L, 'confirmV', L.AJ.R), { sm: true }), this.btn('sec', this.t(L, 'seeDetail'), { sm: true }), this.btn('ter', this.t(L, 'change'), { sm: true }), this.iconBtn('search', this.t(L, 'search'), { sm: true }),
+        this.btn('pri', this.t(L, 'confirmV', L.AJ.N), { sm: true, disabled: true })].map((x, i) => h(React.Fragment, { key: i }, x)))];
+    const rows = ['pend', 'auto', 'watch', 'none'].map(first).filter(Boolean);
+    const table = () => h('div', { style: { overflowX: 'auto' } }, h('table', { className: 'mtp-table' },
+      h('thead', null, h('tr', null, ['colAth', 'colState', 'col7', 'colWhy', 'colAj'].map(k => h('th', { key: k }, this.t(L, k))))),
+      h('tbody', null, rows.map(x => h('tr', { key: x.a.c },
+        h('td', null, h('span', { style: { display: 'inline-flex', alignItems: 'center', gap: 6 } }, h('span', { className: 't-name' }, x.a.n), x.isNew ? this.newDot(L) : null)),
+        h('td', null, this.stChip(L, stOn(x.a, TODAY))), h('td', null, this.week7(L, x.a, {}, R, now)),
+        h('td', null, this.motive(L, x.m) || h('span', { className: 'mtp-plain' }, '—')), h('td', null, this.ajToday(L, x)))))));
+    const toastTx = `${p1 ? p1.a.n : ''} · ${L.AJ_OK[sug]}`;
+    const toastDemo = () => [h('div', { key: 't' }, this.toastEl(L, toastTx)), row([this.btn('sec', 'Probar la confirmación (10 s)', { sm: true, onClick: () => this.showToast(toastTx) })])];
+    const empty = () => this.emptyEl(L, this.t(L, 'allDone'), nextS ? this.t(L, 'nextSes', L.SES[nextS.k], nextS.ini) : null);
+    const loading = () => h('div', { 'aria-busy': 'true', 'aria-label': this.t(L, 'loading'), style: { display: 'flex', flexDirection: 'column', gap: 12 } },
+      [0, 1, 2].map(i => h('div', { key: i, style: { display: 'flex', alignItems: 'center', gap: 12 } }, this.skel(8, 8, 'a'), this.skel(96 + i * 14, 12, 'b'), this.skel(120, 12, 'c'), this.skel(72, 22, 'd'))));
+    const sync = () => [h('span', { key: 1, className: 't-sec', style: { display: 'inline-flex', alignItems: 'center', gap: 6 } }, this.icon('clock', 16), this.t(L, 'dataAt', FEED.band[1])),
+      row([h('span', { key: 'w', className: 'mtp-warn' }, this.icon('clock', 16), this.t(L, 'dataAt', FEED.band[1])), h('span', { key: 'b' }, this.btn('ter', this.t(L, 'refresh'), { sm: true, icon: 'refresh-cw' }))], 4),
+      h('span', { key: 3, className: 'mtp-warn' }, this.icon('triangle-alert', 16), this.t(L, 'syncErr', this.t(L, 'bands'), FEED.band[1]))];
+    const legend = () => h('div', { className: 'mtp-legend' }, ST_KEYS.map(c => h('span', { key: c }, this.cell(c, L.ST[c]), L.ST[c])), ['R', 'A', 'D'].map(v => h('span', { key: v }, this.icon(AJ_ICON[v], 16), L.AJ[v])));
+    const PAIRS = [['Texto principal', 'text', 'surface'], ['Texto principal sobre el fondo', 'text', 'bg'], ['Texto secundario', 'text2', 'surface'], ['Texto secundario sobre el fondo', 'text2', 'bg'], ['Texto secundario sobre gris', 'text2', 'sunken'],
+      ['Enlaces', 'link', 'surface'], ['Botón principal', 'onPrimary', 'primary'], ['Botón principal, con el ratón encima', 'onPrimary', 'primaryHover'], ['Pendiente', 'pendText', 'pendBg'], ['Atención (datos antiguos o error)', 'warnText', 'surface'],
+      ['Chip de ajuste', 'ajText', 'ajBg'], ['Iconos (mínimo 3:1)', 'icon', 'surface', 3], ['Línea de «sin datos» (mínimo 3:1)', 'miss', 'surface', 3]];
+    const contrastEl = m => h('table', { className: 'mtp-table' }, h('thead', null, h('tr', null, h('th', null, 'Texto (mínimo 4,5:1)'), h('th', null, 'Contraste'), h('th', null, 'Cumple'))),
+      h('tbody', null, PAIRS.map(([l, f, b, min = 4.5]) => { const r = contrast(TOKENS[m][f], TOKENS[m][b]); return h('tr', { key: l }, h('td', null, l), h('td', { className: 'num' }, `${r.toFixed(2).replace('.', ',')}:1`), h('td', null, r >= min ? '✓ Sí' : '✗ No')); })));
+    const icons = () => h('div', { style: { display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '14px 16px' } }, Object.keys(ICONS).map(k => h('span', { key: k, style: { display: 'flex', alignItems: 'center', gap: 10, minWidth: 0 } },
+      this.icon(k, 20), h('span', { style: { minWidth: 0, lineHeight: 1.3 } }, h('span', { className: 't-sec', style: { display: 'block' } }, k), Object.values(AJ_ICON).includes(k) ? h('span', { className: 't-lab', style: { display: 'block' } }, 'solo para los ajustes') : null))));
+    return h('div', { className: 'mtp-page', style: { gap: 32 } },
+      this.toolHead('Estilos y componentes'),
+      sec('Tipografía', typo), sec('Colores', colors), sec('Estados del deportista', states), sec('Ajustes', ajustes), sec('Pendiente, salud y nuevo hoy', marks), sec('Botones', buttons),
+      sec('Tabla', table, true), sec('Confirmación con Deshacer', toastDemo), sec('Estado vacío', empty), sec('Cargando', loading), sec('Datos y sincronización', sync),
+      sec('Leyenda (solo en la vista Semana de Deportistas)', legend), sec('Contraste de los textos', contrastEl), sec('Iconos', icons, true));
+  }
+  // Comprobación (fase 1): les xifres amb les dades d'avui i un canvi de prova en memòria (no es desa).
+  simAth() {
+    const s = this.state;
+    return ATH.map(a => {
+      let b = a;
+      if (s.simC === a.c && s.simSt && !a.calc) {
+        const st = s.simSt, q0 = a.q || [.3, .2, .1];
+        const q = st === 'N' ? null : st === 'R' ? q0.map((x, j) => (j < 2 ? Math.min(x, -1.9) : x)) : st === 'M' ? q0.map((x, j) => (j === 1 ? Math.min(x, -1.2) : Math.max(x, -.8))) : q0.map(x => Math.max(x, -.6));
+        b = { ...b, d: a.d.slice(0, 6) + st, q };
+      }
+      if (s.simWell && a.c === 'MT-03') b = { ...b, well: TODAY };
+      return b;
+    });
+  }
+  pageCheck() {
+    const L = this.L('es'), s = this.state, R = { ...RULES0, outDays: s.outDays, backDays: s.backDays }, now = this.now();
+    const ath = this.simAth(), store = s.useStore ? s.store : {}, board = boardOf(ath, store, R, now), K = countsOf(board, 'T');
+    const names = X => X.map(x => x.a.n), rk = st => { const i = ['pend', 'nodec', 'done', 'auto', 'watch', 'calc'].indexOf(st); return i < 0 ? 99 : i; };
+    const base = countsOf(boardOf(ATH, {}, RULES0, hmMin(CLOCK0)), 'T'), same = (X, want) => X.length === want.length && want.every(n => X.includes(n));
+    const checks = [['Pendientes', names(base.pend), ['Martí R.', 'Arnau V.', 'Júlia M.', 'Abril J.']], ['Ajustes automáticos', names(base.auto), ['Pol S.', 'Laia P.']], ['A vigilar', names(base.watch), ['Biel C.']]];
+    const card = { background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 8, padding: '16px 20px' };
+    const line = (l, v) => h('div', { key: l, style: { display: 'flex', gap: 16, padding: '7px 0', borderTop: '1px solid var(--border)' } }, h('span', { className: 't-sec', style: { width: 260, flex: 'none' } }, l), h('span', { className: 'num', style: { minWidth: 0 } }, v));
+    const nl = nextLimit(board, 'T'), ws = weekSum(ath, 39, 'T'), hist = historyOf(ath, store, R, now, mondayOf(39), TODAY), up = upcoming(ath, 'T');
+    const sel = (val, on, opts, label) => h('label', { style: { display: 'inline-flex', alignItems: 'center', gap: 8 } }, label,
+      h('select', { className: 'mtp-input', value: val, onChange: e => on(e.target.value), style: { paddingRight: 8 } }, opts.map(([k, w]) => h('option', { key: k, value: k }, w))));
+    const num = (val, on, label) => h('label', { style: { display: 'inline-flex', alignItems: 'center', gap: 8 } }, label,
+      h('input', { className: 'mtp-input num', type: 'number', min: 1, max: 14, value: val, onChange: e => on(Math.max(1, Math.min(14, +e.target.value || 1))), style: { width: 64 } }));
+    const tick = (on, label) => h('label', { style: { display: 'inline-flex', alignItems: 'center', gap: 6 } }, h('input', { type: 'checkbox', checked: on.v, onChange: e => on.set(e.target.checked) }), label);
+    const simOn = s.simC || s.simWell || s.outDays !== RULES0.outDays || s.backDays !== RULES0.backDays || s.useStore;
+    const dayS = i => this.dShort(L, i);
+    return h('div', { className: 'mtp-page' },
+      this.toolHead('Comprobación de las cifras'),
+      h('section', { style: card }, h('h2', { style: { marginBottom: 8 } }, 'Comprobación con los datos de hoy'),
+        checks.map(([l, got, want]) => { const ok = same(got, want);
+          return h('div', { key: l, style: { display: 'grid', gridTemplateColumns: '28px 200px minmax(0,1fr)', gap: 8, alignItems: 'baseline', padding: '8px 0', borderTop: '1px solid var(--border)' } },
+            h('span', { 'aria-label': ok ? 'Correcto' : 'No coincide', style: { fontWeight: 600, color: ok ? 'var(--opt)' : 'var(--rec)' } }, ok ? '✓' : '✗'),
+            h('span', { style: { fontWeight: 600 } }, `${l}: ${got.length}`), h('span', null, got.join(', ') || '—', ok ? null : ` (esperado: ${want.join(', ')})`)); })),
+      h('section', { style: card }, h('h2', { style: { marginBottom: 8 } }, simOn ? 'Cifras con el cambio de prueba' : 'Cifras que salen de los mismos datos'),
+        line('Estado del equipo hoy', ST_KEYS.map(c => `${K.st[c]} ${L.ST[c]}`).join(' · ')),
+        line('Hoy · decididos', `${K.resolved} de ${K.total} decididos`),
+        line('Pendientes / automáticos / a vigilar', `${K.pend.length} · ${K.auto.length} · ${K.watch.length}${K.nodec.length ? ` · ${K.nodec.length} sin decidir` : ''}`),
+        line('Próxima hora límite', nl ? `${minHm(nl.lim)} · ${L.SES[nl.ses.k]}, ${nl.ses.g === 'AB' ? 'grupos A y B' : `grupo ${nl.ses.g}`} (${nl.n} pendiente${nl.n === 1 ? '' : 's'})` : 'Nada pendiente'),
+        line('Filtros de Deportistas', `Todos ${K.filt.all} · Pendientes ${K.filt.pend} · A vigilar ${K.filt.watch} · Lesión o enfermedad ${K.filt.salut} · Sin datos ${K.filt.nd}`),
+        line('Semana 39 hasta hoy', `${ws.ok} de ${ws.tot} días en Óptimo, ${ws.diff === 0 ? 'igual que' : `${Math.abs(ws.diff)} ${ws.diff > 0 ? 'más' : 'menos'} que`} la semana pasada`),
+        line('Historial de esta semana', `${hist.length} decisiones (${hist.filter(x => x.src === 'auto').length} automáticas · ${hist.filter(x => x.src === 'cap').length} sin decidir)`),
+        line('Próximos', up.map(x => x.t === 'form' ? `${dayS(x.day)} · formulario semanal` : x.t === 'band' ? `${dayS(x.day)} · ${x.a.n} tendrá su normal` : `${dayS(x.day)} · revisión de ${x.a.n}`).join(' · ')),
+        line('Hora simulada', `${minHm(now)} (los datos de las pulseras son de las ${FEED.band[1]})`)),
+      h('section', { style: card }, h('h2', { style: { marginBottom: 12 } }, 'Probar un cambio (no se guarda)'),
+        h('div', { style: { display: 'flex', flexWrap: 'wrap', gap: '12px 20px', alignItems: 'center' } },
+          sel(s.simC, v => this.setState({ simC: v, simSt: v ? (s.simSt || 'R') : '' }), [['', 'Ningún deportista'], ...ATH.filter(a => !a.calc).map(a => [a.c, a.n])], 'Estado de hoy de'),
+          s.simC ? sel(s.simSt, v => this.setState({ simSt: v }), ['O', 'M', 'R', 'N'].map(c => [c, L.ST[c]]), 'pasa a') : null,
+          num(s.outDays, v => this.setState({ outDays: v }), 'Días seguidos fuera de su normal'), num(s.backDays, v => this.setState({ backDays: v }), 'Días de vuelta de lesión'),
+          tick({ v: s.simWell, set: v => this.setState({ simWell: v }) }, 'Laia marca «Ya estoy bien»'),
+          tick({ v: s.useStore, set: v => this.setState({ useStore: v, store: readStore() }) }, `Con los ajustes guardados en este navegador (${Object.keys(s.store).length})`),
+          simOn ? this.btn('sec', 'Volver a los datos de hoy', { sm: true, onClick: () => this.setState({ simC: '', simSt: '', simWell: false, outDays: RULES0.outDays, backDays: RULES0.backDays, useStore: false }) }) : null)),
+      h('section', { style: { display: 'flex', flexDirection: 'column', gap: 12 } }, h('h2', null, 'Los 20 deportistas hoy'),
+        h('div', { style: { overflowX: 'auto' } }, h('table', { className: 'mtp-table' },
+          h('thead', null, h('tr', null, ['Deportista', 'Grupo', 'Estado hoy', 'Qué toca', 'Motivo', 'Sugerencia', 'Datos de hoy', 'Ajuste de hoy'].map(t => h('th', { key: t }, t)))),
+          h('tbody', null, board.slice().sort((x, y) => rk(x.status) - rk(y.status) || x.a.n.localeCompare(y.a.n)).map(x => { const hh = healthOn(x.a, TODAY);
+            return h('tr', { key: x.a.c },
+              h('td', null, h('span', { style: { display: 'inline-flex', alignItems: 'center', gap: 6, whiteSpace: 'nowrap' } }, h('span', { className: 't-name' }, x.a.n), x.isNew ? this.newDot(L) : null)),
+              h('td', null, x.a.g),
+              h('td', null, h('span', { style: { display: 'inline-flex', flexDirection: 'column', gap: 4 } }, this.stChip(L, stOn(x.a, TODAY)), hh ? this.healthMark(L, hh) : null)),
+              h('td', { style: { fontWeight: ['pend', 'auto', 'watch'].includes(x.status) ? 600 : 400, whiteSpace: 'nowrap' } }, KIND_ES[x.status] || '—'),
+              h('td', { style: { minWidth: 200 } }, this.motive(L, x.m) || '—'),
+              h('td', { style: { whiteSpace: 'nowrap' } }, x.sug ? L.AJ[x.sug] : x.kind === 'pend' ? 'Sin sugerencia' : '—'),
+              h('td', { style: { minWidth: 150 } }, this.deltas(L, x.a) || '—'),
+              h('td', null, this.ajToday(L, x))); }))))));
+  }
+  renderVals() {
+    const s = this.state, L = this.L(s.lang), now = this.now(), board = boardOf(ATH, s.store, RULES0, now), K = countsOf(board, s.grp), c = { L, now, board, K };
+    this._c = c;
+    const open = s.side === 'open', back = (on, k) => (on ? h('div', { key: k, onClick: () => this.setState({ menu: false, proto: false, help: false }), style: { position: 'fixed', inset: 0, zIndex: 40 } }) : null);
+    const shell = h('div', { className: 'mtp mtp-shell', 'data-theme': this.mode(), style: { '--sideW': `${open ? 224 : 64}px` } },
+      back(s.menu || s.proto || s.help, 'bd'), this.sideEl(c),
+      h('div', { className: 'mtp-col' }, this.topEl(c), h('main', { ref: this.mainRef, className: 'mtp-scroll' }, this.pageEl(c))),
+      this.asstEl(c), this.protoEl(),
+      s.toast ? this.toastEl(L, s.toast, { fixed: true, onUndo: () => { clearTimeout(this.toastT); const u = this._undo; this._undo = null; this.setState({ toast: null }); if (u) u(); },
+        onClose: () => { clearTimeout(this.toastT); this._undo = null; this.setState({ toast: null }); } }) : null);
+    return { rootSt: {}, tokens: h('style', null, TOKEN_CSS), page: shell };
+  }
+}
+</script>
+</body>
+</html>
