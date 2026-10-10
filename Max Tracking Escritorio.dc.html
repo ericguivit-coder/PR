@@ -29,6 +29,8 @@ button{font:inherit;color:inherit}
 @keyframes mtToastOut{0%{opacity:1;transform:none;filter:none}28%{opacity:1;transform:translateX(-10px) scale(1.01)}100%{opacity:0;transform:translateX(calc(100% + 40px)) scale(.95);filter:blur(4px)}}
 @keyframes mtLineIn{from{opacity:0;transform:translateX(12px)}to{opacity:1;transform:none}}
 @keyframes mtSlideL{from{opacity:0;transform:translateX(24px)}to{opacity:1;transform:none}}
+@keyframes mtToastDn{from{opacity:0;transform:translateY(calc(-100% - 24px))}to{opacity:1;transform:none}}
+@keyframes mtToastUp{from{opacity:1;transform:none}to{opacity:0;transform:translateY(calc(-100% - 24px))}}
 .mt-chatq .mt-bstip{max-width:100%!important}
 .mt-fab{transition:transform .2s cubic-bezier(.2,.7,.2,1),box-shadow .2s}@media(hover:hover){.mt-fab:hover{transform:translateY(-2px)}}
 .mt-rsz>span{opacity:0;transition:opacity .15s}.mt-rsz:focus-visible>span,.mt-rsz[data-drag]>span{opacity:1}@media(hover:hover){.mt-rsz:hover>span{opacity:1}}
@@ -915,6 +917,7 @@ class Component extends DCLogic {
       chatSmall: { ca: 'Reduir', es: 'Reducir', fr: 'Réduire', en: 'Shrink' },
       chatResize: { ca: "Arrossega per canviar l'amplada", es: 'Arrastra para cambiar el ancho', fr: 'Fais glisser pour changer la largeur', en: 'Drag to resize' },
       chatPh: { ca: 'Escriu una pregunta sobre les teves dades…', es: 'Escribe una pregunta sobre tus datos…', fr: 'Écris une question sur tes données…', en: 'Type a question about your data…' },
+      chatPhS: { ca: 'Escriu la teva pregunta…', es: 'Escribe tu pregunta…', fr: 'Écris ta question…', en: 'Type your question…' },
       chatSend: { ca: 'Enviar', es: 'Enviar', fr: 'Envoyer', en: 'Send' },
       chatPrivacy: { ca: 'No es guarda res del que escrius.', es: 'No se guarda nada de lo que escribes.', fr: "Rien de ce que tu écris n'est enregistré.", en: 'Nothing you type is saved.' },
       chatIntro: { ca: "Pregunta el que vulguis sobre les teves dades: t'ho comparo amb el teu normal i, si ajuda, t'ho ensenyo amb targetes o gràfics.", es: 'Pregunta lo que quieras sobre tus datos: te lo comparo con tu normal y, si ayuda, te lo enseño con tarjetas o gráficos.',
@@ -988,6 +991,8 @@ class Component extends DCLogic {
       menPh: { ca: 'Si en algun moment ho passes molt malament:', es: 'Si en algún momento lo pasas muy mal:', fr: 'Si à un moment ça va vraiment mal :', en: 'If at any point things feel really bad:' },
       menPh024: { ca: '24 h, gratuït', es: '24 h, gratis', fr: '24 h/24, gratuit', en: '24 h, free' },
       menEnded: { ca: 'Acabat', es: 'Terminado', fr: 'Terminé', en: 'Over' },
+      helpBrief: { ca: 'Parlar-ne amb algú et pot ajudar', es: 'Hablarlo con alguien te puede ayudar', fr: "En parler à quelqu'un peut t'aider", en: 'Talking to someone can help' },
+      helpHide: { ca: 'Amaga-ho per avui', es: 'Ocultar por hoy', fr: "Masquer pour aujourd'hui", en: 'Hide for today' },
       wkAnswers: { ca: 'Les teves respostes', es: 'Tus respuestas', fr: 'Tes réponses', en: 'Your answers' },
       nmMore: { ca: 'Més que el teu normal', es: 'Más que tu normal', fr: 'Plus que ta normale', en: 'Above your usual' },
       nmLess: { ca: 'Menys que el teu normal', es: 'Menos que tu normal', fr: 'Moins que ta normale', en: 'Below your usual' },
@@ -1941,11 +1946,11 @@ Reply ONLY with this JSON: {"text": "your answer", "blocs": [], "basat": ["data 
       h('span', { key: T.t + T.x, style: { maxWidth: '100%', padding: '8px 12px', boxSizing: 'border-box', borderRadius: 12, background: C.pop, border: `1px solid ${C.line2}`, boxShadow: `0 10px 28px ${this.sh(.35)}`, fontSize: 12.5, lineHeight: 1.45, color: C.ink, textWrap: 'pretty', animation: 'mtFade .15s both' } }, T.t));
   }
   seg(opts, val, on, key) {
-    const C = this.C;
+    const C = this.C, ph = this.phone();
     return h('div', { key: key || 'seg', role: 'tablist', style: { display: 'inline-flex', padding: 3, gap: 2, background: C.bg, border: `1px solid ${C.line}`, borderRadius: this.G.seg, flex: 'none' } },
       opts.map(o => { const a = o.k === val, dis = !!o.dis;
         return h('button', { key: o.k, role: 'tab', 'aria-selected': a, disabled: dis, onClick: () => { if (!dis) on(o.k); }, className: a || dis ? '' : 'mt-sg',
-          style: { border: 'none', borderRadius: this.G.segIn, padding: '5px 11px', fontSize: 13, fontWeight: 500, cursor: dis ? 'not-allowed' : 'pointer', background: a ? C.s3 : 'transparent', color: a ? C.ink : dis ? this.fg(.25) : C.ink2, boxShadow: a ? `0 1px 2px ${this.sh(.4)}, inset 0 0 0 1px ${this.ov(.07)}` : 'none', transition: 'background .2s, color .2s' } }, o.t); }));
+          style: { border: 'none', borderRadius: this.G.segIn, padding: ph ? '5px 9px' : '5px 11px', fontSize: ph ? 12.5 : 13, fontWeight: 500, cursor: dis ? 'not-allowed' : 'pointer', background: a ? C.s3 : 'transparent', color: a ? C.ink : dis ? this.fg(.25) : C.ink2, boxShadow: a ? `0 1px 2px ${this.sh(.4)}, inset 0 0 0 1px ${this.ov(.07)}` : 'none', transition: 'background .2s, color .2s' } }, o.t); }));
   }
   coachGlyph(c, x, y, r, key) {
     if (c == null) return null;
@@ -1980,7 +1985,13 @@ Reply ONLY with this JSON: {"text": "your answer", "blocs": [], "basat": ["data 
   stack(items) { const gap = this.phone() ? 24 : 32, L = items.filter(Boolean); return L.map((el, i) => h('div', { key: 's' + i, className: 'mt-in', style: { position: 'relative', zIndex: L.length - i, animationDelay: `${i * 55}ms`, marginTop: i > 1 ? gap : 0 } }, el)); }
   headEl(title, sub, right) {
     const C = this.C, ph = this.phone();
-    // Al telèfon, més justa: menys espai a dalt i a baix, i el que va a la dreta passa a sota.
+    // Al telèfon, més justa: el títol i el que va a la dreta (el selector de setmana, de mes o de període) a la mateixa línia i, a sota, la dada petita,
+    // perquè el selector no ocupi una línia sencera i el més important quedi més amunt (09-10-2026). Si no hi cap, el selector baixa sol.
+    if (ph) return h('header', { style: { padding: '4px 0 16px' } },
+      h('div', { style: { display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '8px 12px', flexWrap: 'wrap' } },
+        h('h1', { style: { margin: 0, fontFamily: this.G.display, fontSize: 24, fontWeight: this.G.headW, letterSpacing: this.G.track, lineHeight: 1.1 } }, title),
+        right ? h('div', { style: { display: 'flex', alignItems: 'center', gap: 10, marginLeft: 'auto' } }, right) : null),
+      sub ? h('div', { style: { marginTop: 5, fontSize: 13.5, color: C.ink2 } }, sub) : null);
     return h('header', { style: { display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', gap: ph ? '8px 16px' : 24, padding: ph ? '6px 0 18px' : this.G.gpt ? '18px 0 26px' : '34px 0 22px', flexWrap: 'wrap' } },
       h('div', null, h('h1', { style: { margin: 0, fontFamily: this.G.display, fontSize: ph ? 26 : 28, fontWeight: this.G.headW, letterSpacing: this.G.track, lineHeight: 1.1 } }, title), sub ? h('div', { style: { marginTop: ph ? 5 : 7, fontSize: ph ? 13.5 : 14, color: C.ink2 } }, sub) : null),
       right ? h('div', { style: { display: 'flex', alignItems: 'center', gap: 12 } }, right) : null);
@@ -2251,7 +2262,7 @@ Reply ONLY with this JSON: {"text": "your answer", "blocs": [], "basat": ["data 
   RecoveryCurve = p => {
     const C = this.C, [ref, W] = useWidth(), [hv, setHv] = React.useState(null), { pts } = p, n = pts.length, uid = 'rc' + React.useId().replace(/[^a-zA-Z0-9]/g, '');
     this.useTapAway(ref, () => setHv(null));
-    const padL = 22, padR = 92, padT = 22, ph = 120, axY = padT + ph + 22, H = axY + 6, iw = Math.max(40, (W || 300) - padL - padR), X = j => padL + (n === 1 ? iw / 2 : j * iw / (n - 1)), Y = v => padT + (1 - v) * ph, kids = [], defs = [];
+    const mob = this.phone(), padL = mob ? 10 : 22, padR = mob ? 76 : 92, padT = 22, ph = mob ? 150 : 120, axY = padT + ph + 22, H = axY + 6, iw = Math.max(40, (W || 300) - padL - padR), X = j => padL + (n === 1 ? iw / 2 : j * iw / (n - 1)), Y = v => padT + (1 - v) * ph, kids = [], defs = [];
     if (W) {
       defs.push(h('linearGradient', { key: 'bg', id: uid + 'bg', x1: 0, y1: 0, x2: 0, y2: 1 }, h('stop', { offset: 0, stopColor: this.tone(.92), stopOpacity: .07 }), h('stop', { offset: .5, stopColor: this.tone(.5), stopOpacity: .03 }), h('stop', { offset: 1, stopColor: this.tone(.1), stopOpacity: .07 })));
       kids.push(h('rect', { key: 'bgr', x: padL, y: padT, width: iw, height: ph, rx: this.G.inner || 6, fill: `url(#${uid}bg)` }));
@@ -2271,7 +2282,7 @@ Reply ONLY with this JSON: {"text": "your answer", "blocs": [], "basat": ["data 
       kids.push(h('rect', { key: 'ov', x: padL - 6, y: 0, width: iw + 12, height: H, fill: 'transparent', style: { cursor: 'crosshair' }, onPointerMove: e => { const rc = e.currentTarget.getBoundingClientRect(), j = Math.max(0, Math.min(n - 1, Math.round((e.clientX - rc.left - 6) / ((rc.width - 12) || 1) * (n - 1)))); if (j !== hv) setHv(j); }, onPointerDown: e => { const rc = e.currentTarget.getBoundingClientRect(), j = Math.max(0, Math.min(n - 1, Math.round((e.clientX - rc.left - 6) / ((rc.width - 12) || 1) * (n - 1)))); setHv(j); }, onPointerLeave: e => { if (e.pointerType === 'mouse') setHv(null); } }));
     }
     let tip = null;
-    if (hv != null && W) { const q = pts[hv], tw = 220, x = X(hv), left = x + 16 + tw > W ? x - 16 - tw : x + 16, d = this.day(q.i), row = (k, lab, val) => h('div', { key: k, style: { display: 'flex', justifyContent: 'space-between', gap: 12, marginTop: 4 } }, h('span', { style: { color: C.ink3 } }, lab), h('span', { style: { color: C.ink, fontWeight: 600 } }, val));
+    if (hv != null && W) { const q = pts[hv], tw = mob ? W : 220, x = X(hv), left = mob ? 0 : x + 16 + tw > W ? x - 16 - tw : x + 16, d = this.day(q.i), row = (k, lab, val) => h('div', { key: k, style: { display: 'flex', justifyContent: 'space-between', gap: 12, marginTop: 4 } }, h('span', { style: { color: C.ink3 } }, lab), h('span', { style: { color: C.ink, fontWeight: 600 } }, val));
       tip = h('div', { style: { position: 'absolute', left, top: 0, width: tw, boxSizing: 'border-box', pointerEvents: 'none', padding: '10px 12px', background: C.tip, border: `1px solid ${C.line2}`, borderRadius: this.G.inner, boxShadow: `0 12px 32px ${this.sh(.45)}`, fontSize: 12, color: C.ink2, zIndex: 3 } },
         h('div', { style: { display: 'flex', justifyContent: 'space-between', gap: 10 } }, h('span', { style: { color: C.ink3 } }, q.i === 41 ? this.t('today') : `${this.WD[d.wd]} ${d.n} ${d.mo}`), q.v != null ? h('span', { style: { display: 'inline-flex', alignItems: 'center', gap: 6, fontWeight: 600, color: C.ink } }, this.dot(this.tone(q.v), 7), this.evWord(q.v)) : null),
         h('div', { style: { marginTop: 6, paddingTop: 6, borderTop: `1px solid ${C.line}` } },
@@ -2292,7 +2303,7 @@ Reply ONLY with this JSON: {"text": "your answer", "blocs": [], "basat": ["data 
   setTrk(id, fn) { this.setState(st => { const all = { ...(st.trk || {}) }, rec = { c: {}, ...(all[id] || {}) }; fn(rec); all[id] = rec; try { localStorage.setItem('mt-desk-trk', JSON.stringify(all)); } catch (e) {} return { trk: all }; }); }
   trackingEl(sc, R) {
     const T0 = this.tracking(sc); if (!T0) return null;
-    const C = this.C, D = this.data(sc), ghostBtn = { display: 'inline-flex', alignItems: 'center', gap: 4, padding: 0, border: 'none', background: 'transparent', color: C.ink3, fontFamily: 'inherit', fontSize: 12.5, fontWeight: 500, cursor: 'pointer', whiteSpace: 'nowrap' };
+    const C = this.C, D = this.data(sc), mob = this.phone(), ghostBtn = { display: 'inline-flex', alignItems: 'center', gap: 4, padding: 0, border: 'none', background: 'transparent', color: C.ink3, fontFamily: 'inherit', fontSize: 12.5, fontWeight: 500, cursor: 'pointer', whiteSpace: 'nowrap' };
     const btn = { display: 'inline-flex', alignItems: 'center', gap: 6, padding: '6px 12px', border: `1px solid ${C.line2}`, borderRadius: this.G.ctrl, background: 'transparent', color: C.ink, fontFamily: 'inherit', fontSize: 13, fontWeight: 600, cursor: 'pointer' };
     const seeWeek = h('button', { key: 'sw', className: 'mt-sg', onClick: () => this.goWeek(T0.wi, { health: 'ost', fatigue: 'q-fatiga', healthLow: 'q-salut' }[T0.type]), style: ghostBtn }, this.t('seeWeekN', T0.W.id), this.icon('right', 11, 2.2));
     // Tots els problemes de salut ja s'han acabat (una malaltia amb les dades de nou al teu normal): una línia, igual que a Setmana.
@@ -2312,13 +2323,13 @@ Reply ONLY with this JSON: {"text": "your answer", "blocs": [], "basat": ["data 
     // des de quan i quan es revisa. Fatiga / salut baixa: com sempre.
     const tabs = HP && HP.length > 1 ? this.seg(HP.map((p, j) => ({ k: j, t: h('span', { style: { display: 'inline-flex', alignItems: 'center', gap: 7 } }, this.dot(p.col, 7), p.what) })), sel, j => this.setState({ trkSel: j }), 'trkp') : null;
     const head = x ? [
-      h('div', { key: 'hl', style: { display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '8px 14px', flexWrap: 'wrap' } }, h('span', { style: { fontSize: 12.5, fontWeight: 600, color: C.ink3 } }, this.t('trkTitle')), tabs),
-      h('div', { key: 'hp', style: { marginTop: tabs ? 14 : 6, display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '6px 14px', flexWrap: 'wrap' } },
-        h('span', { style: { display: 'inline-flex', alignItems: 'center', gap: 9, flexWrap: 'wrap', fontSize: 17, fontWeight: 600, color: C.ink } }, x.what,
+      mob && !tabs ? null : h('div', { key: 'hl', style: { display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '8px 14px', flexWrap: 'wrap' } }, h('span', { style: { fontSize: 12.5, fontWeight: 600, color: C.ink3 } }, this.t('trkTitle')), tabs),
+      h('div', { key: 'hp', style: { marginTop: tabs ? (mob ? 10 : 14) : mob ? 0 : 6, display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '6px 14px', flexWrap: 'wrap' } },
+        h('span', { style: { display: 'inline-flex', alignItems: 'center', gap: 9, flexWrap: 'wrap', fontSize: mob ? 16 : 17, fontWeight: 600, color: C.ink } }, x.what,
           x.nou ? h('span', { style: { padding: '2px 9px', borderRadius: this.G.tag, border: `1px solid ${C.line2}`, fontSize: 12, fontWeight: 600, color: C.ink, whiteSpace: 'nowrap' } }, x.nou) : null),
-        h('span', { style: { display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 14.5, fontWeight: 600, color: x.col } }, this.icon(ended ? 'check' : 'alert', 14, 2.6), x.status)),
-      h('div', { key: 'hs', style: { marginTop: 5, fontSize: 13, color: C.ink3 } }, `${this.t('trkSince', this.dLong(x.st))} · ${this.t('trkFrom', T.W.id)}${word ? ' · ' + word : ''}`),
-      x.next != null ? h('div', { key: 'hr', style: { marginTop: 8, display: 'flex', alignItems: 'center', gap: 7, fontSize: 13.5, fontWeight: 500, color: C.ink } }, this.icon('form', 14, 2), x.next > 41 ? this.t('trkReview', this.dLong(x.next)) : this.t('trkReviewLate')) : null]
+        h('span', { style: { display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: mob ? 13.5 : 14.5, fontWeight: 600, color: x.col } }, this.icon(ended ? 'check' : 'alert', 14, 2.6), x.status)),
+      h('div', { key: 'hs', style: { marginTop: mob ? 4 : 5, fontSize: mob ? 12.5 : 13, color: C.ink3 } }, mob ? `${this.t('trkSince', this.dLong(x.st))}${word ? ' · ' + word : ''}` : `${this.t('trkSince', this.dLong(x.st))} · ${this.t('trkFrom', T.W.id)}${word ? ' · ' + word : ''}`),
+      x.next != null ? h('div', { key: 'hr', style: { marginTop: mob ? 5 : 8, display: 'flex', alignItems: 'center', gap: 7, fontSize: mob ? 12.5 : 13.5, fontWeight: 500, color: C.ink } }, this.icon('form', mob ? 13 : 14, 2), x.next > 41 ? this.t('trkReview', this.dLong(x.next)) : this.t('trkReviewLate')) : null]
       : [h('div', { key: 'h', style: { display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 14, flexWrap: 'wrap' } },
         h('div', { style: { minWidth: 0 } },
           h('div', { style: { display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' } },
@@ -2328,10 +2339,11 @@ Reply ONLY with this JSON: {"text": "your answer", "blocs": [], "basat": ["data 
           h('div', { style: { marginTop: 5, fontSize: 13, color: C.ink3 } }, `${this.t('trkSince', this.dLong(T.start))} · ${this.t('trkFrom', T.W.id)}${word ? ' · ' + word : ''}`)),
         h('span', { style: { display: 'inline-flex', alignItems: 'center', gap: 6, padding: '4px 10px', borderRadius: this.G.tag, background: this.alpha(col, C.dark ? .18 : .2), boxShadow: `inset 0 0 0 1px ${this.alpha(col, C.dark ? .45 : .55)}`, fontSize: 12.5, fontWeight: 600, color: C.ink } }, this.dot(col, 7), this.t({ good: 'trkGood', mixed: 'trkMixed', bad: 'trkBad' }[T.status])))];
     // Evolució des de l'inici (desplegable), sobre el panell de gràfic. Només aquest problema: la línia de la vegada anterior es va treure el 05-10-2026.
-    const evo = open ? (() => { const pts = this.recoveryPoints(sc, T), inset = C.well;
-      return h('div', { key: 'evo', style: { marginTop: 14, padding: '14px 16px 8px', borderRadius: this.G.inner || 8, background: inset, border: `1px solid ${C.wellLine}`, overflow: 'hidden', animation: 'mtUnfold .55s cubic-bezier(.2,.7,.2,1) both' } },
-        h('div', { style: { fontSize: 13.5, fontWeight: 600, color: C.ink } }, this.t('evTitle', this.dLong(T.start))),
-        h('div', { style: { marginTop: 12 } }, h(this.RecoveryCurve, { key: 'rc' + T.id + Object.keys(T.checks).length, pts, bg: inset }))); })() : null;
+    // Al telèfon (10-10-2026), el gràfic es veu sempre i més gran: és el que millor ensenya com va el problema.
+    const evo = open || mob ? (() => { const pts = this.recoveryPoints(sc, T), inset = C.well;
+      return h('div', { key: 'evo', style: { marginTop: mob ? 12 : 14, padding: mob ? '10px 8px 4px' : '14px 16px 8px', borderRadius: this.G.inner || 8, background: inset, border: `1px solid ${C.wellLine}`, overflow: 'hidden', animation: 'mtUnfold .55s cubic-bezier(.2,.7,.2,1) both' } },
+        mob ? null : h('div', { style: { fontSize: 13.5, fontWeight: 600, color: C.ink } }, this.t('evTitle', this.dLong(T.start))),
+        h('div', { style: { marginTop: mob ? 0 : 12 } }, h(this.RecoveryCurve, { key: 'rc' + T.id + Object.keys(T.checks).length, pts, bg: inset }))); })() : null;
     const evoBtn = h('button', { key: 'eb', className: 'mt-btn', onClick: () => this.setState(st => ({ trkOpen: !st.trkOpen })), style: btn }, this.icon('chart', 14, 2), this.t(open ? 'trkHideEvo' : 'trkSeeEvo'));
     const sig = s0 => h('div', { key: s0.k, style: { display: 'grid', gridTemplateColumns: '18px minmax(0,1fr)', gap: 10, alignItems: 'start', padding: '10px 12px', borderRadius: this.G.inner || 8, background: this.ov(.03), border: `1px solid ${C.line}` } },
       h('span', { style: { marginTop: 1 } }, this.stateMark(s0.k, s0.v, D.band, 17)),
@@ -2340,11 +2352,31 @@ Reply ONLY with this JSON: {"text": "your answer", "blocs": [], "basat": ["data 
     const card = kids => h('div', { id: 'mt-trk', style: this.card({ padding: '18px 22px 18px 24px', boxShadow: `inset 3px 0 0 ${col}${this.G.shadow && this.G.shadow !== 'none' ? ', ' + this.G.shadow : ''}`, animation: 'mtIn .45s cubic-bezier(.2,.7,.2,1) both' }) }, ...head, ...kids);
     // Un problema que ja s'ha acabat (l'altre encara dura): com va acabar i la seva evolució.
     if (ended) return card([h('p', { key: 'em', style: { margin: '14px 0 0', fontSize: 14.5, lineHeight: 1.55, color: C.ink, textWrap: 'pretty' } }, this.t('trkEndedData', this.dLong(x.end))), evo,
-      h('div', { key: 'ea', style: { marginTop: 14, display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10, flexWrap: 'wrap' } }, evoBtn, seeWeek)]);
+      h('div', { key: 'ea', style: { marginTop: 14, display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10, flexWrap: 'wrap' } }, mob ? null : evoBtn, seeWeek)]);
     // Tancat per la persona: el formulari encara el marca, i es pot desfer.
     if (T.closed != null) return card([h('div', { key: 'cl', style: { marginTop: 14, display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, flexWrap: 'wrap' } },
       h('span', { style: { flex: '1 1 420px', minWidth: 0, fontSize: 14, lineHeight: 1.5, color: C.ink, textWrap: 'pretty' } }, this.t('trkSaidOk', this.dLong(x.st), this.OST_S[x.b.ost || T.W.ostrc].toLowerCase())),
       h('button', { className: 'mt-btn', onClick: () => this.setTrk(T.id, r => { delete r.closed; }), style: { ...btn, padding: '5px 11px', fontSize: 12.5 } }, this.t('undoL')))]);
+    // Telèfon (10-10-2026): el gràfic primer i més gran; les senyals en una fila; el missatge en dues línies («Continuar llegint»);
+    // «Com va avui?» amb els tres botons en una fila i les teves respostes al costat; a baix, «Ja estic bé» i l'enllaç a la setmana.
+    if (mob) {
+      const sigPh = s0 => { const sub = s0.last == null ? this.t('noReg') : s0.ok ? (s0.since === 41 ? this.t('trkOkToday') : this.t('trkOkSince', this.dLong(s0.since))) : this.t('trkNotYet');
+        return h('span', { key: s0.k, title: `${this.META[s0.k].name} · ${sub}`, style: { display: 'inline-flex', alignItems: 'center', gap: 6, padding: '4px 10px 4px 5px', borderRadius: this.G.tag, background: this.ov(.05), border: `1px solid ${C.line}`, fontSize: 12.5, fontWeight: 600, color: C.ink, whiteSpace: 'nowrap' } },
+          h('span', { style: { display: 'flex' } }, this.stateMark(s0.k, s0.v, D.band, 15)), this.META[s0.k].name); };
+      const ans = [35, 36, 37, 38, 39, 40, 41].filter(i => i >= Math.max(T.start, T.W.a + 6));
+      return card([evo,
+        h('div', { key: 'sg', style: { marginTop: 10, display: 'flex', flexWrap: 'wrap', gap: 6 } }, T.signals.map(sigPh)),
+        h('div', { key: 'ms', style: { marginTop: 10 } }, h(this.ClampBox, { max: 44 }, h('div', { style: { fontSize: 13.5, lineHeight: 1.5, color: C.ink, textWrap: 'pretty' } }, this.segs(live || `${this.trkMsg(T)}${T.check === 'better' ? ' ' + this.t('trkSayBetter') : T.check === 'worse' ? ' ' + this.t('trkSayWorse') : ''}`)))),
+        h('div', { key: 'hw', style: { marginTop: 10, paddingTop: 10, borderTop: `1px solid ${C.line}` } },
+          h('div', { style: { display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10 } }, h('span', { style: { fontSize: 13, fontWeight: 600, color: C.ink } }, this.t('trkHow')),
+            h('div', { title: this.t('trkAns'), style: { display: 'flex', gap: 6 } }, ans.map(i => { const a = T.checks[i], c = a === 'better' ? this.tone(.9) : a === 'worse' ? this.tone(.12) : a === 'same' ? C.ink2 : null, d = this.day(i);
+              return h('span', { key: i, style: { display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 3 } }, h('span', { style: { width: 10, height: 10, boxSizing: 'border-box', borderRadius: this.G.dot, background: c || 'transparent', border: c ? 'none' : `1px dashed ${this.ov(.3)}` } }), h('span', { style: { fontSize: 9.5, color: i === 41 ? C.ink : C.ink3, fontWeight: i === 41 ? 600 : 400 } }, this.WD[d.wd])); }))),
+          h('div', { style: { marginTop: 8, display: 'grid', gridTemplateColumns: 'repeat(3, minmax(0, 1fr))', gap: 6 } },
+            [['better', 'trkBetter', this.tone(.9)], ['same', 'trkSame', C.ink2], ['worse', 'trkWorse', this.tone(.12)]].map(([v, k, c]) => { const on = T.check === v;
+              return h('button', { key: v, className: on ? undefined : 'mt-btn', 'aria-pressed': on, onClick: () => this.setTrk(T.id, r => { r.c = { ...(r.c || {}) }; if (r.c[41] === v) delete r.c[41]; else r.c[41] = v; }), style: { ...btn, justifyContent: 'center', padding: '7px 6px', border: `1px solid ${on ? this.alpha(c, .6) : C.line2}`, background: on ? this.alpha(c, .2) : 'transparent', fontWeight: on ? 600 : 500 } }, h('span', { style: { width: 8, height: 8, borderRadius: this.G.dot, background: c, flex: 'none' } }), this.t(k)); }))),
+        h('div', { key: 'ac', style: { marginTop: 12, display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10, flexWrap: 'wrap' } },
+          h('button', { className: 'mt-frow', onClick: () => this.setTrk(T.id, r => { r.closed = 41; }), style: { ...btn, border: 'none', background: C.ink, color: C.bg } }, this.icon('check', 13, 2.6), this.t('trkImOk')), seeWeek)]);
+    }
     return card([
       h('div', { key: 'sg', style: { marginTop: 14, display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 200px), 1fr))', gap: 8 } }, T.signals.map(sig)),
       h('div', { key: 'ms', style: { marginTop: 14, fontSize: 14.5, lineHeight: 1.55, color: C.ink, textWrap: 'pretty' } }, this.segs(live || `${this.trkMsg(T)}${T.check === 'better' ? ' ' + this.t('trkSayBetter') : T.check === 'worse' ? ' ' + this.t('trkSayWorse') : ''}`)),
@@ -2598,18 +2630,20 @@ Reply ONLY with this JSON: {"text": "your answer", "blocs": [], "basat": ["data 
   LineMulti = p => {
     const C = this.C, [ref, W] = useWidth(), uid = 'lu' + React.useId().replace(/[^a-zA-Z0-9]/g, '');
     const { D, idx, marks, focus } = p, n = idx.length, K = this.KEYS, band = D.band;
-    const Lw = 190, padR = 70, iw = Math.max(40, W - Lw - padR), X = j => Lw + (n === 1 ? iw / 2 : j * iw / (n - 1)), slot = iw / Math.max(1, n - 1);
+    // Telèfon (inspirat en WHOOP, 10-10-2026): sense la columna de 190 px de l'esquerra ni la píl·lula d'avui: el gràfic de cada dada a tot l'ample i, a sobre
+    // (HH), el nom, el valor i l'estat; en tocar un dia, aquesta línia passa a dir el d'aquell dia (PanelHover). A l'esquerra, només els límits de la franja.
+    const mob = this.phone(), HH = mob ? 44 : 0, Lw = mob ? 34 : 190, padR = mob ? 10 : 70, iw = Math.max(40, W - Lw - padR), X = j => Lw + (n === 1 ? iw / 2 : j * iw / (n - 1)), slot = iw / Math.max(1, n - 1);
     // Els panells creixen amb l'amplada (de 96 a 140 px): en una pantalla ampla, amb 28 dies o 6 setmanes, les línies no queden aixafades.
-    const top = 30, PH = Math.round(Math.max(96, Math.min(140, iw * .12))), laneY = top + K.length * PH, axY = laneY + 22, H = axY + 8, kids = [], defs = [];
+    const top = mob ? 8 : 30, PH = mob ? 124 : Math.round(Math.max(96, Math.min(140, iw * .12))), laneY = top + K.length * PH, axY = laneY + 22, H = axY + 8, kids = [], defs = [];
     let lastJ = n - 1; while (lastJ > 0 && K.every(k => D.vals[k][idx[lastJ]] == null)) lastJ--;
     const rj = lastJ, ri = idx[rj];
     const hrows = [];
     const tJ = idx[n - 1] === 41 ? n - 1 : -1, cw = Math.min(44, Math.max(28, slot)), bpos = tJ >= 0 ? (j1, yT) => (j1 === tJ ? { bx: X(tJ) - cw / 2 - 14, by: yT + 6 } : null) : null;
-    if (tJ >= 0) { kids.push(h('rect', { key: 'tcol', x: X(tJ) - cw / 2, y: top + 2, width: cw, height: laneY + 6 - top - 2, rx: this.G.markRx, fill: this.ov(.07), stroke: this.fg(.16), strokeWidth: 1, style: { animation: 'mtFade .5s .2s both' } })); }
+    if (tJ >= 0 && !mob) { kids.push(h('rect', { key: 'tcol', x: X(tJ) - cw / 2, y: top + 2, width: cw, height: laneY + 6 - top - 2, rx: this.G.markRx, fill: this.ov(.07), stroke: this.fg(.16), strokeWidth: 1, style: { animation: 'mtFade .5s .2s both' } })); }
     K.forEach((k, r) => {
       const y0 = top + r * PH, meta = this.META[k], vals = idx.map(i => D.vals[k][i]), b = band ? band[k] : null, pres = vals.filter(x => x != null), R0 = b || this.DEF[k], half = (R0.hi - R0.lo) / 2, mean = b ? b.mean : (pres.length ? this.sum(pres) / pres.length : R0.mean);
       let lo, hi; if (k === 'estat') { lo = .6; hi = 5.4; } else { const pool = pres.concat([mean - 2 * half, mean + 2 * half]); lo = Math.min(...pool); hi = Math.max(...pool); const pd = (hi - lo) * .08 || 1; lo -= pd; hi += pd; }
-      const pt = y0 + 12, pb = y0 + PH - 8, Y = x => pt + (1 - (x - lo) / (hi - lo)) * (pb - pt), tc = x => (b ? this.toneOf(k, x, band) : C.ink2);
+      const pt = y0 + 12 + HH, pb = y0 + PH - 8, Y = x => pt + (1 - (x - lo) / (hi - lo)) * (pb - pt), tc = x => (b ? this.toneOf(k, x, band) : C.ink2);
       kids.push(h('line', { key: 'sep' + r, x1: 0, x2: W, y1: y0, y2: y0, stroke: C.line }));
       if (p.flashK === k && p.flashT && Date.now() - p.flashT < 5000) { const fa = this.tone(.47); kids.push(h('rect', { key: 'fl' + p.flashT, x: -10, y: y0 + 2, width: W + 20, height: PH - 4, rx: this.G.inner || 6, fill: this.alpha(fa, .13), stroke: this.alpha(fa, .85), strokeWidth: 2.5, style: { pointerEvents: 'none', animation: 'mtFlashRow 2.2s ease-out .55s both' } })); }
       // Rang personal com a Fitbit: franja suau del color de la dada, amb els seus límits al costat.
@@ -2617,7 +2651,9 @@ Reply ONLY with this JSON: {"text": "your answer", "blocs": [], "basat": ["data 
         kids.push(h('rect', { key: 'bd' + k, x: Lw, y: a, width: iw, height: Math.max(1, c - a), rx: Math.min(6, (c - a) / 2), fill: this.alpha(bc, C.dark ? .17 : .13), style: { animation: 'mtFade .5s both' } }));
         if (k !== 'estat') [[a, b.hi], [c, b.lo]].forEach(([yy, vv], q) => kids.push(h('text', { key: `be${k}${q}`, x: Lw - 8, y: yy + 3.5, textAnchor: 'end', fill: C.ink3, style: { fontSize: 10, fontVariantNumeric: 'tabular-nums' } }, this.fmtV(k, vv)))); }
       kids.push(h('line', { key: 'mn' + k, x1: Lw, x2: Lw + iw, y1: Y(mean), y2: Y(mean), stroke: this.fg(.45), strokeWidth: 1.2, strokeDasharray: '5 4' }));
-      marks.filter(m => m.k === k).forEach(m => this.markCols(kids, [m], idx, Lw - slot / 2, slot, y0 + 8, PH - 12, focus, 0, 0, true, bpos));
+      // Al telèfon, la columna d'avui va dins de cada panell (a dalt hi ha el nom i el valor).
+      if (mob && tJ >= 0) kids.push(h('rect', { key: 'tc' + k, x: X(tJ) - cw / 2, y: pt - 6, width: cw, height: pb - pt + 10, rx: this.G.markRx, fill: this.ov(.07), stroke: this.fg(.16), strokeWidth: 1, style: { animation: 'mtFade .5s .2s both' } }));
+      marks.filter(m => m.k === k).forEach(m => this.markCols(kids, [m], idx, Lw - slot / 2, slot, y0 + 8 + HH, PH - 12 - HH, focus, 0, 0, true, bpos));
       // HRV: una sola línia, la mitjana de 7 dies (la d'un sol dia salta molt). Calen 3 dies amb dada a la finestra.
       // Sense punts per dia (quedaven solts, 05-10-2026): el valor de cada dia surt en passar el ratolí, i el punt d'avui i el del ratolí van sobre la línia (onLine).
       const avg7 = k === 'hrv', mv = avg7 ? idx.map(i => { const w = D.vals[k].slice(Math.max(0, i - 6), i + 1).filter(x => x != null); return w.length >= 3 ? this.sum(w) / w.length : null; }) : vals;
@@ -2636,17 +2672,21 @@ Reply ONLY with this JSON: {"text": "your answer", "blocs": [], "basat": ["data 
       this.gapGroup(kids, defs, id + 'gm', mv, X, grp, gi); this.gapDecor(kids, id, mv, X, Y, col, 2.25);
       const lj = n - 1, ev = onLine(lj); if (ev != null && idx[lj] === 41) { kids.push(h('circle', { key: 'e' + k, cx: X(lj), cy: Y(ev), r: 5, fill: col, stroke: C.s1, strokeWidth: 2.5 }), this.pingEl(X(lj), Y(ev), col, 5, 'p' + k, 1.8)); }
       kids.push(h('text', { key: 'mnl' + k, x: Lw - 8, y: Y(mean) + 3.5, textAnchor: 'end', fill: C.ink, style: { fontSize: 10.5, fontWeight: 600, fontVariantNumeric: 'tabular-nums' } }, this.fmtV(k, mean)));
-      if (tv != null) this.pill(kids, 'tg' + k, X(tJ) + cw / 2 + 6, Y(onLine(tJ) ?? tv), this.fmtV(k, tv), col, C.bg, 'start');
+      if (mob) { /* al telèfon, el valor d'avui és a dalt del panell */ } else if (tv != null) this.pill(kids, 'tg' + k, X(tJ) + cw / 2 + 6, Y(onLine(tJ) ?? tv), this.fmtV(k, tv), col, C.bg, 'start');
       else if (tJ >= 0) kids.push(h('g', { key: 'tgm' + k }, h('rect', { x: X(tJ) + cw / 2 + 6, y: Y(mean) - 10, width: 34, height: 20, rx: Math.min(10, this.G.tag + 4), fill: 'none', stroke: this.ov(.3), strokeDasharray: '3 3' }), h('text', { x: X(tJ) + cw / 2 + 23, y: Y(mean) + 4, textAnchor: 'middle', fill: C.ink3, style: { fontSize: 11 } }, '—')));
       const x = D.vals[k][ri], st = this.status(k, x, band);
       kids.push(h('rect', { key: 'ik' + k, x: 0, y: y0 + 14, width: 12, height: 3, rx: 1.5, fill: this.idCol(k) }));
       kids.push(h('text', { key: 'ln' + k, x: 20, y: y0 + 19, fill: C.ink2, style: { fontSize: 13, fontWeight: 500 } }, meta.name));
-      kids.push(h('text', { key: 'lv' + k, x: 0, y: y0 + 47, style: { fontSize: 22, fontWeight: 600 } }, h('tspan', { fill: x == null ? C.ink3 : st.col }, this.fmtV(k, x)), x != null ? h('tspan', { fill: C.ink3, dx: 5, style: { fontSize: 12, fontWeight: 400 } }, meta.unit) : null));
-      kids.push(h('text', { key: 'ls' + k, x: 0, y: y0 + 66, fill: x == null ? C.ink3 : st.col, style: { fontSize: 11.5, fontWeight: 500 } }, st.label));
+      kids.push(h('text', { key: 'lv' + k, x: mob ? W : 0, y: mob ? y0 + 21 : y0 + 47, textAnchor: mob ? 'end' : 'start', style: { fontSize: mob ? 18 : 22, fontWeight: 600 } }, h('tspan', { fill: x == null ? C.ink3 : st.col }, this.fmtV(k, x)), x != null ? h('tspan', { fill: C.ink3, dx: 5, style: { fontSize: 12, fontWeight: 400 } }, meta.unit) : null));
+      kids.push(h('text', { key: 'ls' + k, x: 0, y: mob ? y0 + 38 : y0 + 66, fill: x == null ? C.ink3 : st.col, style: { fontSize: 11.5, fontWeight: 500 } }, st.label));
       let pj = rj - 1; while (pj >= 0 && vals[pj] == null && rj - pj < 8) pj--; const pv = pj >= 0 ? vals[pj] : null;
       if (x != null && pv != null) { const dd = x - pv, mag = k === 'son' ? Math.round(Math.abs(dd) * 60) : k === 'estat' ? Math.round(Math.abs(dd) * 10) : Math.round(Math.abs(dd)), yest = pj === rj - 1 && ri === 41, good = this.DEF[k].worse === 'up' ? dd < 0 : dd > 0;
-        kids.push(h('text', { key: 'ld' + k, x: 0, y: y0 + 84, fill: C.ink2, style: { fontSize: 11.5, fontVariantNumeric: 'tabular-nums' } }, mag === 0 ? this.t(yest ? 'sameYest' : 'samePrev') : [h('tspan', { key: 'a', fill: this.tone(good ? .9 : .15), style: { fontSize: 9 } }, dd > 0 ? '▲ ' : '▼ '), `${this.delta(k, x, pv)} ${this.t(yest ? 'vsYest' : 'vsPrevDay')}`])); }
+        kids.push(h('text', { key: 'ld' + k, x: mob ? W : 0, y: mob ? y0 + 38 : y0 + 84, textAnchor: mob ? 'end' : 'start', fill: C.ink2, style: { fontSize: 11.5, fontVariantNumeric: 'tabular-nums' } }, mag === 0 ? this.t(yest ? 'sameYest' : 'samePrev') : [h('tspan', { key: 'a', fill: this.tone(good ? .9 : .15), style: { fontSize: 9 } }, dd > 0 ? '▲ ' : '▼ '), `${this.delta(k, x, pv)} ${this.t(yest ? 'vsYest' : 'vsPrevDay')}`])); }
       hrows.push({ y0, y1: y0 + PH, pt: j => (onLine(j) != null ? [X(j), Y(onLine(j))] : null), col: j => (vals[j] == null ? C.ink3 : col),
+        head: j => { const v = vals[j], s2 = this.status(k, v, band);
+          return [h('span', { key: 'l', style: { display: 'inline-flex', alignItems: 'center', gap: 8, minWidth: 0, fontSize: 13, fontWeight: 600, color: C.ink, whiteSpace: 'nowrap' } }, h('span', { style: { width: 12, height: 3, flex: 'none', borderRadius: 2, background: col } }), idx[j] === 41 ? this.t('today') : this.cap(this.dShort(idx[j]))),
+            v == null ? h('span', { key: 'r', style: { fontSize: 12.5, color: C.ink3 } }, this.t('noDay'))
+              : h('span', { key: 'r', style: { display: 'inline-flex', alignItems: 'baseline', gap: 6, minWidth: 0, whiteSpace: 'nowrap' } }, h('span', { style: { fontSize: 11.5, fontWeight: 500, color: s2.col, overflow: 'hidden', textOverflow: 'ellipsis' } }, s2.label), h('span', { style: { fontSize: 18, fontWeight: 600, color: s2.col, fontVariantNumeric: 'tabular-nums' } }, this.fmtV(k, v)), h('span', { style: { fontSize: 11.5, color: C.ink3 } }, meta.unit))]; },
         tip: j => { const v = vals[j], s2 = this.status(k, v, band), head = this.tipHead(h('span', { style: { width: 12, height: 3, borderRadius: 2, background: col } }), meta.name, idx[j]);
           if (v == null) return [head, h('div', { key: 'nd', style: { marginTop: 8, color: C.ink2 } }, this.t('noDay')), D.pos[idx[j]] != null || D.coach[idx[j]] ? this.dayFoot(D.pos[idx[j]], D.coach[idx[j]]) : null];
           let pj = j - 1; while (pj >= 0 && vals[pj] == null && j - pj < 8) pj--; const pv = pj >= 0 ? vals[pj] : null;
@@ -2659,12 +2699,16 @@ Reply ONLY with this JSON: {"text": "your answer", "blocs": [], "basat": ["data 
               avg7 && mv[j] != null ? h('div', { key: 'm7', style: { marginTop: 4, display: 'flex', justifyContent: 'space-between', gap: 10, color: C.ink2 } }, h('span', null, this.t('meanN', 7)), h('span', { style: { color: C.ink, fontWeight: 600, fontVariantNumeric: 'tabular-nums' } }, `${this.fmtV(k, mv[j])} ${meta.unit}`)) : null),
             this.dayFoot(D.pos[idx[j]], D.coach[idx[j]])]; } });
     });
-    kids.push(h('text', { key: 'date', x: 0, y: 16, fill: C.ink, style: { fontSize: 13, fontWeight: 600 } }, ri === 41 ? this.t('todayD', this.dLong(ri)) : this.cap(this.dLong(ri))));
-    if (tJ >= 0) this.pill(kids, 'hoyp', X(tJ), top - 8, this.t('today'), C.ink, C.bg, 'middle');
+    // Al telèfon, el dia va a sobre del gràfic (en HTML), amb el selector de període al costat.
+    const dayT = ri === 41 ? this.t('todayD', mob ? this.dShort(ri) : this.dLong(ri)) : this.cap(mob ? this.dShort(ri) : this.dLong(ri));
+    if (!mob) kids.push(h('text', { key: 'date', x: 0, y: 16, fill: C.ink, style: { fontSize: 13, fontWeight: 600 } }, dayT));
+    if (tJ >= 0 && !mob) this.pill(kids, 'hoyp', X(tJ), top - 8, this.t('today'), C.ink, C.bg, 'middle');
     kids.push(h('line', { key: 'sepL', x1: 0, x2: W, y1: laneY, y2: laneY, stroke: C.line }));
     this.lineAxisX(kids, idx, X, axY);
-    return h('div', { ref, style: { position: 'relative', height: H } }, W ? [h('svg', { key: 'svg', width: W, height: H, viewBox: `0 0 ${W} ${H}`, style: { display: 'block', overflow: 'visible', fontFamily: this.SANS, fontVariantNumeric: 'tabular-nums' } }, h('defs', null, defs), kids),
-      h(this.PanelHover, { key: 'hv', W, H, rows: hrows, X, n, x0: Lw, x1: Lw + iw, valid: j => D.vals.rhr[idx[j]] !== undefined, dayLabel: j => (idx[j] === 41 ? this.t('todayD', this.dLong(idx[j])) : this.cap(this.dLong(idx[j]))) })] : null);
+    const head = mob ? h('div', { key: 'hd', style: { display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '8px 10px', flexWrap: 'wrap', marginBottom: 8 } }, h('span', { style: { fontSize: 13, fontWeight: 600, color: C.ink, whiteSpace: 'nowrap' } }, dayT), p.seg || null) : null;
+    const body = h('div', { key: 'ch', ref, style: { position: 'relative', height: H } }, W ? [h('svg', { key: 'svg', width: W, height: H, viewBox: `0 0 ${W} ${H}`, style: { display: 'block', overflow: 'visible', fontFamily: this.SANS, fontVariantNumeric: 'tabular-nums' } }, h('defs', null, defs), kids),
+      h(this.PanelHover, { key: 'hv', W, H, rows: hrows, X, n, x0: Lw, x1: Lw + iw, hh: HH, valid: j => D.vals.rhr[idx[j]] !== undefined, dayLabel: j => (idx[j] === 41 ? this.t('todayD', this.dLong(idx[j])) : this.cap(this.dLong(idx[j]))) })] : null);
+    return mob ? h('div', null, head, body) : body;
   };
 
   // Fitxa del hover: capçalera (clau + nom · data), rang personal en miniatura i comparacions alineades.
@@ -2694,7 +2738,7 @@ Reply ONLY with this JSON: {"text": "your answer", "blocs": [], "basat": ["data 
   // Capa de hover dels panells: només el panell sota el cursor, amb línia, punt i fitxa que llisquen d'un dia a l'altre.
   // Viu a part perquè moure el ratolí no redibuixi tot el gràfic.
   PanelHover = p => {
-    const C = this.C, { W, H, rows, X, n, x0, x1, valid, dayLabel } = p, [hv, setHv] = React.useState(null), last = React.useRef(null);
+    const C = this.C, mob = this.phone(), { W, H, rows, X, n, x0, x1, valid, dayLabel } = p, [hv, setHv] = React.useState(null), last = React.useRef(null);
     const box = React.useRef(null); this.useTapAway(box, () => setHv(null));
     const move = e => { const rc = e.currentTarget.getBoundingClientRect(), mx = e.clientX - rc.left, my = e.clientY - rc.top, r = rows.findIndex(q => my >= q.y0 && my < q.y1);
       if (r < 0 || mx < x0 - 16 || mx > x1 + 16) { if (hv) setHv(null); return; }
@@ -2704,7 +2748,13 @@ Reply ONLY with this JSON: {"text": "your answer", "blocs": [], "basat": ["data 
     if (hv) last.current = hv;
     const cur = hv || last.current, on = !!hv, ease = 'cubic-bezier(.22,.8,.26,1)';
     let layer = null;
-    if (cur && rows[cur.r]) { const row = rows[cur.r], x = X(cur.j), pt = row.pt ? row.pt(cur.j) : null, col = row.col ? row.col(cur.j) : C.ink2, tw = 228, left = x + 18 + tw > x1 - 36 ? x - 18 - tw : x + 18, ty = Math.max(0, Math.min(H - 190, (pt ? pt[1] : (row.y0 + row.y1) / 2) - 44));
+    if (cur && rows[cur.r] && mob && rows[cur.r].head) { const row = rows[cur.r], x = X(cur.j), pt = row.pt ? row.pt(cur.j) : null, col = row.col ? row.col(cur.j) : C.ink2, hh = p.hh || 0;
+      layer = [
+        h('svg', { key: 's', width: W, height: H, style: { position: 'absolute', left: 0, top: 0, overflow: 'visible', pointerEvents: 'none', opacity: on ? 1 : 0, transition: 'opacity .2s' } },
+          h('g', { style: { transform: `translateX(${x}px)`, transition: `transform .2s ${ease}` } }, h('line', { x1: 0, x2: 0, y1: row.y0 + hh + 4, y2: row.y1 - 4, stroke: this.fg(.42), strokeWidth: 1 })),
+          pt ? h('g', { style: { transform: `translate(${pt[0]}px, ${pt[1]}px)`, transition: `transform .2s ${ease}` } }, h('circle', { r: 10, fill: this.alpha(col, .2) }), h('circle', { r: 5, fill: C.s1, stroke: col, strokeWidth: 2.5 })) : null),
+        h('div', { key: 'hb', style: { position: 'absolute', left: 0, top: row.y0 + 2, width: W, height: hh - 4, display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10, boxSizing: 'border-box', background: C.s1, pointerEvents: 'none', opacity: on ? 1 : 0, transition: 'opacity .15s' } }, row.head(cur.j))];
+    } else if (cur && rows[cur.r]) { const row = rows[cur.r], x = X(cur.j), pt = row.pt ? row.pt(cur.j) : null, col = row.col ? row.col(cur.j) : C.ink2, tw = 228, left = x + 18 + tw > x1 - 36 ? x - 18 - tw : x + 18, ty = Math.max(0, Math.min(H - 190, (pt ? pt[1] : (row.y0 + row.y1) / 2) - 44));
       layer = [
         h('svg', { key: 's', width: W, height: H, style: { position: 'absolute', left: 0, top: 0, overflow: 'visible', pointerEvents: 'none', opacity: on ? 1 : 0, transition: 'opacity .2s' } },
           h('g', { style: { transform: `translateX(${x}px)`, transition: `transform .2s ${ease}` } }, h('line', { x1: 0, x2: 0, y1: row.y0 + 4, y2: row.y1 - 4, stroke: this.fg(.42), strokeWidth: 1 })),
@@ -2712,7 +2762,7 @@ Reply ONLY with this JSON: {"text": "your answer", "blocs": [], "basat": ["data 
         h('div', { key: 't', style: { position: 'absolute', left: 0, top: 0, width: tw, boxSizing: 'border-box', pointerEvents: 'none', padding: '11px 14px 12px', background: C.tip, border: `1px solid ${C.line2}`, borderRadius: this.G.inner, boxShadow: `0 12px 32px ${this.sh(.45)}`, fontSize: 12, color: C.ink2, zIndex: 2, opacity: on ? 1 : 0, transform: `translate(${left}px, ${ty}px)`, transition: `transform .2s ${ease}, opacity .2s` } },
           row.tip(cur.j))];
     }
-    return h('div', { ref: box, style: { position: 'absolute', inset: 0, cursor: 'crosshair' }, ...this.ptr(move, () => setHv(null)) }, layer);
+    return h('div', { ref: box, style: { position: 'absolute', inset: 0, cursor: 'crosshair', ...(mob ? { touchAction: 'pan-y' } : {}) }, ...this.ptr(move, () => setHv(null)) }, layer);
   };
 
 
@@ -2721,13 +2771,14 @@ Reply ONLY with this JSON: {"text": "your answer", "blocs": [], "basat": ["data 
     this.useTapAway(ref, () => setHov(null));
     const { feel, obj, est, idx, marks, focus } = p, n = idx.length;
     // Sense llegenda: Mejor / Tu normal / Peor a l'esquerra i «Tu» / «El teu cos» a l'extrem de la línia, com al gràfic d'Avui.
-    const padL = 88, padR = 92, padT = 24, ph = 200, axY = padT + ph + 24, H = axY + 8, iw = Math.max(40, W - padL - padR), X = j => padL + (n === 1 ? iw / 2 : j * iw / (n - 1)), slot = iw / Math.max(1, n - 1);
+    // Telèfon: menys marge als costats (els noms de les zones i «Tu» / «El teu cos», més a prop) i el gràfic més baix; el detall del dia tocat, a dalt i a tot l'ample.
+    const mob = this.phone(), padL = mob ? 64 : 88, padR = mob ? 70 : 92, padT = 24, ph = mob ? 160 : 200, axY = padT + ph + 24, H = axY + 8, iw = Math.max(40, W - padL - padR), X = j => padL + (n === 1 ? iw / 2 : j * iw / (n - 1)), slot = iw / Math.max(1, n - 1);
     const lo = -2.8, hi = 2.4, Y = z => padT + (1 - (z - lo) / (hi - lo)) * ph, base = padT + ph, kids = [], defs = [], warn = C.dark ? this.tone(.47) : this.toneF(.47), feelC = C.ink, dataC = this.idCol('data');
     const word = z => (z == null ? this.t('noDataL') : z >= .5 ? this.t('wAbove') : z <= -.5 ? this.t('wBelow') : this.t('wNormal'));
     const both = j => feel[j] != null && obj[j] != null, miss = j => both(j) && Math.abs(feel[j] - obj[j]) >= 1.2, todayJ = idx[n - 1] === 41 && feel[n - 1] != null ? n - 1 : -1;
     kids.push(h('rect', { key: 'nb', x: padL, y: Y(1), width: iw, height: Y(-1) - Y(1), fill: this.ov(.035) }));
     kids.push(h('line', { key: 'z', x1: padL, x2: padL + iw, y1: Y(0), y2: Y(0), stroke: this.fg(.26), strokeDasharray: '3 5' }));
-    [[this.t('better'), 1.8], [this.t('yourUsual'), 0], [this.t('worse'), -2.1]].forEach(([t, z], i) => kids.push(h('text', { key: 'yl' + i, x: padL - 12, y: Y(z) + 4, textAnchor: 'end', fill: i === 1 ? C.ink2 : C.ink3, style: { fontSize: 11 } }, i !== 1 ? h('tspan', { fill: this.tone(i ? .12 : .92), style: { fontSize: 9 } }, i ? '▼ ' : '▲ ') : null, t)));
+    [[this.t('better'), 1.8], [this.t('yourUsual'), 0], [this.t('worse'), -2.1]].forEach(([t, z], i) => kids.push(h('text', { key: 'yl' + i, x: padL - (mob ? 8 : 12), y: Y(z) + 4, textAnchor: 'end', fill: i === 1 ? C.ink2 : C.ink3, style: { fontSize: mob ? 10.5 : 11 } }, i !== 1 ? h('tspan', { fill: this.tone(i ? .12 : .92), style: { fontSize: 9 } }, i ? '▼ ' : '▲ ') : null, t)));
     this.markCols(kids, marks, idx, padL - slot / 2, slot, padT, ph, focus, 0, 0, true);
     { const any = feel.map((z, j) => (z != null || obj[j] != null ? 1 : null)); this.gapZones(kids, defs, uid + 'z', this.gapsOf(any).flatMap(g => g.miss).concat(this.edgeMiss(any)), X, slot, padT, ph); }
     const fR = this.runsOf(feel, X, Y), oR = this.runsOf(obj, X, Y), gF = [], gO = [];
@@ -2750,15 +2801,15 @@ Reply ONLY with this JSON: {"text": "your answer", "blocs": [], "basat": ["data 
     if (todayJ >= 0) this.endDot(kids, X(todayJ), Y(feel[todayJ]), feelC, 'end', true);
     { const lj = n - 1, lf = feel[lj], lo2 = obj[lj]; let yf = lf != null ? Y(lf) : null, yo = lo2 != null ? Y(lo2) : null;
       if (yf != null && yo != null && Math.abs(yf - yo) < 13) { const m = (yf + yo) / 2, up = lf >= lo2; yf = up ? m - 6.5 : m + 6.5; yo = up ? m + 6.5 : m - 6.5; }
-      if (yf != null) kids.push(h('text', { key: 'tf', x: X(lj) + 16, y: yf + 4, fill: feelC, style: { fontSize: 11.5, fontWeight: 600 } }, this.t('fvYou')));
-      if (yo != null) kids.push(h('text', { key: 'to', x: X(lj) + 16, y: yo + 4, fill: dataC, style: { fontSize: 11.5, fontWeight: 600 } }, this.t('fvData'))); }
+      if (yf != null) kids.push(h('text', { key: 'tf', x: X(lj) + (mob ? 10 : 16), y: yf + 4, fill: feelC, style: { fontSize: 11.5, fontWeight: 600 } }, this.t('fvYou')));
+      if (yo != null) kids.push(h('text', { key: 'to', x: X(lj) + (mob ? 10 : 16), y: yo + 4, fill: dataC, style: { fontSize: 11.5, fontWeight: 600 } }, this.t('fvData'))); }
     if (hov != null) { kids.push(h('line', { key: 'cur', x1: X(hov), x2: X(hov), y1: padT - 4, y2: base, stroke: this.fg(.3) })); if (feel[hov] != null) kids.push(h('circle', { key: 'hf', cx: X(hov), cy: Y(feel[hov]), r: 5, fill: C.s1, stroke: feelC, strokeWidth: 2.5 })); if (obj[hov] != null) kids.push(h('circle', { key: 'ho', cx: X(hov), cy: Y(obj[hov]), r: 4.5, fill: C.s1, stroke: dataC, strokeWidth: 2.25 })); }
     this.lineAxisX(kids, idx, X, axY);
-    kids.push(h('rect', { key: 'ov', x: padL - 10, y: 0, width: iw + 20, height: H, fill: 'transparent', style: { cursor: 'crosshair' },
+    kids.push(h('rect', { key: 'ov', x: padL - 10, y: 0, width: iw + 20, height: H, fill: 'transparent', style: { cursor: 'crosshair', ...(mob ? { touchAction: 'pan-y' } : {}) },
       ...this.ptr(e => { const r = e.currentTarget.getBoundingClientRect(), j = Math.max(0, Math.min(n - 1, Math.round((e.clientX - r.left - 10) / (r.width - 20) * (n - 1)))), nj = est[j] === undefined ? null : j; if (nj !== hov) setHov(nj); }, () => setHov(null)) }));
     let tip = null;
-    if (hov != null && W) { const i = idx[hov], f = feel[hov], o = obj[hov], tipW = 240, cx = X(hov), left = cx + 18 + tipW > W ? cx - 18 - tipW : cx + 18, bb = f != null && o != null, same = bb && Math.abs(f - o) < 1.2;
-      tip = this.tipBox('tip', left, padT, tipW, [h('div', { key: 'a', style: { color: C.ink3 } }, i === 41 ? this.t('todayD', this.dLong(i)) : this.cap(this.dLong(i))),
+    if (hov != null && W) { const i = idx[hov], f = feel[hov], o = obj[hov], tipW = mob ? W : 240, cx = X(hov), left = mob ? 0 : cx + 18 + tipW > W ? cx - 18 - tipW : cx + 18, bb = f != null && o != null, same = bb && Math.abs(f - o) < 1.2;
+      tip = this.tipBox('tip', left, mob ? -8 : padT, tipW, [h('div', { key: 'a', style: { color: C.ink3 } }, i === 41 ? this.t('todayD', this.dLong(i)) : this.cap(this.dLong(i))),
         h('div', { key: 'b', style: { marginTop: 6, display: 'flex', gap: 8, alignItems: 'center' } }, h('span', { style: { width: 12, height: 3, borderRadius: 2, background: feelC } }), h('span', null, `${this.t('rowFeel')}: `, h('b', { style: { color: C.ink, fontWeight: 600 } }, est[hov] != null ? `${est[hov]}/5` : '—'), ` · ${word(f)}`)),
         h('div', { key: 'c', style: { marginTop: 4, display: 'flex', gap: 8, alignItems: 'center' } }, h('span', { style: { width: 12, height: 3, borderRadius: 2, background: dataC } }), `${this.t('rowData')}: ${word(o)}`),
         bb ? h('div', { key: 'd', style: { marginTop: 8, paddingTop: 8, borderTop: `1px solid ${C.line}`, color: same ? C.ink2 : C.ink } }, same ? this.t('match') : this.t('noMatch')) : null]); }
@@ -2768,7 +2819,7 @@ Reply ONLY with this JSON: {"text": "your answer", "blocs": [], "basat": ["data 
   pill(kids, key, x, y, text, bg, fg, anchor) { const w = Math.max(34, String(text).length * 7 + 14), x0 = anchor === 'end' ? x - w : anchor === 'middle' ? x - w / 2 : x; kids.push(h('g', { key, style: { pointerEvents: 'none' } }, h('rect', { x: x0, y: y - 10, width: w, height: 20, rx: Math.min(10, this.G.tag + 4), fill: bg }), h('text', { x: x0 + w / 2, y: y + 4, textAnchor: 'middle', fill: fg, style: { fontSize: 11, fontWeight: 600, fontVariantNumeric: 'tabular-nums' } }, text))); }
 
   // Evolució: dades diàries en panells (un per dada) i com et sents vs les dades.
-  chartMulti(D, idx, marks, sc, range) { return h(this.LineMulti, { key: `mu-${range}-${sc}`, D, idx, marks, focus: this.focusN(), flashK: this.state.flashK, flashT: this.state.flashT }); }
+  chartMulti(D, idx, marks, sc, range, seg) { return h(this.LineMulti, { key: `mu-${range}-${sc}`, D, idx, marks, seg, focus: this.focusN(), flashK: this.state.flashK, flashT: this.state.flashT }); }
   chartSents(D, idx, marks, sc, range) { return h(this.LineSents, { key: `se-${range}-${sc}`, feel: idx.map(i => D.feel[i]), obj: idx.map(i => D.obj[i]), est: idx.map(i => D.vals.estat[i]), idx, marks, focus: this.focusN() }); }
 
 
@@ -2912,7 +2963,18 @@ Reply ONLY with this JSON: {"text": "your answer", "blocs": [], "basat": ["data 
     const row = (ic, label, txt, c, d) => h('div', { style: { display: 'grid', gridTemplateColumns: '16px minmax(0,1fr) auto', gap: 8, alignItems: 'center', fontSize: 13, color: C.ink2, animation: anim('mtLineIn', d) } },
       h('span', { style: { display: 'flex', color: C.ink2 } }, this.icon(ic, 14, 2.2)), h('span', null, label), chip(txt, c, d + .1));
     // Al telèfon, a baix, a sobre del botó del xat i a tot l'ample (com a molt 420 px), perquè no tapi la barra de dalt.
-    const pos = p.ph ? { bottom: `calc(${this.TABH + 14 + 48 + 12}px + ${this.SAB})`, right: 'calc(12px + env(safe-area-inset-right, 0px))', width: 'min(420px, calc(100vw - 24px))' } : { top: p.top, right: 20, width: 330, maxWidth: 'calc(100vw - 40px)' };
+    // Al telèfon (10-10-2026): compacta (el títol i, a sota, el que li has dit ≠ l'estat de les dades) i entra des de dalt, sota la barra.
+    if (p.ph) { const chipP = (ic, txt, c, d) => h('span', { style: { display: 'inline-flex', alignItems: 'center', gap: 5, minWidth: 0, padding: '2px 8px', borderRadius: 999, background: this.alpha(c, .18), color: C.ink, fontSize: 12, fontWeight: 700, whiteSpace: 'nowrap', animation: anim('mtFade', d, .4) } }, h('span', { style: { display: 'inline-flex', color: C.ink2 } }, this.icon(ic, 12, 2.2)), this.dot(c, 6), txt);
+      return h('div', { style: { position: 'fixed', top: `calc(${52 + 8}px + ${this.SAT})`, right: 'calc(12px + env(safe-area-inset-right, 0px))', width: 'min(420px, calc(100vw - 24px))', zIndex: 55, animation: out ? 'mtToastUp .4s cubic-bezier(.4,0,.2,1) both' : `mtToastDn .55s cubic-bezier(.2,.8,.2,1) ${t0}s both` } },
+        h('div', { role: 'button', tabIndex: 0, 'aria-label': `${this.t('cvTitle')}. ${this.t('cvRowCoach')}: ${cWord}. ${this.t('cvRowData')}: ${sWord}.`, onClick: go, onKeyDown: e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); go(); } },
+          style: { display: 'grid', gridTemplateColumns: '28px minmax(0,1fr) 30px', gap: '0 10px', alignItems: 'center', padding: '8px 4px 8px 10px', borderRadius: 14, background: C.pop, backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)', border: `1px solid ${this.alpha(col, .5)}`, boxShadow: `0 12px 32px ${this.sh(.35)}`, cursor: 'pointer' } },
+          h('span', { style: { width: 28, height: 28, borderRadius: '50%', background: this.alpha(col, .24), color: col, display: 'inline-flex', alignItems: 'center', justifyContent: 'center' } }, this.icon('chat', 14, 2.2)),
+          h('div', { style: { minWidth: 0 } },
+            h('div', { style: { fontSize: 13, fontWeight: 650, lineHeight: 1.3, color: C.ink, textWrap: 'pretty' } }, this.t('cvTitle')),
+            h('div', { style: { marginTop: 5, display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap' } }, chipP('chat', cWord, cCol, .2), h('span', { style: { fontSize: 12, fontWeight: 600, color: C.ink2 } }, '≠'), chipP('chart', sWord, sCol, .3), h('span', { style: { display: 'inline-flex', color: C.ink2 } }, this.icon('right', 11, 2.4)))),
+          h('button', { className: 'mt-btn', 'aria-label': this.t('cvHide'), title: this.t('cvHide'), onClick: e => { e.stopPropagation(); leave(); }, style: { width: 30, height: 30, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', padding: 0, border: 'none', borderRadius: '50%', background: 'transparent', color: C.ink2, cursor: 'pointer' } },
+            h('svg', { width: 13, height: 13, viewBox: '0 0 24 24', fill: 'none', stroke: 'currentColor', strokeWidth: 2.4, strokeLinecap: 'round', style: { display: 'block' } }, h('path', { d: 'M6 6l12 12M18 6L6 18' }))))); }
+    const pos = { top: p.top, right: 20, width: 330, maxWidth: 'calc(100vw - 40px)' };
     return h('div', { style: { position: 'fixed', ...pos, zIndex: 55, animation: out ? 'mtToastOut .5s cubic-bezier(.4,0,.2,1) both' : `mtToastIn .75s cubic-bezier(.2,.8,.2,1) ${t0}s both` } },
       h('div', { role: 'button', tabIndex: 0, 'aria-label': `${this.t('cvTitle')}. ${this.t('cvRowCoach')}: ${cWord}. ${this.t('cvRowData')}: ${sWord}.`, className: 'mt-tcard', onClick: go, onKeyDown: e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); go(); } },
         style: { position: 'relative', overflow: 'hidden', display: 'grid', gridTemplateColumns: '34px minmax(0,1fr) 26px', gap: '0 12px', alignItems: 'start', padding: '12px 8px 12px 14px', borderRadius: 16, background: C.pop, backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)', border: `1px solid ${this.alpha(col, .5)}`, boxShadow: `0 16px 40px ${this.sh(.5)}`, cursor: 'pointer' } },
@@ -2928,11 +2990,11 @@ Reply ONLY with this JSON: {"text": "your answer", "blocs": [], "basat": ["data 
           h('svg', { width: 13, height: 13, viewBox: '0 0 24 24', fill: 'none', stroke: 'currentColor', strokeWidth: 2.4, strokeLinecap: 'round', style: { display: 'block' } }, h('path', { d: 'M6 6l12 12M18 6L6 18' })))));
   };
   // Hoy · día a día: los cuatro datos en paneles, con hoy destacado y comparado con los días anteriores.
-  dayByDayEl(sc, D, findings) {
+  dayByDayEl(sc, D, findings, seg) {
     const s = this.state, nou = sc === 'nou', range = nou ? 7 : s.evoRange, idx = Array.from({ length: range }, (_, j) => 42 - range + j);
     const marks = findings.filter(f => this.KEYS.includes(f.k) && f.days && f.days.length).map(f => ({ k: f.k, n: f.n, days: f.days }));
     return this.box({ id: 'mt-daybyday', st: { padding: '20px 24px 18px' }, title: this.t('dayByDay') },
-      h('div', { style: { marginTop: 14 } }, this.chartMulti(D, idx, marks, sc, range)));
+      h('div', { style: { marginTop: seg ? 2 : 14 } }, this.chartMulti(D, idx, marks, sc, range, seg)));
   }
   // Esta semana · de un vistazo: 7 dies × 4 dades (cada casella, el to d'aquella dada aquell dia), estat del dia i entrenador.
   // «Aquesta setmana» a Avui: una targeta per dia, tenyida amb el color del seu estat (coherent amb la paraula), amb l'estat en paraula,
@@ -2969,44 +3031,34 @@ Reply ONLY with this JSON: {"text": "your answer", "blocs": [], "basat": ["data 
     return this.box({ st: { padding: '18px 20px' }, title: this.t('thisWeek'), right: see },
       h('div', { style: { display: 'grid', gridTemplateColumns: 'minmax(100px, 140px) repeat(7, minmax(0, 1fr))', gridTemplateRows: 'auto auto repeat(4, 22px) auto', columnGap: 8, rowGap: 10, alignItems: 'center' } }, kids));
   }
-  // «Aquesta setmana» al telèfon (des del 09-10-2026), en dues versions per triar al matràs (s.wnVer); quan l'usuari en triï una, s'esborra l'altra:
-  // · «fila» (per defecte): els 7 dies a la vista en columnes estretes. L'estat és un punt i l'entrenador, el seu símbol; la paraula surt en tocar
-  //   (com el valor de cada barra). El segon toc porta a Evolució › Dia a dia, com a l'ordinador.
-  // · «desliza»: les targetes de sempre, que llisquen de costat; s'obre amb avui a la vista. Els noms de les dades es queden quiets a l'esquerra.
+  // «Aquesta setmana» al telèfon (des del 09-10-2026; triada el 10-10-2026 entre «fila» i aquesta, «desliza»): les targetes de sempre, que llisquen
+  // de costat i s'obren amb avui a la vista. Els noms de les dades es queden quiets a l'esquerra. En tocar un dia, el detall (com a l'ordinador).
   weekNowPh(sc, D) {
-    const C = this.C, B = D.band, fila = this.state.wnVer !== 'desliza', days = [38, 39, 40, 41, 42, 43, 44], rows = ['hd', 'st', ...this.KEYS, 'co'], R = k => rows.indexOf(k) + 1;
+    const C = this.C, B = D.band, days = [38, 39, 40, 41, 42, 43, 44], rows = ['hd', 'st', ...this.KEYS, 'co'], R = k => rows.indexOf(k) + 1;
     const see = h('button', { className: 'mt-sg', onClick: () => this.goWeek(-1), style: { display: 'inline-flex', alignItems: 'center', gap: 4, padding: 0, border: 'none', background: 'transparent', color: C.ink2, fontFamily: 'inherit', fontSize: 13, fontWeight: 500, cursor: 'pointer', whiteSpace: 'nowrap' } }, this.t('seeWeek'), this.icon('right', 11, 2.2));
-    const lab = (key, txt) => h('div', { key: 'l' + key, style: { gridColumn: 1, gridRow: R(key), display: 'flex', alignItems: 'center', minWidth: 0, fontSize: fila ? 11.5 : 12.5, lineHeight: 1.2, color: C.ink, overflowWrap: 'anywhere' } }, txt);
+    const lab = (key, txt) => h('div', { key: 'l' + key, style: { gridColumn: 1, gridRow: R(key), display: 'flex', alignItems: 'center', minWidth: 0, fontSize: 12.5, lineHeight: 1.2, color: C.ink, overflowWrap: 'anywhere' } }, txt);
     const labels = [lab('st', this.t('dayState')), ...this.KEYS.map(k => lab(k, this.META[k].name)), lab('co', this.t('coach'))];
     const kids = [];
     days.forEach((i, j) => {
-      const col = (fila ? 2 : 1) + j, fut = i > 41, today = i === 41, d = this.day(i), s2 = fut ? null : this.dayState(sc, i), c2 = s2 ? this.dayTone(sc, i) : null, go = fut ? undefined : () => this.goDays();
+      const col = 1 + j, fut = i > 41, today = i === 41, d = this.day(i), s2 = fut ? null : this.dayState(sc, i), c2 = s2 ? this.dayTone(sc, i) : null, go = fut ? undefined : () => this.goDays();
       const hasData = !fut && this.KEYS.some(k => D.vals[k][i] != null), cw = fut ? null : D.coach[i], cwT = cw ? (this.COACH[cw].s || this.COACH[cw].t) : null, cwC = cw && this.COACH[cw].h != null ? this.tone(this.COACH[cw].h) : cw ? C.ink : C.ink3;
-      kids.push(h('div', { key: 'bg' + i, onClick: go, style: { gridColumn: col, gridRow: `1 / ${rows.length + 1}`, alignSelf: 'stretch', borderRadius: fila ? 10 : 14, boxSizing: 'border-box', border: fut ? `1px dashed ${this.ov(.14)}` : `1px solid ${c2 ? this.alpha(c2, today ? .9 : .35) : today ? this.fg(.55) : C.line2}`, background: fut ? 'transparent' : C.bg, cursor: fut ? 'default' : 'pointer', scrollSnapAlign: fila ? undefined : 'end', animation: `mtIn .4s cubic-bezier(.2,.7,.2,1) ${(.05 + j * .05).toFixed(2)}s both` } }));
-      const cell = (key, row, content, st, title) => h('div', { key: key + i, onClick: go, title, 'data-act': '', style: { position: 'relative', zIndex: 1, gridColumn: col, gridRow: R(row), padding: fila ? '0 4px' : '0 9px', minWidth: 0, cursor: fut ? 'default' : 'pointer', ...st } }, content);
+      kids.push(h('div', { key: 'bg' + i, onClick: go, style: { gridColumn: col, gridRow: `1 / ${rows.length + 1}`, alignSelf: 'stretch', borderRadius: 14, boxSizing: 'border-box', border: fut ? `1px dashed ${this.ov(.14)}` : `1px solid ${c2 ? this.alpha(c2, today ? .9 : .35) : today ? this.fg(.55) : C.line2}`, background: fut ? 'transparent' : C.bg, cursor: fut ? 'default' : 'pointer', scrollSnapAlign: 'end', animation: `mtIn .4s cubic-bezier(.2,.7,.2,1) ${(.05 + j * .05).toFixed(2)}s both` } }));
+      const cell = (key, row, content, st, title) => h('div', { key: key + i, onClick: go, title, 'data-act': '', style: { position: 'relative', zIndex: 1, gridColumn: col, gridRow: R(row), padding: '0 9px', minWidth: 0, cursor: fut ? 'default' : 'pointer', ...st } }, content);
       const stW = s2 ? this.ST[s2].w : this.t(hasData ? 'calculating' : 'noReg'), dayT = this.cap(this.dLong(i));
-      kids.push(cell('h', 'hd', fila
-        ? h('span', { style: { display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 1, lineHeight: 1.1, color: fut ? this.fg(.35) : C.ink } }, h('span', { style: { fontSize: 10.5, fontWeight: today ? 700 : 500, color: fut ? this.fg(.35) : today ? C.ink : C.ink2 } }, this.WD[d.wd]), h('span', { style: { fontSize: 13, fontWeight: today ? 800 : 600, fontVariantNumeric: 'tabular-nums' } }, String(d.n)))
-        : h('span', { style: { fontSize: 13.5, fontWeight: today ? 700 : 600, color: fut ? this.fg(.35) : C.ink, whiteSpace: 'nowrap' } }, today ? this.t('today') : `${this.WD[d.wd]} ${d.n}`), { paddingTop: fila ? 8 : 12, textAlign: fila ? 'center' : undefined }));
-      // Estat: amb «fila», un punt del color de l'estat (la paraula, en tocar); amb «desliza», el punt i la paraula.
-      kids.push(cell('s', 'st', fut ? null : fila
-        ? (s2 ? h('span', { style: { display: 'block', width: 10, height: 10, margin: '0 auto', borderRadius: '50%', background: c2 } }) : h('span', { style: { display: 'block', width: 10, height: 10, margin: '0 auto', boxSizing: 'border-box', borderRadius: '50%', border: `1.5px dashed ${this.ov(.35)}` } }))
-        : s2 ? h('span', { style: { display: 'flex', alignItems: 'center', gap: 6, fontSize: 12.5, fontWeight: 700, letterSpacing: '-.005em', color: c2, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' } }, h('span', { style: { width: 8, height: 8, flex: 'none', borderRadius: '50%', background: c2 } }), this.ST[s2].w)
+      kids.push(cell('h', 'hd', h('span', { style: { fontSize: 13.5, fontWeight: today ? 700 : 600, color: fut ? this.fg(.35) : C.ink, whiteSpace: 'nowrap' } }, today ? this.t('today') : `${this.WD[d.wd]} ${d.n}`), { paddingTop: 12 }));
+      // Estat: el punt i la paraula (la targeta ja porta el color).
+      kids.push(cell('s', 'st', fut ? null : s2 ? h('span', { style: { display: 'flex', alignItems: 'center', gap: 6, fontSize: 12.5, fontWeight: 700, letterSpacing: '-.005em', color: c2, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' } }, h('span', { style: { width: 8, height: 8, flex: 'none', borderRadius: '50%', background: c2 } }), this.ST[s2].w)
         : this.missChip(stW), null, fut ? undefined : `${dayT} · ${this.t('dayState')}: ${stW}`));
       this.KEYS.forEach(k => { const x = fut ? undefined : D.vals[k][i], has = x != null && !!B, f = has ? Math.max(.06, Math.min(1, (this.qOf(k, x, B) + 3) / 4.2)) : .5, c = has ? this.toneF(this.hOf(k, x, B)) : this.alpha(this.idCol(k), .5);
         const tip = fut ? undefined : `${dayT} · ${this.META[k].name}: ${x == null ? this.t('noRegL') : `${this.fmtT(k, x)}${B ? ' · ' + this.status(k, x, B).label : ''}`}`;
-        kids.push(cell('b' + k, k, h('span', { style: { position: 'relative', display: 'block', height: fila ? 8 : 10, borderRadius: 5, boxSizing: 'border-box', background: x == null ? 'transparent' : this.ov(.1), border: x == null ? `1px dashed ${this.ov(fut ? .1 : .24)}` : 'none', overflow: 'hidden' } },
+        kids.push(cell('b' + k, k, h('span', { style: { position: 'relative', display: 'block', height: 10, borderRadius: 5, boxSizing: 'border-box', background: x == null ? 'transparent' : this.ov(.1), border: x == null ? `1px dashed ${this.ov(fut ? .1 : .24)}` : 'none', overflow: 'hidden' } },
           x != null ? h('span', { style: { position: 'absolute', left: 0, top: 0, bottom: 0, width: `${f * 100}%`, borderRadius: 5, background: c, transformOrigin: 'left', animation: `mtGrowX .6s cubic-bezier(.2,.7,.2,1) ${(.15 + j * .05).toFixed(2)}s both` } }) : null), null, tip)); });
-      // Entrenador: amb «fila», el seu símbol (la paraula, en tocar); amb «desliza», la paraula.
-      kids.push(cell('c', 'co', fut ? null : fila
-        ? h('span', { style: { display: 'flex', justifyContent: 'center' } }, this.coachIcon(cw, 12))
-        : h('span', { style: { display: 'block', fontSize: 13, fontWeight: 600, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', color: cwC } }, cwT || '—'), { paddingBottom: fila ? 10 : 12 }, fut ? undefined : `${dayT} · ${this.t('coach')}: ${cwT || '—'}`));
+      // Entrenador: la paraula.
+      kids.push(cell('c', 'co', fut ? null : h('span', { style: { display: 'block', fontSize: 13, fontWeight: 600, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', color: cwC } }, cwT || '—'), { paddingBottom: 12 }, fut ? undefined : `${dayT} · ${this.t('coach')}: ${cwT || '—'}`));
     });
-    const box = (st, body) => this.box({ st, title: this.t('thisWeek'), right: see }, body);
-    if (fila) return box({ padding: '16px 14px' }, h('div', { style: { display: 'grid', gridTemplateColumns: '68px repeat(7, minmax(0, 1fr))', gridTemplateRows: 'auto auto repeat(4, minmax(20px, auto)) auto', columnGap: 4, rowGap: 8, alignItems: 'center' } }, labels, kids));
-    // «desliza»: els noms en una columna quieta i, al costat, els dies en files de la mateixa alçada.
+    // Els noms en una columna quieta i, al costat, els dies en files de la mateixa alçada.
     const rowsT = '40px 26px repeat(4, 22px) 34px';
-    return box({ padding: '16px 0 16px 14px' }, h('div', { style: { display: 'flex', gap: 8 } },
+    return this.box({ st: { padding: '16px 0 16px 14px' }, title: this.t('thisWeek'), right: see }, h('div', { style: { display: 'flex', gap: 8 } },
       h('div', { style: { flex: 'none', width: 80, display: 'grid', gridTemplateRows: rowsT, rowGap: 10, alignItems: 'center' } }, labels),
       h(this.WeekSwipe, { key: 'ws' + sc, today: 3, colW: 88, gap: 8 }, h('div', { style: { display: 'grid', gridTemplateColumns: 'repeat(7, 88px)', gridTemplateRows: rowsT, columnGap: 8, rowGap: 10, alignItems: 'center', width: 'max-content', paddingRight: 14 } }, kids))));
   }
@@ -3061,7 +3113,7 @@ Reply ONLY with this JSON: {"text": "your answer", "blocs": [], "basat": ["data 
   // important (30-09-2026): salut mental (si n'hi ha) · les teves 3 paraules + titular + 2–3 claus · Salut (lesió, malaltia) · Les teves
   // respostes · El que vas dir vs les teves dades · Setmana a setmana (només per mirar: ja no canvia la pàgina).
   // Fons negres com a Avui: targetes negres amb vora fina (C.bg) per a claus i fitxes, i panell negre (C.well) per al gràfic.
-  setPbSim(k) { this.setState({ pbSim: k, week2: -1, chatLog: [] }); this.go('setmana'); }
+  setPbSim(k) { this.showHelp(); this.setState({ pbSim: k, week2: -1, chatLog: [] }); this.go('setmana'); }
   // Nota mitjana del formulari sobre 10 (la fatiga es gira: 10 = gens cansat).
   formAvg(W) { return this.sum(this.SCALES.map(q => (q.inv ? 11 - W.v[q.k] : W.v[q.k]))) / this.SCALES.length; }
   decS(x) { return String(Math.round(x * 10) / 10).replace('.', this.t('dec')); }
@@ -3087,7 +3139,7 @@ Reply ONLY with this JSON: {"text": "your answer", "blocs": [], "basat": ["data 
   weekPickEl(wi, lwi, n) {
     const C = this.C, W = this.WEEKS[wi], open = !!this.state.wkPick, close = () => this.setState({ wkPick: false });
     const arrow = (dir, fn) => h('button', { key: dir, disabled: !fn, onClick: fn ? () => { close(); fn(); } : undefined, className: fn ? 'mt-btn' : '', 'aria-label': this.t(dir === 'p' ? 'prev' : 'next'),
-      style: { width: 32, height: 32, flex: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', border: `1px solid ${C.line2}`, borderRadius: this.G.ctrl, background: 'transparent', color: fn ? C.ink : this.fg(.2), cursor: fn ? 'pointer' : 'default', padding: 0 } }, this.icon(dir === 'p' ? 'left' : 'right', 16));
+      style: { width: this.phone() ? 30 : 32, height: this.phone() ? 30 : 32, flex: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', border: `1px solid ${C.line2}`, borderRadius: this.G.ctrl, background: 'transparent', color: fn ? C.ink : this.fg(.2), cursor: fn ? 'pointer' : 'default', padding: 0 } }, this.icon(dir === 'p' ? 'left' : 'right', 16));
     const item = j => { const w = this.WEEKS[j], on = j === wi;
       return h('button', { key: w.id, className: on ? '' : 'mt-pr', onClick: () => { close(); this.setWeek2(j); }, style: { display: 'grid', gridTemplateColumns: 'minmax(0,1fr) 16px', gap: '3px 10px', alignItems: 'center', width: '100%', padding: '9px 12px', border: 'none', borderRadius: 10, background: on ? this.ov(.08) : 'transparent', color: C.ink, fontFamily: 'inherit', textAlign: 'left', cursor: 'pointer' } },
         h('span', { style: { fontSize: 14, fontWeight: 600 } }, `${this.t('weekN', w.id)} · ${this.weekLabel(w.a)}`),
@@ -3100,13 +3152,13 @@ Reply ONLY with this JSON: {"text": "your answer", "blocs": [], "basat": ["data 
         h('span', { style: { gridRow: '1 / 3', gridColumn: 2 } }, this.formBtn((this.props || {}).formWeekly, this.t('fillForm'), 'pf' + w.id)),
         h('span', { style: { display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 13, fontWeight: 600, color: rc } }, this.dot(rc, 7), this.t('overdueL'))); };
     const list = []; for (let j = 0; j < lwi; j++) list.push(pend(j)); for (let j = lwi; j < n; j++) list.push(item(j));
-    return h('div', { key: 'wpk', style: { position: 'relative', display: 'flex', alignItems: 'center', gap: 8 } },
+    return h('div', { key: 'wpk', style: { position: 'relative', display: 'flex', alignItems: 'center', gap: this.phone() ? 4 : 8 } },
       arrow('p', wi < n - 1 ? () => this.setWeek2(wi + 1) : null),
-      h('button', { className: 'mt-btn', 'aria-expanded': open, 'aria-haspopup': 'listbox', onClick: () => this.setState(st => ({ wkPick: !st.wkPick })), style: { display: 'inline-flex', alignItems: 'center', gap: 8, height: 32, padding: '0 12px', border: `1px solid ${C.line2}`, borderRadius: this.G.ctrl, background: open ? this.ov(.06) : 'transparent', color: C.ink, fontFamily: 'inherit', fontSize: 14, fontWeight: 600, cursor: 'pointer', whiteSpace: 'nowrap' } },
-        `${this.t('weekN', W.id)} · ${this.weekLabel(W.a)}`, h('span', { style: { display: 'flex', transition: 'transform .2s', transform: open ? 'rotate(180deg)' : 'none' } }, this.icon('chevD', 14, 2.2))),
+      h('button', { className: 'mt-btn', 'aria-expanded': open, 'aria-haspopup': 'listbox', onClick: () => this.setState(st => ({ wkPick: !st.wkPick })), style: { display: 'inline-flex', alignItems: 'center', gap: this.phone() ? 6 : 8, height: this.phone() ? 30 : 32, padding: this.phone() ? '0 10px' : '0 12px', border: `1px solid ${C.line2}`, borderRadius: this.G.ctrl, background: open ? this.ov(.06) : 'transparent', color: C.ink, fontFamily: 'inherit', fontSize: this.phone() ? 13 : 14, fontWeight: 600, cursor: 'pointer', whiteSpace: 'nowrap' } },
+        `${this.phone() ? `${this.t('wAbbr')}${W.id}` : this.t('weekN', W.id)} · ${this.weekLabel(W.a)}`, h('span', { style: { display: 'flex', transition: 'transform .2s', transform: open ? 'rotate(180deg)' : 'none' } }, this.icon('chevD', 14, 2.2))),
       arrow('n', wi > lwi ? () => this.setWeek2(wi - 1) : null),
       open ? h('div', { key: 'bd', onClick: close, style: { position: 'fixed', inset: 0, zIndex: 40 } }) : null,
-      open ? h('div', { key: 'pop', role: 'listbox', style: { position: 'absolute', right: 0, top: 40, zIndex: 41, width: 330, maxHeight: 380, overflowY: 'auto', padding: 6, boxSizing: 'border-box', borderRadius: 14, background: C.pop, backdropFilter: 'blur(14px)', WebkitBackdropFilter: 'blur(14px)', border: `1px solid ${C.line2}`, boxShadow: `0 18px 50px ${this.sh(.5)}`, animation: 'mtIn .18s cubic-bezier(.2,.7,.2,1) both' } }, list) : null);
+      open ? h('div', { key: 'pop', role: 'listbox', style: { position: 'absolute', right: 0, top: 40, zIndex: 41, width: this.phone() ? 'min(330px, calc(100vw - 32px))' : 330, maxHeight: 380, overflowY: 'auto', padding: 6, boxSizing: 'border-box', borderRadius: 14, background: C.pop, backdropFilter: 'blur(14px)', WebkitBackdropFilter: 'blur(14px)', border: `1px solid ${C.line2}`, boxShadow: `0 18px 50px ${this.sh(.5)}`, animation: 'mtIn .18s cubic-bezier(.2,.7,.2,1) both' } }, list) : null);
   }
   // El teu normal al formulari: la mitjana de les teves 4 respostes anteriors (en calen 3 com a mínim). Només et compares amb tu.
   normOf(wi) { const P = this.WEEKS.slice(wi + 1, wi + 5); if (P.length < 3) return null; const o = {}; this.SCALES.forEach(q => { o[q.k] = this.sum(P.map(w => w.v[q.k])) / P.length; }); return o; }
@@ -3366,6 +3418,7 @@ Reply ONLY with this JSON: {"text": "your answer", "blocs": [], "basat": ["data 
   // el ratolí) i els telèfons en una línia. Sense dia N; quan ja no el marques, una línia.
   menBlockEl(sc, D, W) {
     const M = W ? this.menOf(sc, D, W) : null; if (!M) return null;
+    if (this.phone() && M.k !== 'end') return this.helpPh('mt-men', this.t('menT', this.dLong(M.st)));
     const C = this.C, badge = (bg, fg, n) => h('span', { style: { width: n, height: n, flex: 'none', borderRadius: this.G.badge, background: bg, color: fg, display: 'inline-flex', alignItems: 'center', justifyContent: 'center' } }, this.icon('heart', Math.round(n / 2), 2.2));
     if (M.k === 'end') return h('div', { id: 'mt-men', style: this.card({ padding: '14px 20px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, flexWrap: 'wrap' }) },
       h('span', { style: { display: 'inline-flex', alignItems: 'center', gap: 10, fontSize: 15.5, fontWeight: 600, color: C.ink } }, badge(this.ov(.1), C.ink, 28), this.t('menT', this.dLong(M.st))),
@@ -3488,7 +3541,7 @@ Reply ONLY with this JSON: {"text": "your answer", "blocs": [], "basat": ["data 
   // Estructura (des del 05-10-2026, pageMes): (ajuda) · titular i text curt · bloc principal (el teu benestar | la idea principal) · 4 xifres ·
   // les teves respostes | mes a mes en punts · més idees.
   WEM_SIM = { baj: [3, 3, 2, 3, 3, 4, 3], low: [2, 3, 2, 2, 3, 3, 2] };
-  setWemSim(k) { this.setState({ wemSim: k, month: 0, moPick: false, chatLog: [] }); this.go('mes'); }
+  setWemSim(k) { this.showHelp(); this.setState({ wemSim: k, month: 0, moPick: false, chatLog: [] }); this.go('mes'); }
   // Sota el títol: quan arriba el proper formulari mensual o, si l'últim està sense respondre, l'avís amb «Respondre» (Google Form).
   mNextEl(sc) { if (sc !== 'nou' && this.mLast() > 0) return this.monthPendEl(); return h('span', { style: { color: this.C.ink2 } }, this.t('nextFormOn', this.dLong(47), this.t('inDays', 47 - 41))); }
   // Esportista nou: encara no hi ha cap formulari mensual; només quan arriba el primer (en discontinu, com tot el que encara no hi és).
@@ -3515,16 +3568,43 @@ Reply ONLY with this JSON: {"text": "your answer", "blocs": [], "basat": ["data 
   mLvl(M, N) { const t = this.sum(M.wem); return t <= 19 ? 'low' : N && t - N.t <= -3 ? 'drop' : null; }
   // Amb qui en pots parlar (el detall, en passar el ratolí) i els telèfons d'ajuda: els mateixos del bloc de salut mental.
   helpChips() {
-    const C = this.C, ico = ['user', 'users', 'plus'];
-    return this.t('menWho').map((w, j) => h('span', { key: 'hw' + j, title: w[1], style: { display: 'inline-flex', alignItems: 'center', gap: 7, padding: '5px 11px', borderRadius: this.G.inner || 8, background: C.bg, border: `1px solid ${C.line2}`, fontSize: 13.5, fontWeight: 600, color: C.ink, whiteSpace: 'nowrap' } }, this.icon(ico[j], 14, 2), w[0]));
+    const C = this.C, ico = ['user', 'users', 'plus'], ph = this.phone();
+    return this.t('menWho').map((w, j) => h('span', { key: 'hw' + j, title: w[1], style: { display: 'inline-flex', alignItems: 'center', gap: ph ? 5 : 7, padding: ph ? '4px 9px' : '5px 11px', borderRadius: this.G.inner || 8, background: C.bg, border: `1px solid ${C.line2}`, fontSize: ph ? 12.5 : 13.5, fontWeight: 600, color: C.ink, whiteSpace: 'nowrap' } }, this.icon(ico[j], ph ? 12 : 14, 2), w[0]));
   }
+  // Telèfon (10-10-2026): l'avís de salut mental i el de benestar baix, plegables. Plegat, només una frase que convida a parlar-ne amb algú;
+  // en tocar-lo es desplega: què passa (des de quan), amb qui en pots parlar i els telèfons. Amb una ✕ que l'amaga la resta del dia (torna l'endemà;
+  // la data real es desa a «mt-desk-menx»). El text continua sent fix, mai de la IA. Els telèfons, com a text: que es puguin tocar per trucar
+  // és una funció per decidir (09-10-2026).
+  helpPh(id, title) {
+    if (this.helpHidden()) return null;
+    const C = this.C, A = this.alertC(this.tone(.47)), open = !!this.state.helpOpen;
+    return h('div', { id, style: this.card({ padding: '6px 4px 6px 10px', borderColor: A.bd, background: `linear-gradient(${A.bg}, ${A.bg}), ${C.s1}`, animation: 'mtIn .45s cubic-bezier(.2,.7,.2,1) both' }) },
+      h('div', { style: { display: 'flex', alignItems: 'center', gap: 4 } },
+        h('button', { onClick: () => this.setState(st => ({ helpOpen: !st.helpOpen })), 'aria-expanded': open, style: { flex: 1, minWidth: 0, display: 'flex', alignItems: 'center', gap: 9, minHeight: 36, padding: 0, border: 'none', background: 'transparent', color: C.ink, fontFamily: 'inherit', textAlign: 'left', cursor: 'pointer' } },
+          h('span', { style: { width: 22, height: 22, flex: 'none', borderRadius: this.G.badge, background: A.ic, color: A.icFg, display: 'inline-flex', alignItems: 'center', justifyContent: 'center' } }, this.icon('heart', 12, 2.2)),
+          h('span', { style: { flex: 1, minWidth: 0, fontSize: 14, fontWeight: 600, lineHeight: 1.3, textWrap: 'pretty' } }, this.t('helpBrief')),
+          h('span', { style: { display: 'flex', color: C.ink2, transition: 'transform .2s', transform: open ? 'rotate(180deg)' : 'none' } }, this.icon('chevD', 14, 2.2))),
+        h('button', { className: 'mt-ib', onClick: () => this.hideHelp(), 'aria-label': this.t('helpHide'), title: this.t('helpHide'), style: { width: 32, height: 32, flex: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', border: 'none', borderRadius: '50%', background: 'transparent', color: C.ink2, cursor: 'pointer', padding: 0 } },
+          h('svg', { width: 13, height: 13, viewBox: '0 0 24 24', fill: 'none', stroke: 'currentColor', strokeWidth: 2.4, strokeLinecap: 'round', style: { display: 'block' } }, h('path', { d: 'M6 6l12 12M18 6L6 18' })))),
+      open ? h('div', { key: 'hb', style: { paddingLeft: 31, paddingRight: 8, paddingBottom: 6, overflow: 'hidden', animation: 'mtUnfold .35s cubic-bezier(.2,.7,.2,1) both' } },
+        h('div', { style: { fontSize: 13, fontWeight: 600, lineHeight: 1.4, color: C.ink, textWrap: 'pretty' } }, title),
+        h('div', { style: { marginTop: 8, display: 'flex', flexWrap: 'wrap', gap: 5 } }, this.helpChips()),
+        this.helpPhones()) : null);
+  }
+  helpHidden() { if (!this.phone()) return false; if (this.state.menX != null) return this.state.menX; try { return localStorage.getItem('mt-desk-menx') === new Date().toDateString(); } catch (e) { return false; } }
+  hideHelp() { try { localStorage.setItem('mt-desk-menx', new Date().toDateString()); } catch (e) {} this.setState({ menX: true }); }
+  showHelp() { try { localStorage.removeItem('mt-desk-menx'); } catch (e) {} this.setState({ menX: false }); }
   helpPhones() {
-    const C = this.C, tel = (n, sub) => h('a', { key: n, href: 'tel:' + n, style: { color: C.ink, fontWeight: 700, textDecoration: 'none', whiteSpace: 'nowrap' } }, n, sub ? h('span', { style: { fontWeight: 500 } }, ` (${sub})`) : null);
+    const C = this.C, ph = this.phone(), tel = (n, sub) => h(ph ? 'span' : 'a', { key: n, href: ph ? undefined : 'tel:' + n, style: { color: C.ink, fontWeight: 700, textDecoration: 'none', whiteSpace: 'nowrap' } }, n, sub ? h('span', { style: { fontWeight: 500 } }, ` (${sub})`) : null);
+    // Al telèfon, una línia de text seguida (la icona dins el text): si no, la icona es quedava sola en una línia.
+    if (ph) return h('div', { style: { marginTop: 8, fontSize: 12.5, lineHeight: 1.45, color: C.ink, textWrap: 'pretty' } },
+      h('span', { style: { display: 'inline-flex', verticalAlign: '-2px', marginRight: 6 } }, this.icon('phone', 13, 2)), this.t('menPh'), ' ', tel('024', this.t('menPh024')), h('span', { style: { color: C.ink3 } }, ' · '), tel('112'));
     return h('div', { style: { marginTop: 10, display: 'flex', alignItems: 'center', gap: '4px 8px', flexWrap: 'wrap', fontSize: 13.5, lineHeight: 1.45, color: C.ink } },
       h('span', { style: { display: 'inline-flex' } }, this.icon('phone', 14, 2)), this.t('menPh'), tel('024', this.t('menPh024')), h('span', { style: { color: C.ink3 } }, '·'), tel('112'));
   }
   // Zona baixa a l'últim formulari mensual: el mateix bloc compacte que el de salut mental, amb text fix (mai de la IA).
   wemSupEl() {
+    if (this.phone()) return this.helpPh('mt-wsup', this.t('m2SupT'));
     const C = this.C, A = this.alertC(this.tone(.47));
     return h('div', { id: 'mt-wsup', style: this.card({ padding: '14px 18px', display: 'grid', gridTemplateColumns: '28px minmax(0,1fr)', gap: 12, alignItems: 'start', borderColor: A.bd, background: `linear-gradient(${A.bg}, ${A.bg}), ${C.s1}`, animation: 'mtIn .45s cubic-bezier(.2,.7,.2,1) both' }) },
       h('span', { style: { width: 28, height: 28, flex: 'none', borderRadius: this.G.badge, background: A.ic, color: A.icFg, display: 'inline-flex', alignItems: 'center', justifyContent: 'center' } }, this.icon('heart', 14, 2.2)),
@@ -3583,7 +3663,7 @@ Reply ONLY with this JSON: {"text": "your answer", "blocs": [], "basat": ["data 
   monthPickEl(mi, ml, n) {
     const C = this.C, M = this.MONTHS[mi], open = !!this.state.moPick, close = () => this.setState({ moPick: false }), W2 = this.t('m2Cmp');
     const arrow = (dir, fn) => h('button', { key: dir, disabled: !fn, onClick: fn ? () => { close(); fn(); } : undefined, className: fn ? 'mt-btn' : '', 'aria-label': this.t(dir === 'p' ? 'prev' : 'next'),
-      style: { width: 32, height: 32, flex: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', border: `1px solid ${C.line2}`, borderRadius: this.G.ctrl, background: 'transparent', color: fn ? C.ink : this.fg(.2), cursor: fn ? 'pointer' : 'default', padding: 0 } }, this.icon(dir === 'p' ? 'left' : 'right', 16));
+      style: { width: this.phone() ? 30 : 32, height: this.phone() ? 30 : 32, flex: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', border: `1px solid ${C.line2}`, borderRadius: this.G.ctrl, background: 'transparent', color: fn ? C.ink : this.fg(.2), cursor: fn ? 'pointer' : 'default', padding: 0 } }, this.icon(dir === 'p' ? 'left' : 'right', 16));
     const item = j => { const m = this.MONTHS[j], on = j === mi, t = this.sum(m.wem), cp = this.mCmp(m, this.mNorm(j), j === n - 1);
       return h('button', { key: m.k, className: on ? '' : 'mt-pr', onClick: () => { close(); this.setMonth(j); }, style: { display: 'grid', gridTemplateColumns: 'minmax(0,1fr) 16px', gap: '3px 10px', alignItems: 'center', width: '100%', padding: '9px 12px', border: 'none', borderRadius: 10, background: on ? this.ov(.08) : 'transparent', color: C.ink, fontFamily: 'inherit', textAlign: 'left', cursor: 'pointer' } },
         h('span', { style: { fontSize: 14, fontWeight: 600 } }, `${m.Name} · ${this.mPer(m)}`),
@@ -3596,13 +3676,13 @@ Reply ONLY with this JSON: {"text": "your answer", "blocs": [], "basat": ["data 
         h('span', { style: { gridRow: '1 / 3', gridColumn: 2 } }, this.formBtn((this.props || {}).formMonthly, this.t('fillForm'), 'pm' + m.k)),
         h('span', { style: { display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 13, fontWeight: 600, color: rc } }, this.dot(rc, 7), this.t('overdueL'))); };
     const list = []; for (let j = 0; j < ml; j++) list.push(pend(j)); for (let j = ml; j < n; j++) list.push(item(j));
-    return h('div', { key: 'mpk', style: { position: 'relative', display: 'flex', alignItems: 'center', gap: 8 } },
+    return h('div', { key: 'mpk', style: { position: 'relative', display: 'flex', alignItems: 'center', gap: this.phone() ? 4 : 8 } },
       arrow('p', mi < n - 1 ? () => this.setMonth(mi + 1) : null),
-      h('button', { className: 'mt-btn', 'aria-expanded': open, 'aria-haspopup': 'listbox', onClick: () => this.setState(st => ({ moPick: !st.moPick })), style: { display: 'inline-flex', alignItems: 'center', gap: 8, height: 32, padding: '0 12px', border: `1px solid ${C.line2}`, borderRadius: this.G.ctrl, background: open ? this.ov(.06) : 'transparent', color: C.ink, fontFamily: 'inherit', fontSize: 14, fontWeight: 600, cursor: 'pointer', whiteSpace: 'nowrap' } },
+      h('button', { className: 'mt-btn', 'aria-expanded': open, 'aria-haspopup': 'listbox', onClick: () => this.setState(st => ({ moPick: !st.moPick })), style: { display: 'inline-flex', alignItems: 'center', gap: this.phone() ? 6 : 8, height: this.phone() ? 30 : 32, padding: this.phone() ? '0 10px' : '0 12px', border: `1px solid ${C.line2}`, borderRadius: this.G.ctrl, background: open ? this.ov(.06) : 'transparent', color: C.ink, fontFamily: 'inherit', fontSize: this.phone() ? 13 : 14, fontWeight: 600, cursor: 'pointer', whiteSpace: 'nowrap' } },
         `${M.Name} · ${this.mPer(M)}`, h('span', { style: { display: 'flex', transition: 'transform .2s', transform: open ? 'rotate(180deg)' : 'none' } }, this.icon('chevD', 14, 2.2))),
       arrow('n', mi > ml ? () => this.setMonth(mi - 1) : null),
       open ? h('div', { key: 'bd', onClick: close, style: { position: 'fixed', inset: 0, zIndex: 40 } }) : null,
-      open ? h('div', { key: 'pop', role: 'listbox', style: { position: 'absolute', right: 0, top: 40, zIndex: 41, width: 300, maxHeight: 380, overflowY: 'auto', padding: 6, boxSizing: 'border-box', borderRadius: 14, background: C.pop, backdropFilter: 'blur(14px)', WebkitBackdropFilter: 'blur(14px)', border: `1px solid ${C.line2}`, boxShadow: `0 18px 50px ${this.sh(.5)}`, animation: 'mtIn .18s cubic-bezier(.2,.7,.2,1) both' } }, list) : null);
+      open ? h('div', { key: 'pop', role: 'listbox', style: { position: 'absolute', right: 0, top: 40, zIndex: 41, width: this.phone() ? 'min(300px, calc(100vw - 32px))' : 300, maxHeight: 380, overflowY: 'auto', padding: 6, boxSizing: 'border-box', borderRadius: 14, background: C.pop, backdropFilter: 'blur(14px)', WebkitBackdropFilter: 'blur(14px)', border: `1px solid ${C.line2}`, boxShadow: `0 18px 50px ${this.sh(.5)}`, animation: 'mtIn .18s cubic-bezier(.2,.7,.2,1) both' } }, list) : null);
   }
   // Dalt de tot, sense targeta: el teu benestar (el total, del seu color, i respecte al teu normal), una barra que s'omple amb la marca del teu
   // normal, el titular (amb «Basat en…» en passar el ratolí) i un text curt (de la IA o, sense IA, fet amb les dades), que no repeteix el que ja
@@ -3624,9 +3704,9 @@ Reply ONLY with this JSON: {"text": "your answer", "blocs": [], "basat": ["data 
       N ? h('span', { title: this.t('nmVal', this.decS(N.t)), style: { position: 'absolute', left: `${(N.t / 35) * 100}%`, top: -5, width: 3, height: 18, marginLeft: -1.5, borderRadius: 2, background: C.ink, boxShadow: `0 0 0 2px ${C.bg}` } }) : null);
     const v = R.loading ? null : R.val, tit = v ? v.titular : null, txt = v ? v.texto : null;
     const titEl = R.loading ? h('div', { key: 'tl', style: { marginTop: 26 } }, sk('40%', 18, 0))
-      : h('div', { key: 'tt' + tit, style: { marginTop: 26, animation: 'mtIn .45s cubic-bezier(.2,.7,.2,1) .2s both' } }, this.basisTip({ basis }, tit, { display: 'inline-block', fontFamily: this.G.display, fontSize: 22, fontWeight: 600, letterSpacing: '-.01em', lineHeight: 1.3, color: C.ink }));
+      : h('div', { key: 'tt' + tit, style: { marginTop: 26, animation: 'mtIn .45s cubic-bezier(.2,.7,.2,1) .2s both' } }, this.basisTip({ basis }, tit, { display: 'inline-block', fontFamily: this.G.display, fontSize: this.phone() ? 19 : 22, fontWeight: 600, letterSpacing: '-.01em', lineHeight: 1.3, color: C.ink }));
     const textEl = R.loading ? h('div', { key: 'tl2', style: { marginTop: 14, display: 'grid', gap: 10, maxWidth: 720 } }, sk('92%', 13, .08), sk('64%', 13, .16))
-      : txt ? h('div', { key: 'tx' + mi }, h(this.ClampBox, { max: 124 }, h('p', { style: { margin: '10px 0 0', maxWidth: 720, fontSize: 16, lineHeight: 1.75, color: C.ink, textWrap: 'pretty', animation: 'mtIn .45s cubic-bezier(.2,.7,.2,1) .26s both' } }, this.segs(txt, true)))) : null;
+      : txt ? h('div', { key: 'tx' + mi }, h(this.ClampBox, { max: 124 }, h('p', { style: { margin: '10px 0 0', maxWidth: 720, fontSize: this.phone() ? 15 : 16, lineHeight: this.phone() ? 1.6 : 1.75, color: C.ink, textWrap: 'pretty', animation: 'mtIn .45s cubic-bezier(.2,.7,.2,1) .26s both' } }, this.segs(txt, true)))) : null;
     const A = this.alertC(this.tone(.47));
     const dropEl = lvl === 'drop' ? h('div', { key: 'dp', style: { marginTop: 16, display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: '8px 10px', padding: '10px 12px 10px 14px', borderRadius: this.G.inner || 8, background: A.bg, border: `1px solid ${A.bd}`, animation: 'mtIn .45s cubic-bezier(.2,.7,.2,1) .4s both' } },
       h('span', { style: { display: 'inline-flex', alignItems: 'center', gap: 8, fontSize: 14, fontWeight: 600, color: C.ink } }, h('span', { style: { width: 22, height: 22, flex: 'none', borderRadius: this.G.badge, background: A.ic, color: A.icFg, display: 'inline-flex', alignItems: 'center', justifyContent: 'center' } }, this.icon('heart', 12, 2.2)), this.t('m2DropT')),
@@ -3722,7 +3802,7 @@ Reply ONLY with this JSON: {"text": "your answer", "blocs": [], "basat": ["data 
   }
   // Línia de punts (setmana a setmana, mes a mes): el triat, més gran i amb anella; el que falta o encara no ha arribat, en discontinu.
   stepEl(nodes) {
-    const C = this.C, n = nodes.length;
+    const C = this.C, n = nodes.length, ph = this.phone();
     const dotOf = x => x.dash ? h('span', { style: { width: 16, height: 16, borderRadius: '50%', boxSizing: 'border-box', border: `1.5px dashed ${x.dash}`, background: C.s1 } })
       : h('span', { style: { width: x.sel ? 18 : 14, height: x.sel ? 18 : 14, borderRadius: '50%', background: x.col, boxShadow: x.sel ? `0 0 0 3px ${C.s1}, 0 0 0 5px ${x.col}` : 'none' } });
     return h('div', { style: { position: 'relative', display: 'flex', gap: 4 } },
@@ -3730,7 +3810,7 @@ Reply ONLY with this JSON: {"text": "your answer", "blocs": [], "basat": ["data 
       nodes.map((x, j) => h(x.onClick ? 'button' : 'div', { key: x.key, onClick: x.onClick, 'aria-pressed': x.onClick ? !!x.sel : undefined, style: { position: 'relative', flex: '1 1 0', minWidth: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6, padding: 0, border: 'none', background: 'transparent', fontFamily: 'inherit', color: 'inherit', cursor: x.onClick ? 'pointer' : 'default', animation: `mtIn .4s cubic-bezier(.2,.7,.2,1) ${(.05 + j * .04).toFixed(2)}s both` } },
         h('span', { style: { height: 26, display: 'flex', alignItems: 'center' } }, dotOf(x)),
         h('span', { style: { fontSize: 13, fontWeight: x.sel ? 700 : 500, color: x.sel ? C.ink : x.dash ? C.ink3 : C.ink2, whiteSpace: 'nowrap', fontVariantNumeric: 'tabular-nums' } }, x.lab),
-        x.sub ? h('span', { style: { maxWidth: '100%', fontSize: 12, fontWeight: 500, color: x.subCol || C.ink2, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', fontVariantNumeric: 'tabular-nums' } }, x.sub) : null)));
+        x.sub ? h('span', { style: { maxWidth: '100%', fontSize: ph ? 11 : 12, fontWeight: 500, lineHeight: ph ? 1.25 : undefined, textAlign: ph ? 'center' : undefined, color: x.subCol || C.ink2, whiteSpace: ph ? 'normal' : 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', fontVariantNumeric: 'tabular-nums' } }, x.sub) : null)));
   }
   // Setmana.
   pageSetmana(sc, D, g) {
@@ -3749,11 +3829,11 @@ Reply ONLY with this JSON: {"text": "your answer", "blocs": [], "basat": ["data 
     const C = this.C, g = this.geom(), G = this.GEN, ok = this.tone(.9);
     const sk = (w, hh, d) => h('div', { key: w + d, style: { height: hh, width: w, borderRadius: 999, background: `linear-gradient(90deg, ${this.ov(.05)}, ${this.ov(.1)}, ${this.ov(.05)})`, backgroundSize: '1200px 100%', animation: `mtShim 1.6s linear ${d}s infinite` } });
     const v = R.loading ? null : R.val, tit = v ? v.titular || G.wT[E.key] || G.wT.mid : null;
-    const titEl = R.loading ? sk('40%', 18, 0) : h('div', { key: 'tt' + tit, style: { animation: 'mtIn .45s cubic-bezier(.2,.7,.2,1) both' } }, this.basisTip({ basis }, tit, { display: 'inline-block', fontFamily: this.G.display, fontSize: 22, fontWeight: 600, letterSpacing: '-.01em', lineHeight: 1.3, color: C.ink }));
+    const titEl = R.loading ? sk('40%', 18, 0) : h('div', { key: 'tt' + tit, style: { animation: 'mtIn .45s cubic-bezier(.2,.7,.2,1) both' } }, this.basisTip({ basis }, tit, { display: 'inline-block', fontFamily: this.G.display, fontSize: this.phone() ? 19 : 22, fontWeight: 600, letterSpacing: '-.01em', lineHeight: 1.3, color: C.ink }));
     const words = ['rendiment', 'descans', 'salut'].map(k => ({ k, w: W.w[k], q: this.SCALES.find(x => x.k === k) })).filter(x => x.w);
-    const wordsEl = h('div', { key: 'wd', style: { marginTop: 12, display: 'flex', flexWrap: 'wrap', gap: '12px 36px', alignItems: 'flex-end' } }, words.map((x, j) =>
+    const wordsEl = h('div', { key: 'wd', style: { marginTop: 12, display: 'flex', flexWrap: 'wrap', gap: g.phone ? '10px 28px' : '12px 36px', alignItems: 'flex-end' } }, words.map((x, j) =>
       h('button', { key: x.k + W.id, onClick: () => this.flashTo('mt-wk-q-' + x.k), style: { padding: 0, border: 'none', background: 'transparent', textAlign: 'left', fontFamily: 'inherit', color: 'inherit', cursor: 'pointer', animation: `mtIn .5s cubic-bezier(.2,.7,.2,1) ${(.05 + j * .08).toFixed(2)}s both` } },
-        h('span', { style: { display: 'block', fontFamily: this.G.display, fontSize: g.stack ? 26 : 32, fontWeight: 600, letterSpacing: '-.02em', lineHeight: 1.1, color: this.sTone(W.v[x.k], 1, 10, x.q.inv) } }, this.t('q', x.w)),
+        h('span', { style: { display: 'block', fontFamily: this.G.display, fontSize: g.phone ? 24 : g.stack ? 26 : 32, fontWeight: 600, letterSpacing: '-.02em', lineHeight: 1.1, color: this.sTone(W.v[x.k], 1, 10, x.q.inv) } }, this.t('q', x.w)),
         h('span', { style: { display: 'block', marginTop: 5, fontSize: 13.5, fontWeight: 500, color: C.ink } }, x.q.t))));
     // Els dies en Òptim: la mateixa xifra que la parella Salut de «El que vas dir vs les teves dades» (un dia en Precaució no és Òptim).
     const M = (this.wkVs(sc, D, W).find(r => r.k === 'salut') || {}).M;
@@ -3763,7 +3843,7 @@ Reply ONLY with this JSON: {"text": "your answer", "blocs": [], "basat": ["data 
       M ? h('div', { style: { position: 'relative', height: 8, borderRadius: 4, background: this.ov(.08) } }, h('span', { style: { position: 'absolute', left: 0, top: 0, bottom: 0, width: `${Math.max(3, M.d * 100)}%`, borderRadius: 4, background: this.tone(M.d), transformOrigin: 'left', animation: 'mtGrowX .6s cubic-bezier(.2,.7,.2,1) .15s both' } }))
         : this.missChip(this.t(D.band ? 'noReg' : 'calculating')));
     const mn = this.wtMain(keys), badge = (bg, ic) => h('span', { style: { width: 28, height: 28, flex: 'none', marginTop: 1, borderRadius: this.G.badge, background: bg, color: C.dark ? C.bg : '#FFFFFF', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' } }, this.icon(ic, 15, 2.6));
-    const big = { display: 'block', fontFamily: this.G.display, fontSize: 22, fontWeight: 600, letterSpacing: '-.01em', lineHeight: 1.3, color: C.ink };
+    const big = { display: 'block', fontFamily: this.G.display, fontSize: this.phone() ? 19 : 22, fontWeight: 600, letterSpacing: '-.01em', lineHeight: 1.3, color: C.ink };
     const right = !keys ? h('div', { style: { display: 'grid', gap: 12 } }, sk('40%', 12, 0), sk('80%', 20, .1), sk('65%', 12, .2))
       : mn ? h('button', { className: 'mt-frowl', onClick: () => this.flashTo('mt-wk-' + mn.to), style: { display: 'block', width: '100%', padding: 0, border: 'none', background: 'transparent', textAlign: 'left', fontFamily: 'inherit', color: 'inherit', cursor: 'pointer' } },
           this.tLab(this.t('wtMain')),
@@ -3773,20 +3853,23 @@ Reply ONLY with this JSON: {"text": "your answer", "blocs": [], "basat": ["data 
       : h('div', null, this.tLab(this.t('wtMain')),
           h('div', { style: { marginTop: 14, display: 'flex', alignItems: 'flex-start', gap: 12 } }, badge(ok, 'check'),
             h('span', { style: { minWidth: 0 } }, h('span', { style: big }, this.t('wtCalm')), E.ok && E.line ? h('span', { style: { display: 'block', marginTop: 6, fontSize: 15, lineHeight: 1.5, color: C.ink } }, E.line) : null)));
-    const hero = h('div', { key: 'hr', className: 'mt-foldlist', ref: el => this.seenRef(el), style: this.card({ marginTop: 18, padding: '24px 26px', display: 'flex', flexWrap: 'wrap', gap: '28px 48px' }) },
+    const hero = h('div', { key: 'hr', className: 'mt-foldlist', ref: el => this.seenRef(el), style: this.card({ marginTop: g.phone ? 0 : 18, padding: '24px 26px', display: 'flex', flexWrap: 'wrap', gap: g.phone ? '20px 48px' : '28px 48px' }) },
       h('div', { style: { flex: '1 1 340px', minWidth: 0 } }, this.tLab(this.t('wtWeek')), wordsEl, dayEl),
       h('div', { style: { flex: '1 1 320px', minWidth: 0 } }, right));
-    return h('section', { id: 'mt-wk-top' }, titEl, hero, h('div', { key: 'nt', style: { marginTop: 14, textAlign: 'center', fontSize: 12, color: C.ink3, textWrap: 'balance' } }, this.t('note')));
+    const noteEl = h('div', { key: 'nt', style: { marginTop: 14, textAlign: 'center', fontSize: 12, color: C.ink3, textWrap: 'balance' } }, this.t('note'));
+    // Al telèfon, primer la targeta i després el titular, com a Avui: el primer que es veu és com estàs (10-10-2026).
+    if (g.phone) return h('section', { id: 'mt-wk-top' }, hero, h('div', { key: 'tw', style: { marginTop: 18 } }, titEl), noteEl);
+    return h('section', { id: 'mt-wk-top' }, titEl, hero, noteEl);
   }
   // Les 5 notes en xifres, respecte al teu normal (la mateixa etiqueta que «Les teves respostes»). Només es marca la que va pitjor que el teu normal.
   // En una fila si hi caben (com a mínim 150 px cadascuna); si no (iPad), 3 a dalt i 2 a baix, sense cap xifra sola en una fila. L'etiqueta passa a dues línies abans que sortir de la targeta.
   wtTilesEl(W, wi) {
-    const C = this.C, nm = this.normOf(wi), amb = this.alertC(this.tone(.47), .1), one = this.geom().cw >= 800;
-    return h('div', { style: { display: 'grid', gridTemplateColumns: one ? 'repeat(5, minmax(0,1fr))' : 'repeat(6, minmax(0,1fr))', gap: 12 } }, this.SCALES.map((q, j) => { const v = W.v[q.k], col = this.sTone(v, 1, 10, q.inv), r = nm ? this.vsNorm(q, v, nm[q.k]) : null, warn = !!(r && !r.same && !r.better);
-      return h('button', { key: q.k + W.id, className: 'mt-fcard', onClick: () => this.flashTo('mt-wk-q-' + q.k), style: { gridColumn: one ? undefined : `span ${j < 3 ? 2 : 3}`, minWidth: 0, display: 'flex', flexDirection: 'column', alignItems: 'flex-start', padding: '15px 16px', borderRadius: this.G.inner || 12, border: `1px solid ${warn ? amb.bd : C.line2}`, background: warn ? `linear-gradient(${amb.bg}, ${amb.bg}), ${C.s1}` : C.s1, textAlign: 'left', fontFamily: 'inherit', color: 'inherit', cursor: 'pointer', animation: `mtIn .4s cubic-bezier(.2,.7,.2,1) ${(.05 + j * .05).toFixed(2)}s both` } },
-        h('span', { style: { fontSize: 14, fontWeight: 600, color: C.ink } }, q.t),
-        h('span', { style: { marginTop: 8, display: 'flex', alignItems: 'baseline', gap: 4 } }, h('span', { style: { fontSize: 30, fontWeight: 600, letterSpacing: '-.02em', lineHeight: 1, color: col, fontVariantNumeric: 'tabular-nums' } }, String(v)), h('span', { style: { fontSize: 13, color: C.ink2 } }, '/10')),
-        r ? h('span', { title: this.t('nmVal', this.decS(nm[q.k])), style: { marginTop: 8, display: 'inline-flex', alignItems: 'baseline', gap: 5, fontSize: 12.5, lineHeight: 1.35, fontWeight: 600, color: r.same ? C.ink : r.col } }, h('span', { style: { flex: 'none', fontSize: r.same ? 13 : 9 } }, r.same ? '=' : r.more ? '▲' : '▼'), h('span', { style: { minWidth: 0 } }, this.t(r.same ? 'nmSame' : r.more ? 'nmMore' : 'nmLess'))) : null); }));
+    const C = this.C, nm = this.normOf(wi), amb = this.alertC(this.tone(.47), .1), one = this.geom().cw >= 800, ph = this.phone();
+    return h('div', { style: { display: 'grid', gridTemplateColumns: one ? 'repeat(5, minmax(0,1fr))' : 'repeat(6, minmax(0,1fr))', gap: ph ? 8 : 12 } }, this.SCALES.map((q, j) => { const v = W.v[q.k], col = this.sTone(v, 1, 10, q.inv), r = nm ? this.vsNorm(q, v, nm[q.k]) : null, warn = !!(r && !r.same && !r.better);
+      return h('button', { key: q.k + W.id, className: 'mt-fcard', onClick: () => this.flashTo('mt-wk-q-' + q.k), style: { gridColumn: one ? undefined : `span ${j < 3 ? 2 : 3}`, minWidth: 0, display: 'flex', flexDirection: 'column', alignItems: 'flex-start', padding: ph ? '11px 12px' : '15px 16px', borderRadius: this.G.inner || 12, border: `1px solid ${warn ? amb.bd : C.line2}`, background: warn ? `linear-gradient(${amb.bg}, ${amb.bg}), ${C.s1}` : C.s1, textAlign: 'left', fontFamily: 'inherit', color: 'inherit', cursor: 'pointer', animation: `mtIn .4s cubic-bezier(.2,.7,.2,1) ${(.05 + j * .05).toFixed(2)}s both` } },
+        h('span', { style: { fontSize: ph ? 13 : 14, fontWeight: 600, color: C.ink } }, q.t),
+        h('span', { style: { marginTop: ph ? 6 : 8, display: 'flex', alignItems: 'baseline', gap: 4 } }, h('span', { style: { fontSize: ph ? 24 : 30, fontWeight: 600, letterSpacing: '-.02em', lineHeight: 1, color: col, fontVariantNumeric: 'tabular-nums' } }, String(v)), h('span', { style: { fontSize: 13, color: C.ink2 } }, '/10')),
+        r ? h('span', { title: this.t('nmVal', this.decS(nm[q.k])), style: { marginTop: ph ? 6 : 8, display: 'inline-flex', alignItems: 'baseline', gap: 5, fontSize: ph ? 11.5 : 12.5, lineHeight: 1.35, fontWeight: 600, color: r.same ? C.ink : r.col } }, h('span', { style: { flex: 'none', fontSize: r.same ? 13 : 9 } }, r.same ? '=' : r.more ? '▲' : '▼'), h('span', { style: { minWidth: 0 } }, this.t(r.same ? 'nmSame' : r.more ? 'nmMore' : 'nmLess'))) : null); }));
   }
   // Dues columnes: les altres claus (a tenir en compte o, si tot va bé, el que ha anat bé) | setmana a setmana i, amb un problema en curs, quan es revisa.
   // (A Setmana, Mes i Evolució les dues targetes fan la mateixa alçada: la més baixa s'estira i les seves files es reparteixen l'espai, sense forat a sota.)
@@ -3838,25 +3921,28 @@ Reply ONLY with this JSON: {"text": "your answer", "blocs": [], "basat": ["data 
     const basis = [this.t('m2BForm'), ...(N ? [this.t('m2BNorm', N.n)] : [])];
     const Wl = this.WEEKS[this.lastWi()], men = mi === ml ? this.menOf(sc, D, Wl) : null, top = men && men.k === 'on' ? this.menBlockEl(sc, D, Wl) : mi === ml && this.mLvl(M, N) === 'low' ? this.wemSupEl() : null;
     // Titular, text i (amb una baixada clara) amb qui parlar-ne; a sota, el bloc principal: el teu benestar | la idea principal.
-    const hero = h('div', { key: 'hr', style: this.card({ marginTop: 18, padding: '24px 26px', display: 'flex', flexWrap: 'wrap', gap: '28px 48px' }) },
+    const hero = h('div', { key: 'hr', style: this.card({ marginTop: g.phone ? 0 : 18, padding: '24px 26px', display: 'flex', flexWrap: 'wrap', gap: g.phone ? '20px 48px' : '28px 48px' }) },
       h('div', { style: { flex: '1 1 340px', minWidth: 0 } }, this.mesHeroF(sc, D, M, mi, N, R, basis, 'well')),
       h('div', { style: { flex: '1 1 320px', minWidth: 0 } }, this.mesIdeasEl(R, 'feat')));
-    const topEl = h('section', { id: 'mt-mo-top' }, this.mesHeroF(sc, D, M, mi, N, R, basis, 'read'), hero, h('div', { key: 'nt', style: { marginTop: 14, textAlign: 'center', fontSize: 12, color: C.ink3, textWrap: 'balance' } }, this.t('note')));
+    const noteEl = h('div', { key: 'nt', style: { marginTop: 14, textAlign: 'center', fontSize: 12, color: C.ink3, textWrap: 'balance' } }, this.t('note'));
+    // Al telèfon, primer la targeta i després el titular i el text (el bloc del titular compensa el seu marge amb -26 px: aquí n'hi deixem 18).
+    const topEl = g.phone ? h('section', { id: 'mt-mo-top' }, hero, h('div', { key: 'rd', style: { marginTop: 18 } }, this.mesHeroF(sc, D, M, mi, N, R, basis, 'read')), noteEl)
+      : h('section', { id: 'mt-mo-top' }, this.mesHeroF(sc, D, M, mi, N, R, basis, 'read'), hero, noteEl);
     return this.stack([this.headEl(title, this.mNextEl(sc), this.monthPickEl(mi, ml, n)), top, topEl, this.mtTilesEl(M, mi, N), this.mtColsEl(M, mi, N, ml, n), this.mesIdeasEl(R, 'rest')]);
   }
   // Quatre xifres: el benestar, respecte al teu normal, la frase més alta i la més baixa. Només es marca el que baixa clarament.
   mtTilesEl(M, mi, N) {
-    const C = this.C, tot = this.sum(M.wem), cmp = this.mCmp(M, N, mi === this.MONTHS.length - 1), lvl = mi === this.mLast() ? this.mLvl(M, N) : null, S = this.WEM_SHORT, WS = this.t('m2CmpS'), amb = this.alertC(this.tone(.47), .1);
+    const C = this.C, ph = this.phone(), tot = this.sum(M.wem), cmp = this.mCmp(M, N, mi === this.MONTHS.length - 1), lvl = mi === this.mLast() ? this.mLvl(M, N) : null, S = this.WEM_SHORT, WS = this.t('m2CmpS'), amb = this.alertC(this.tone(.47), .1);
     const it = M.wem.map((v, j) => ({ j, v, g: N ? v - N.w[j] : 0 })), hi = it.slice().sort((a, b) => b.v - a.v || a.j - b.j)[0], lo = it.slice().sort((a, b) => a.v - b.v || a.j - b.j)[0];
     const chg = x => (N && Math.abs(x.g) >= .75 ? h('span', { style: { display: 'inline-flex', alignItems: 'center', gap: 5, color: this.tone(x.g > 0 ? .9 : this.WSEG['!']) } }, h('span', { style: { fontSize: 9 } }, x.g > 0 ? '▲' : '▼'), this.t(x.g > 0 ? 'nmMore' : 'nmLess')) : null);
     const ans = x => h('span', { style: { display: 'inline-flex', gap: '2px 10px', flexWrap: 'wrap' } }, h('span', { style: { color: this.wTone(x.v, 1, 5) } }, this.SCALE5[x.v - 1]), chg(x));
-    const tile = (key, lab, val, unit, sub, col, warn, to, num) => h('button', { key, className: 'mt-fcard', onClick: () => this.flashTo(to), style: { flex: '1 1 190px', minWidth: 0, display: 'flex', flexDirection: 'column', alignItems: 'flex-start', padding: '15px 16px', borderRadius: this.G.inner || 12, border: `1px solid ${warn ? amb.bd : C.line2}`, background: warn ? `linear-gradient(${amb.bg}, ${amb.bg}), ${C.s1}` : C.s1, textAlign: 'left', fontFamily: 'inherit', color: 'inherit', cursor: 'pointer' } },
-      h('span', { style: { fontSize: 14, fontWeight: 600, color: C.ink } }, lab),
-      typeof val === 'string' ? h('span', { style: { marginTop: 8, maxWidth: '100%', display: 'flex', alignItems: 'baseline', gap: 4 } }, h('span', { style: { minWidth: 0, fontSize: num ? 30 : 21, fontWeight: 600, letterSpacing: '-.02em', lineHeight: 1.1, color: col, fontVariantNumeric: 'tabular-nums', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' } }, val), unit ? h('span', { style: { fontSize: 13, color: C.ink2 } }, unit) : null)
+    const tile = (key, lab, val, unit, sub, col, warn, to, num) => h('button', { key, className: 'mt-fcard', onClick: () => this.flashTo(to), style: { flex: ph ? '1 1 calc(50% - 4px)' : '1 1 190px', minWidth: 0, display: 'flex', flexDirection: 'column', alignItems: 'flex-start', padding: ph ? '11px 12px' : '15px 16px', borderRadius: this.G.inner || 12, border: `1px solid ${warn ? amb.bd : C.line2}`, background: warn ? `linear-gradient(${amb.bg}, ${amb.bg}), ${C.s1}` : C.s1, textAlign: 'left', fontFamily: 'inherit', color: 'inherit', cursor: 'pointer' } },
+      h('span', { style: { fontSize: ph ? 13 : 14, fontWeight: 600, color: C.ink } }, lab),
+      typeof val === 'string' ? h('span', { style: { marginTop: ph ? 6 : 8, maxWidth: '100%', display: 'flex', alignItems: 'baseline', gap: 4 } }, h('span', { style: { minWidth: 0, fontSize: ph ? (num ? 24 : 17) : num ? 30 : 21, fontWeight: 600, letterSpacing: '-.02em', lineHeight: 1.1, color: col, fontVariantNumeric: 'tabular-nums', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' } }, val), unit ? h('span', { style: { fontSize: 13, color: C.ink2 } }, unit) : null)
         : h('span', { style: { marginTop: 10 } }, val),
-      sub ? h('span', { style: { marginTop: 8, fontSize: 12.5, fontWeight: 600, color: C.ink } }, sub) : null);
+      sub ? h('span', { style: { marginTop: ph ? 6 : 8, fontSize: ph ? 11.5 : 12.5, fontWeight: 600, color: C.ink } }, sub) : null);
     const d = N ? tot - N.t : null, dS = d == null ? null : `${d > 0.05 ? '+' : d < -0.05 ? '−' : ''}${this.decS(Math.abs(d))}`;
-    return h('div', { style: { display: 'flex', flexWrap: 'wrap', gap: 12 } },
+    return h('div', { style: { display: 'flex', flexWrap: 'wrap', gap: ph ? 8 : 12 } },
       tile('t', this.t('wellS'), String(tot), '/35', cmp.k === 'calc' || cmp.k === 'first' ? null : h('span', { style: { color: cmp.col } }, WS[cmp.k]), this.wTone(tot, 7, 35), !!lvl, 'mt-mo-form', true),
       tile('d', this.t('mtVsN'), N ? dS : this.missChip(this.t('nmCalc')), null, N ? this.t('nmVal', this.decS(N.t)) : null, cmp.col, cmp.k === 'dn', 'mt-mo-evo', true),
       tile('h', this.t('mtHigh'), S[hi.j], null, ans(hi), this.wTone(hi.v, 1, 5), false, 'mt-mo-q-' + hi.j),
@@ -3899,7 +3985,8 @@ Reply ONLY with this JSON: {"text": "your answer", "blocs": [], "basat": ["data 
       sents = this.box({ id: 'mt-evo-sents', st: { padding: '20px 24px 18px' }, title: this.t('feelVsData') },
         h('div', { style: { marginTop: 12 } }, this.chartSents(D, idx, sm, sc, range)));
     }
-    return this.stack([this.headEl(this.t('evol'), period, right), this.evTopEl(sc, D, idx, R), this.evTilesEl(D, idx), this.evColsEl(sc, R), this.dayByDayEl(sc, D, R.findings), sents]);
+    // Al telèfon (10-10-2026), el selector de període va dins la targeta «Dia a dia», al costat del dia, i no a la capçalera.
+    return this.stack([this.headEl(this.t('evol'), period, g.phone ? null : right), this.evTopEl(sc, D, idx, R), this.evTilesEl(D, idx), this.evColsEl(sc, R), this.dayByDayEl(sc, D, R.findings, g.phone ? right : null), sents]);
   }
   // L'avís en discontinu de l'esportista nou: el dia que tindrà 14 dies de dades (avui + els que falten), amb la data en l'idioma triat.
   emptyEvoF(D) {
@@ -3921,8 +4008,8 @@ Reply ONLY with this JSON: {"text": "your answer", "blocs": [], "basat": ["data 
     const v = R.loading ? null : R.val, basis = [...this.KEYS.map(k => this.META[k].name), this.t('coachComm')];
     const label = h('div', { key: 'lb', style: { display: 'flex', alignItems: 'baseline', gap: '4px 8px', flexWrap: 'wrap', marginBottom: 8, fontSize: 13.5, color: C.ink2 } }, h('span', { style: { color: C.ink2, fontWeight: 500 } }, this.t('trendReading')), R.loading ? null : h('span', null, `· ${this.t(R.auto ? 'autoTag' : 'aiTag')}`));
     const titEl = !v ? h('div', { key: 'tl', style: { display: 'grid', gap: 10 } }, sk('40%', 18, 0), sk('70%', 12, .1))
-      : h('div', { key: 'tt' + v.titular, style: { animation: 'mtIn .45s cubic-bezier(.2,.7,.2,1) both' } }, this.basisTip({ basis }, v.titular, { display: 'inline-block', fontFamily: this.G.display, fontSize: 22, fontWeight: 600, letterSpacing: '-.01em', lineHeight: 1.3, color: C.ink }),
-          v.resum ? h('p', { style: { margin: '8px 0 0', maxWidth: 760, fontSize: 16, lineHeight: 1.6, color: C.ink, textWrap: 'pretty' } }, this.segs(v.resum)) : null);
+      : h('div', { key: 'tt' + v.titular, style: { animation: 'mtIn .45s cubic-bezier(.2,.7,.2,1) both' } }, this.basisTip({ basis }, v.titular, { display: 'inline-block', fontFamily: this.G.display, fontSize: g.phone ? 19 : 22, fontWeight: 600, letterSpacing: '-.01em', lineHeight: 1.3, color: C.ink }),
+          v.resum ? h('p', { style: { margin: '8px 0 0', maxWidth: 760, fontSize: g.phone ? 15 : 16, lineHeight: g.phone ? 1.55 : 1.6, color: C.ink, textWrap: 'pretty' } }, this.segs(v.resum)) : null);
     // Esquerra: els teus dies.
     // Un dia amb dades però encara sense franja (esportista nou): gris llis, «Calculant»; el discontinu és només per als dies sense registre.
     const days = idx.map(i => { const st = this.dayState(sc, i), has = this.KEYS.some(k => D.vals[k][i] != null); return { i, st, has, fill: st === 'prec' ? this.toneF(.5) : st ? this.toneF(this.dayH(D.pos[i])) : has ? this.ov(.22) : null }; }), withSt = days.filter(x => x.st), ok = withSt.filter(x => x.st === 'fons').length;
@@ -3935,7 +4022,7 @@ Reply ONLY with this JSON: {"text": "your answer", "blocs": [], "basat": ["data 
     // Dreta: el més important.
     const mn = this.evMain(R), info = !mn && nou && R.findings[0] ? R.findings[0] : null, x = mn || info;
     const badge = (bg, fg, ic) => h('span', { style: { width: 28, height: 28, flex: 'none', marginTop: 1, borderRadius: this.G.badge, background: bg, color: fg, display: 'inline-flex', alignItems: 'center', justifyContent: 'center' } }, this.icon(ic, 15, 2.6));
-    const big = { display: 'block', fontFamily: this.G.display, fontSize: 22, fontWeight: 600, letterSpacing: '-.01em', lineHeight: 1.3, color: C.ink };
+    const big = { display: 'block', fontFamily: this.G.display, fontSize: g.phone ? 19 : 22, fontWeight: 600, letterSpacing: '-.01em', lineHeight: 1.3, color: C.ink };
     const ac = v && v.accions && v.accions[0], act = typeof ac === 'string' ? ac : ac && (ac.t || ac.text);
     const actEl = act ? h('span', { style: { display: 'block', marginTop: 12, fontSize: 14.5, lineHeight: 1.5, color: C.ink, textWrap: 'pretty' } }, h('b', { style: { fontWeight: 600 } }, `${this.t('nextDays')}: `), act) : null;
     const main = !v ? h('div', { style: { display: 'grid', gap: 12 } }, sk('40%', 12, 0), sk('80%', 20, .1), sk('65%', 12, .2))
@@ -3947,17 +4034,20 @@ Reply ONLY with this JSON: {"text": "your answer", "blocs": [], "basat": ["data 
       : h('div', null, this.tLab(this.t('wtMain')),
           h('div', { style: { marginTop: 14, display: 'flex', alignItems: 'flex-start', gap: 12 } }, badge(this.tone(.9), C.dark ? C.bg : '#FFFFFF', 'check'),
             h('span', { style: { minWidth: 0 } }, h('span', { style: big }, this.t('evCalm')), actEl)));
-    const hero = h('div', { key: 'hr', className: 'mt-foldlist', ref: el => this.seenRef(el), style: this.card({ marginTop: 18, padding: '24px 26px', display: 'flex', flexWrap: 'wrap', gap: '28px 48px' }) },
+    const hero = h('div', { key: 'hr', className: 'mt-foldlist', ref: el => this.seenRef(el), style: this.card({ marginTop: g.phone ? 0 : 18, padding: '24px 26px', display: 'flex', flexWrap: 'wrap', gap: g.phone ? '20px 48px' : '28px 48px' }) },
       h('div', { style: { flex: '1 1 380px', minWidth: 0 } }, this.tLab(this.t('evDays')), strip, dates, okEl),
       h('div', { style: { flex: '1 1 320px', minWidth: 0 } }, main));
-    return h('section', { id: 'mt-evo-top' }, label, titEl, hero, h('div', { key: 'nt', style: { marginTop: 14, textAlign: 'center', fontSize: 12, color: C.ink3, textWrap: 'balance' } }, this.t('note')));
+    const noteEl = h('div', { key: 'nt', style: { marginTop: 14, textAlign: 'center', fontSize: 12, color: C.ink3, textWrap: 'balance' } }, this.t('note'));
+    // Al telèfon, primer la targeta (els teus dies i el més important) i després la lectura de tendències.
+    if (g.phone) return h('section', { id: 'mt-evo-top' }, hero, h('div', { key: 'rd', style: { marginTop: 18 } }, label, titEl), noteEl);
+    return h('section', { id: 'mt-evo-top' }, label, titEl, hero, noteEl);
   }
   // Minigràfic d'una dada al període triat: la línia (amb forats els dies sense registre) sobre la teva franja.
   // Corba suau, dibuixada a l'amplada real de la targeta perquè no s'estiri (05-10-2026): amb 7 dies, la del gràfic gran (passa per cada dia);
   // amb 28 dies o 6 setmanes, la B-spline (basisPath), que arrodoneix les puntes.
   sparkEl(k, D, idx) { return h(this.Spark, { key: 'sp' + k, k, D, idx }); }
   Spark = p => {
-    const C = this.C, [ref, W] = useWidth(), { k, D, idx } = p, H = 40, B = D.band ? D.band[k] : null, b = B && k === 'estat' ? { lo: 3.5, hi: 4.5 } : B, vs = idx.map(i => D.vals[k][i]), pres = vs.filter(v => v != null), col = this.idCol(k);
+    const C = this.C, [ref, W] = useWidth(), { k, D, idx } = p, H = this.phone() ? 30 : 40, B = D.band ? D.band[k] : null, b = B && k === 'estat' ? { lo: 3.5, hi: 4.5 } : B, vs = idx.map(i => D.vals[k][i]), pres = vs.filter(v => v != null), col = this.idCol(k);
     if (!pres.length) return h('div', { style: { marginTop: 10, height: H, borderRadius: 6, border: `1.5px dashed ${this.ov(.2)}` } });
     let lo = Math.min(...pres, ...(b ? [b.lo] : [])), hi = Math.max(...pres, ...(b ? [b.hi] : [])); const pad = (hi - lo) * .12 || 1; lo -= pad; hi += pad;
     const n = vs.length, X = j => (n === 1 ? W / 2 : 1 + j * (W - 2) / (n - 1)), Y = v => H - (v - lo) / (hi - lo) * H, runs = this.runsOf(vs, X, Y), bh = b ? Math.max(1, Y(b.lo) - Y(b.hi)) : 0;
@@ -3969,16 +4059,16 @@ Reply ONLY with this JSON: {"text": "your answer", "blocs": [], "basat": ["data 
   // Quatre xifres: la mitjana dels últims 7 dies de cada dada, respecte a les 3 setmanes anteriors (la mateixa regla que la lectura de tendències),
   // amb el minigràfic del període. Només es marca en àmbar la que va pitjor. Clic → la seva fila de «Dia a dia».
   evTilesEl(D, idx) {
-    const C = this.C, amb = this.alertC(this.tone(.47), .1), avg = xs => { const p = xs.filter(v => v != null); return p.length ? this.sum(p) / p.length : null; };
-    return h('div', { style: { display: 'flex', flexWrap: 'wrap', gap: 12 } }, this.KEYS.map((k, j) => {
+    const C = this.C, ph = this.phone(), amb = this.alertC(this.tone(.47), .1), avg = xs => { const p = xs.filter(v => v != null); return p.length ? this.sum(p) / p.length : null; };
+    return h('div', { style: { display: 'flex', flexWrap: 'wrap', gap: ph ? 8 : 12 } }, this.KEYS.map((k, j) => {
       const B = D.band ? D.band[k] : null, a7 = avg(D.vals[k].slice(35)), p21 = avg(D.vals[k].slice(14, 35));
       const dir = B && a7 != null && p21 != null ? (Math.abs(a7 - p21) >= (B.hi - B.lo) / 4 ? (a7 > p21 ? 'up' : 'dn') : 'same') : null;
       const bad = !!dir && dir !== 'same' && (B.worse === 'up' ? dir === 'up' : dir === 'dn'), scol = !dir || dir === 'same' ? C.ink : this.tone(bad ? .47 : .9);
-      return h('button', { key: k, className: 'mt-fcard', onClick: () => this.goMetric(k), style: { flex: '1 1 210px', minWidth: 0, display: 'flex', flexDirection: 'column', alignItems: 'stretch', padding: '15px 16px 14px', borderRadius: this.G.inner || 12, border: `1px solid ${bad ? amb.bd : C.line2}`, background: bad ? `linear-gradient(${amb.bg}, ${amb.bg}), ${C.s1}` : C.s1, textAlign: 'left', fontFamily: 'inherit', color: 'inherit', cursor: 'pointer', animation: `mtIn .4s cubic-bezier(.2,.7,.2,1) ${(.05 + j * .05).toFixed(2)}s both` } },
-        h('span', { style: { display: 'flex', alignItems: 'center', gap: 8, fontSize: 14, fontWeight: 600, color: C.ink } }, h('span', { style: { width: 12, height: 3, borderRadius: 2, background: this.idCol(k) } }), this.META[k].name),
-        h('span', { title: this.t('meanN', 7), style: { marginTop: 8, display: 'flex', alignItems: 'baseline', gap: 5 } }, h('span', { style: { fontSize: 30, fontWeight: 600, letterSpacing: '-.02em', lineHeight: 1, color: a7 == null ? C.ink3 : D.band ? this.toneOf(k, a7, D.band) : C.ink, fontVariantNumeric: 'tabular-nums' } }, a7 == null ? '—' : this.fmtV(k, k === 'estat' ? Math.round(a7 * 10) / 10 : a7)),
-          h('span', { style: { fontSize: 13, color: C.ink2 } }, `${k === 'estat' ? '/5' : this.META[k].unit} · ${this.t('meanN', 7).toLowerCase()}`)),
-        dir ? h('span', { style: { marginTop: 6, display: 'inline-flex', alignItems: 'center', gap: 5, fontSize: 12.5, fontWeight: 600, color: scol } }, h('span', { style: { fontSize: dir === 'same' ? 13 : 9 } }, dir === 'same' ? '=' : dir === 'up' ? '▲' : '▼'), this.t(dir === 'same' ? 'evSame' : dir === 'up' ? 'evUp' : 'evDn')) : null,
+      return h('button', { key: k, className: 'mt-fcard', onClick: () => this.goMetric(k), style: { flex: ph ? '1 1 calc(50% - 4px)' : '1 1 210px', minWidth: 0, display: 'flex', flexDirection: 'column', alignItems: 'stretch', padding: ph ? '11px 12px 10px' : '15px 16px 14px', borderRadius: this.G.inner || 12, border: `1px solid ${bad ? amb.bd : C.line2}`, background: bad ? `linear-gradient(${amb.bg}, ${amb.bg}), ${C.s1}` : C.s1, textAlign: 'left', fontFamily: 'inherit', color: 'inherit', cursor: 'pointer', animation: `mtIn .4s cubic-bezier(.2,.7,.2,1) ${(.05 + j * .05).toFixed(2)}s both` } },
+        h('span', { style: { display: 'flex', alignItems: 'center', gap: 8, fontSize: ph ? 13 : 14, fontWeight: 600, color: C.ink } }, h('span', { style: { width: 12, height: 3, borderRadius: 2, background: this.idCol(k) } }), this.META[k].name),
+        h('span', { title: this.t('meanN', 7), style: { marginTop: ph ? 6 : 8, display: 'flex', alignItems: 'baseline', gap: 5, flexWrap: ph ? 'wrap' : undefined } }, h('span', { style: { fontSize: ph ? 24 : 30, fontWeight: 600, letterSpacing: '-.02em', lineHeight: 1, color: a7 == null ? C.ink3 : D.band ? this.toneOf(k, a7, D.band) : C.ink, fontVariantNumeric: 'tabular-nums' } }, a7 == null ? '—' : this.fmtV(k, k === 'estat' ? Math.round(a7 * 10) / 10 : a7)),
+          h('span', { style: { fontSize: ph ? 11.5 : 13, color: C.ink2 } }, `${k === 'estat' ? '/5' : this.META[k].unit} · ${this.t('meanN', 7).toLowerCase()}`)),
+        dir ? h('span', { style: { marginTop: ph ? 4 : 6, display: 'inline-flex', alignItems: 'center', gap: 5, fontSize: ph ? 11.5 : 12.5, fontWeight: 600, color: scol } }, h('span', { style: { fontSize: dir === 'same' ? 13 : 9 } }, dir === 'same' ? '=' : dir === 'up' ? '▲' : '▼'), this.t(dir === 'same' ? 'evSame' : dir === 'up' ? 'evUp' : 'evDn')) : null,
         this.sparkEl(k, D, idx)); }));
   }
   // Dues columnes: les altres troballes (a tenir en compte o el que ha anat bé), amb el seu número | tu vs les teves dades i l'enllaç al gràfic.
@@ -4426,7 +4516,8 @@ Reply ONLY with this JSON: {"text": "your answer", "blocs": [], "basat": ["data 
       h('div', { style: { fontSize: 14.5, lineHeight: 1.5, color: C.ink, textWrap: 'pretty' } }, this.t('chatRisk')),
       h('div', { style: { marginTop: 10, display: 'grid', gap: 7 } }, this.t('menWho').map((w, q) => h('div', { key: q, style: { display: 'flex', alignItems: 'center', gap: 9, fontSize: 13.5, color: C.ink } }, h('span', { style: { display: 'flex' } }, this.icon(ico[q], 15, 2)), h('b', { style: { fontWeight: 600 } }, w[0]), h('span', null, w[1])))),
       h('div', { style: { marginTop: 10, display: 'flex', alignItems: 'center', gap: '6px 10px', flexWrap: 'wrap', fontSize: 14, color: C.ink } }, h('span', { style: { display: 'flex' } }, this.icon('phone', 14, 2)),
-        h('a', { href: 'tel:112', style: { color: C.ink, fontWeight: 700, textDecoration: 'none' } }, '112'), h('span', { style: { color: C.ink3 } }, '·'), h('a', { href: 'tel:024', style: { color: C.ink, fontWeight: 700, textDecoration: 'none' } }, '024'), h('span', null, `(${this.t('menPh024')})`)));
+        // Al telèfon, els telèfons com a text (que es puguin tocar per trucar és una funció per decidir, 09-10-2026).
+        h(this.phone() ? 'span' : 'a', { href: this.phone() ? undefined : 'tel:112', style: { color: C.ink, fontWeight: 700, textDecoration: 'none' } }, '112'), h('span', { style: { color: C.ink3 } }, '·'), h(this.phone() ? 'span' : 'a', { href: this.phone() ? undefined : 'tel:024', style: { color: C.ink, fontWeight: 700, textDecoration: 'none' } }, '024'), h('span', null, `(${this.t('menPh024')})`)));
   }
   // Botó flotant de la IA, a baix a la dreta a totes les pàgines (com el del matràs): obre i tanca la finestra petita. Amb la vista general, s'amaga.
   chatFabEl() {
@@ -4474,7 +4565,7 @@ Reply ONLY with this JSON: {"text": "your answer", "blocs": [], "basat": ["data 
       style: { position: 'absolute', top: 0, bottom: 0, left: -6, width: 12, zIndex: 45, cursor: 'col-resize', touchAction: 'none', outline: 'none', display: 'flex', justifyContent: 'center' } },
       h('span', { style: { width: 2, height: '100%', background: drag ? C.ink : C.ink3 } }));
     const chip = (key, label, onClick) => h('button', { key, className: 'mt-btn', onClick, disabled: busy, style: { display: 'inline-flex', alignItems: 'center', gap: 6, padding: '6px 11px', border: `1px solid ${C.line2}`, borderRadius: this.G.tag, background: 'transparent', color: C.ink, fontFamily: 'inherit', fontSize: 13, fontWeight: 500, lineHeight: 1.3, cursor: busy ? 'default' : 'pointer', textAlign: 'left' } }, label, this.icon('right', 11, 2.2));
-    const suggest = () => this.chatSuggest(sc).map(id => h('button', { key: id, className: 'mt-fcard', onClick: () => this.chatAsk(sc, null, id), disabled: busy, style: { display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10, width: '100%', padding: '12px 14px', boxSizing: 'border-box', borderRadius: this.G.inner, border: `1px solid ${C.line2}`, background: C.bg, color: C.ink, fontFamily: 'inherit', fontSize: 14.5, fontWeight: 500, lineHeight: 1.35, textAlign: 'left', cursor: busy ? 'default' : 'pointer' } }, Q[id], h('span', { className: 'mt-farrow', style: { display: 'flex', color: C.ink2 } }, this.icon('right', 12, 2.2))));
+    const suggest = () => this.chatSuggest(sc).map(id => h('button', { key: id, className: 'mt-fcard', onClick: () => this.chatAsk(sc, null, id), disabled: busy, style: { display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10, width: '100%', padding: ph ? '10px 12px' : '12px 14px', boxSizing: 'border-box', borderRadius: this.G.inner, border: `1px solid ${C.line2}`, background: C.bg, color: C.ink, fontFamily: 'inherit', fontSize: ph ? 14 : 14.5, fontWeight: 500, lineHeight: 1.35, textAlign: 'left', cursor: busy ? 'default' : 'pointer' } }, Q[id], h('span', { className: 'mt-farrow', style: { display: 'flex', color: C.ink2 } }, this.icon('right', 12, 2.2))));
     const sk = (w, d) => h('div', { key: 'sk' + d, style: { height: 12, width: w, marginTop: 10, borderRadius: 999, background: `linear-gradient(90deg, ${this.ov(.05)}, ${this.ov(.1)}, ${this.ov(.05)})`, backgroundSize: '1200px 100%', animation: `mtShim 1.6s linear ${d}s infinite` } });
     const entry = (e, i) => { const a = e.a, basis = a && a.basat && a.basat.length ? a.basat : null;
       const body = e.status === 'loading' ? [sk('92%', 0), sk('70%', .1), sk('48%', .2)]
@@ -4501,27 +4592,27 @@ Reply ONLY with this JSON: {"text": "your answer", "blocs": [], "basat": ["data 
     const pBot = this.TABH + 14 + 48 + 10, fr = { borderRadius: Math.min(16, this.G.card), border: `1px solid ${C.line2}`, boxShadow: `0 18px 50px ${this.sh(.5)}`, overflow: 'hidden', animation: 'mtIn .22s cubic-bezier(.2,.7,.2,1) both' };
     const box = full ? { position: 'fixed', left: 0, right: 0, ...(vv ? { top: vv.top, height: vv.h } : { top: 0, bottom: 0 }), zIndex: 70, animation: 'mtIn .22s cubic-bezier(.2,.7,.2,1) both' }
       : ph ? { position: 'fixed', zIndex: 58, right: 'calc(12px + env(safe-area-inset-right, 0px))', width: 'min(420px, calc(100vw - 24px))', ...fr,
-          ...(kb ? { top: `calc(${vv.top + 8}px + ${this.SAT})`, height: `calc(${vv.h - 16}px - ${this.SAT})` } : { bottom: `calc(${pBot}px + ${this.SAB})`, height: `min(440px, calc(${s.vh}px - ${pBot + 52 + 12}px - ${this.SAB} - ${this.SAT}))` }) }
+          ...(kb ? { top: `calc(${vv.top + 8}px + ${this.SAT})`, height: `calc(${vv.h - 16}px - ${this.SAT})` } : { bottom: `calc(${pBot}px + ${this.SAB})`, maxHeight: `min(440px, calc(${s.vh}px - ${pBot + 52 + 12}px - ${this.SAB} - ${this.SAT}))` }) }
       : !big ? { position: 'fixed', right: 20, bottom: 80, zIndex: 58, width: 'min(420px, calc(100vw - 40px))', height: 'min(640px, calc(100vh - 110px))', borderRadius: Math.min(16, this.G.card), border: `1px solid ${C.line2}`, boxShadow: `0 18px 50px ${this.sh(.5)}`, overflow: 'hidden', animation: 'mtIn .22s cubic-bezier(.2,.7,.2,1) both' }
       : { ...(dock.push ? { position: 'relative', flex: 'none', height: '100vh' } : { position: 'fixed', top: 0, right: 0, bottom: 0, zIndex: 58, boxShadow: `-18px 0 48px ${this.sh(.35)}` }), width: dock.w, borderLeft: `1px solid ${C.line2}`, animation: 'mtSlideL .3s cubic-bezier(.2,.7,.2,1) both' };
     const ib = { width: ph ? 40 : 34, height: ph ? 40 : 34, flex: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', border: 'none', borderRadius: '50%', background: 'transparent', color: C.ink2, fontFamily: 'inherit', fontSize: 15, cursor: 'pointer', padding: 0 };
     const col = { maxWidth: big || full ? 720 : 'none', margin: '0 auto' };
     return h('aside', { 'aria-label': this.t('chatTitle'), style: { ...box, boxSizing: 'border-box', display: 'flex', flexDirection: 'column', background: C.bg } }, big ? handle : null,
-      h('div', { style: { flex: 'none', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10, height: 56, padding: full ? `${this.SAT} 6px 0 16px` : ph ? '0 6px 0 16px' : '0 10px 0 18px', borderBottom: `1px solid ${C.line}` } },
+      h('div', { style: { flex: 'none', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10, height: ph && !full ? 48 : 56, padding: full ? `${this.SAT} 6px 0 16px` : ph ? '0 6px 0 16px' : '0 10px 0 18px', borderBottom: `1px solid ${C.line}` } },
         h('div', { style: { minWidth: 0, display: 'flex', alignItems: 'center', gap: 9 } }, h('span', { style: { display: 'flex', color: C.ink } }, this.icon('chat', 17, 2)),
           h('span', { style: { fontSize: 16, fontWeight: 600, color: C.ink, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' } }, this.t('chatTitle'))),
         h('div', { style: { display: 'flex', alignItems: 'center', gap: 2, flex: 'none' } },
           h('button', { className: 'mt-ib', onClick: () => this.setState(st => ({ chatBig: !st.chatBig })), 'aria-label': this.t(s.chatBig ? 'chatSmall' : 'chatBig'), title: this.t(s.chatBig ? 'chatSmall' : 'chatBig'), style: ib }, this.icon(s.chatBig ? 'shrink' : 'grow', 16, 2)),
           h('button', { className: 'mt-ib', onClick: () => this.chatSet(false), 'aria-label': this.t('chatClose'), title: this.t('chatClose'), style: ib }, '✕'))),
-      h('div', { ref: bodyRef, style: { position: 'relative', flex: 1, minHeight: 0, overflowY: 'auto', padding: big ? `24px ${px}px 32px` : full ? '18px 16px 24px' : ph ? '16px 16px 20px' : '18px 18px 24px' } }, h('div', { style: col },
-        n ? [...log.map(entry), tail] : [h('p', { key: 'in', style: { margin: '0 0 14px', fontSize: 15, lineHeight: 1.5, color: C.ink, textWrap: 'pretty' } }, this.t('chatIntro')), h('div', { key: 'sg', style: { display: 'grid', gap: 8 } }, suggest())])),
+      h('div', { ref: bodyRef, style: { position: 'relative', flex: 1, minHeight: 0, overflowY: 'auto', padding: big ? `24px ${px}px 32px` : full ? '18px 16px 24px' : ph ? '14px 14px 16px' : '18px 18px 24px' } }, h('div', { style: col },
+        n ? [...log.map(entry), tail] : [h('p', { key: 'in', style: { margin: ph ? '0 0 10px' : '0 0 14px', fontSize: ph ? 14 : 15, lineHeight: ph ? 1.45 : 1.5, color: C.ink, textWrap: 'pretty' } }, this.t('chatIntro')), h('div', { key: 'sg', style: { display: 'grid', gap: ph ? 6 : 8 } }, suggest())])),
       h('div', { style: { flex: 'none', padding: big ? `14px ${px}px 18px` : full ? `12px 12px ${kb ? '12px' : `calc(12px + ${this.SAB})`}` : ph ? '12px' : '12px 14px 14px', borderTop: `1px solid ${C.line}` } }, h('div', { style: col },
         h('div', { style: { display: 'flex', alignItems: 'flex-end', gap: 8 } },
           // Al telèfon, la lletra de 16 px: amb menys, l'iPhone amplia la pantalla en tocar per escriure.
-          h('textarea', { ref: inRef, value: txt, rows: 2, placeholder: this.t('chatPh'), 'aria-label': this.t('chatPh'), onChange: ev => setTxt(ev.target.value), onKeyDown: ev => { if (ev.key === 'Enter' && !ev.shiftKey) { ev.preventDefault(); send(); } else if (ev.key === 'Escape') this.chatSet(false); },
-            style: { flex: 1, minWidth: 0, resize: 'none', padding: '10px 12px', boxSizing: 'border-box', borderRadius: Math.min(12, this.G.ctrl), border: `1px solid ${C.line2}`, background: C.s1, color: C.ink, fontFamily: 'inherit', fontSize: ph ? 16 : 14.5, lineHeight: 1.4, outline: 'none' } }),
+          h('textarea', { ref: inRef, value: txt, rows: ph ? 1 : 2, placeholder: this.t(ph ? 'chatPhS' : 'chatPh'), 'aria-label': this.t('chatPh'), onChange: ev => setTxt(ev.target.value), onKeyDown: ev => { if (ev.key === 'Enter' && !ev.shiftKey) { ev.preventDefault(); send(); } else if (ev.key === 'Escape') this.chatSet(false); },
+            style: { flex: 1, minWidth: 0, resize: 'none', padding: ph ? '9px 12px' : '10px 12px', boxSizing: 'border-box', borderRadius: Math.min(12, this.G.ctrl), border: `1px solid ${C.line2}`, background: C.s1, color: C.ink, fontFamily: 'inherit', fontSize: ph ? 16 : 14.5, lineHeight: 1.4, outline: 'none' } }),
           h('button', { onClick: send, disabled: busy || empty, 'aria-label': this.t('chatSend'), title: this.t('chatSend'), style: { width: 38, height: 38, flex: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', border: 'none', borderRadius: '50%', background: busy || empty ? this.ov(.12) : C.ink, color: busy || empty ? C.ink3 : C.bg, cursor: busy || empty ? 'default' : 'pointer', padding: 0 } }, this.icon('right', 17, 2.4))),
-        h('div', { style: { marginTop: 8, fontSize: 11.5, lineHeight: 1.45, color: C.ink3 } }, `${this.t('chatPrivacy')} ${this.t('note')}`))));
+        h('div', { style: { marginTop: ph ? 6 : 8, fontSize: ph ? 11 : 11.5, lineHeight: ph ? 1.4 : 1.45, color: C.ink3 } }, `${this.t('chatPrivacy')} ${this.t('note')}`))));
   };
   protoEl(sc) {
     const s = this.state, C = this.C, ph = this.phone();
@@ -4547,10 +4638,6 @@ Reply ONLY with this JSON: {"text": "your answer", "blocs": [], "basat": ["data 
         h('div', { key: t, style: { ...foot, cursor: 'default', flexDirection: 'column', alignItems: 'stretch', gap: 6 } }, h('span', null, t),
           h('span', { style: { display: 'flex', gap: 4 } }, opts.map(([k, lb]) => { const on = cur === k;
             return h('button', { key: k, onClick: () => fn(k), style: { flex: 1, height: 22, padding: '0 6px', borderRadius: 6, border: `1px solid ${C.line2}`, background: on ? C.ink : 'transparent', color: on ? C.bg : C.ink2, fontFamily: 'inherit', fontSize: 11.5, fontWeight: 700, cursor: 'pointer' } }, lb); })))),
-      // Telèfon: les dues versions d'«Aquesta setmana» a Avui (fins que l'usuari en triï una).
-      ph ? h('div', { key: 'wn', style: { ...foot, cursor: 'default', flexDirection: 'column', alignItems: 'stretch', gap: 6 } }, h('span', null, 'Esta semana en Hoy (móvil)'),
-        h('span', { style: { display: 'flex', gap: 4 } }, [['fila', 'Fila'], ['desliza', 'Deslizar']].map(([k, lb]) => { const on = (s.wnVer || 'fila') === k;
-          return h('button', { key: k, onClick: () => this.setState({ wnVer: k }), style: { flex: 1, height: 22, padding: '0 6px', borderRadius: 6, border: `1px solid ${C.line2}`, background: on ? C.ink : 'transparent', color: on ? C.bg : C.ink2, fontFamily: 'inherit', fontSize: 11.5, fontWeight: 700, cursor: 'pointer' } }, lb); }))) : null,
       h('button', { className: 'mt-pr', onClick: () => this.setState(st => ({ simOverdue: !st.simOverdue })), style: { ...foot, color: s.simOverdue ? C.ink : C.ink2 } }, h('span', null, 'Simular cuestionarios sin responder'), h('span', null, s.simOverdue ? this.icon('check', 13) : '')),
       h('button', { className: 'mt-pr', onClick: () => this.setState(st => ({ simNoDec: !st.simNoDec })), style: { ...foot, color: s.simNoDec ? C.ink : C.ink2 } }, h('span', null, 'Simular: la sesión empieza sin ajuste del preparador'), h('span', null, s.simNoDec ? this.icon('check', 13) : '')),
       ph ? null : h('a', { className: 'mt-pr', href: './Max%20Tracking%20-%20M%C3%B3vil.dc.html', target: '_blank', rel: 'noopener', style: foot }, h('span', null, 'Abrir versión móvil'), h('span', null, '↗')),
