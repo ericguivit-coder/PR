@@ -1494,6 +1494,7 @@ Reply ONLY with this JSON: {"text": "your answer", "blocs": [], "basat": ["data 
     const s = this.state, ps = this._ps || s;
     this._ps = s;
     if ((ps.page !== s.page || ps.scenario !== s.scenario) && this.mainRef.current) this.mainRef.current.scrollTop = 0;
+    if (s.page === 'habits' && !this.phone()) this.setState({ page: 'avui' });
     if ((ps.page !== s.page || ps.scenario !== s.scenario || ps.lang !== s.lang) && this._tipEl) this.closeTip();
   }
 
@@ -2481,7 +2482,7 @@ Reply ONLY with this JSON: {"text": "your answer", "blocs": [], "basat": ["data 
           h('span', { style: { fontSize: 17, fontWeight: 500, lineHeight: 1.45, color: on ? C.ink3 : C.ink, textDecoration: on ? 'line-through' : 'none', textDecorationColor: this.ov(.35), textWrap: 'pretty', transition: 'color .2s' } }, this.segs(t))); })));
   }
   // Pla de recuperació: a l'esquerra, estratègies de la IA (àrea + acció + per què, per marcar); a la dreta, les propostes del preparador físic (prepSesEl).
-  recoveryPlanEl(sc, R) {
+  recoveryPlanEl(sc, R, mode) {
     const C = this.C, ph = this.phone(), v = R.val, tone = sc === 'nou' ? C.ink2 : (this.periodTone(sc, [41]) || C.ink2), done = this.state.done || {};
     // Cada àrea amb la seva icona i un color (mai verd/àmbar/vermell, que són de l'estat).
     const AR = { son: ['moon', 'arSon', this.idCol('son')], desc: ['pause', 'arDesc', this.idCol('rhr')], hidr: ['drop', 'arHidr', this.idCol('hrv')], nutr: ['food', 'arNutr', this.idCol('data')], mob: ['move', 'arMob', this.idCol('data')], resp: ['breath', 'arResp', this.idCol('hrv')], com: ['chat', 'arCom', C.ink2], reg: ['pen', 'arReg', C.ink2] };
@@ -2499,6 +2500,27 @@ Reply ONLY with this JSON: {"text": "your answer", "blocs": [], "basat": ["data 
       h('span', { style: { fontSize: 12.5, color: C.ink3, fontVariantNumeric: 'tabular-nums', whiteSpace: 'nowrap' } }, this.t('doneOf', nDone, list.length)),
       h('span', { style: { width: 64, height: 5, borderRadius: 3, background: this.ov(.08), overflow: 'hidden' } }, h('span', { style: { display: 'block', height: '100%', width: `${(nDone / list.length) * 100}%`, borderRadius: 3, background: tone, transition: 'width .35s cubic-bezier(.2,.7,.2,1)' } }))) : null;
     const aj = (this.state.prepAj || {})[this.who(sc).code] || null;
+    // Pàgina dels hàbits (telèfon): el progrés, les targetes per marcar i l'avís.
+    if (mode === 'page') return h('div', null,
+      h('div', { key: 'pg', style: { display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10, flexWrap: 'wrap', marginBottom: 12 } }, this.tag(this.t('byAI')),
+        list && list.length ? h('span', { style: { display: 'inline-flex', alignItems: 'center', gap: 10 } }, h('span', { style: { fontSize: 13, color: C.ink2, fontVariantNumeric: 'tabular-nums', whiteSpace: 'nowrap' } }, this.t('doneOf', nDone, list.length)),
+          h('span', { style: { width: 72, height: 6, borderRadius: 3, background: this.ov(.08), overflow: 'hidden' } }, h('span', { style: { display: 'block', height: '100%', width: `${(nDone / list.length) * 100}%`, borderRadius: 3, background: tone, transition: 'width .35s cubic-bezier(.2,.7,.2,1)' } }))) : null),
+      h('div', { key: 'ls', style: { display: 'flex', flexDirection: 'column', gap: 8 } }, list == null ? h('div', { style: { padding: '14px 0', fontSize: 13, color: C.ink3 } }, this.t('reading')) : list.map(item)),
+      h('div', { key: 'nt', style: { marginTop: 16, textAlign: 'center', fontSize: 12, color: C.ink3, textWrap: 'balance' } }, this.t('note')));
+    // Telèfon (10-10-2026): els hàbits de la IA ja no van un darrere l'altre, sinó en un botó (les seves icones, quants n'has fet) que obre la seva
+    // pàgina; la proposta del preparador físic, com sempre (ja és compacta i s'entén).
+    if (ph) {
+      const habBtn = list && !list.length ? null : h('button', { key: 'hb', className: 'mt-fcard', onClick: () => this.openHabits(), style: this.card({ display: 'grid', gridTemplateColumns: 'auto minmax(0,1fr) 16px', alignItems: 'center', gap: 12, width: '100%', padding: '12px', textAlign: 'left', cursor: 'pointer', fontFamily: 'inherit', color: 'inherit' }) },
+        h('span', { style: { display: 'flex', gap: 4 } }, (list || [{ a: 'desc' }, { a: 'son' }, { a: 'hidr' }]).slice(0, 3).map((x, j) => { const ar = AR[x.a] || AR.desc, ac = ar[2];
+          return h('span', { key: j, style: { width: 30, height: 30, borderRadius: this.G.inner || 8, background: `linear-gradient(145deg, ${this.alpha(ac, .26)}, ${this.alpha(ac, .1)})`, color: ac, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', opacity: list ? 1 : .4 } }, this.icon(ar[0], 15, 1.9)); })),
+        h('span', { style: { minWidth: 0 } }, h('span', { style: { display: 'block', fontSize: 15, fontWeight: 600, color: C.ink } }, this.t('stratTitle')),
+          h('span', { style: { display: 'flex', alignItems: 'center', gap: 8, marginTop: 5 } }, list == null ? h('span', { style: { fontSize: 12.5, color: C.ink3 } }, this.t('reading'))
+            : [h('span', { key: 't', style: { fontSize: 12.5, color: C.ink2, fontVariantNumeric: 'tabular-nums', whiteSpace: 'nowrap' } }, this.t('doneOf', nDone, list.length)),
+              h('span', { key: 'b', style: { flex: '0 1 64px', height: 5, borderRadius: 3, background: this.ov(.08), overflow: 'hidden' } }, h('span', { style: { display: 'block', height: '100%', width: `${(nDone / list.length) * 100}%`, borderRadius: 3, background: tone } }))])),
+        h('span', { className: 'mt-farrow', style: { display: 'flex', color: C.ink2 } }, this.icon('right', 13, 2.2)));
+      return h('div', null, this.secHead(this.t('planToday')), habBtn,
+        h('div', { key: 'pr', style: { marginTop: habBtn ? 18 : 0 } }, colHead(this.t('coachProps'), aj && aj.at ? h('span', { style: { fontSize: 13, color: C.ink, whiteSpace: 'nowrap' } }, this.t('prepAt', aj.at)) : null), this.prepSesEl(sc, aj)));
+    }
     const cols = h('div', { style: { marginTop: 0, display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 380px), 1fr))', gap: '20px 28px', alignItems: 'start' } },
         h('div', { style: { minWidth: 0 } }, colHead(h('span', { style: { display: 'inline-flex', alignItems: 'center', gap: 10 } }, this.t('stratTitle'), this.tag(this.t('byAI'))), progress),
           h('div', { style: { marginTop: 12, display: 'flex', flexDirection: 'column', gap: 8 } }, list == null ? h('div', { style: { padding: '14px 0', fontSize: 13, color: C.ink3 } }, this.t('reading')) : list.map(item))),
@@ -2827,14 +2849,25 @@ Reply ONLY with this JSON: {"text": "your answer", "blocs": [], "basat": ["data 
   // Avui: el valor de cada dada només surt als anells de l'informe; les fitxes ensenyen com ha anat els últims 7 dies.
   // Els qüestionaris són una sola targeta fora de l'informe (setmana passada + mes + quan toca el següent, amb l'enllaç al Google Form).
   pageAvui(sc, D, g) {
-    const C = this.C, reg = this.REG[sc], R = this.reportData('daily', sc), P = this.props || {}, T = this.caution(sc), qf = this.qFacts(sc);
+    const C = this.C, reg = this.REG[sc], R = this.reportData('daily', sc), P = this.props || {}, qf = this.qFacts(sc);
     const right = h('span', { style: { display: 'inline-flex', alignItems: 'center', gap: 10, fontSize: 13, color: C.ink2 } }, this.dot(reg ? C.ink2 : 'transparent', 7, reg ? null : `1px solid ${C.ink3}`), reg ? this.t('regDone', reg) : this.t('regPending'), reg ? null : this.formBtn(P.formDaily, this.t('doLog'), 'dl'));
-    // «Basat en…»: només les dades que hi ha avui, la franja amb els dies reals i el formulari si s'ha fet servir.
-    const today = this.KEYS.filter(k => D.vals[k][41] != null);
-    const basis = [...today.map(k => this.META[k].name), ...(today.length ? [] : [this.t('yestData')]), ...(D.coach[41] != null ? [this.t('coachComm')] : []), D.band ? this.t('bandDays', D.nBand) : this.t('nDaysData', D.nData), ...(sc !== 'nou' && (qf.length || T) ? [this.t('lastFormW', this.WEEKS[this.lastWi()].id)] : [])];
+    const basis = this.dailyBasis(sc, D);
     const o = { title: this.t('dayReport'), after: [this.formsSummaryEl(sc)], clamp: this.phone() ? 100 : 124, left: h(this.RingsV, { key: 'rv-' + sc, sc, D }), text: true, hl: true, qExtra: (this.canLive('daily', sc) && (this.state.ai[this.aiKey('daily', sc)] || {}).status === 'done') ? null : qf, R, basis, onPick: f => { if (this.KEYS.includes(f.k)) this.setState({ metric: f.k }); } };
     return this.stack([this.headEl(this.t('today'), this.dFull(41), right), this.wellBlockEl(sc), this.reportEl(o), this.trackingEl(sc, R), this.recoveryPlanEl(sc, R), this.feelStripEl(sc, D), this.weekNowEl(sc, D)]);
   }
+  // «Basat en…» de l'informe del dia (i dels hàbits que en surten): només les dades que hi ha avui, la franja amb els dies reals i el formulari si s'ha fet servir.
+  dailyBasis(sc, D) {
+    const T = this.caution(sc), qf = this.qFacts(sc), today = this.KEYS.filter(k => D.vals[k][41] != null);
+    return [...today.map(k => this.META[k].name), ...(today.length ? [] : [this.t('yestData')]), ...(D.coach[41] != null ? [this.t('coachComm')] : []), D.band ? this.t('bandDays', D.nBand) : this.t('nDaysData', D.nData), ...(sc !== 'nou' && (qf.length || T) ? [this.t('lastFormW', this.WEEKS[this.lastWi()].id)] : [])];
+  }
+  // Pàgina dels hàbits de recuperació (telèfon, des del 10-10-2026): només s'hi arriba des del botó d'Avui. Els hàbits que la IA proposa avui,
+  // per marcar (les mateixes targetes de sempre, amb més espai), amb «Basat en…» al títol i l'avís a sota. Per tornar, «‹ Avui» a la barra de dalt.
+  pageHabits(sc, D, g) {
+    return this.stack([this.headEl(this.basisTip({ basis: this.dailyBasis(sc, D) }, this.t('stratTitle')), this.dFull(41), null), this.recoveryPlanEl(sc, this.reportData('daily', sc), 'page')]);
+  }
+  openHabits() { this._habY = this.mainRef.current ? this.mainRef.current.scrollTop : 0; this.go('habits'); }
+  // En tornar a Avui, al mateix lloc on eres (el botó dels hàbits).
+  backHabits() { const y = this._habY || 0; this.go('avui'); setTimeout(() => { const m = this.mainRef.current; if (m) m.scrollTop = y; }, 30); }
   // Botó cap al Google Form (s'obre a part). Sense enllaç configurat, es veu desactivat.
   formBtn(url, label, key) {
     const C = this.C, st = { display: 'inline-flex', alignItems: 'center', gap: 6, padding: '6px 11px', border: 'none', borderRadius: this.G.ctrl, background: C.ink, color: C.bg, fontFamily: 'inherit', fontSize: 12.5, fontWeight: 600, whiteSpace: 'nowrap', flex: 'none', textDecoration: 'none' };
@@ -4222,7 +4255,8 @@ Reply ONLY with this JSON: {"text": "your answer", "blocs": [], "basat": ["data 
       h('span', { style: { display: 'inline-flex', borderRadius: '50%', boxShadow: inP2 ? `0 0 0 2px ${C.bg}, 0 0 0 3.5px ${C.ink}` : 'none' } }, av(32)));
     return h('div', { key: 'top', style: { position: 'sticky', top: 0, zIndex: 40, height: 52, display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8, paddingTop: this.SAT, paddingLeft: 'max(16px, env(safe-area-inset-left, 0px))', paddingRight: 'max(6px, env(safe-area-inset-right, 0px))', background: C.bg, boxShadow: s.scrolled ? `0 1px 0 ${C.line}` : 'none', transition: 'box-shadow .2s, background .3s' } },
       s.pick ? h('div', { key: 'bd', onClick: () => this.setState({ pick: false }), style: { position: 'fixed', inset: 0, zIndex: 39 } }) : null,
-      h('span', { key: 'l', style: { fontSize: 17, fontWeight: 600, letterSpacing: '-.01em', color: C.ink, whiteSpace: 'nowrap' } }, 'Max Tracking'),
+      s.page === 'habits' ? h('button', { key: 'l', onClick: () => this.backHabits(), style: { display: 'inline-flex', alignItems: 'center', gap: 2, height: 40, padding: '0 10px 0 0', marginLeft: -6, border: 'none', background: 'transparent', color: C.ink, fontFamily: 'inherit', fontSize: 17, fontWeight: 600, cursor: 'pointer', whiteSpace: 'nowrap' } }, this.icon('left', 20, 2.2), this.t('today'))
+        : h('span', { key: 'l', style: { fontSize: 17, fontWeight: 600, letterSpacing: '-.01em', color: C.ink, whiteSpace: 'nowrap' } }, 'Max Tracking'),
       h('div', { key: 'r', style: { position: 'relative', zIndex: 41, display: 'flex', alignItems: 'center', gap: 2 } }, modeB, avB), menu);
   }
   // A baix: les 4 pàgines (Avui, Setmana, Mes, Evolució) amb icona i nom; l'actiu, amb el fons de l'element actiu de la barra lateral.
@@ -4230,15 +4264,15 @@ Reply ONLY with this JSON: {"text": "your answer", "blocs": [], "basat": ["data 
   tabBarEl() {
     const C = this.C, s = this.state;
     return h('nav', { key: 'tabs', 'aria-label': this.t('nav'), style: { flex: 'none', display: 'grid', gridTemplateColumns: `repeat(${this.PAGES.length}, minmax(0, 1fr))`, paddingBottom: this.SAB, paddingLeft: 'env(safe-area-inset-left, 0px)', paddingRight: 'env(safe-area-inset-right, 0px)', background: C.side || C.bg, borderTop: `1px solid ${C.sideLine || C.line}`, transition: 'background .3s' } },
-      this.PAGES.map(([k, tk, ic]) => { const on = s.page === k;
-        return h('button', { key: k, className: 'mt-tb', 'aria-current': on ? 'page' : undefined, onClick: () => { if (on && this.mainRef.current) this.mainRef.current.scrollTo({ top: 0, behavior: 'smooth' }); else this.go(k); },
+      this.PAGES.map(([k, tk, ic]) => { const on = s.page === k || (k === 'avui' && s.page === 'habits');
+        return h('button', { key: k, className: 'mt-tb', 'aria-current': on ? 'page' : undefined, onClick: () => { if (s.page === 'habits' && k === 'avui') this.backHabits(); else if (on && this.mainRef.current) this.mainRef.current.scrollTo({ top: 0, behavior: 'smooth' }); else this.go(k); },
           style: { height: this.TABH, minWidth: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 3, padding: '0 2px', border: 'none', background: 'transparent', color: on ? C.ink : C.ink3, cursor: 'pointer', fontFamily: 'inherit', transition: 'color .2s' } },
           h('span', { style: { width: 54, height: 28, display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: 14, background: on ? 'var(--mt-act)' : 'transparent', transition: 'background .2s' } }, this.icon(ic, 21)),
           h('span', { style: { maxWidth: '100%', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', fontSize: 11.5, fontWeight: on ? 600 : 500, lineHeight: 1.2 } }, this.t(tk))); }));
   }
   onMainScroll = e => { const v = e.currentTarget.scrollTop > 4; if (v !== this.state.scrolled) this.setState({ scrolled: v }); };
   pageEl(sc, D, g) {
-    const s = this.state, P = { avui: this.pageAvui, setmana: this.pageSetmana, mes: this.pageMes, evolucio: this.pageEvol, priv: this.pagePriv, ajustos: this.pageAjustos }[s.page] || this.pageAvui;
+    const s = this.state, P = { avui: this.pageAvui, setmana: this.pageSetmana, mes: this.pageMes, evolucio: this.pageEvol, priv: this.pagePriv, ajustos: this.pageAjustos, habits: this.phone() ? this.pageHabits : this.pageAvui }[s.page] || this.pageAvui;
     return h('div', { key: `pg-${s.page}-${sc}-${s.visit}`, style: { boxSizing: 'border-box', width: '100%', maxWidth: g.cw + g.pad * 2, margin: '0 auto', padding: `0 ${g.pad}px 80px` } }, P.call(this, sc, D, g));
   }
   pickScn(k) { this.setState(st => ({ scenario: k, chatLog: [], hoverF: null, pinF: null, week2: -1, month: 0, visit: st.visit + 1, range: k === 'nou' ? 7 : st.range, evoRange: k === 'nou' ? 7 : st.evoRange === 7 ? 28 : st.evoRange })); }

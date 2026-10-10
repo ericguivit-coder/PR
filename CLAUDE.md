@@ -257,7 +257,7 @@ Una segunda app, para los entrenadores y **sobre todo para el preparador físico
 
 ## Versión de teléfono (en curso, desde el 09-10-2026)
 
-Plan aprobado el 09-10-2026, en el Drive: «App del deportista en el móvil: plan (9 oct 2026)» (01 Planificació, id `1dYBr23xoDS0xKsCqs_iFkp-HP3gv35291k64eT4zl2E`). Es «la misma app en una columna»: mismos bloques, textos, datos, reglas e IA; solo cambia cómo se colocan. El diseño sigue congelado: si un bloque no cabe sin quitar algo, pregunta antes.
+Plan aprobado el 09-10-2026. En el Drive, la versión 2, con las decisiones del 9 y el 10 de octubre: «App del deportista en el móvil: plan · versión 2 (10 oct 2026)» (01 Planificació, id `1nBO7C3Ha0jdtZJMOsigmxKPm-K2dSUrdoSgH8yc4JRQ`). La versión 1 se conserva con «sustituida» en el título. Es «la misma app en una columna»: mismos bloques, textos, datos, reglas e IA; solo cambia cómo se colocan. El diseño sigue congelado: si un bloque no cabe sin quitar algo, pregunta antes.
 - **Decisiones del usuario:** navegación A (barra abajo con Hoy · Semana · Mes · Evolución; Privacidad y Ajustes desde la inicial, arriba a la derecha); «Esta semana» de Hoy con las tarjetas que se deslizan (elegida el 10-10-2026 entre dos versiones; la otra, «Fila», se borró); los teléfonos 024 y 112 **no** se pueden tocar para llamar (función por decidir).
 - **Lo que pidió al probarlo en su móvil (09-10-2026):**
   - que la página **nunca se mueva de lado** (era el globo escondido de «Basado en…», de 440 px);
@@ -296,6 +296,12 @@ Plan aprobado el 09-10-2026, en el Drive: «App del deportista en el móvil: pla
     - las señales en píldoras en una línea (desde cuándo, al tocarlas) y el mensaje cortado a dos líneas (`ClampBox`);
     - «¿Cómo va hoy?» con los tres botones en una fila y tus respuestas al lado;
     - la etiqueta «Seguimiento», solo si hay dos problemas (lleva las pestañas).
+  - Hábitos de la IA (decidido el 10-10-2026): en Hoy ya no van uno tras otro. Van en un botón («Hábitos de recuperación», con sus iconos y «N de 3 hechas»), que abre la página `habits` (`pageHabits`). A esa página solo se llega desde el botón.
+    - Lleva las mismas tarjetas para marcar (`recoveryPlanEl(sc, R, 'page')`; «hecha» se guarda igual, en `mt-desk-done`), «Basado en…» en el título (`dailyBasis`, el mismo del informe del día) y el aviso «Orientativo…».
+    - Arriba, «‹ Hoy» (`backHabits`) vuelve al mismo punto de Hoy. Mientras estás en la página, la pestaña Hoy sigue marcada.
+    - En el ordenador no existe: la página `habits` muestra Hoy.
+    - Lo que dice cada hábito no cambió (área, acción y motivo de la IA). Explicarlo más (cómo, cuándo) obligaría a cambiar lo que se le pide a la IA y no está decidido.
+    - La propuesta del preparador se queda como estaba, porque el usuario la ve compacta, clara y funciona.
   - Notificación del entrenador (`CoachToast` con `ph`): compacta (el título y, debajo, lo que le dijiste ≠ el estado de tus datos, con iconos) y entra desde arriba, debajo de la barra (`mtToastDn` / `mtToastUp`).
   - Chat, primera vista: la ventana pequeña mide lo justo (como mucho 440 px), las sugerencias y la bienvenida son más pequeñas y el cuadro para escribir es de una línea, con un texto corto (`chatPhS`).
   - «Esta semana» (`weekNowPh`): la versión «Deslizar», elegida el 10-10-2026; la «Fila» y su selector del matraz se borraron. Son las tarjetas de siempre en `WeekSwipe`, que se abre con hoy a la vista y difumina los bordes, con los nombres de los datos quietos a la izquierda.
