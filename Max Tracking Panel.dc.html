@@ -32,11 +32,18 @@ input::placeholder{color:var(--mt-ph)}
 // Max Tracking · panell del preparador físic (ordinador i iPad). Versió oficial des del 06-10-2026; abans eren bocets al llenç
 // «Panel del preparador · bocetos» (versió 3, blanc i blau, compacta). Pla: Drive › 01 Planificació › «Panel del preparador: plan de la versión oficial».
 // Estructura: barra lateral (pàgines) + barra de dalt (cercador, hora de les dades i grups) + la pàgina.
-// Es munta per parts: ara hi ha Inici, la Fitxa de cada esportista i Ajustos. Sessions, Esportistes, Avisos, Setmana i Experiment surten desactivats al menú.
+// Pàgines: Inici, Sessions (calendari i detall de la sessió), Esportistes, la Fitxa de cada esportista, Avisos, Setmana, Experiment (H1) i Ajustos.
 // Què veu el preparador (provisional, fins que respongui l'Oriol): les dades físiques, l'estat del dia, rendiment / fatiga / descans i la participació
 // i el tipus de problema. Mai la salut mental, el que l'esportista va dir a l'entrenador (H2), qui no ha respost (H4), les paraules, el comentari,
 // el benestar mensual ni l'APSQ. La IA rep codis (MT-01…), mai noms, i suggereix: el preparador decideix.
 // L'ajust que desa el preparador va a localStorage («mt-prep-aj», per codi) i l'app del deportista el llegeix a Avui (el mateix ordinador, sense servidor).
+// Des del 07-10-2026 (de l'especificació de redisseny, que l'usuari va provar i no va voler; es queda aquest panell, amb el seu disseny):
+//   · totes les xifres surten d'un sol lloc (derive(): avisos i sessió d'avui de cada esportista, amb les regles d'Ajustos i l'hora), i coincideixen
+//     a Inici, Sessions, Esportistes, Avisos, Setmana i la barra lateral (que ara compta el grup triat);
+//   · els casos clars es resolen sols (ajustos automàtics: Pol, Descans; Laia, Alternativa), amb opció de canviar-los;
+//   · hora simulada (matràs) i hora límit: a l'hora límit amb decisions pendents surt una notificació; si la sessió comença sense decidir, l'app del
+//     deportista li ensenya una orientació (mt-prep-day, que publica aquest panell);
+//   · Ajustos: regles dels avisos i les decisions, plantilles d'adaptació per tipus de sessió i notificacions, amb la vista prèvia dels correus.
 const h = React.createElement;
 const LANG_KEYS = ['ca', 'es', 'fr', 'en'];
 // Textos en quatre idiomes: cada objecte { ca, es, fr, en } es resol a l'idioma `l` (si en falta un, surt el català).
@@ -138,27 +145,25 @@ const IDC = { dark: { rhr: '#e76187', hrv: '#377ee3', son: '#00c5d5' }, light: {
 const TODAY = 27, WEEK0 = 24;
 // d = estat dels 7 últims dies: O Òptim, M Moderat, R Recuperació, P Precaució (problema físic en curs), N sense dades, C calculant (encara sense franja).
 // p = posició de cada dia (0 = Recuperació, 1 = Òptim) · q = distància a la franja avui de FC, HRV i son (mitges franges, positiu = millor).
-// sv = sessió d'avui: sug = l'ajust que suggereix la IA (null = no en suggereix cap), why = per què; dec / at = el que ja ha decidit el preparador.
-// av = avís: t = tipus (salut, rec = dies seguits en Recuperació, torna = tornada d'una lesió, dada = una dada fora de la franja, buit = sense dades),
-// o = ordre d'importància, des = dia en què comença, rev = revisat avui a aquesta hora.
+// hl = salut (fets del formulari setmanal; mai la salut mental): t = salut (lesió o malaltia en curs: pb = les o mal, ost = participació 0–3,
+// des = des de quin dia) o torna (la lesió es va acabar: fi = el dia). Els avisos (av) i la sessió d'avui (sv) ja no s'escriuen a mà: els calcula
+// derive() amb les regles d'Ajustos i l'hora (des del 07-10-2026), i així totes les pantalles compten el mateix.
 // f = formulari de la setmana 38: rendiment, la seva normal, fatiga, normal, descans, normal (sense f, es genera dins la seva normal).
 // part = participació de les setmanes 35–38 (0 completa · 1 completa amb problemes · 2 reduïda · 3 no pot participar).
 // sw = ajust de la sessió de dv. 18 a dc. 23 (N per defecte) i swAi = si el preparador va acceptar ('ok') o canviar ('chg') el suggeriment de la IA.
 // calc = dies de dades d'un esportista nou (sense franja fins als 14).
 const ATH = [
-  { c: 'MT-01', n: 'Pol S.', g: 'A', d: 'OOPMRRR', p: [.9, .88, .86, .52, .2, .15, .12], q: [-2.2, -1.9, -1.1], sv: { sug: 'D', why: 'ill' },
-    av: { t: 'salut', o: 1, pb: 'mal', ost: 3, des: 23 }, f: [4, 7.0, 9, 4.6, 4, 7.2], part: [0, 0, 0, 3], sw: ['N', 'N', 'D', 'D', 'D', 'D'], swAi: [null, null, 'ok', 'ok', 'ok', 'ok'] },
-  { c: 'MT-07', n: 'Martí R.', g: 'A', d: 'OOMMRRR', p: [.9, .86, .55, .5, .24, .2, .17], q: [-2.0, -1.6, -1.3], sv: { sug: 'R', why: 'runY' },
-    av: { t: 'rec', o: 2, des: 25, nou: true }, f: [6, 7.3, 8, 4.4, 5, 7.1], sw: ['N', 'N', 'N', 'N', 'N', 'R'], swAi: [null, null, null, null, null, 'ok'], note: 'marti' },
-  { c: 'MT-03', n: 'Laia P.', g: 'B', d: 'OPPPPPP', p: [.92, .9, .88, .86, .84, .88, .85], q: [.2, .1, -.3], sv: { sug: 'A', why: 'inj', dec: 'A', at: '8:10' },
-    av: { t: 'salut', o: 3, pb: 'les', ost: 2, des: 22, rev: '8:10', revDay: 30 }, f: [5, 7.4, 5, 4.8, 7, 7.0], part: [0, 0, 0, 2], sw: ['N', 'A', 'A', 'A', 'A', 'A'], swAi: [null, 'ok', 'ok', 'ok', 'ok', 'ok'] },
-  { c: 'MT-04', n: 'Júlia M.', g: 'B', d: 'PPOOOMO', p: [.86, .84, .88, .9, .87, .56, .88], q: [.3, .2, .1], sv: { sug: 'R', why: 'back' },
-    av: { t: 'torna', o: 4, fi: 23 }, f: [6, 7.1, 5, 4.9, 7, 7.2], part: [2, 2, 1, 0], sw: ['A', 'A', 'N', 'R', 'R', 'N'], swAi: ['ok', 'ok', null, 'ok', 'chg', null], note: 'julia' },
-  { c: 'MT-05', n: 'Biel C.', g: 'A', d: 'OOOOOMM', p: [.9, .9, .88, .86, .85, .56, .52], q: [-.6, -1.2, .1], sv: { sug: 'N', why: 'watch' },
-    av: { t: 'dada', o: 5, k: 'hrv', n: 2, des: 26, nou: true }, f: [7, 7.2, 5, 4.5, 6, 7.0] },
-  { c: 'MT-06', n: 'Arnau V.', g: 'A', d: 'OOOOONN', p: [.88, .9, .86, .9, .85, null, null], q: null, sv: { sug: null, why: 'none' },
-    av: { t: 'buit', o: 6, des: 26 }, f: [8, 7.5, 4, 4.2, 7, 7.3] },
-  { c: 'MT-02', n: 'Abril J.', g: 'B', d: 'OOOOOOR', p: [.9, .92, .88, .9, .86, .84, .22], q: [-1.8, -.4, .2], sv: { sug: 'R', why: 'today' }, f: [7, 7.3, 6, 4.8, 6, 7.1] },
+  { c: 'MT-01', n: 'Pol S.', g: 'A', d: 'OOPMRRR', p: [.9, .88, .86, .52, .2, .15, .12], q: [-2.2, -1.9, -1.1],
+    hl: { t: 'salut', pb: 'mal', ost: 3, des: 23 }, f: [4, 7.0, 9, 4.6, 4, 7.2], part: [0, 0, 0, 3], sw: ['N', 'N', 'D', 'D', 'D', 'D'], swAi: [null, null, 'ok', 'ok', 'ok', 'ok'] },
+  { c: 'MT-07', n: 'Martí R.', g: 'A', d: 'OOMMRRR', p: [.9, .86, .55, .5, .24, .2, .17], q: [-2.0, -1.6, -1.3],
+    f: [6, 7.3, 8, 4.4, 5, 7.1], sw: ['N', 'N', 'N', 'N', 'N', 'R'], swAi: [null, null, null, null, null, 'ok'], note: 'marti' },
+  { c: 'MT-03', n: 'Laia P.', g: 'B', d: 'OPPPPPP', p: [.92, .9, .88, .86, .84, .88, .85], q: [.2, .1, -.3],
+    hl: { t: 'salut', pb: 'les', ost: 2, des: 22 }, f: [5, 7.4, 5, 4.8, 7, 7.0], part: [0, 0, 0, 2], sw: ['N', 'A', 'A', 'A', 'A', 'A'], swAi: [null, 'ok', 'ok', 'ok', 'ok', 'ok'] },
+  { c: 'MT-04', n: 'Júlia M.', g: 'B', d: 'PPOOOMO', p: [.86, .84, .88, .9, .87, .56, .88], q: [.3, .2, .1],
+    hl: { t: 'torna', fi: 23 }, f: [6, 7.1, 5, 4.9, 7, 7.2], part: [2, 2, 1, 0], sw: ['A', 'A', 'N', 'R', 'R', 'N'], swAi: ['ok', 'ok', null, 'ok', 'chg', null], note: 'julia' },
+  { c: 'MT-05', n: 'Biel C.', g: 'A', d: 'OOOOOMM', p: [.9, .9, .88, .86, .85, .56, .52], q: [-.6, -1.2, .1], f: [7, 7.2, 5, 4.5, 6, 7.0] },
+  { c: 'MT-06', n: 'Arnau V.', g: 'A', d: 'OOOOONN', p: [.88, .9, .86, .9, .85, null, null], q: null, f: [8, 7.5, 4, 4.2, 7, 7.3] },
+  { c: 'MT-02', n: 'Abril J.', g: 'B', d: 'OOOOOOR', p: [.9, .92, .88, .9, .86, .84, .22], q: [-1.8, -.4, .2], f: [7, 7.3, 6, 4.8, 6, 7.1] },
   { c: 'MT-08', n: 'Clara F.', g: 'B', d: 'OMOOMOM', p: [.88, .55, .87, .9, .54, .86, .55], q: [.1, -1.1, .3] },
   { c: 'MT-09', n: 'Joel K.', g: 'A', d: 'OOOOOOM', p: [.9, .88, .9, .87, .86, .9, .58], q: [.2, .1, -1.2] },
   { c: 'MT-19', n: 'Nora G.', g: 'B', d: 'CCCCCCC', p: null, q: null, calc: 9 },
@@ -232,6 +237,66 @@ function seriesOf(a) {
   KEYS3.forEach(k => { const dir = k === 'rhr' ? -1 : 1; S[k] = qs[k].map(q => (q == null ? null : mean[k] + dir * q * half[k])); });
   return (SERIES[a.c] = S);
 }
+// ── Regles (des del 07-10-2026) ──────────────────────────────────────────
+// Els avisos i el que queda per decidir avui ja no s'escriuen a mà: surten d'aquestes funcions, amb les regles d'Ajustos (mt-prep-rules) i l'hora.
+// Abans cada pantalla els comptava a la seva manera i les xifres no coincidien; ara totes llegeixen el que en treu derive() (al component).
+// Regles per defecte (la proposta de l'especificació del 06-10-2026; falta parlar-ne amb el preparador): dies seguits fora de la franja per a
+// un avís, dies de tornada d'una lesió que es vigilen, minuts abans de la sessió per decidir (hora límit), l'hora del resum per correu i les notificacions.
+const RULES0 = { outDays: 2, backDays: 7, leadMin: 60, digest: '7:30', digestOn: true, notifyLate: true, webNotif: false };
+// Hora simulada a l'obrir el prototip (el dia és fix; l'hora avança amb el rellotge real). Amb l'hora real, a la tarda ja no quedaria res per decidir.
+const CLOCK0 = '8:30';
+// Avís que ja surt revisat a l'obrir el prototip (Laia, a les 8:10), com abans.
+const REV0 = { 'MT-03': '8:10' };
+const hmMin = s => { const [hh, mm] = String(s).split(':').map(Number); return hh * 60 + (mm || 0); };
+const minHm = m => { m = Math.round(m); return `${Math.floor(m / 60)}:${String(((m % 60) + 60) % 60).padStart(2, '0')}`; };
+// Estat del dia i (O, M, P, R, N, C; null = encara no en tenia dades) i distància a la franja d'una dada (positiu = millor; per sota de −1, fora).
+function stAt(a, i) { const x = seriesOf(a).st[i]; return x ? x.c : null; }
+function qAt(a, k, i) { const S = seriesOf(a), v = S[k][i]; if (v == null || a.calc) return null; return (k === 'rhr' ? -1 : 1) * (v - S.mean[k]) / S.half[k]; }
+// Dies seguits amb el mateix estat fins al dia i, la dada que porta més dies seguits fora de la franja i el primer dia seguit sense dades.
+function runAt(a, i) { const c = stAt(a, i); if (!c) return 0; let n = 0; for (let j = i; j >= 0 && stAt(a, j) === c; j--) n++; return n; }
+function outAt(a, i) { let best = null; KEYS3.forEach(k => { let n = 0; for (let j = i; j >= 0; j--) { const q = qAt(a, k, j); if (q == null || q >= -1) break; n++; } if (n && (!best || n > best.n)) best = { k, n }; }); return best; }
+function ndSince(a, i) { let j = i; while (j > 0 && stAt(a, j - 1) === 'N') j--; return j; }
+// Lesió o malaltia en curs el dia i, i tornada d'una lesió (els primers «days» dies després que el formulari ja no la marqui).
+function healthAt(a, i) { const v = a.hl; return v && v.t === 'salut' && i >= v.des ? v : null; }
+function backAt(a, i, days) { const v = a.hl; if (!v || v.t !== 'torna') return null; const n = i - v.fi; return n >= 1 && n <= days ? v : null; }
+// Avís del dia i (o = ordre d'importància): lesió o malaltia en curs; 2 dies o més seguits en Recuperació (H3); la tornada d'una lesió; una dada
+// fora de la franja outDays dies o més; 2 dies o més sense dades. Mai la salut mental, qui no respon (H4) ni el que va dir a l'entrenador (H2).
+function avAt(a, i, R) {
+  const hh = healthAt(a, i); if (hh) return { t: 'salut', pb: hh.pb, ost: hh.ost, des: hh.des, o: hh.ost >= 3 ? 1 : 3 };
+  const c = stAt(a, i), run = runAt(a, i);
+  if (c === 'R' && run >= 2) return { t: 'rec', des: i - run + 1, o: 2 };
+  const bk = backAt(a, i, R.backDays); if (bk) return { t: 'torna', fi: bk.fi, o: 4 };
+  const out = c === 'N' || c === 'C' ? null : outAt(a, i); if (out && out.n >= R.outDays) return { t: 'dada', k: out.k, n: out.n, des: i - out.n + 1, o: 5 };
+  if (c === 'N') { const s0 = ndSince(a, i); if (i - s0 + 1 >= 2) return { t: 'buit', des: s0, o: 6 }; }
+  return null;
+}
+// Suggeriment de la IA (al prototip, una simulació amb regles; amb dades reals el faria la IA amb codis, mai noms). Sense dades, cap.
+function sugAt(a, i) {
+  const c = stAt(a, i), hh = healthAt(a, i);
+  if (c == null || c === 'N' || c === 'C') return null;
+  if (hh && hh.ost >= 3) return 'D';
+  if (hh && hh.ost === 2) return hh.pb === 'les' ? 'A' : 'R';
+  if (c === 'R' || c === 'P') return 'R';
+  if (backAt(a, i, 14)) return 'R';
+  return 'N';
+}
+// La sessió d'avui de cada esportista (setmana 39, WEEK) i què toca (regles «Cuándo se crea un pendiente» de l'especificació):
+//   pend = per decidir · auto = ajust automàtic (v; es pot canviar) · watch = vigilar, sense decisió · calc · none. why = el perquè (whyX de TX.UI).
+// Una malaltia o lesió que no deixa participar → Descans automàtic; amb participació reduïda → l'ajust que diu la salut (lesió: Alternativa).
+function svAt(a, i, R) {
+  const w = WEEK[i - WEEK0], x = w && (w.AB || w[a.g]); if (!x || x.t === 'desc') return { kind: 'none', sug: null, why: 'ok', ses: null };
+  const c = stAt(a, i), hh = healthAt(a, i), sug = sugAt(a, i), run = runAt(a, i), out = outAt(a, i), ses = x, base = { sug, ses };
+  if (hh && hh.ost >= 3) return { ...base, kind: 'auto', v: 'D', why: 'ill' };
+  if (hh && hh.ost === 2) return { ...base, kind: 'auto', v: sug, why: hh.pb === 'les' ? 'inj' : 'ill' };
+  if (c === 'C') return { ...base, kind: 'calc', why: 'calc' };
+  if (c === 'N') return { ...base, kind: 'pend', why: 'none' };
+  if (c === 'R') return { ...base, kind: 'pend', why: run >= 2 ? (a.sw && a.sw[i - 22] && a.sw[i - 22] !== 'N' ? 'runY' : 'run') : 'today' };
+  if (c === 'P') return { ...base, kind: 'pend', why: 'inj' };
+  if (backAt(a, i, R.backDays)) return { ...base, kind: 'pend', why: 'back' };
+  if (out && out.n >= R.outDays) return c === 'M' && sug === 'N' ? { ...base, kind: 'watch', why: 'watch', k: out.k } : { ...base, kind: 'pend', why: 'run' };
+  return { ...base, kind: 'none', why: 'ok' };
+}
+
 // Icones (traç de 24 × 24).
 const ICON = {
   home: ['M3 10.5L12 3l9 7.5V20a1 1 0 0 1-1 1h-5v-6h-6v6H4a1 1 0 0 1-1-1z'], load: ['M6.5 7v10', 'M3.5 9.5v5', 'M17.5 7v10', 'M20.5 9.5v5', 'M6.5 12h11'],
@@ -239,7 +304,7 @@ const ICON = {
   bell: ['M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9', 'M10.3 21a1.94 1.94 0 0 0 3.4 0'], week: ['M8 2v4', 'M16 2v4', 'M3 10h18', 'M5 4h14a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2z'],
   flask: ['M9 3h6', 'M10 3v6l-5 9a2 2 0 0 0 1.8 3h10.4a2 2 0 0 0 1.8-3l-5-9V3'], sliders: ['M4 8h16', 'M15 5v6', 'M4 16h16', 'M9 13v6'],
   search: ['M11 19a8 8 0 1 0 0-16 8 8 0 0 0 0 16z', 'M21 21l-4.3-4.3'], clock: ['M12 7v5l3 2', 'M12 3a9 9 0 1 0 0 18 9 9 0 0 0 0-18z'],
-  check: ['M5 12.5l4.5 4.5L19 7.5'], left: ['M15 6l-6 6 6 6'], right: ['M9 6l6 6-6 6'], plus: ['M12 5v14', 'M5 12h14'], pause: ['M9 5v14', 'M15 5v14'],
+  check: ['M5 12.5l4.5 4.5L19 7.5'], left: ['M15 6l-6 6 6 6'], right: ['M9 6l6 6-6 6'], plus: ['M12 5v14', 'M5 12h14'], minus: ['M5 12h14'], pause: ['M9 5v14', 'M15 5v14'],
   alert: ['M12 3a9 9 0 1 0 0 18 9 9 0 0 0 0-18z', 'M12 8v5', 'M12 16.5v.5'], back: ['M3 12a9 9 0 1 0 3-6.7L3 8', 'M3 3v5h5'],
   off: ['M12 3a9 9 0 1 0 0 18 9 9 0 0 0 0-18z', 'M5.6 5.6l12.8 12.8'], ext: ['M14 4h6v6', 'M20 4l-9 9', 'M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5'],
   sheet: ['M5 3h10l4 4v14H5z', 'M15 3v4h4', 'M8 11h8', 'M8 15h8', 'M12 11v8'], logo: ['M3 19l6-10 4 6 3-4 5 8z'], panel: ['M6 3h12a3 3 0 0 1 3 3v12a3 3 0 0 1-3 3H6a3 3 0 0 1-3-3V6a3 3 0 0 1 3-3z', 'M9 3v18'],
@@ -443,7 +508,7 @@ const TX = {
     whyRunY: { ca: n => `${n} dies seguits fora de la seva franja, i ahir, amb la sessió reduïda, encara no hi va tornar.`, es: n => `${n} días seguidos fuera de su franja, y ayer, con la sesión reducida, todavía no volvió.`, fr: n => `${n} jours de suite hors de sa plage, et hier, avec la séance réduite, pas encore de retour.`, en: n => `${n} days in a row outside their range, and yesterday's reduced session hasn't brought them back yet.` },
     whyBack: { ca: "Torna d'una lesió: millor una tornada progressiva.", es: 'Vuelve de una lesión: mejor una vuelta progresiva.', fr: "Revient d'une blessure : mieux vaut une reprise progressive.", en: 'Coming back from an injury: better a gradual return.' },
     whyToday: { ca: 'Avui ha entrat en Recuperació, amb la FC per sobre del seu normal.', es: 'Hoy ha entrado en Recuperación, con la FC por encima de su normal.', fr: "Entre aujourd'hui en Récupération, avec la FC au-dessus de sa normale.", en: 'Moved into Recovery today, with resting HR above usual.' },
-    whyWatch: { ca: 'Pot fer la sessió normal; vigila la HRV.', es: 'Puede hacer la sesión normal; vigila la HRV.', fr: 'Peut faire la séance normale ; surveillez la HRV.', en: 'Can do the normal session; keep an eye on HRV.' },
+    whyWatch: { ca: m => `Pot fer la sessió normal; vigila ${m}.`, es: m => `Puede hacer la sesión normal; vigila ${m}.`, fr: m => `Peut faire la séance normale ; surveillez ${m}.`, en: m => `Can do the normal session; keep an eye on ${m}.` },
     whyInj: { ca: 'Lesió amb participació reduïda: millor sense impacte.', es: 'Lesión con participación reducida: mejor sin impacto.', fr: 'Blessure avec participation réduite : mieux vaut sans impact.', en: 'Injury with reduced participation: better without impact.' },
     whyOk: { ca: 'Dins del seu normal: pot fer la sessió normal.', es: 'Dentro de su normal: puede hacer la sesión normal.', fr: 'Dans sa normale : peut faire la séance normale.', en: 'Within usual: can do the normal session.' },
     whyNone: { ca: "Sense dades d'avui: la IA no suggereix res.", es: 'Sin datos de hoy: la IA no sugiere nada.', fr: "Pas de données aujourd'hui : l'IA ne suggère rien.", en: 'No data today: the AI suggests nothing.' },
@@ -501,11 +566,11 @@ const TX = {
       fr: "le code de chaque athlète (jamais le nom), la FC au repos, la HRV et le sommeil par rapport à sa plage, l'état du jour, la performance, la fatigue et le repos du questionnaire hebdomadaire, ainsi que la participation et le type de problème (blessure ou maladie).",
       en: "each athlete's code (never the name), resting HR, HRV and sleep against their range, the day status, performance, fatigue and rest from the weekly form, and participation and the type of problem (injury or illness)." },
     aiNot: { ca: 'Què no llegeix mai: ', es: 'Qué no lee nunca: ', fr: 'Ce qu’elle ne lit jamais : ', en: 'What it never reads: ' },
-    aiNotT: { ca: "la salut mental, el que cada esportista va dir a l'entrenador, qui no ha respost els formularis, les paraules i el comentari del formulari, el benestar mensual ni l'APSQ.",
-      es: 'la salud mental, lo que cada deportista dijo al entrenador, quién no ha respondido los formularios, las palabras y el comentario del formulario, el bienestar mensual ni el APSQ.',
-      fr: "la santé mentale, ce que chaque athlète a dit à l'entraîneur, qui n'a pas répondu aux questionnaires, les mots et le commentaire du questionnaire, le bien-être mensuel ni l'APSQ.",
-      en: "mental health, what each athlete told the coach, who hasn't answered the forms, the words and comment in the form, monthly wellbeing or the APSQ." },
-    version: { ca: 'Max Tracking · Panell del preparador · prototip, 6 oct. 2026', es: 'Max Tracking · Panel del preparador · prototipo, 6 oct 2026', fr: 'Max Tracking · Tableau du préparateur · prototype, 6 oct. 2026', en: 'Max Tracking · Coach panel · prototype, 6 Oct 2026' },
+    aiNotT: { ca: "la salut mental, el que cada esportista va dir a l'entrenador, qui no ha respost els formularis, les paraules i el comentari del formulari ni el benestar mensual.",
+      es: 'la salud mental, lo que cada deportista dijo al entrenador, quién no ha respondido los formularios, las palabras y el comentario del formulario ni el bienestar mensual.',
+      fr: "la santé mentale, ce que chaque athlète a dit à l'entraîneur, qui n'a pas répondu aux questionnaires, les mots et le commentaire du questionnaire ni le bien-être mensuel.",
+      en: "mental health, what each athlete told the coach, who hasn't answered the forms, the words and comment in the form or monthly wellbeing." },
+    version: { ca: 'Max Tracking · Panell del preparador · prototip, 7 oct. 2026', es: 'Max Tracking · Panel del preparador · prototipo, 7 oct 2026', fr: 'Max Tracking · Tableau du préparateur · prototype, 7 oct. 2026', en: 'Max Tracking · Coach panel · prototype, 7 Oct 2026' },
     // Inici i fitxa: enllaços a les pàgines noves.
     seeAll: { ca: 'Veure-ho tot', es: 'Ver todos', fr: 'Tout voir', en: 'See all' }, seeSession: { ca: 'Veure la sessió', es: 'Ver sesión', fr: 'Voir la séance', en: 'View session' },
     askAI: { ca: 'Pregunta a la IA', es: 'Preguntar a la IA', fr: "Demander à l'IA", en: 'Ask the AI' },
@@ -620,12 +685,87 @@ const TX = {
     thinking: { ca: 'Pensant…', es: 'Pensando…', fr: 'Réflexion…', en: 'Thinking…' }, chatErr: { ca: "No s'ha pogut respondre. Torna-ho a provar.", es: 'No se ha podido responder. Vuelve a intentarlo.', fr: 'Impossible de répondre. Réessayez.', en: "Couldn't answer. Please try again." },
     basisChat: { ca: "l'estat del dia i els últims 7 dies de cada esportista respecte a la seva franja, els avisos, els ajustos d'avui i el formulari de la setmana 38.", es: 'el estado del día y los últimos 7 días de cada deportista frente a su franja, los avisos, los ajustes de hoy y el formulario de la semana 38.',
       fr: "l'état du jour et les 7 derniers jours de chaque athlète par rapport à sa plage, les alertes, les ajustements du jour et le questionnaire de la semaine 38.", en: "the day status and each athlete's last 7 days against their range, the alerts, today's adjustments and the week 38 form." },
+    // Regles, plantilles i notificacions (Ajustos), ajustos automàtics, hora límit i correus (vista prèvia), des del 07-10-2026.
+    autoV: { ca: v => `Automàtic: ${v}`, es: v => `Automático: ${v}`, fr: v => `Automatique : ${v}`, en: v => `Automatic: ${v}` },
+    autoIs: { ca: 'Ajust automàtic:', es: 'Ajuste automático:', fr: 'Ajustement automatique :', en: 'Automatic adjustment:' },
+    autoChange: { ca: 'El pots canviar.', es: 'Puedes cambiarlo.', fr: 'Vous pouvez le modifier.', en: 'You can change it.' },
+    autoNote: { ca: 'Automàtic: no cal desar res.', es: 'Automático: no hace falta guardar nada.', fr: 'Automatique : rien à enregistrer.', en: 'Automatic: nothing to save.' },
+    noDec: { ca: 'Sense decidir', es: 'Sin decidir', fr: 'Non décidé', en: 'Not decided' },
+    nNoDec: { ca: n => `${n} sense decidir`, es: n => `${n} sin decidir`, fr: n => `${n} non ${n === 1 ? 'décidé' : 'décidés'}`, en: n => `${n} not decided` },
+    sesStarted: { ca: v => `La sessió ja ha començat · ${v}`, es: v => `La sesión ya ha empezado · ${v}`, fr: v => `La séance a déjà commencé · ${v}`, en: v => `The session has already started · ${v}` },
+    // Què veu el deportista si la sessió comença sense decisió (sug = si la IA en tenia; sense, només que avui no hi ha dades de la polsera).
+    nodecSees: { ca: (n, sug) => `${n} veu a la seva app que encara no has decidit, ${sug ? 'una orientació segons el suggeriment' : "que avui no hi ha dades de la seva polsera"} i que en parli amb tu abans de començar.`,
+      es: (n, sug) => `${n} ve en su app que aún no has decidido, ${sug ? 'una orientación según la sugerencia' : 'que hoy no hay datos de su pulsera'} y que hable contigo antes de empezar.`,
+      fr: (n, sug) => `Dans son app, ${n} voit que vous n'avez pas encore décidé, ${sug ? 'une orientation selon la suggestion' : "qu'il n'y a pas de données de son bracelet aujourd'hui"} et une invitation à vous en parler avant de commencer.`,
+      en: (n, sug) => `In the app, ${n} sees that you haven't decided yet, ${sug ? 'guidance based on the suggestion' : 'that there is no wearable data today'}, and a request to talk to you before starting.` },
+    limitAt: { ca: t => `Decideix abans de les ${t}`, es: t => `Decide antes de las ${t}`, fr: t => `À décider avant ${t}`, en: t => `Decide before ${t}` },
+    limitLate: { ca: t => `Hora límit passada (${t})`, es: t => `Hora límite pasada (${t})`, fr: t => `Heure limite dépassée (${t})`, en: t => `Deadline passed (${t})` },
+    rulesH: { ca: 'Avisos i decisions', es: 'Avisos y decisiones', fr: 'Alertes et décisions', en: 'Alerts and decisions' },
+    rOut: { ca: 'Dies seguits fora de la franja', es: 'Días seguidos fuera de la franja', fr: 'Jours de suite hors de la plage', en: 'Days in a row outside the range' },
+    rOutS: { ca: 'A partir de quants dies surt un avís. Si la IA suggereix Normal, no cal decidir: queda a vigilar.', es: 'A partir de cuántos días sale un aviso. Si la IA sugiere Normal, no hace falta decidir: queda a vigilar.',
+      fr: "À partir de combien de jours une alerte apparaît. Si l'IA suggère Normale, pas de décision : à surveiller.", en: 'After how many days an alert appears. If the AI suggests Normal, no decision is needed: it goes to watch.' },
+    rBack: { ca: "Dies de tornada d'una lesió que es vigilen", es: 'Días de vuelta de lesión que se vigilan', fr: 'Jours de retour de blessure sous surveillance', en: 'Days watched after an injury' },
+    rBackS: { ca: 'Des que el formulari ja no marca la lesió.', es: 'Desde que el formulario ya no marca la lesión.', fr: 'Depuis que le questionnaire ne signale plus la blessure.', en: 'From when the form no longer reports the injury.' },
+    rLead: { ca: 'Hora límit', es: 'Hora límite', fr: 'Heure limite', en: 'Deadline' },
+    rLeadS: { ca: "Quant abans de la sessió cal decidir-ne l'ajust.", es: 'Cuánto antes de la sesión hay que decidir el ajuste.', fr: "Combien de temps avant la séance il faut décider l'ajustement.", en: 'How long before the session the adjustment must be decided.' },
+    minBefore: { ca: n => `${n} min abans`, es: n => `${n} min antes`, fr: n => `${n} min avant`, en: n => `${n} min before` },
+    nDays: { ca: n => `${n} ${n === 1 ? 'dia' : 'dies'}`, es: n => `${n} ${n === 1 ? 'día' : 'días'}`, fr: n => `${n} ${n === 1 ? 'jour' : 'jours'}`, en: n => `${n} ${n === 1 ? 'day' : 'days'}` },
+    less: { ca: 'Menys', es: 'Menos', fr: 'Moins', en: 'Less' }, more: { ca: 'Més', es: 'Más', fr: 'Plus', en: 'More' },
+    rulesNow: { ca: (a, d) => `Avui, amb aquestes regles: ${a} ${a === 1 ? 'avís' : 'avisos'} per revisar i ${d} per decidir a tot l'equip.`, es: (a, d) => `Hoy, con estas reglas: ${a} ${a === 1 ? 'aviso' : 'avisos'} por revisar y ${d} por decidir en todo el equipo.`,
+      fr: (a, d) => `Aujourd'hui, avec ces règles : ${a} ${a === 1 ? 'alerte' : 'alertes'} à revoir et ${d} à décider dans toute l'équipe.`, en: (a, d) => `Today, with these rules: ${a} ${a === 1 ? 'alert' : 'alerts'} to review and ${d} to decide across the team.` },
+    resetDef: { ca: 'Tornar als valors per defecte', es: 'Volver a los valores por defecto', fr: 'Revenir aux valeurs par défaut', en: 'Back to the defaults' },
+    tplH: { ca: "Plantilles d'adaptació", es: 'Plantillas de adaptación', fr: "Modèles d'adaptation", en: 'Adjustment templates' },
+    tplSub: { ca: "Què vol dir Reduïda i Alternativa en cada tipus de sessió. Ho hereten totes les sessions d'aquell tipus.", es: 'Qué significan Reducida y Alternativa en cada tipo de sesión. Lo heredan todas las sesiones de ese tipo.',
+      fr: 'Ce que signifient Réduite et Alternative pour chaque type de séance. Toutes les séances de ce type en héritent.', en: 'What Reduced and Alternative mean for each session type. Every session of that type inherits it.' },
+    tplType: { ca: 'Tipus de sessió', es: 'Tipo de sesión', fr: 'Type de séance', en: 'Session type' },
+    tplUsed: { ca: x => `Aquesta setmana: ${x}`, es: x => `Esta semana: ${x}`, fr: x => `Cette semaine : ${x}`, en: x => `This week: ${x}` },
+    tplEdit: { ca: 'Editar', es: 'Editar', fr: 'Modifier', en: 'Edit' }, tplCancel: { ca: 'Cancel·lar', es: 'Cancelar', fr: 'Annuler', en: 'Cancel' },
+    tplCustom: { ca: 'Canviada', es: 'Cambiada', fr: 'Modifié', en: 'Changed' }, backOrig: { ca: "Tornar a l'original", es: 'Volver a la original', fr: "Revenir à l'original", en: 'Back to the original' },
+    linesPh: { ca: 'Un canvi per línia', es: 'Un cambio por línea', fr: 'Un changement par ligne', en: 'One change per line' },
+    notifH: { ca: 'Notificacions', es: 'Notificaciones', fr: 'Notifications', en: 'Notifications' },
+    nDigest: { ca: 'Resum diari per correu', es: 'Resumen diario por correo', fr: 'Résumé quotidien par e-mail', en: 'Daily email summary' },
+    nDigestS: { ca: "El que queda per decidir avui i els avisos, amb un enllaç a Inici.", es: 'Lo que queda por decidir hoy y los avisos, con un enlace a Inicio.', fr: "Ce qui reste à décider aujourd'hui et les alertes, avec un lien vers l'accueil.", en: "What's left to decide today and the alerts, with a link to Home." },
+    atTime: { ca: 'Hora', es: 'Hora', fr: 'Heure', en: 'Time' },
+    nLate: { ca: "Si arriba l'hora límit sense decidir", es: 'Si llega la hora límite sin decidir', fr: "Si l'heure limite arrive sans décision", en: 'If the deadline arrives undecided' },
+    nLateS: { ca: 'Un correu amb els noms i, si ho permets, una notificació del navegador.', es: 'Un correo con los nombres y, si lo permites, una notificación del navegador.', fr: 'Un e-mail avec les noms et, si vous l’autorisez, une notification du navigateur.', en: 'An email with the names and, if you allow it, a browser notification.' },
+    nWeb: { ca: 'Notificacions del navegador', es: 'Notificaciones del navegador', fr: 'Notifications du navigateur', en: 'Browser notifications' },
+    webOk: { ca: 'Permeses en aquest navegador.', es: 'Permitidas en este navegador.', fr: 'Autorisées dans ce navigateur.', en: 'Allowed in this browser.' },
+    webDenied: { ca: 'Bloquejades en aquest navegador: canvia-ho als seus ajustos.', es: 'Bloqueadas en este navegador: cámbialo en sus ajustes.', fr: 'Bloquées dans ce navigateur : modifiez-le dans ses réglages.', en: "Blocked in this browser: change it in the browser's settings." },
+    webNo: { ca: 'Aquest navegador no en té.', es: 'Este navegador no las tiene.', fr: "Ce navigateur n'en propose pas.", en: "This browser doesn't support them." },
+    webAsk: { ca: 'El navegador et demanarà permís.', es: 'El navegador te pedirá permiso.', fr: 'Le navigateur vous demandera la permission.', en: 'The browser will ask for permission.' },
+    seeDigest: { ca: x => `Veure el correu de les ${x}`, es: x => `Ver el correo de las ${x}`, fr: x => `Voir l'e-mail de ${x}`, en: x => `See the ${x} email` },
+    seeLate: { ca: "Veure el correu de l'hora límit", es: 'Ver el correo de la hora límite', fr: "Voir l'e-mail de l'heure limite", en: 'See the deadline email' },
+    mailPrev: { ca: "Vista prèvia · al prototip no s'envia", es: 'Vista previa · en el prototipo no se envía', fr: "Aperçu · le prototype n'envoie rien", en: 'Preview · the prototype sends nothing' },
+    mailTo: { ca: 'Per a', es: 'Para', fr: 'À', en: 'To' }, mailSubj: { ca: 'Assumpte', es: 'Asunto', fr: 'Objet', en: 'Subject' },
+    dgSubj: { ca: (n, d) => (n ? `Avui, ${n} per decidir · ${d}` : `Avui no queda res per decidir · ${d}`), es: (n, d) => (n ? `Hoy, ${n} por decidir · ${d}` : `Hoy no queda nada por decidir · ${d}`),
+      fr: (n, d) => (n ? `Aujourd'hui, ${n} à décider · ${d}` : `Rien à décider aujourd'hui · ${d}`), en: (n, d) => (n ? `Today, ${n} to decide · ${d}` : `Nothing to decide today · ${d}`) },
+    dgHello: { ca: 'Hola:', es: 'Hola:', fr: 'Bonjour,', en: 'Hi,' },
+    dgIntro: { ca: "Això és el que queda per decidir avui. Decideix cada ajust abans de la seva hora límit.", es: 'Esto es lo que queda por decidir hoy. Decide cada ajuste antes de su hora límite.', fr: "Voici ce qui reste à décider aujourd'hui. Décidez chaque ajustement avant son heure limite.", en: "Here's what's left to decide today. Decide each adjustment before its deadline." },
+    dgNone: { ca: 'Avui no queda cap ajust per decidir.', es: 'Hoy no queda ningún ajuste por decidir.', fr: "Aucun ajustement à décider aujourd'hui.", en: 'There are no adjustments left to decide today.' },
+    dgSes: { ca: (x, g, i, l) => `${x} · ${g} · ${i} · decideix abans de les ${l}`, es: (x, g, i, l) => `${x} · ${g} · ${i} · decide antes de las ${l}`, fr: (x, g, i, l) => `${x} · ${g} · ${i} · à décider avant ${l}`, en: (x, g, i, l) => `${x} · ${g} · ${i} · decide before ${l}` },
+    dgOther: { ca: (a, au, w) => `A més: ${a} ${a === 1 ? 'avís' : 'avisos'} per revisar, ${au} ${au === 1 ? 'ajust automàtic' : 'ajustos automàtics'} i ${w} a vigilar.`, es: (a, au, w) => `Además: ${a} ${a === 1 ? 'aviso' : 'avisos'} por revisar, ${au} ${au === 1 ? 'ajuste automático' : 'ajustes automáticos'} y ${w} a vigilar.`,
+      fr: (a, au, w) => `Et aussi : ${a} ${a === 1 ? 'alerte' : 'alertes'} à revoir, ${au} ${au === 1 ? 'ajustement automatique' : 'ajustements automatiques'} et ${w} à surveiller.`, en: (a, au, w) => `Also: ${a} ${a === 1 ? 'alert' : 'alerts'} to review, ${au} automatic ${au === 1 ? 'adjustment' : 'adjustments'} and ${w} to watch.` },
+    dgOpen: { ca: 'Obrir Inici', es: 'Abrir Inicio', fr: "Ouvrir l'accueil", en: 'Open Home' },
+    dgFoot: { ca: t => `Reps aquest correu cada dia a les ${t}. Ho pots canviar a Ajustos › Notificacions.`, es: t => `Recibes este correo cada día a las ${t}. Puedes cambiarlo en Ajustes › Notificaciones.`, fr: t => `Vous recevez cet e-mail chaque jour à ${t}. Modifiable dans Réglages › Notifications.`, en: t => `You get this email every day at ${t}. Change it in Settings › Notifications.` },
+    noSugW: { ca: 'sense suggeriment (sense dades de la polsera)', es: 'sin sugerencia (sin datos de la pulsera)', fr: 'sans suggestion (pas de données du bracelet)', en: 'no suggestion (no wearable data)' },
+    ltSubj: { ca: (x, g) => `Hora límit passada · ${x} (${g})`, es: (x, g) => `Hora límite pasada · ${x} (${g})`, fr: (x, g) => `Heure limite dépassée · ${x} (${g})`, en: (x, g) => `Deadline passed · ${x} (${g})` },
+    ltTitle: { ca: t => `Hora límit passada · ${t}`, es: t => `Hora límite pasada · ${t}`, fr: t => `Heure limite dépassée · ${t}`, en: t => `Deadline passed · ${t}` },
+    ltLeft: { ca: (n, x) => `${n === 1 ? 'Queda 1 per decidir' : `Queden ${n} per decidir`}: ${x}`, es: (n, x) => `${n === 1 ? 'Queda 1 por decidir' : `Quedan ${n} por decidir`}: ${x}`, fr: (n, x) => `Encore ${n} à décider : ${x}`, en: (n, x) => `${n} still to decide: ${x}` },
+    ltStarts: { ca: t => `La sessió comença a les ${t}.`, es: t => `La sesión empieza a las ${t}.`, fr: t => `La séance commence à ${t}.`, en: t => `The session starts at ${t}.` },
+    ltAfter: { ca: "Si no decideixes abans que comenci, cada esportista veurà a la seva app una orientació segons el suggeriment i li demanarem que parli amb tu.", es: 'Si no decides antes de que empiece, cada deportista verá en su app una orientación según la sugerencia y le pediremos que hable contigo.',
+      fr: "Si vous ne décidez pas avant le début, chaque athlète verra dans son app une orientation selon la suggestion et on lui demandera de vous en parler.", en: "If you don't decide before it starts, each athlete will see guidance in their app based on the suggestion, and we'll ask them to talk to you." },
+    ltNone: { ca: "Ara cap sessió té l'hora límit passada sense decidir. Així seria el correu de la pròxima:", es: 'Ahora ninguna sesión tiene la hora límite pasada sin decidir. Así sería el correo de la próxima:', fr: "Aucune séance n'a dépassé son heure limite sans décision. Voici à quoi ressemblerait le prochain e-mail :", en: 'No session is past its deadline undecided. This is what the next one would look like:' },
+    ltNoNext: { ca: "Avui ja no queda cap hora límit per decidir.", es: 'Hoy ya no queda ninguna hora límite por decidir.', fr: "Plus aucune heure limite à décider aujourd'hui.", en: 'No deadlines left to decide today.' },
+    decideNow: { ca: 'Decidir ara', es: 'Decidir ahora', fr: 'Décider maintenant', en: 'Decide now' }, closeW: { ca: 'Tancar', es: 'Cerrar', fr: 'Fermer', en: 'Close' },
   },
 };
 
 class Component extends DCLogic {
   state = (() => {
-    let style = 'marino', mode = 'auto', lang = 'ca', grp = 'T', sysDark = true, pHidden = false, dec = {}, rev = {}, exp = { res: [] }, side = null;
+    let style = 'marino', mode = 'auto', lang = 'ca', grp = 'T', sysDark = true, pHidden = false, dec = {}, rev = {}, exp = { res: [] }, side = null, rules = {}, tpl = {}, perm = 'none';
+    // Regles i plantilles d'Ajustos (des del 07-10-2026): només el que canvia respecte als valors per defecte.
+    try { rules = JSON.parse(localStorage.getItem('mt-prep-rules') || '{}') || {}; tpl = JSON.parse(localStorage.getItem('mt-prep-tpl') || '{}') || {}; } catch (e) { rules = {}; tpl = {}; }
+    try { perm = typeof Notification === 'undefined' ? 'none' : Notification.permission; } catch (e) { perm = 'none'; }
     try { style = localStorage.getItem('mt-prep-style') || 'marino'; mode = localStorage.getItem('mt-prep-mode') || 'auto'; lang = localStorage.getItem('mt-prep-lang') || 'ca'; grp = localStorage.getItem('mt-prep-grp') || 'T'; pHidden = localStorage.getItem('mt-prep-proto-hidden') === '1'; side = localStorage.getItem('mt-prep-side'); } catch (e) {}
     try { dec = JSON.parse(localStorage.getItem('mt-prep-aj') || '{}') || {}; } catch (e) { dec = {}; }
     try { rev = JSON.parse(localStorage.getItem('mt-prep-rev') || '{}') || {}; } catch (e) { rev = {}; }
@@ -635,7 +775,8 @@ class Component extends DCLogic {
       lang: LANG_KEYS.includes(lang) ? lang : 'ca', grp: ['T', 'A', 'B'].includes(grp) ? grp : 'T', sysDark, dec, rev, sel: {}, note: {}, q: '', qOpen: false, side: side === 'open' || side === 'closed' ? side : null,
       vw: window.innerWidth, vh: window.innerHeight, pOpen: false, pHidden, visit: 0,
       depQ: '', depF: 'all', depSort: 'att', avTab: 'pend', avTy: 'all', sesSel: null, sesWi: 3, sesG: 'A', exp, expSel: null, expConf: null,
-      chatOpen: false, chatBig: false, chatLog: [], chatQ: '' };
+      chatOpen: false, chatBig: false, chatLog: [], chatQ: '',
+      rules, tpl, tplType: 'fuerza', tplEd: null, perm, mail: null, lateSeen: {}, clock: { base: hmMin(CLOCK0), t0: Date.now() }, tick: 0 };
   })();
   mainRef = React.createRef();
   searchRef = React.createRef();
@@ -675,7 +816,8 @@ class Component extends DCLogic {
 
   // ── Idioma i dies ─────────────────────────────────────────────────────
   L() { const l = this.state.lang; if (this._L && this._L.lang === l) return this._L; return (this._L = { lang: l, ...locTx(TX, l) }); }
-  t(k, ...a) { const v = this.L().UI[k]; return typeof v === 'function' ? v(...a) : v ?? k; }
+  // Si un nom acaba en inicial («Arnau V.») just abans del punt final, no en surten dos.
+  t(k, ...a) { const v = this.L().UI[k]; if (typeof v !== 'function') return v ?? k; const r = v(...a); return typeof r === 'string' ? r.replace(/(\s\p{Lu}\.)\./gu, '$1') : r; }
   day(i) { const d = new Date(2026, 7, 28 + i); return { n: d.getDate(), m: d.getMonth(), wd: (d.getDay() + 6) % 7 }; }
   dLong(i) { const d = this.day(i); return `${this.L().WDL[d.wd]} ${d.n}`; }
   dShort(i) { const d = this.day(i); return `${this.L().WD3[d.wd]} ${d.n}`; }
@@ -694,18 +836,23 @@ class Component extends DCLogic {
     // ⌘K (o Ctrl+K): al cercador. Tecla E: mostra o amaga el botó del prototip. Esc tanca el cercador i el menú del prototip.
     this.onKey = e => {
       if ((e.metaKey || e.ctrlKey) && (e.key === 'k' || e.key === 'K')) { e.preventDefault(); if (this.searchRef.current) this.searchRef.current.focus(); return; }
-      if (e.key === 'Escape') { this.setState({ qOpen: false, pOpen: false, chatOpen: false }); return; }
+      if (e.key === 'Escape') { this.setState({ qOpen: false, pOpen: false, chatOpen: false, mail: null }); return; }
       if (e.metaKey || e.ctrlKey || e.altKey || /^(INPUT|TEXTAREA|SELECT)$/.test((e.target && e.target.tagName) || '')) return;
       if (e.key === 'e' || e.key === 'E') this.setProtoHidden(!this.state.pHidden);
     };
     window.addEventListener('keydown', this.onKey);
     // Mode automàtic: segueix el mode clar o fosc del sistema.
     try { this.mq = window.matchMedia('(prefers-color-scheme: dark)'); this.onMq = e => this.setState({ sysDark: e.matches }); this.mq.addEventListener('change', this.onMq); } catch (e) {}
-    this.syncBody();
+    // L'hora avança (hora límit, sessions que comencen): es torna a pintar cada 30 segons. Si una altra pestanya canvia les regles o els ajustos, es tornen a llegir.
+    this.tickT = setInterval(() => this.setState(st => ({ tick: st.tick + 1 })), 30000);
+    this.onStorage = e => { const rd = (k, d) => { try { return JSON.parse(localStorage.getItem(k) || 'null') || d; } catch (er) { return d; } };
+      if (e.key === null || ['mt-prep-aj', 'mt-prep-rev', 'mt-prep-rules', 'mt-prep-tpl'].includes(e.key)) this.setState({ dec: rd('mt-prep-aj', {}), rev: rd('mt-prep-rev', {}), rules: rd('mt-prep-rules', {}), tpl: rd('mt-prep-tpl', {}) }); };
+    window.addEventListener('storage', this.onStorage);
+    this.syncBody(); this.publishDay();
   }
-  componentWillUnmount() { window.removeEventListener('resize', this.onResize); window.removeEventListener('keydown', this.onKey); try { this.mq.removeEventListener('change', this.onMq); } catch (e) {} }
+  componentWillUnmount() { window.removeEventListener('resize', this.onResize); window.removeEventListener('keydown', this.onKey); window.removeEventListener('storage', this.onStorage); clearInterval(this.tickT); try { this.mq.removeEventListener('change', this.onMq); } catch (e) {} }
   componentDidUpdate(pp, ps) {
-    this.syncBody();
+    this.syncBody(); this.publishDay(); this.webNotify();
     const s = this.state;
     if (ps && (ps.page !== s.page || ps.ath !== s.ath) && this.mainRef.current) this.mainRef.current.scrollTop = 0;
     if (ps && ps.chatLog !== s.chatLog && this.chatRef.current) this.chatRef.current.scrollTop = this.chatRef.current.scrollHeight;
@@ -716,14 +863,30 @@ class Component extends DCLogic {
   list() { const g = this.state.grp; return ATH.filter(a => g === 'T' || a.g === g); }
   ath(c) { return ATH.find(a => a.c === c) || ATH[0]; }
   sesOf(a, wi) { const w = WEEK[wi]; return w.AB || w[a.g]; }
-  // L'ajust desat: el del preparador (state.dec, a localStorage) o el que ja venia decidit a les dades.
-  decOf(a) { return this.state.dec[a.c] || (a.sv && a.sv.dec ? { v: a.sv.dec, at: a.sv.at, sug: a.sv.sug } : null); }
-  sugOf(a) { if (a.sv) return a.sv.sug; return a.calc || a.d[6] === 'N' ? null : 'N'; }
-  whyOf(a) { const w = a.sv ? a.sv.why : a.calc ? 'calc' : a.d[6] === 'N' ? 'none' : 'ok', n = this.runOf(a).n;
-    return { ill: this.t('whyIll'), run: this.t('whyRun', n), runY: this.t('whyRunY', n), back: this.t('whyBack'), today: this.t('whyToday'), watch: this.t('whyWatch'), inj: this.t('whyInj'), ok: this.t('whyOk'), none: this.t('whyNone'), calc: this.t('whyCalc') }[w]; }
-  // Per decidir: té suggeriment o avís per a la sessió d'avui i encara no s'ha desat cap ajust.
-  pendingDec(a) { return !!a.sv && !this.decOf(a); }
-  revAt(a) { if (!a.av) return null; return this.state.rev[a.c] || a.av.rev || null; }
+  // Regles d'Ajustos (les per defecte, amb el que s'hi hagi canviat) i l'hora simulada (minuts des de les 0:00).
+  R() { const r = this.state.rules; if (this._Rk !== r) { this._Rk = r; this._Rv = { ...RULES0, ...r }; } return this._Rv; }
+  now() { const k = this.state.clock; return k.base + Math.floor((Date.now() - k.t0) / 60000); }
+  // Una sola font per a totes les xifres: a cada pintada, els avisos (av) i la sessió d'avui (sv) de cada esportista surten de les regles i l'hora.
+  // sv: kind (pend, auto, watch, calc, none), v (l'automàtic), sug, why, ini / lim (minuts: inici i hora límit), late (límit passat), locked (ja ha començat).
+  derive() {
+    const R = this.R(), now = this.now();
+    ATH.forEach(a => {
+      a.av = avAt(a, TODAY, R); if (a.av) a.av.nou = !avAt(a, TODAY - 1, R);
+      const sv = svAt(a, TODAY, R), ini = sv.ses && sv.ses.h ? hmMin(sv.ses.h.split('–')[0]) : null;
+      a.sv = { ...sv, ini, lim: ini == null ? null : ini - R.leadMin, late: ini != null && now > ini - R.leadMin, locked: ini != null && now >= ini };
+    });
+  }
+  // L'ajust desat pel preparador (state.dec, a localStorage), l'automàtic de les regles i el d'avui (null = encara per decidir).
+  decOf(a) { return this.state.dec[a.c] || null; }
+  autoOf(a) { return a.sv && a.sv.kind === 'auto' ? a.sv.v : null; }
+  ajOf(a) { const d = this.decOf(a); if (d) return d.v; if (this.autoOf(a)) return this.autoOf(a); return a.sv && a.sv.kind === 'pend' ? null : a.sv && a.sv.ses ? 'N' : null; }
+  sugOf(a) { return a.sv ? a.sv.sug : null; }
+  whyOf(a) { const L = this.L(), w = a.sv ? a.sv.why : 'ok', n = this.runOf(a).n;
+    return { ill: this.t('whyIll'), run: this.t('whyRun', n), runY: this.t('whyRunY', n), back: this.t('whyBack'), today: this.t('whyToday'), watch: this.t('whyWatch', L.META[(a.sv && a.sv.k) || 'hrv']), inj: this.t('whyInj'), ok: this.t('whyOk'), none: this.t('whyNone'), calc: this.t('whyCalc') }[w]; }
+  // Per decidir: la sessió d'avui ho demana, encara no s'ha desat cap ajust i no ha començat. Sense decidir: ha començat sense ajust.
+  pendingDec(a) { return !!a.sv && a.sv.kind === 'pend' && !this.decOf(a) && !a.sv.locked; }
+  noDecOf(a) { return !!a.sv && a.sv.kind === 'pend' && !this.decOf(a) && a.sv.locked; }
+  revAt(a) { if (!a.av) return null; return this.state.rev[a.c] || REV0[a.c] || null; }
   // Dies seguits amb el mateix estat que avui (Moderat o Recuperació) i des de quin dia.
   runOf(a) { const c = a.d[6]; if (c !== 'R' && c !== 'M') return { n: 0, from: null }; let n = 0; for (let j = 6; j >= 0 && a.d[j] === c; j--) n++; return { n, from: 21 + 7 - n }; }
   // Ordre d'atenció (mai per valors): avisos per importància, després els que tenen la sessió per decidir, després la resta per nom.
@@ -832,8 +995,8 @@ class Component extends DCLogic {
   openAth(c) { this.setState(st => ({ page: 'ficha', ath: c, back: st.page === 'ficha' ? st.back : st.page, tab: st.page === 'ficha' ? st.tab : 'res', q: '', qOpen: false })); }
   sideEl() {
     const C = this.C, s = this.state, open = this.sideOpen(), W = this.sideW();
-    const pendAv = ATH.filter(a => a.av && !this.revAt(a)).length, pendDec = ATH.filter(a => this.pendingDec(a)).length;
-    const bdg = { ses: [pendDec, 'acc'], av: [pendAv, 'warn'], dep: [ATH.length, 'plain'] };
+    const inG = this.list(), pendAv = inG.filter(a => a.av && !this.revAt(a)).length, pendDec = inG.filter(a => this.pendingDec(a)).length;
+    const bdg = { ses: [pendDec, 'acc'], av: [pendAv, 'warn'], dep: [inG.length, 'plain'] };
     const dotEl = k => { const b = bdg[k]; if (!b || open || !b[0] || b[1] === 'plain') return null;
       return h('span', { 'aria-hidden': true, style: { position: 'absolute', top: 6, right: 8, width: 7, height: 7, borderRadius: '50%', background: b[1] === 'acc' ? C.acc : this.tone(.5), boxShadow: `0 0 0 2px ${C.side}` } }); };
     const badgeEl = k => { const b = bdg[k]; if (!b || !open || !b[0]) return null; const w = this.tone(.5), wk = this.alertC(w);
@@ -961,19 +1124,21 @@ class Component extends DCLogic {
       pend.length ? pend.map(avRow) : h('div', { style: { display: 'flex', alignItems: 'center', gap: 8, padding: 16, fontSize: 13.5 } }, h('span', { style: { color: okCol } }, this.icon('check', 16, 2.6)), this.t('allReviewed')),
       revd.length ? h('div', { style: { display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: '4px 10px', padding: '9px 16px', borderTop: `1px solid ${C.line}`, background: C.s2, fontSize: 12.5 } },
         h('span', { style: { display: 'inline-flex', alignItems: 'center', gap: 5, fontWeight: 600 } }, h('span', { style: { color: okCol } }, this.icon('check', 13, 2.6)), this.t('revToday')),
-        revd.map((a, i) => { const d = this.decOf(a), at = this.revAt(a);
-          return h('span', { key: a.c }, `${a.n} · ${d ? `${L.VERL[d.v]} (${d.at || at})` : at}${i < revd.length - 1 ? ',' : ''}`); })) : null);
+        revd.map((a, i) => { const d = this.decOf(a), at = this.revAt(a), au = this.autoOf(a);
+          return h('span', { key: a.c }, `${a.n} · ${d ? `${L.VERL[d.v]} (${d.at || at})` : au ? `${L.VERL[au]} (${at})` : at}${i < revd.length - 1 ? ',' : ''}`); })) : null);
     // Sessions d'avui (de TrainingPeaks) i propers dies.
     const sesRows = ['A', 'B'].filter(g => s.grp === 'T' || s.grp === g).map((g, i) => {
-      const x = WEEK[3][g], inG = ATH.filter(a => a.g === g), pendG = inG.filter(a => this.pendingDec(a)).length, adG = inG.filter(a => { const d = this.decOf(a); return d && d.v !== 'N'; }).length;
+      const x = WEEK[3][g], inG = ATH.filter(a => a.g === g), pendG = inG.filter(a => this.pendingDec(a)).length, ndG = inG.filter(a => this.noDecOf(a)).length, adG = inG.filter(a => { const v = this.ajOf(a); return v && v !== 'N'; }).length;
+      const ini = hmMin(x.h.split('–')[0]), lim = ini - this.R().leadMin, late = this.now() > lim;
       return h('button', { key: g, type: 'button', className: 'mt-hov', onClick: () => this.openSesion(3, g), style: { display: 'grid', gridTemplateColumns: '32px minmax(0,1fr)', gap: 12, alignItems: 'start', width: '100%', padding: '12px 16px', border: 'none', borderTop: i ? `1px solid ${C.line}` : 'none', background: 'transparent', textAlign: 'left', color: C.ink, cursor: 'pointer', boxSizing: 'border-box' } },
         h('span', { style: { width: 32, height: 32, borderRadius: 7, background: C.accBg, color: C.accInk, display: 'inline-flex', alignItems: 'center', justifyContent: 'center' } }, this.icon(x.t, 16, 2.1)),
         h('span', { style: { minWidth: 0 } },
           h('span', { style: { display: 'block', fontSize: 13.5, fontWeight: 600 } }, L.SES[x.k]),
           h('span', { style: { display: 'block', marginTop: 1, fontSize: 12.5, color: C.ink2 } }, `${this.t('group', g)} · ${x.h} · ${L.PLACE[x.pl]} · RPE ${x.rpe}`),
+          pendG ? h('span', { style: { display: 'flex', alignItems: 'center', gap: 5, marginTop: 4, fontSize: 12.5, fontWeight: late ? 600 : 500, color: late ? this.tone(.5) : C.ink } }, this.icon('clock', 12, 2.4), this.t(late ? 'limitLate' : 'limitAt', minHm(lim))) : null,
           h('span', { style: { display: 'flex', flexWrap: 'wrap', gap: 6, marginTop: 8 } },
-            pendG ? h('span', { style: this.chip('warn') }, this.t('nToDecide', pendG)) : null, adG ? h('span', { style: this.chip('acc') }, this.t('nAdjusted', adG)) : null,
-            h('span', { style: this.chip() }, this.t('nNormal', inG.length - pendG - adG))))); });
+            pendG ? h('span', { style: this.chip('warn') }, this.t('nToDecide', pendG)) : null, ndG ? h('span', { style: this.chip('miss') }, this.t('nNoDec', ndG)) : null, adG ? h('span', { style: this.chip('acc') }, this.t('nAdjusted', adG)) : null,
+            h('span', { style: this.chip() }, this.t('nNormal', inG.length - pendG - ndG - adG))))); });
     const nx = [{ g: null, i: 30, t: this.t('nxForm'), w: s.grp === 'A' ? this.t('nxFormA') : this.t('nxFormT', 'Laia') }, { g: 'B', i: 32, t: this.t('nxBand', 'Nora'), w: this.t('nxBandW') }].filter(x => !x.g || s.grp === 'T' || s.grp === x.g);
     const right = h('div', { key: 'r', style: { ...this.fx('1 1 0', nar), minWidth: 0, display: 'flex', flexDirection: 'column', gap: 16 } },
       h('section', { style: this.card({ overflow: 'hidden' }) }, this.headRow(this.h2(this.t('sesToday')),
@@ -1023,7 +1188,7 @@ class Component extends DCLogic {
       let o;
       if (rv && d) { const k = this.alertC(this.tone(.92), .06); o = { t: this.t('banDone'), w: this.t('banSes', L.VERL[d.v], d.sug && d.v === d.sug), icon: 'check', box: { ...base, background: k.bg, border: `1px solid ${k.bd}` }, ic: { ...icb, background: k.ic, color: k.icFg } }; }
       else if (rv) o = { t: this.t('banDone'), w: this.pendingDec(a) ? this.t('banOpen') : '', icon: 'check', box: { ...base, background: C.s2, border: `1px solid ${C.line}` }, ic: { ...icb, background: C.s1, border: `1px solid ${C.line2}`, color: C.ink } };
-      else { const k = this.alertC(this.tone(.5), .1); o = { t: this.t('banPend'), w: `${tx.why}, ${this.low(tx.since)}. ${a.sv ? this.t('banAuto') : ''}`, icon: this.avLook(a, 26).icon, pending: true, box: { ...base, background: k.bg, border: `1px solid ${k.bd}` }, ic: { ...icb, background: k.ic, color: k.icFg } }; }
+      else { const k = this.alertC(this.tone(.5), .1); o = { t: this.t('banPend'), w: `${tx.why}, ${this.low(tx.since)}. ${this.pendingDec(a) ? this.t('banAuto') : ''}`, icon: this.avLook(a, 26).icon, pending: true, box: { ...base, background: k.bg, border: `1px solid ${k.bd}` }, ic: { ...icb, background: k.ic, color: k.icFg } }; }
       ban = h('div', { key: 'ban', role: 'status', style: o.box }, h('span', { style: o.ic }, this.icon(o.icon, 14, 2.4)),
         h('span', { style: { flex: '1 1 240px', minWidth: 0, fontSize: 13.5 } }, h('span', { style: { fontWeight: 650 } }, o.t), ' ', o.w),
         o.pending ? h('button', { type: 'button', className: 'mt-hov', onClick: () => this.markRev(a), style: smBtn }, this.icon('check', 12, 2.6), this.t('markRev')) : null);
@@ -1038,7 +1203,7 @@ class Component extends DCLogic {
   fichaRes(a, S) {
     const C = this.C, L = this.L(), mw = this._mainW || 800, nar = mw < 680, okC = this.tone(.92), sum = this.summaryOf(a);
     const days = [0, 1, 2, 3, 4, 5, 6].map(j => { const c = a.d[j], p = a.p ? a.p[j] : null, i = 21 + j, d = this.day(i), dec = this.decOf(a);
-      const v = j === 6 ? (dec ? dec.v : null) : (a.sw ? a.sw[j] : 'N');
+      const v = j === 6 ? (dec ? dec.v : this.ajOf(a)) : (a.sw ? a.sw[j] : 'N');
       const svSt = { width: 22, height: 22, borderRadius: 5, boxSizing: 'border-box', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', ...(!v ? { border: `1.5px dashed ${C.miss}`, color: C.ink2 } : v === 'N' ? { color: C.ink3 } : { background: C.accBg, color: C.accInk, border: `1px solid ${C.accLine}` }) };
       return h('div', { key: j, style: { display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6 } },
         h('span', { style: { fontSize: 11.5, fontWeight: j === 6 ? 700 : 500, color: j === 6 ? C.ink : C.ink2 } }, L.WD2[d.wd]),
@@ -1133,8 +1298,9 @@ class Component extends DCLogic {
   fichaSes(a) {
     const C = this.C, L = this.L(), dec = this.decOf(a);
     const rows = WEEK.map((w, wi) => { const x = w.AB || w[a.g], i = WEEK0 + wi, past = i < TODAY, today = i === TODAY, sj = i - 21;
-      const v = past ? (a.sw ? a.sw[sj] : 'N') : today ? (dec ? dec.v : null) : null, ai = past && a.swAi ? a.swAi[sj] : today && dec && dec.sug ? (dec.v === dec.sug ? 'ok' : 'chg') : null;
-      const right = x.t === 'desc' ? null : v ? h('span', { style: v === 'N' ? { fontSize: 12.5, fontWeight: 500 } : this.chip('acc') }, L.VER[v]) : today ? h('span', { style: this.chip('warn') }, this.t('toDecide')) : h('span', { style: { fontSize: 12.5, color: C.ink3 } }, '—');
+      const v = past ? (a.sw ? a.sw[sj] : 'N') : today ? this.ajOf(a) : null, ai = past && a.swAi ? a.swAi[sj] : today && dec && dec.sug ? (dec.v === dec.sug ? 'ok' : 'chg') : null, au = today && !dec && this.autoOf(a);
+      const right = x.t === 'desc' ? null : today && this.noDecOf(a) ? h('span', { style: this.chip('miss') }, this.t('noDec')) : v ? h('span', { style: v === 'N' ? { fontSize: 12.5, fontWeight: 500 } : this.chip('acc') }, au ? this.t('autoV', L.VER[v]) : L.VER[v])
+        : today ? h('span', { style: this.chip('warn') }, this.t('toDecide')) : h('span', { style: { fontSize: 12.5, color: C.ink3 } }, '—');
       return h('div', { key: wi, style: { display: 'grid', gridTemplateColumns: '64px 30px minmax(0,1fr) auto', gap: 12, alignItems: 'center', padding: '10px 16px', borderTop: wi ? `1px solid ${C.line}` : 'none', background: today ? (C.dark ? 'rgba(76,130,247,.05)' : C.s2) : 'transparent' } },
         h('span', { style: { fontSize: 12.5, fontWeight: today ? 700 : 500, color: today ? C.accInk : C.ink2 } }, this.dShort(i)),
         h('span', { style: { width: 30, height: 30, borderRadius: 7, background: x.t === 'desc' ? C.s2 : C.accBg, color: x.t === 'desc' ? C.ink2 : C.accInk, display: 'inline-flex', alignItems: 'center', justifyContent: 'center' } }, this.icon(x.t, 15, 2.1)),
@@ -1183,13 +1349,14 @@ class Component extends DCLogic {
   // Sessió d'avui: la sessió de TrainingPeaks del seu grup, el suggeriment de la IA, les quatre opcions, què li arribarà (què canvia sobre l'Excel)
   // i una nota. En desar es guarda l'ajust (i si era el suggerit), l'avís queda revisat i l'esportista el veu a Avui.
   sesTodayEl(a) {
-    const C = this.C, s = this.state, L = this.L(), x = this.sesOf(a, 3), dec = this.decOf(a), sug = this.sugOf(a);
-    const sel = s.sel[a.c] !== undefined ? s.sel[a.c] : dec ? dec.v : null, note = s.note[a.c] !== undefined ? s.note[a.c] : (dec && dec.note) || '';
-    const saved = !!dec && sel === dec.v && note === ((dec && dec.note) || ''), first = a.n.split(' ')[0];
-    const items = { N: [L.VERS.N], R: L.CHG_A.R[x.t] || L.RED[x.t] || [], A: L.CHG_A.A[x.t] || L.ALT[x.t] || [], D: L.CHG_A.D }[sel || sug || 'N'];
+    const C = this.C, s = this.state, L = this.L(), x = this.sesOf(a, 3), dec = this.decOf(a), sug = this.sugOf(a), au = dec ? null : this.autoOf(a), locked = !!(a.sv && a.sv.locked);
+    const sel = s.sel[a.c] !== undefined ? s.sel[a.c] : dec ? dec.v : au, note = s.note[a.c] !== undefined ? s.note[a.c] : (dec && dec.note) || '';
+    // Desat: el que va desar el preparador, o l'ajust automàtic sense canvis (no cal desar res).
+    const saved = dec ? sel === dec.v && note === (dec.note || '') : !!au && sel === au && !note, first = a.n.split(' ')[0];
+    const items = { N: [L.VERS.N], R: this.tplLines(x.t, 'R', true), A: this.tplLines(x.t, 'A', true), D: L.CHG_A.D }[sel || sug || 'N'];
     const opt = k => { const on = sel === k, isS = k === sug;
-      return h('button', { key: k, type: 'button', role: 'radio', 'aria-checked': on, onClick: () => this.setState(st => ({ sel: { ...st.sel, [a.c]: k } })),
-        style: { display: 'flex', alignItems: 'center', gap: 8, minWidth: 0, padding: '7px 9px', borderRadius: 7, cursor: 'pointer', boxSizing: 'border-box', textAlign: 'left',
+      return h('button', { key: k, type: 'button', role: 'radio', 'aria-checked': on, disabled: locked || undefined, onClick: () => this.setState(st => ({ sel: { ...st.sel, [a.c]: k } })),
+        style: { display: 'flex', alignItems: 'center', gap: 8, minWidth: 0, padding: '7px 9px', borderRadius: 7, cursor: locked ? 'not-allowed' : 'pointer', opacity: locked && !on ? .5 : 1, boxSizing: 'border-box', textAlign: 'left',
           ...(on ? { border: `1px solid ${C.acc}`, background: C.acc, color: '#FFFFFF' } : { border: `1px ${isS ? 'dashed' : 'solid'} ${isS ? C.acc : C.line2}`, background: C.s1, color: isS ? C.accInk : C.ink }) } },
         this.icon(k, 13, 2.3), h('span', { style: { minWidth: 0 } }, h('span', { style: { display: 'block', fontSize: 13, fontWeight: 600 } }, L.VER[k]), h('span', { style: { display: 'block', fontSize: 11.5, opacity: .85 } }, L.VERS[k]))); };
     const accSt = this.btn(sel === sug ? 'sec' : 'primary', { height: 26, padding: '0 10px', fontSize: 12 });
@@ -1201,27 +1368,31 @@ class Component extends DCLogic {
         h('div', { style: { fontSize: 12.5, color: C.ink2 } }, `${x.h} · ${L.PLACE[x.pl]} · ${this.t('group', a.g)} · TrainingPeaks`)),
       h('div', { style: { padding: '12px 16px', background: C.s2, borderBottom: `1px solid ${C.line}` } },
         h('div', { style: { display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8 } },
-          sug ? h('span', { title: this.t('basedOn', this.t('sugBasis')), style: { fontSize: 13, cursor: 'help' } }, this.t('aiSuggests'), ' ', h('span', { style: { fontWeight: 650 } }, L.VER[sug])) : h('span', { style: { fontSize: 13 } }, this.whyOf(a)),
-          sug ? h('button', { type: 'button', className: sel === sug ? 'mt-hov' : 'mt-pri', onClick: () => this.setState(st => ({ sel: { ...st.sel, [a.c]: sug } })), style: accSt }, this.t(sel === sug ? 'accepted' : 'accept')) : null),
-        sug ? h('p', { style: { margin: '6px 0 0', fontSize: 12.5, lineHeight: 1.5 } }, `${this.whyOf(a)} ${this.t('yours')}`) : null),
+          au ? h('span', { style: { fontSize: 13 } }, this.t('autoIs'), ' ', h('span', { style: { fontWeight: 650 } }, L.VER[au]))
+            : sug ? h('span', { title: this.t('basedOn', this.t('sugBasis')), style: { fontSize: 13, cursor: 'help' } }, this.t('aiSuggests'), ' ', h('span', { style: { fontWeight: 650 } }, L.VER[sug])) : h('span', { style: { fontSize: 13 } }, this.whyOf(a)),
+          !au && sug && !locked ? h('button', { type: 'button', className: sel === sug ? 'mt-hov' : 'mt-pri', onClick: () => this.setState(st => ({ sel: { ...st.sel, [a.c]: sug } })), style: accSt }, this.t(sel === sug ? 'accepted' : 'accept')) : null),
+        au ? h('p', { style: { margin: '6px 0 0', fontSize: 12.5, lineHeight: 1.5 } }, `${this.whyOf(a)} ${this.t('autoChange')}`)
+          : sug ? h('p', { style: { margin: '6px 0 0', fontSize: 12.5, lineHeight: 1.5 } }, `${this.whyOf(a)} ${this.t('yours')}`) : null),
       h('div', { style: { padding: '12px 16px' } },
         h('div', { role: 'radiogroup', 'aria-label': this.t('sesTodayT'), style: { display: 'grid', gridTemplateColumns: 'repeat(2, minmax(0,1fr))', gap: 6 } }, ['N', 'R', 'A', 'D'].map(opt)),
+        // Ha començat sense decisió: el deportista veu l'orientació, no un ajust (i ja no hi ha nota per desar).
+        locked && !dec && !au ? h('p', { style: { margin: '12px 0 0', padding: '9px 11px', borderRadius: 8, background: C.s2, border: `1px solid ${C.line}`, fontSize: 12.5, lineHeight: 1.5 } }, this.t('nodecSees', first, !!sug)) :
         h('div', { style: { marginTop: 12, border: `1px solid ${C.line}`, borderRadius: 8, overflow: 'hidden' } },
           h('div', { style: { padding: '7px 10px', fontSize: 12, fontWeight: 600, background: C.s2, borderBottom: `1px solid ${C.line}` } }, this.t('willGet', sel ? L.VER[sel] : sug ? this.t('ifAccept', L.VERL[sug]) : L.VER.N)),
           items.map((t2, i) => h('div', { key: i, style: { padding: '6px 10px', fontSize: 12.5, borderTop: i ? `1px solid ${C.line}` : 'none' } }, t2)),
           (sel || sug || 'N') !== 'D' && x.xls !== false ? h('span', { title: this.t('linkTP'), style: { display: 'flex', alignItems: 'center', gap: 7, padding: '7px 10px', borderTop: `1px solid ${C.line}`, fontSize: 12.5, fontWeight: 600, color: C.accInk, cursor: 'help' } },
             this.icon('sheet', 14, 2), this.t('instrVideos'), h('span', { style: { marginLeft: 'auto' } }, this.icon('ext', 13, 2.2))) : null),
-        h('label', { style: { display: 'block', marginTop: 12, fontSize: 12.5, fontWeight: 600 } }, this.t('noteFor', first),
-          h('input', { type: 'text', value: note, placeholder: this.t('notePh'), maxLength: 140, onChange: e => { const val = e.target.value; this.setState(st => ({ note: { ...st.note, [a.c]: val } })); },
+        locked && !(dec && dec.note) ? null : h('label', { style: { display: 'block', marginTop: 12, fontSize: 12.5, fontWeight: 600 } }, this.t('noteFor', first),
+          h('input', { type: 'text', value: note, placeholder: this.t('notePh'), maxLength: 140, readOnly: locked || undefined, onChange: e => { const val = e.target.value; this.setState(st => ({ note: { ...st.note, [a.c]: val } })); },
             style: { display: 'block', width: '100%', boxSizing: 'border-box', marginTop: 6, height: 32, padding: '0 10px', borderRadius: 7, border: `1px solid ${C.line2}`, background: C.bg, color: C.ink, fontSize: 13, fontWeight: 400 } })),
         h('div', { style: { marginTop: 12, display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8 } },
-          h('span', { style: { fontSize: 12.5 } }, saved ? this.t('savedAt', dec.at) : this.t('seesToday', first)),
-          h('button', { type: 'button', className: saved ? 'mt-hov' : 'mt-pri', disabled: !sel || saved, onClick: () => this.saveDec(a, sel, note),
+          h('span', { style: { fontSize: 12.5, fontWeight: locked ? 600 : 400 } }, locked ? this.t('sesStarted', dec ? L.VERL[dec.v] : au ? L.VERL[au] : this.t('noDec').toLowerCase()) : saved ? (dec ? this.t('savedAt', dec.at) : this.t('autoNote')) : this.t('seesToday', first)),
+          h('button', { type: 'button', className: saved || locked ? 'mt-hov' : 'mt-pri', disabled: !sel || saved || locked, onClick: () => this.saveDec(a, sel, note),
             style: this.btn(saved ? 'sec' : 'primary', !sel ? { opacity: .45, cursor: 'not-allowed' } : saved ? { cursor: 'default' } : {}) }, this.t(saved ? 'saved' : 'save')))));
   }
   saveDec(a, v, note) {
     if (!v) return;
-    const now = new Date(), at = `${now.getHours()}:${String(now.getMinutes()).padStart(2, '0')}`, rec = { v, note: (note || '').trim(), at, sug: this.sugOf(a) };
+    const at = minHm(this.now()), au = this.autoOf(a), rec = { v, note: (note || '').trim(), at, sug: this.sugOf(a), src: 'prep', was: a.sv ? a.sv.kind : null, ...(au ? { auto: au } : {}) };
     this.setState(st => { const dec = { ...st.dec, [a.c]: rec }, rev = a.av ? { ...st.rev, [a.c]: st.rev[a.c] || at } : st.rev, sel = { ...st.sel }, nt = { ...st.note }; delete sel[a.c]; delete nt[a.c];
       try { localStorage.setItem('mt-prep-aj', JSON.stringify(dec)); localStorage.setItem('mt-prep-rev', JSON.stringify(rev)); } catch (e) {}
       return { dec, rev, sel, note: nt }; });
@@ -1236,8 +1407,102 @@ class Component extends DCLogic {
           h('span', { title: ai ? this.t(ai === 'ok' ? 'aiAcc' : 'aiChg') : undefined, style: v === 'N' ? { fontSize: 12.5, fontWeight: 500 } : this.chip('acc') }, L.VER[v] + (ai === 'ok' ? ` · ${this.t('aiOk')}` : ''))); }));
   }
 
+  // ── Regles, plantilles, notificacions i l'estat per a l'app del deportista (des del 07-10-2026) ──
+  // Les regles i les plantilles es canvien a Ajustos i es desen a mt-prep-rules i mt-prep-tpl (només el que canvia).
+  setRule(k, v) { this.setState(st => { const r = { ...st.rules, [k]: v }; if (r[k] === RULES0[k]) delete r[k]; try { localStorage.setItem('mt-prep-rules', JSON.stringify(r)); } catch (e) {} return { rules: r }; }); }
+  bumpRule(k, d, min, max) { const cur = this.R()[k]; this.setRule(k, Math.max(min, Math.min(max, cur + d))); }
+  resetRules(keys) { this.setState(st => { const r = { ...st.rules }; keys.forEach(k => delete r[k]); try { localStorage.setItem('mt-prep-rules', JSON.stringify(r)); } catch (e) {} return { rules: r }; }); }
+  setTpl(t, o) { this.setState(st => { const p = { ...st.tpl }; if (o) p[t] = o; else delete p[t]; try { localStorage.setItem('mt-prep-tpl', JSON.stringify(p)); } catch (e) {} return { tpl: p, tplEd: null }; }); }
+  // Què canvia amb Reduïda o Alternativa en un tipus de sessió: la plantilla d'Ajustos si s'ha canviat; si no, la de sempre
+  // (athlete = com ho llegirà l'esportista, en segona persona, si n'hi ha).
+  tplLines(t, v, athlete) { const L = this.L(), p = this.state.tpl[t]; if (p && p[v] && p[v].length) return p[v]; return (athlete && L.CHG_A[v] && L.CHG_A[v][t]) || (v === 'R' ? L.RED : L.ALT)[t] || []; }
+  // Notificacions del navegador: en activar-les, el navegador demana permís (si encara no l'ha donat).
+  setWeb(v) {
+    if (!v) { this.setRule('webNotif', false); return; }
+    let p = 'none'; try { p = Notification.permission; } catch (e) {}
+    if (p === 'default') { try { Promise.resolve(Notification.requestPermission()).then(q => { this.setState({ perm: q }); this.setRule('webNotif', q === 'granted'); }); } catch (e) {} return; }
+    this.setRule('webNotif', p === 'granted');
+  }
+  // Sessions d'avui amb decisions pendents i l'hora límit passada (encara no han començat); all = també les que encara hi són a temps.
+  lateList(all) {
+    const by = {}, ab = !!WEEK[TODAY - WEEK0].AB;
+    ATH.forEach(a => { if (!this.pendingDec(a) || !(all || a.sv.late)) return; const g = ab ? 'AB' : a.g; (by[g] = by[g] || { g, ses: a.sv.ses, lim: a.sv.lim, ini: a.sv.ini, rows: [] }).rows.push(a); });
+    return Object.values(by).map(x => ({ ...x, rows: this.ordered(x.rows) })).sort((p, q) => p.lim - q.lim);
+  }
+  grpW(g) { return g === 'AB' ? this.t('groupsBoth') : this.t('group', g); }
+  // Notificació de l'hora límit: si arriba amb decisions pendents, surt a dalt a la dreta (és el que rebria el preparador per correu i, si ho
+  // permet, com a notificació del navegador: webNotify). Es tanca i no torna a sortir per a aquella sessió.
+  notesEl() {
+    const C = this.C, L = this.L(), s = this.state; if (!this.R().notifyLate) return null;
+    const G = this.lateList().filter(x => !s.lateSeen[x.g]); if (!G.length) return null;
+    const seen = g => this.setState(st => ({ lateSeen: { ...st.lateSeen, [g]: true } }));
+    return h('div', { key: 'notes', role: 'status', 'aria-live': 'polite', style: { position: 'fixed', top: 62, right: 24, zIndex: 65, width: 340, maxWidth: 'calc(100vw - 48px)', display: 'flex', flexDirection: 'column', gap: 8 } },
+      G.map(x => h('div', { key: x.g, className: 'mt-in', style: { display: 'flex', alignItems: 'flex-start', gap: 10, padding: '12px 10px 12px 14px', borderRadius: 10, background: C.s1, border: `1px solid ${C.line2}`, boxShadow: `0 14px 36px ${C.pop}` } },
+        h('span', { style: { color: this.tone(.5), marginTop: 1 } }, this.icon('bell', 15, 2.2)),
+        h('div', { style: { flex: 1, minWidth: 0, fontSize: 13, lineHeight: 1.45 } },
+          h('div', { style: { fontWeight: 650 } }, this.t('ltTitle', minHm(x.lim))), h('div', null, `${L.SES[x.ses.k]} · ${this.grpW(x.g)}`),
+          h('div', null, this.t('ltLeft', x.rows.length, this.jn(x.rows.map(a => a.n)))), h('div', { style: { color: C.ink2 } }, this.t('ltStarts', minHm(x.ini))),
+          h('button', { type: 'button', className: 'mt-pri', onClick: () => { seen(x.g); this.openSesion(TODAY - WEEK0, x.g === 'AB' ? 'A' : x.g); }, style: this.btn('primary', { marginTop: 8, height: 28, padding: '0 10px', fontSize: 12.5 }) }, this.t('decideNow'))),
+        h('button', { type: 'button', className: 'mt-hov', 'aria-label': this.t('closeW'), title: this.t('closeW'), onClick: () => seen(x.g), style: { width: 26, height: 26, flex: 'none', borderRadius: 6, border: 'none', background: 'transparent', color: C.ink2, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', padding: 0 } }, this.icon('x', 13, 2.4)))));
+  }
+  webNotify() {
+    const R = this.R(); let p = 'none'; try { p = Notification.permission; } catch (e) {}
+    if (!R.notifyLate || !R.webNotif || p !== 'granted') return;
+    this._webSent = this._webSent || {};
+    this.lateList().forEach(x => { if (this._webSent[x.g]) return; this._webSent[x.g] = true;
+      try { new Notification(this.t('ltSubj', this.L().SES[x.ses.k], this.grpW(x.g)), { body: this.t('ltLeft', x.rows.length, this.jn(x.rows.map(a => a.n))), tag: `mt-late-${x.g}` }); } catch (e) {} });
+  }
+  // Vista prèvia dels correus (al prototip no s'envien). El de les 7:30: el que queda per decidir a cada sessió, amb l'hora límit (el nom i el
+  // suggeriment, mai el motiu de salut), quants avisos hi ha per revisar i quants automàtics i a vigilar, i l'enllaç a Inici. El de l'hora límit:
+  // qui queda i què passarà si no es decideix.
+  mailEl() {
+    const C = this.C, L = this.L(), s = this.state, R = this.R(), kind = s.mail; if (!kind) return null;
+    const close = () => this.setState({ mail: null }), P = (k, kids, st) => h('p', { key: k, style: { margin: 0, ...(st || {}) } }, kids);
+    const line = a => h('div', { key: a.c }, `· ${a.n} — ${a.sv.sug ? this.t('aiChip', L.VER[a.sv.sug]) : this.t('noSugW')}`);
+    const cta = (label, go) => h('button', { key: 'cta', type: 'button', className: 'mt-pri', onClick: () => { close(); go(); }, style: this.btn('primary', { alignSelf: 'flex-start' }) }, label);
+    const name = this.t('roleShort'), ab = !!WEEK[TODAY - WEEK0].AB, td = this.day(TODAY), dateW = `${L.WDL[td.wd]} ${td.n} ${L.MN[td.m]}`;
+    let subj, body;
+    if (kind === 'digest') {
+      // A les 7:30: el que diuen les regles, sense les decisions preses més tard i sense les sessions que ja haurien començat.
+      const at = hmMin(R.digest), dAt = a => { const d = this.decOf(a); return d && d.at && hmMin(d.at) < at; };
+      const P0 = ATH.filter(a => a.sv.kind === 'pend' && !dAt(a) && !(a.sv.ini != null && at >= a.sv.ini)), by = {};
+      P0.forEach(a => { const g = ab ? 'AB' : a.g; (by[g] = by[g] || { g, ses: a.sv.ses, lim: a.sv.lim, rows: [] }).rows.push(a); });
+      const G = Object.values(by).sort((p, q) => p.lim - q.lim), nAv = ATH.filter(a => a.av && !(s.rev[a.c] && hmMin(s.rev[a.c]) < at) && !(REV0[a.c] && hmMin(REV0[a.c]) < at)).length;
+      subj = this.t('dgSubj', P0.length, dateW);
+      body = [P('h', this.t('dgHello')), P('i', P0.length ? this.t('dgIntro') : this.t('dgNone')),
+        ...G.map(gr => h('div', { key: gr.g, style: { display: 'flex', flexDirection: 'column', gap: 3 } }, h('div', { style: { fontWeight: 650 } }, this.t('dgSes', L.SES[gr.ses.k], this.grpW(gr.g), gr.ses.h.split('–')[0], minHm(gr.lim))), this.ordered(gr.rows).map(line))),
+        P('o', this.t('dgOther', nAv, ATH.filter(a => a.sv.kind === 'auto').length, ATH.filter(a => a.sv.kind === 'watch').length)), cta(this.t('dgOpen'), () => this.go('inicio')),
+        P('f', this.t('dgFoot', R.digest), { fontSize: 12.5, color: C.ink2 })];
+    } else {
+      const late = this.lateList(), gr = late[0] || this.lateList(true)[0];
+      subj = gr ? this.t('ltSubj', L.SES[gr.ses.k], this.grpW(gr.g)) : this.t('seeLate');
+      body = gr ? [late.length ? null : P('n', this.t('ltNone'), { fontSize: 12.5, color: C.ink2 }), P('h', this.t('dgHello')), P('l', this.t('ltLeft', gr.rows.length, this.jn(gr.rows.map(a => a.n)))),
+        P('s', this.t('ltStarts', minHm(gr.ini))), P('a', this.t('ltAfter')), cta(this.t('decideNow'), () => this.openSesion(TODAY - WEEK0, gr.g === 'AB' ? 'A' : gr.g))].filter(Boolean) : [P('x', this.t('ltNoNext'))];
+    }
+    return h('div', { key: 'mail', onClick: e => { if (e.target === e.currentTarget) close(); }, style: { position: 'fixed', inset: 0, zIndex: 90, display: 'flex', alignItems: 'flex-start', justifyContent: 'center', padding: '64px 24px', background: C.pop, overflow: 'auto', boxSizing: 'border-box' } },
+      h('div', { role: 'dialog', 'aria-modal': 'true', 'aria-label': subj, className: 'mt-in', style: { width: 600, maxWidth: '100%', background: C.s1, border: `1px solid ${C.line2}`, borderRadius: 12, boxShadow: `0 18px 48px ${C.pop}`, overflow: 'hidden' } },
+        h('div', { style: { display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10, padding: '8px 8px 8px 16px', borderBottom: `1px solid ${C.line}`, background: C.s2 } },
+          h('span', { style: { fontSize: 12, fontWeight: 600, color: C.ink2 } }, this.t('mailPrev')),
+          h('button', { type: 'button', className: 'mt-hov', 'aria-label': this.t('closeW'), title: this.t('closeW'), onClick: close, style: { width: 28, height: 28, borderRadius: 6, border: 'none', background: 'transparent', color: C.ink, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', padding: 0 } }, this.icon('x', 14, 2.4))),
+        h('div', { style: { display: 'grid', gridTemplateColumns: '64px minmax(0,1fr)', gap: '4px 10px', padding: '12px 16px', borderBottom: `1px solid ${C.line}`, fontSize: 13 } },
+          h('span', { style: { color: C.ink2 } }, this.t('mailTo')), h('span', null, name), h('span', { style: { color: C.ink2 } }, this.t('mailSubj')), h('span', { style: { fontWeight: 650 } }, subj)),
+        h('div', { style: { display: 'flex', flexDirection: 'column', gap: 14, padding: '16px 16px 18px', fontSize: 13.5, lineHeight: 1.55 } }, body)));
+  }
+  // L'estat d'avui per a l'app del deportista (mt-prep-day): de cada esportista, si la sessió ha començat sense decisió (nodec: l'app li
+  // ensenya una orientació), el suggeriment de la IA, l'ajust automàtic i, si la plantilla del seu tipus de sessió s'ha canviat a Ajustos, les
+  // línies noves. Només s'escriu si canvia. Amb servidor, ho faria la base de dades.
+  publishDay() {
+    const ath = {};
+    ATH.forEach(a => { const sv = a.sv || {}, d = this.decOf(a), p = sv.ses ? this.state.tpl[sv.ses.t] || {} : {}, own = v => (p[v] && p[v].length ? p[v] : null);
+      ath[a.c] = { st: d ? 'done' : sv.kind === 'pend' ? (sv.locked ? 'nodec' : 'pend') : sv.kind || 'none', sug: sv.sug ?? null, auto: !d && sv.kind === 'auto' ? sv.v : null,
+        ses: sv.ses ? sv.ses.k : null, chg: own('R') || own('A') ? { R: own('R'), A: own('A') } : null }; });
+    const out = JSON.stringify({ day: TODAY, ath });
+    if (out === this._pub) return; this._pub = out; try { localStorage.setItem('mt-prep-day', out); } catch (e) {}
+  }
+
   // ── Ajustos ───────────────────────────────────────────────────────────
-  // Aparença (mode i els quatre estils), idioma, perfil i què llegeix la IA.
+  // Aparença (mode i els quatre estils), idioma, perfil i què llegeix la IA; des del 07-10-2026, també les regles dels avisos i les decisions,
+  // les plantilles d'adaptació i les notificacions.
   pageAjustes() {
     const C = this.C, s = this.state, L = this.L(), nar = this.cw() < 760;
     const group = (title, kids, key, sub) => h('div', { key, style: { display: 'flex', flexDirection: 'column', gap: 8 } },
@@ -1273,9 +1538,62 @@ class Component extends DCLogic {
       h('p', { style: { margin: 0 } }, this.t('aiP1')),
       h('p', { style: { margin: '10px 0 0' } }, h('span', { style: { fontWeight: 600 } }, this.t('aiReads')), this.t('aiReadsT')),
       h('p', { style: { margin: '6px 0 0' } }, h('span', { style: { fontWeight: 600 } }, this.t('aiNot')), this.t('aiNotT')));
+    // Regles dels avisos i de les decisions (des del 07-10-2026): el canvi es veu al moment a Inici, Avisos, Sessions, Esportistes i la barra lateral.
+    const R = this.R(), keys = ['outDays', 'backDays', 'leadMin'], changedR = keys.some(k => R[k] !== RULES0[k]);
+    const stepB = off => ({ width: 28, height: 28, flex: 'none', borderRadius: 7, border: `1px solid ${C.line2}`, background: C.s1, color: C.ink, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', cursor: off ? 'not-allowed' : 'pointer', opacity: off ? .4 : 1, padding: 0 });
+    const step = (k, min, max, label) => h('div', { role: 'group', 'aria-label': label, style: { display: 'flex', alignItems: 'center', gap: 6 } },
+      h('button', { type: 'button', className: 'mt-hov', 'aria-label': `${this.t('less')} · ${label}`, disabled: R[k] <= min || undefined, onClick: () => this.bumpRule(k, -1, min, max), style: stepB(R[k] <= min) }, this.icon('minus', 13, 2.4)),
+      h('span', { className: 'mt-num', 'aria-live': 'polite', style: { minWidth: 58, textAlign: 'center', fontSize: 13.5, fontWeight: 600, color: C.ink } }, this.t('nDays', R[k])),
+      h('button', { type: 'button', className: 'mt-hov', 'aria-label': `${this.t('more')} · ${label}`, disabled: R[k] >= max || undefined, onClick: () => this.bumpRule(k, 1, min, max), style: stepB(R[k] >= max) }, this.icon('plus', 13, 2.4)));
+    const selSt = { height: 32, padding: '0 8px', borderRadius: 7, border: `1px solid ${C.line2}`, background: C.bg, color: C.ink, fontSize: 13, fontFamily: 'inherit' };
+    const rules = h('div', { key: 'rl', style: { display: 'flex', flexDirection: 'column', gap: 8 } },
+      h('div', { style: this.card({ overflow: 'hidden' }) },
+        rowEl(this.t('rOut'), step('outDays', 1, 7, this.t('rOut')), 0, this.t('rOutS')), rowEl(this.t('rBack'), step('backDays', 1, 14, this.t('rBack')), 1, this.t('rBackS')),
+        rowEl(this.t('rLead'), h('select', { value: R.leadMin, 'aria-label': this.t('rLead'), onChange: e => this.setRule('leadMin', +e.target.value), style: selSt }, [30, 45, 60, 90, 120].map(n => h('option', { key: n, value: n }, this.t('minBefore', n)))), 2, this.t('rLeadS'))),
+      h('div', { style: { display: 'flex', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between', gap: 8, padding: '0 2px', fontSize: 13 } },
+        h('span', { role: 'status' }, this.t('rulesNow', ATH.filter(a => a.av && !this.revAt(a)).length, ATH.filter(a => this.pendingDec(a)).length)),
+        changedR ? h('button', { type: 'button', className: 'mt-lnk', onClick: () => this.resetRules(keys), style: { padding: 0, border: 'none', background: 'transparent', fontSize: 13, fontWeight: 600, color: C.accInk, cursor: 'pointer' } }, this.t('resetDef')) : null));
+    // Plantilles d'adaptació: què vol dir Reduïda i Alternativa en cada tipus de sessió (les hereten totes les sessions d'aquell tipus).
+    const TY = ['fuerza', 'resis', 'agil', 'tec', 'larga'], ty = TY.includes(s.tplType) ? s.tplType : 'fuerza', ed = s.tplEd && s.tplEd.t === ty ? s.tplEd : null, custom = !!s.tpl[ty];
+    const split = v => String(v || '').split('\n').map(y => y.trim()).filter(Boolean), same = (p, q) => p.length === q.length && p.every((y, j) => y === q[j]);
+    const used = []; WEEK.forEach(w => ['A', 'B', 'AB'].forEach(g => { const x = w[g]; if (x && x.t === ty && !used.includes(L.SES[x.k])) used.push(L.SES[x.k]); }));
+    const tplRow = (v, i) => h('div', { key: v, style: { display: 'grid', gridTemplateColumns: '32px minmax(0,1fr)', gap: 12, alignItems: 'start', padding: '12px 16px', borderTop: i ? `1px solid ${C.line}` : 'none' } },
+      h('span', { style: { width: 32, height: 32, borderRadius: 7, background: C.accBg, color: C.accInk, display: 'inline-flex', alignItems: 'center', justifyContent: 'center' } }, this.icon(v, 15, 2.2)),
+      h('div', { style: { minWidth: 0 } }, h('div', { style: { fontSize: 13.5, fontWeight: 600 } }, L.VER[v]),
+        ed ? h('textarea', { rows: 3, value: ed[v], placeholder: this.t('linesPh'), 'aria-label': `${L.VER[v]} · ${this.t('linesPh')}`, onChange: e => { const val = e.target.value; this.setState(st => ({ tplEd: { ...st.tplEd, [v]: val } })); },
+          style: { display: 'block', width: '100%', boxSizing: 'border-box', marginTop: 6, padding: '8px 10px', borderRadius: 7, border: `1px solid ${C.line2}`, background: C.bg, color: C.ink, fontSize: 13, fontFamily: 'inherit', lineHeight: 1.45, resize: 'vertical' } })
+          : h('span', { style: { display: 'flex', flexWrap: 'wrap', gap: 6, marginTop: 7 } }, this.tplLines(ty, v).map((w, j) => h('span', { key: j, style: this.chip() }, w)))));
+    // Només es desa el que canvia: el que es deixa com estava continua sortint al deportista en segona persona.
+    const saveTpl = () => { const r = split(ed.R), a2 = split(ed.A), cR = r.length && !same(r, L.RED[ty] || []), cA = a2.length && !same(a2, L.ALT[ty] || []);
+      this.setTpl(ty, cR || cA ? { ...(cR ? { R: r } : {}), ...(cA ? { A: a2 } : {}) } : null); };
+    const tplSec = h('div', { key: 'tp', style: { display: 'flex', flexDirection: 'column', gap: 8 } },
+      h('div', { style: { display: 'flex', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between', gap: 8 } }, this.seg(TY.map(k => ({ k, t: L.SES_T[k] })), ty, k => this.setState({ tplType: k, tplEd: null }), this.t('tplType'), 'ty'),
+        custom ? h('span', { style: this.chip('acc') }, this.t('tplCustom')) : null),
+      h('div', { style: this.card({ overflow: 'hidden' }) }, tplRow('R', 0), tplRow('A', 1),
+        h('div', { style: { display: 'flex', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between', gap: 8, padding: '10px 16px', borderTop: `1px solid ${C.line}`, background: C.s2 } },
+          h('span', { style: { fontSize: 12.5, color: C.ink2, minWidth: 0 } }, used.length ? this.t('tplUsed', used.join(', ')) : ''),
+          h('span', { style: { display: 'flex', gap: 8 } }, ed ? [h('button', { key: 'c', type: 'button', className: 'mt-hov', onClick: () => this.setState({ tplEd: null }), style: this.btn('sec') }, this.t('tplCancel')),
+            h('button', { key: 's', type: 'button', className: 'mt-pri', onClick: saveTpl, style: this.btn('primary') }, this.t('save'))]
+            : [custom ? h('button', { key: 'o', type: 'button', className: 'mt-hov', onClick: () => this.setTpl(ty, null), style: this.btn('ghost') }, this.t('backOrig')) : null,
+              h('button', { key: 'e', type: 'button', className: 'mt-hov', onClick: () => this.setState({ tplEd: { t: ty, R: this.tplLines(ty, 'R').join('\n'), A: this.tplLines(ty, 'A').join('\n') } }), style: this.btn('sec') }, this.t('tplEdit'))]))));
+    // Notificacions: el resum per correu, l'avís de l'hora límit i les del navegador, amb la vista prèvia dels correus (al prototip no s'envien).
+    const sw = (on, label, set, dis) => h('button', { type: 'button', role: 'switch', 'aria-checked': !!on, 'aria-label': label, title: label, disabled: dis || undefined, onClick: () => set(!on),
+      style: { position: 'relative', width: 36, height: 20, flex: 'none', borderRadius: 10, border: 'none', padding: 0, background: on ? C.acc : C.line2, cursor: dis ? 'not-allowed' : 'pointer', opacity: dis ? .45 : 1, transition: 'background .15s' } },
+      h('span', { style: { position: 'absolute', top: 2, left: on ? 18 : 2, width: 16, height: 16, borderRadius: '50%', background: '#FFFFFF', transition: 'left .15s' } }));
+    const perm = s.perm;
+    const notif = h('div', { key: 'nt', style: { display: 'flex', flexDirection: 'column', gap: 8 } },
+      h('div', { style: this.card({ overflow: 'hidden' }) },
+        rowEl(this.t('nDigest'), h('span', { style: { display: 'flex', alignItems: 'center', gap: 10 } }, h('select', { value: R.digest, disabled: !R.digestOn || undefined, 'aria-label': `${this.t('nDigest')} · ${this.t('atTime')}`, onChange: e => this.setRule('digest', e.target.value), style: selSt },
+          ['6:30', '7:00', '7:30', '8:00', '8:30'].map(x => h('option', { key: x, value: x }, x))), sw(R.digestOn, this.t('nDigest'), v => this.setRule('digestOn', v))), 0, this.t('nDigestS')),
+        rowEl(this.t('nLate'), sw(R.notifyLate, this.t('nLate'), v => this.setRule('notifyLate', v)), 1, this.t('nLateS')),
+        rowEl(this.t('nWeb'), sw(R.webNotif && perm === 'granted', this.t('nWeb'), v => this.setWeb(v), perm === 'denied' || perm === 'none'), 2,
+          this.t(perm === 'granted' ? 'webOk' : perm === 'denied' ? 'webDenied' : perm === 'none' ? 'webNo' : 'webAsk'))),
+      h('div', { style: { display: 'flex', flexWrap: 'wrap', gap: 8 } }, h('button', { type: 'button', className: 'mt-hov', onClick: () => this.setState({ mail: 'digest' }), style: this.btn('sec') }, this.t('seeDigest', R.digest)),
+        h('button', { type: 'button', className: 'mt-hov', onClick: () => this.setState({ mail: 'late' }), style: this.btn('sec') }, this.t('seeLate'))));
     const head = h('header', { key: 'h' }, h('h1', { style: { margin: 0, fontSize: 22, fontWeight: 650, letterSpacing: '-.015em', lineHeight: 1.2 } }, this.t('settings')));
     return this.wrap([head, h('div', { key: 'b', style: { maxWidth: 820, display: 'flex', flexDirection: 'column', gap: 22 } },
-      group(this.t('appearance'), modeRow, 'ap'), group(this.t('style'), styles, 'sty', this.t('styleSub')), group(this.t('language'), langs, 'lg'), group(this.t('profile'), prof, 'pf'), group(this.t('aboutAI'), ai, 'ai'),
+      group(this.t('appearance'), modeRow, 'ap'), group(this.t('style'), styles, 'sty', this.t('styleSub')), group(this.t('language'), langs, 'lg'), group(this.t('profile'), prof, 'pf'),
+      group(this.t('rulesH'), rules, 'rl'), group(this.t('tplH'), tplSec, 'tp', this.t('tplSub')), group(this.t('notifH'), notif, 'nt'), group(this.t('aboutAI'), ai, 'ai'),
       h('div', { key: 'v', style: { fontSize: 12, color: C.ink3 } }, this.t('version')))]);
   }
 
@@ -1291,9 +1609,11 @@ class Component extends DCLogic {
     ...(on ? { border: `1px solid ${C.acc}`, background: C.accBg, color: C.accInk, fontWeight: 600 } : { border: `1px solid ${C.line2}`, background: C.s1, color: C.ink, fontWeight: 500 }) }; }
   linkBtn(label, onClick, key) { const C = this.C; return h('button', { key, type: 'button', className: 'mt-lnk', onClick, style: { padding: 0, border: 'none', background: 'transparent', fontSize: 13, fontWeight: 600, color: C.accInk, cursor: 'pointer', textAlign: 'left' } }, label); }
   // Estat de la sessió d'avui d'un esportista: per decidir (amb el suggeriment de la IA), ajustada o normal.
-  sesChip(a) { const L = this.L(), d = this.decOf(a), sug = this.sugOf(a);
+  sesChip(a) { const L = this.L(), d = this.decOf(a), sug = this.sugOf(a), au = d ? null : this.autoOf(a);
     if (this.pendingDec(a)) return h('span', { style: this.chip('warn') }, sug ? this.t('decPendAI', L.VER[sug]) : this.t('kDecide'));
+    if (this.noDecOf(a)) return h('span', { style: this.chip('miss') }, this.t('noDec'));
     if (d && d.v !== 'N') return h('span', { style: this.chip('acc') }, L.VER[d.v]);
+    if (au && au !== 'N') return h('span', { style: this.chip('acc') }, this.t('autoV', L.VER[au]));
     return h('span', { style: { fontSize: 13, fontWeight: 500 } }, L.VER.N); }
   // Botó cap a TrainingPeaks o l'Excel: al prototip no hi ha enllaç (falta decidir com es connecta), així que surt desactivat i diu per què.
   tpBtn(label, icon, key, extra) { return h('span', { key, 'aria-disabled': 'true', title: this.t('tpPending'), style: this.btn('sec', { opacity: .55, cursor: 'not-allowed', ...extra }) }, icon ? this.icon(icon, 13, 2.2) : null, label, this.icon('ext', 13, 2.2)); }
@@ -1302,7 +1622,7 @@ class Component extends DCLogic {
   // La llista sencera, compacta: cercador, filtres i ordre per atenció o per nom (mai per valors). Amb «Tots», separada per grups.
   pageDep() {
     const C = this.C, s = this.state, L = this.L(), cw = this.cw(), q = this.norm(s.depQ.trim()), f = s.depF, sort = s.depSort, inG = this.list();
-    const test = { all: () => true, av: a => !!a.av, dec: a => this.pendingDec(a), salut: a => !!a.av && a.av.t === 'salut', nd: a => a.d[6] === 'N' };
+    const test = { all: () => true, av: a => !!a.av && !this.revAt(a), dec: a => this.pendingDec(a), salut: a => !!a.av && a.av.t === 'salut', nd: a => a.d[6] === 'N' };
     const list = inG.filter(test[f] || test.all).filter(a => !q || this.norm(a.n).includes(q));
     const SEV = { R: 0, P: 1, M: 2, N: 3, C: 4, O: 5 };
     const order = (x, y) => (sort === 'name' ? x.n.localeCompare(y.n) : (this.rank(x) - this.rank(y)) || (SEV[x.d[6]] - SEV[y.d[6]]) || x.n.localeCompare(y.n));
@@ -1353,8 +1673,8 @@ class Component extends DCLogic {
   pageAv() {
     const C = this.C, s = this.state, L = this.L(), cw = this.cw(), tab = s.avTab, ty = s.avTy, inG = this.list(), inGc = c => inG.some(a => a.c === c);
     const pend = this.ordered(inG.filter(a => a.av && !this.revAt(a))).map(a => { const tx = this.avText(a); return { k: a.c, a, c: a.c, n: a.n, g: a.g, t: a.av.t, why: tx.why, when: tx.since, sug: this.sugOf(a), nou: !!a.av.nou, pending: true }; });
-    const now = inG.filter(a => a.av && this.revAt(a)).map(a => { const d = this.decOf(a);
-      return { k: 'r' + a.c, a, c: a.c, n: a.n, g: a.g, t: a.av.t, why: this.avText(a).why, when: `${this.t('todayW')} · ${(d && d.at) || this.revAt(a)}`, sug: d ? d.sug : null, dec: d ? d.v : 'visto', ok: d && d.sug ? d.v === d.sug : null }; });
+    const now = inG.filter(a => a.av && this.revAt(a)).map(a => { const d = this.decOf(a), au = d ? null : this.autoOf(a);
+      return { k: 'r' + a.c, a, c: a.c, n: a.n, g: a.g, t: a.av.t, why: this.avText(a).why, when: `${this.t('todayW')} · ${(d && d.at) || this.revAt(a)}`, sug: d ? d.sug : null, dec: d ? d.v : au || 'visto', auto: !!au, ok: d && d.sug ? d.v === d.sug : null }; });
     const hist = HIST.filter(x => inGc(x.c)).map((x, i) => { const a = this.ath(x.c);
       return { k: 'h' + i, c: x.c, n: a.n, g: a.g, t: x.t, why: this.histWhy(x), when: `${this.cap(this.dLong(x.day))} · ${x.at}`, sug: x.sug || null, dec: x.dec, ok: x.sug ? x.dec === x.sug : null }; });
     const done = now.concat(hist), base = tab === 'pend' ? pend : tab === 'done' ? done : pend.concat(done), rows = base.filter(r => ty === 'all' || r.t === ty);
@@ -1367,7 +1687,7 @@ class Component extends DCLogic {
       const act = r.pending ? h('span', { style: { display: 'flex', alignItems: 'center', gap: 6 } },
           h('button', { type: 'button', className: 'mt-hov', title: this.t('markRev'), 'aria-label': this.t('markRevOf', r.n), onClick: () => this.markRev(r.a), style: icoBtn }, this.icon('check', 13, 2.5)),
           h('button', { type: 'button', className: 'mt-pri', onClick: () => this.openAth(r.c), style: this.btn('primary', { height: 28, padding: '0 10px', fontSize: 12.5 }) }, this.t(r.t === 'bien' ? 'confirm' : 'review')))
-        : h('span', { style: { minWidth: 0, fontSize: 12.5, lineHeight: 1.35 } }, h('span', { style: { fontWeight: 600 } }, r.dec === 'cierre' ? this.t('closedOk') : r.dec === 'visto' ? this.t('reviewedW') : L.VER[r.dec]),
+        : h('span', { style: { minWidth: 0, fontSize: 12.5, lineHeight: 1.35 } }, h('span', { style: { fontWeight: 600 } }, r.dec === 'cierre' ? this.t('closedOk') : r.dec === 'visto' ? this.t('reviewedW') : r.auto ? this.t('autoV', L.VER[r.dec]) : L.VER[r.dec]),
             r.ok != null ? h('span', { style: { display: 'block', color: C.ink2 } }, this.t(r.ok ? 'aiAccS' : 'aiChgS')) : null);
       return h('div', { key: r.k, style: { ...grid, padding: '10px 16px', borderTop: i ? `1px solid ${C.line}` : 'none' } },
         h('span', { style: lk.box }, this.icon(lk.icon, 14, 2.3)),
@@ -1395,7 +1715,7 @@ class Component extends DCLogic {
     const markSt = { display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: 15, height: 15, borderRadius: 3, boxSizing: 'border-box', flex: 'none' };
     const cell = (a, k) => { const i = WEEK0 + k, today = i === TODAY;
       if (i > TODAY) return h('span', { key: k, title: `${this.cap(this.dLong(i))} · ${this.t('notYet')}`, style: { display: 'flex', alignItems: 'center', justifyContent: 'center', height: 24 } }, h('span', { style: { width: 13, height: 13, borderRadius: 3, background: this.ov(.05) } }));
-      const j = i - 21, c = a.d[j], p = a.p ? a.p[j] : null, d = this.decOf(a), v = today ? (d ? d.v : this.pendingDec(a) ? 'pend' : 'N') : (a.sw ? a.sw[j] : 'N');
+      const j = i - 21, c = a.d[j], p = a.p ? a.p[j] : null, v = today ? (this.pendingDec(a) ? 'pend' : this.ajOf(a) || 'N') : (a.sw ? a.sw[j] : 'N');
       const mark = v === 'pend' ? h('span', { style: { ...markSt, background: wk.chip, border: `1px solid ${wk.chipBd}`, color: C.dark ? warn : C.ink, fontSize: 9, fontWeight: 700 } }, '?')
         : v !== 'N' ? h('span', { style: { ...markSt, background: C.accBg, border: `1px solid ${C.accLine}`, color: C.accInk } }, this.icon(v, 9, 2.8)) : h('span', { style: markSt });
       return h('span', { key: k, title: this.t('cellTip', this.cap(this.dLong(i)), L.STW[c], v === 'pend' ? this.t('pendLow') : L.VERL[v]), style: { display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 4, height: 24, background: today ? todayBg : 'transparent' } },
@@ -1411,7 +1731,7 @@ class Component extends DCLogic {
           [0, 1, 2, 3, 4, 5, 6].map(k => cell(a, k)))))));
     // La setmana fins avui (dl.–dj.).
     const days = list.length * 4, ok = list.reduce((t, a) => t + a.d.slice(3).split('').filter(c => c === 'O').length, 0), pct = Math.round(ok / Math.max(1, days) * 100);
-    const adapted = list.reduce((t, a) => t + (a.sw ? a.sw.slice(3).filter(v => v !== 'N').length : 0), 0) + list.filter(a => { const d = this.decOf(a); return d && d.v !== 'N'; }).length;
+    const adapted = list.reduce((t, a) => t + (a.sw ? a.sw.slice(3).filter(v => v !== 'N').length : 0), 0) + list.filter(a => { const v = this.ajOf(a); return v && v !== 'N'; }).length;
     const pendN = list.filter(a => this.pendingDec(a)).length, avN = list.filter(a => a.av && !this.revAt(a)).length;
     const sofar = h('section', { key: 'sf', style: this.card({ padding: '14px 16px' }) }, this.h2(this.t('weekSoFar')),
       h('div', { style: { marginTop: 10, display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', fontSize: 13 } }, h('span', null, this.t('daysOpt')), h('span', { className: 'mt-num', style: { fontWeight: 650, color: this.tone(.92) } }, this.t('ofPct', ok, days, pct))),
@@ -1441,7 +1761,7 @@ class Component extends DCLogic {
   // A la dreta, la sessió triada: l'Excel amb les instruccions i els vídeos, el material i les adaptacions.
   sesStats(wi, g) { const i = WEEK0 + wi, ath = ATH.filter(a => g === 'AB' || a.g === g);
     if (i < TODAY) { const adj = ath.filter(a => a.sw && a.sw[i - 21] && a.sw[i - 21] !== 'N'); return { past: true, ath, adj, pend: [] }; }
-    if (i === TODAY) return { today: true, ath, pend: ath.filter(a => this.pendingDec(a)), adj: ath.filter(a => { const d = this.decOf(a); return d && d.v !== 'N'; }) };
+    if (i === TODAY) return { today: true, ath, pend: ath.filter(a => this.pendingDec(a)), nodec: ath.filter(a => this.noDecOf(a)), adj: ath.filter(a => { const v = this.ajOf(a); return v && v !== 'N'; }) };
     return { future: true, ath, adj: [], pend: [] }; }
   xlsCard(x, big) {
     const C = this.C, L = this.L();
@@ -1457,10 +1777,12 @@ class Component extends DCLogic {
     let sel = s.sesSel || `3${lanes[0]}`; if (!/AB$/.test(sel) && !lanes.includes(sel.slice(1))) sel = sel[0] + lanes[0];
     const swi = +sel[0], sg = WEEK[swi].AB ? 'AB' : sel.slice(1), sx = WEEK[swi].AB || WEEK[swi][sg];
     const colW = this.cw() < 900 ? 56 : 76, calCols = `${colW}px repeat(7, minmax(0,1fr))`, todayBg = C.dark ? this.alpha(C.acc, .07) : C.s2;
-    const small = kind => ({ ...this.chip(kind, true) });
+    // Si la targeta és estreta, l'etiqueta passa a dues línies (per l'espai) en lloc de sortir-se'n.
+    const small = kind => ({ ...this.chip(kind, true), height: 'auto', minHeight: 18, padding: '2px 5px', lineHeight: 1.2, whiteSpace: 'normal', flex: '0 1 auto', minWidth: 0, maxWidth: '100%' });
     const card = (wi, g) => { const w = WEEK[wi], x = w.AB || w[g], key = `${wi}${w.AB ? 'AB' : g}`, on = sel === key || (w.AB && +sel[0] === wi), st = this.sesStats(wi, w.AB ? 'AB' : g);
       const chips = [];
-      if (x.t !== 'desc') { if (st.pend.length) chips.push(h('span', { key: 'p', style: small('warn') }, this.t('nToDecide', st.pend.length))); if (st.adj.length) chips.push(h('span', { key: 'a', style: small('acc') }, this.t('nAdjusted', st.adj.length))); if (st.past) chips.push(h('span', { key: 'h', style: small() }, this.t('sesDone'))); }
+      if (x.t !== 'desc') { if (st.pend.length) chips.push(h('span', { key: 'p', style: small('warn') }, this.t('nToDecide', st.pend.length))); if (st.nodec && st.nodec.length) chips.push(h('span', { key: 'n', style: small('miss') }, this.t('nNoDec', st.nodec.length)));
+        if (st.adj.length) chips.push(h('span', { key: 'a', style: small('acc') }, this.t('nAdjusted', st.adj.length))); if (st.past) chips.push(h('span', { key: 'h', style: small() }, this.t('sesDone'))); }
       if (x.t === 'desc') chips.push(h('span', { key: 'f', style: small() }, this.t('formChip')));
       if (x.xls === false) chips.push(h('span', { key: 'x', style: small('miss') }, this.t('noXls')));
       return h('button', { key, type: 'button', 'aria-pressed': on, onClick: () => this.setState({ sesSel: key }),
@@ -1481,7 +1803,7 @@ class Component extends DCLogic {
     const label = t => h('div', { style: { fontSize: 12, fontWeight: 600, color: C.ink2 } }, t);
     const adRows = st.today ? st.pend.concat(st.adj) : st.adj;
     const adList = sx.t === 'desc' ? h('div', { style: { marginTop: 6, fontSize: 13 } }, this.t('restDay')) : st.future ? h('div', { style: { marginTop: 6, fontSize: 13 } }, this.t('futureSes'))
-      : adRows.length ? adRows.map((a, r) => { const pend = st.today && this.pendingDec(a), d = st.today ? this.decOf(a) : { v: a.sw[i - 21] }, sug = this.sugOf(a);
+      : adRows.length ? adRows.map((a, r) => { const pend = st.today && this.pendingDec(a), d = { v: st.today ? this.ajOf(a) : a.sw[i - 21] }, sug = this.sugOf(a);
           return h('div', { key: a.c, style: { display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8, padding: '6px 0', borderTop: r ? `1px solid ${C.line}` : 'none' } },
             h('button', { type: 'button', className: 'mt-lnk', onClick: () => this.openAth(a.c), style: { display: 'inline-flex', alignItems: 'center', gap: 7, minWidth: 0, padding: 0, border: 'none', background: 'transparent', fontSize: 13, fontWeight: 600, color: C.ink, cursor: 'pointer' } },
               this.dotEl(a.d[Math.min(6, i - 21)], a.p ? a.p[Math.min(6, i - 21)] : null, 8), a.n),
@@ -1521,11 +1843,11 @@ class Component extends DCLogic {
       this.tpBtn(this.t('seeInTP'), null, 'tp'));
     if (x.t === 'desc') return this.wrap([crumbs, header, h('section', { key: 'r', style: this.card({ padding: '14px 16px', fontSize: 13.5 }) }, this.t('restDay'))]);
     // Columna esquerra: l'Excel i com s'adapta.
-    const sel = a => (s.sel[a.c] !== undefined ? s.sel[a.c] : (this.decOf(a) ? this.decOf(a).v : null));
+    const sel = a => (s.sel[a.c] !== undefined ? s.sel[a.c] : (this.decOf(a) ? this.decOf(a).v : this.autoOf(a)));
     const verOf = a => (st.today ? (sel(a) || (this.pendingDec(a) ? null : 'N')) : st.past ? (a.sw ? a.sw[i - 21] : 'N') : null);
     const count = k => (st.future ? 0 : st.ath.filter(a => verOf(a) === k).length);
     const item = w => ({ w, st: this.chip() }), plain = w => ({ w, st: { fontSize: 13, lineHeight: '22px' } });
-    const AJ = { N: [plain(L.VERS.N)], R: (L.RED[x.t] || []).map(item), A: (L.ALT[x.t] || []).map(item), D: [plain(L.VERS.D)] };
+    const AJ = { N: [plain(L.VERS.N)], R: this.tplLines(x.t, 'R').map(item), A: this.tplLines(x.t, 'A').map(item), D: [plain(L.VERS.D)] };
     const left = h('div', { key: 'l', style: { ...this.fx('1 1 0', nar), minWidth: 0, display: 'flex', flexDirection: 'column', gap: 14 } },
       h('section', { style: this.card({ overflow: 'hidden' }) }, this.headRow(this.h2(this.t('instrVideos'))), this.xlsCard(x, true),
         L.MAT[x.t] ? h('div', { style: { display: 'flex', alignItems: 'flex-start', gap: 8, padding: '12px 16px', borderTop: `1px solid ${C.line}`, fontSize: 13 } }, h('span', { style: { fontWeight: 600, flex: 'none' } }, this.t('material')), h('span', null, L.MAT[x.t])) : null),
@@ -1539,9 +1861,9 @@ class Component extends DCLogic {
     // Columna dreta: les adaptacions de cada esportista.
     let right;
     if (st.today) {
-      const decide = st.ath.filter(a => !!a.sv), normal = st.ath.filter(a => !a.sv);
-      const changed = decide.filter(a => s.sel[a.c] !== undefined && s.sel[a.c] !== (this.decOf(a) ? this.decOf(a).v : null) && s.sel[a.c] != null);
-      const left2 = decide.filter(a => !sel(a)).length;
+      const decide = st.ath.filter(a => this.decOf(a) || ['pend', 'auto', 'watch'].includes(a.sv.kind)), normal = st.ath.filter(a => !decide.includes(a));
+      const changed = decide.filter(a => s.sel[a.c] !== undefined && s.sel[a.c] !== (this.decOf(a) ? this.decOf(a).v : this.autoOf(a)) && s.sel[a.c] != null && !a.sv.locked);
+      const left2 = st.ath.filter(a => this.pendingDec(a)).length;
       const optSt = (on, isS) => ({ height: 28, padding: '0 4px', borderRadius: 6, fontSize: 12, cursor: 'pointer', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', boxSizing: 'border-box',
         ...(on ? { border: `1px solid ${C.acc}`, background: C.acc, color: '#FFFFFF', fontWeight: 650 } : { border: `1px ${isS ? 'dashed' : 'solid'} ${isS ? C.acc : C.line2}`, background: C.s1, color: isS ? C.accInk : C.ink, fontWeight: isS ? 600 : 500 }) });
       right = h('section', { key: 'r', style: this.card({ ...(nar ? {} : { flex: '0 0 420px', width: 420 }), overflow: 'hidden' }) },
@@ -1553,10 +1875,12 @@ class Component extends DCLogic {
               h('span', { style: { fontSize: 12.5, fontWeight: 600, color: this.stCol(t, pt), whiteSpace: 'nowrap' } }, L.STW[t])),
             h('div', { style: { marginTop: 3, fontSize: 12.5 } }, why),
             h('div', { style: { marginTop: 8, display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8, padding: '7px 8px 7px 10px', borderRadius: 7, background: C.s2, border: `1px solid ${C.line}` } },
-              sug ? h('span', { title: `${this.whyOf(a)} ${this.t('basedOn', this.t('sugBasis'))}`, style: { minWidth: 0, fontSize: 12.5, cursor: 'help' } }, this.t('aiSuggests'), ' ', h('span', { style: { fontWeight: 650 } }, L.VER[sug])) : h('span', { style: { minWidth: 0, fontSize: 12.5 } }, this.whyOf(a)),
-              sug ? h('button', { type: 'button', className: v === sug ? 'mt-hov' : 'mt-pri', onClick: () => this.setState(st2 => ({ sel: { ...st2.sel, [a.c]: sug } })), style: this.btn(v === sug ? 'sec' : 'primary', { height: 26, padding: '0 10px', fontSize: 12 }) }, this.t(v === sug ? 'accepted' : 'accept')) : null),
-            h('div', { role: 'radiogroup', 'aria-label': `${this.t('sesTodayT')} · ${a.n}`, style: { marginTop: 8, display: 'grid', gridTemplateColumns: 'repeat(4, minmax(0,1fr))', gap: 4 } },
-              ['N', 'R', 'A', 'D'].map(k => h('button', { key: k, type: 'button', role: 'radio', 'aria-checked': v === k, onClick: () => this.setState(st2 => ({ sel: { ...st2.sel, [a.c]: k } })), style: optSt(v === k, k === sug) }, L.VER[k])))); }),
+              !this.decOf(a) && this.autoOf(a) ? h('span', { style: { minWidth: 0, fontSize: 12.5 } }, this.t('autoIs'), ' ', h('span', { style: { fontWeight: 650 } }, L.VER[this.autoOf(a)]))
+                : sug ? h('span', { title: `${this.whyOf(a)} ${this.t('basedOn', this.t('sugBasis'))}`, style: { minWidth: 0, fontSize: 12.5, cursor: 'help' } }, this.t('aiSuggests'), ' ', h('span', { style: { fontWeight: 650 } }, L.VER[sug])) : h('span', { style: { minWidth: 0, fontSize: 12.5 } }, this.whyOf(a)),
+              sug && !this.autoOf(a) && !a.sv.locked ? h('button', { type: 'button', className: v === sug ? 'mt-hov' : 'mt-pri', onClick: () => this.setState(st2 => ({ sel: { ...st2.sel, [a.c]: sug } })), style: this.btn(v === sug ? 'sec' : 'primary', { height: 26, padding: '0 10px', fontSize: 12 }) }, this.t(v === sug ? 'accepted' : 'accept')) : null),
+            a.sv.locked ? h('div', { style: { marginTop: 8, fontSize: 12.5, fontWeight: 600 } }, this.t('sesStarted', this.ajOf(a) ? L.VERL[this.ajOf(a)] : this.t('noDec').toLowerCase()))
+              : h('div', { role: 'radiogroup', 'aria-label': `${this.t('sesTodayT')} · ${a.n}`, style: { marginTop: 8, display: 'grid', gridTemplateColumns: 'repeat(4, minmax(0,1fr))', gap: 4 } },
+                ['N', 'R', 'A', 'D'].map(k => h('button', { key: k, type: 'button', role: 'radio', 'aria-checked': v === k, onClick: () => this.setState(st2 => ({ sel: { ...st2.sel, [a.c]: k } })), style: optSt(v === k, k === sug) }, L.VER[k])))); }),
         h('div', { style: { padding: '10px 16px 12px', borderTop: `1px solid ${C.line}`, background: C.s2 } }, h('div', { style: { fontSize: 12.5, fontWeight: 600 } }, this.t('normalGroup', normal.length)), h('div', { style: { marginTop: 4, fontSize: 12.5, lineHeight: 1.55 } }, normal.map(a => a.n).join(', '))),
         h('div', { style: { display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10, padding: '12px 16px', borderTop: `1px solid ${C.line}` } },
           h('span', { style: { fontSize: 12.5, lineHeight: 1.4 } }, this.t('seesAll')),
@@ -1575,9 +1899,9 @@ class Component extends DCLogic {
   // Desa diversos ajustos alhora (pàgina de la sessió): cadascun amb la seva hora, el suggeriment de la IA i l'avís revisat.
   saveMany(items) {
     if (!items.length) return;
-    const now = new Date(), at = `${now.getHours()}:${String(now.getMinutes()).padStart(2, '0')}`;
+    const at = minHm(this.now());
     this.setState(st => { const dec = { ...st.dec }, rev = { ...st.rev }, sel = { ...st.sel };
-      items.forEach(({ a, v }) => { dec[a.c] = { v, note: (st.dec[a.c] && st.dec[a.c].note) || '', at, sug: this.sugOf(a) }; if (a.av && !rev[a.c]) rev[a.c] = at; delete sel[a.c]; });
+      items.forEach(({ a, v }) => { const au = this.autoOf(a); dec[a.c] = { v, note: (st.dec[a.c] && st.dec[a.c].note) || '', at, sug: this.sugOf(a), src: 'prep', was: a.sv ? a.sv.kind : null, ...(au ? { auto: au } : {}) }; if (a.av && !rev[a.c]) rev[a.c] = at; delete sel[a.c]; });
       try { localStorage.setItem('mt-prep-aj', JSON.stringify(dec)); localStorage.setItem('mt-prep-rev', JSON.stringify(rev)); } catch (e) {}
       return { dec, rev, sel }; });
   }
@@ -1713,7 +2037,7 @@ class Component extends DCLogic {
       return { codigo: a.c, grupo: a.g, estados_7_dias: a.d, hoy: a.q ? { fc_reposo: rel('rhr', a.q[0]), hrv: rel('hrv', a.q[1]), sueno: rel('son', a.q[2]) } : (a.calc ? 'calculando su franja' : 'sin datos'),
         problema: a.av && a.av.t === 'salut' ? (a.av.pb === 'mal' ? 'enfermedad' : 'lesión') : a.av && a.av.t === 'torna' ? 'vuelve de una lesión' : null,
         formulario_s38: f[1] == null ? 'sin normal todavía' : { rendimiento: f[0] - f[1], fatiga: f[2] - f[3], descanso: f[4] - f[5] },
-        sesion_hoy: d ? d.v : this.pendingDec(a) ? 'por decidir' : 'N', sugerencia_ia: this.sugOf(a) }; });
+        sesion_hoy: d ? d.v : this.pendingDec(a) ? 'por decidir' : this.autoOf(a) ? `automático ${this.autoOf(a)}` : 'N', sugerencia_ia: this.sugOf(a) }; });
     return `Eres el asistente del panel de un preparador físico de esquí alpino (deportistas de 14 a 20 años). Responde en ${lang} a la pregunta sobre el equipo usando solo estos datos.
 Reglas: sugiere, no ordenes; no diagnostiques ni atribuyas causas; no hables de salud mental, de lo que cada deportista dijo al entrenador ni de quién ha respondido los formularios; compara a cada deportista solo con su propia franja; nombra a los deportistas solo por su código entre corchetes, por ejemplo [MT-07].
 Hoy es el jueves 24 de septiembre. estados_7_dias va de viernes a jueves: O óptimo, M moderado, R recuperación, P precaución (lesión o enfermedad), N sin datos, C calculando su franja. formulario_s38 = diferencia con su normal (fatiga: positivo = más fatiga). sesion_hoy: N normal, R reducida, A alternativa, D descanso.
@@ -1778,7 +2102,8 @@ Responde solo con JSON: {"texto": "2 o 3 frases", "codigos": ["MT-07"]}`;
   // ── Prototip (temporal; només en castellà) ───────────────────────────
   // Botó flotant (tecla E per amagar-lo): obrir l'app del deportista i esborrar el que s'ha desat, per tornar a començar la demostració.
   setProtoHidden(v) { try { localStorage.setItem('mt-prep-proto-hidden', v ? '1' : '0'); } catch (e) {} this.setState({ pHidden: v, pOpen: false }); }
-  resetDemo() { try { localStorage.removeItem('mt-prep-aj'); localStorage.removeItem('mt-prep-rev'); } catch (e) {} this.setState({ dec: {}, rev: {}, sel: {}, note: {}, pOpen: false, chatLog: [] }); }
+  resetDemo() { try { ['mt-prep-aj', 'mt-prep-rev', 'mt-prep-rules', 'mt-prep-tpl'].forEach(k => localStorage.removeItem(k)); } catch (e) {}
+    this.setState({ dec: {}, rev: {}, sel: {}, note: {}, rules: {}, tpl: {}, tplEd: null, lateSeen: {}, pOpen: false, chatLog: [] }); }
   protoEl() {
     const C = this.C, s = this.state;
     if (s.pHidden) return h('div', { key: 'ph', title: 'Mostrar el botón del prototipo (tecla E)', onClick: () => this.setProtoHidden(false), style: { position: 'fixed', left: this.sideW(), bottom: 0, width: 36, height: 36, zIndex: 60, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' } },
@@ -1786,9 +2111,13 @@ Responde solo con JSON: {"texto": "2 o 3 frases", "codigos": ["MT-07"]}`;
     const it = { display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10, width: '100%', boxSizing: 'border-box', padding: '8px 10px', border: 'none', borderRadius: 8, background: 'transparent', cursor: 'pointer', fontSize: 12.5, color: C.ink, textDecoration: 'none', textAlign: 'left' };
     const panel = s.pOpen ? h('div', { key: 'pp', style: { position: 'absolute', right: 0, bottom: 50, width: 270, padding: 6, boxSizing: 'border-box', borderRadius: 12, background: C.s1, border: `1px solid ${C.line2}`, boxShadow: `0 18px 50px ${C.pop}` } },
       h('div', { style: { padding: '6px 10px 8px', fontSize: 12, color: C.ink2 } }, 'Prototipo'),
-      h('a', { className: 'mt-hov', href: './Max%20Tracking%20-%20Preparador%20nuevo.dc.html', target: '_blank', rel: 'noopener', style: it }, h('span', null, 'Abrir el panel nuevo (en construcción)'), h('span', null, '↗')),
+      // Hora simulada: la hora límit, les sessions que comencen i l'orientació que veu el deportista si no es decideix a temps.
+      h('div', { style: { padding: '6px 10px 8px' } }, h('div', { style: { fontSize: 12, color: C.ink2, marginBottom: 6 } }, `Hora simulada: ${minHm(this.now())}`),
+        h('div', { style: { display: 'flex', flexWrap: 'wrap', gap: 4 } }, ['8:30', '10:30', '15:05', '16:05'].map(t => { const on = minHm(this.now()) === t;
+          return h('button', { key: t, type: 'button', className: 'mt-hov', onClick: () => this.setState({ clock: { base: hmMin(t), t0: Date.now() }, lateSeen: {} }),
+            style: { height: 26, padding: '0 9px', borderRadius: 6, border: `1px solid ${on ? C.acc : C.line2}`, background: on ? C.accBg : C.s1, color: on ? C.accInk : C.ink, fontSize: 12, fontWeight: 600, cursor: 'pointer' } }, t); }))),
       h('a', { className: 'mt-hov', href: './Max%20Tracking%20-%20Ordenador.dc.html', target: '_blank', rel: 'noopener', style: it }, h('span', null, 'Abrir la app del deportista'), h('span', null, '↗')),
-      h('button', { type: 'button', className: 'mt-hov', onClick: () => this.resetDemo(), style: it }, h('span', null, 'Borrar ajustes y avisos revisados'), h('span', null, '')),
+      h('button', { type: 'button', className: 'mt-hov', onClick: () => this.resetDemo(), style: it }, h('span', null, 'Borrar ajustes, avisos revisados, reglas y plantillas'), h('span', null, '')),
       h('button', { type: 'button', className: 'mt-hov', onClick: () => { this.resetExp(); this.setState({ pOpen: false }); }, style: it }, h('span', null, 'Reiniciar el experimento'), h('span', null, '')),
       h('button', { type: 'button', className: 'mt-hov', onClick: () => this.setProtoHidden(true), style: it }, h('span', null, 'Ocultar botón'), h('span', { style: { fontSize: 10, padding: '2px 5px', border: `1px solid ${C.line2}`, borderRadius: 4, color: C.ink2 } }, 'E'))) : null;
     const btn = h('button', { key: 'pb', type: 'button', title: 'Prototipo · E para ocultar', 'aria-expanded': !!s.pOpen, onClick: () => this.setState({ pOpen: !s.pOpen }),
@@ -1798,12 +2127,13 @@ Responde solo con JSON: {"texto": "2 o 3 frases", "codigos": ["MT-07"]}`;
   }
 
   renderVals() {
+    this.derive();
     const C = this.C;
     return {
       rootSt: { display: 'flex', height: '100vh', overflow: 'hidden', background: C.bg, color: C.ink, fontFamily: "ui-sans-serif, -apple-system, system-ui, 'Segoe UI', Helvetica, Arial, sans-serif", fontSize: 13.5, colorScheme: this.mode(),
         transition: 'background .3s, color .3s', '--mt-hov': C.hov, '--mt-sb': this.ov(.14), '--mt-bg': C.bg, '--mt-acc': C.acc, '--mt-ph': C.ink3 },
       side: this.sideEl(), colSt: { flex: '1 1 0', minWidth: 0, display: 'flex', flexDirection: 'column', height: '100vh' }, top: this.topEl(),
-      mainRef: this.mainRef, mainSt: { flex: 1, minHeight: 0, overflowY: 'auto', position: 'relative' }, page: this.pageEl(), extra: [...[].concat(this.protoEl()), ...this.chatEls()],
+      mainRef: this.mainRef, mainSt: { flex: 1, minHeight: 0, overflowY: 'auto', position: 'relative' }, page: this.pageEl(), extra: [...[].concat(this.protoEl()), ...this.chatEls(), this.notesEl(), this.mailEl()].filter(Boolean),
     };
   }
 }

@@ -2,21 +2,60 @@
 <html>
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Max Tracking · Móvil</title>
 <script src="./support.js"></script>
 </head>
 <body>
 <x-dc>
 <helmet>
-<style>html,body{margin:0;background:#141517}</style>
+<style>html,body{margin:0;background:#000000;overflow:hidden;overscroll-behavior:none}</style>
 </helmet>
-<dc-import name="Max Tracking" device="mobile" athlete-name="{{ athleteName }}" ai-live="{{ aiLive }}"></dc-import>
+<sc-if value="{{ direct }}"><dc-import name="Max Tracking Escritorio" athlete-name="{{ athleteName }}" ai-live="{{ aiLive }}" form-daily="{{ formDaily }}" form-weekly="{{ formWeekly }}" form-monthly="{{ formMonthly }}" session-excel="{{ sessionExcel }}" session-tp="{{ sessionTP }}"></dc-import></sc-if>
+<sc-if value="{{ framed }}"><div style="{{ stageSt }}"><div style="{{ boxSt }}"><div style="{{ scaleSt }}"><x-import component-from-global-scope="IOSDevice" from="./ios-frame.jsx" dark="{{ dark }}" hint-size="402px,874px"><iframe src="{{ src }}" title="Max Tracking" style="display:block;width:402px;height:874px;border:0"></iframe></x-import></div></div></div></sc-if>
 </x-dc>
-<script type="text/x-dc" data-dc-script data-props="{&quot;aiLive&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;IA&quot;},&quot;athleteName&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;Martí&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Deportista&quot;}}">
-// Pàgina mòbil: tota la lògica és a «Max Tracking.dc.html».
+<script type="text/x-dc" data-dc-script data-props="{&quot;aiLive&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;IA&quot;},&quot;athleteName&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;Martí&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Deportista&quot;},&quot;formDaily&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Formularis&quot;},&quot;formWeekly&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Formularis&quot;},&quot;formMonthly&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Formularis&quot;},&quot;sessionExcel&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Preparador&quot;},&quot;sessionTP&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Preparador&quot;}}">
+// Pàgina mòbil (des del 09-10-2026): el motor nou, «Max Tracking Escritorio.dc.html», que es posa sol en la versió de telèfon.
+// · En un mòbil, l'app a pantalla completa, sense marc (la mateixa regla que el motor: menys de 700 px d'amplada, o un mòbil girat).
+// · En un ordinador, el marc d'iPhone a mida real (més petit si no hi cap) amb l'app a dins: un iframe d'aquesta mateixa pàgina amb «?app».
+//   Dins el marc, la pàgina dona a l'app les zones segures d'un iPhone (la càmera de dalt i la barra d'inici de baix), perquè hi deixi lloc com al mòbil.
+// · La barra d'estat del marc (hora, bateria) va en blanc o en negre segons el mode de l'app («mt-desk-mode-v2», el mateix navegador).
+// formDaily / formWeekly / formMonthly i sessionExcel / sessionTP: els mateixos enllaços que a «Max Tracking - Ordenador».
 class Component extends DCLogic {
-  renderVals() { return {}; }
+  constructor(props) {
+    super(props);
+    const app = /[?&]app(=|&|$)/.test(location.search);
+    if (app) try { const r = document.documentElement.style; r.setProperty('--mt-sat', '62px'); r.setProperty('--mt-sab', '34px'); } catch (e) {}
+    let coarse = false; try { coarse = !!(window.matchMedia && window.matchMedia('(pointer: coarse)').matches); } catch (e) {}
+    this.coarse = coarse;
+    this.state = { app, vw: window.innerWidth, vh: window.innerHeight, dark: this.isDark() };
+  }
+  isDark() {
+    let m = 'auto'; try { m = localStorage.getItem('mt-desk-mode-v2') || 'auto'; } catch (e) {}
+    if (m === 'dark' || m === 'light') return m === 'dark';
+    try { return !window.matchMedia || window.matchMedia('(prefers-color-scheme: dark)').matches; } catch (e) { return true; }
+  }
+  componentDidMount() {
+    if (this.state.app) return;
+    this.onResize = () => this.setState({ vw: window.innerWidth, vh: window.innerHeight });
+    this.onMode = () => this.setState({ dark: this.isDark() });
+    window.addEventListener('resize', this.onResize); window.addEventListener('storage', this.onMode);
+    try { this.mq = window.matchMedia('(prefers-color-scheme: dark)'); this.mq.addEventListener('change', this.onMode); } catch (e) {}
+  }
+  componentWillUnmount() {
+    if (this.onResize) window.removeEventListener('resize', this.onResize);
+    if (this.onMode) window.removeEventListener('storage', this.onMode);
+    try { if (this.mq) this.mq.removeEventListener('change', this.onMode); } catch (e) {}
+  }
+  renderVals() {
+    const s = this.state;
+    if (s.app || s.vw < 700 || (s.vh < 500 && this.coarse)) return { direct: true, framed: false };
+    const k = Math.min(1, (s.vh - 48) / 874, (s.vw - 48) / 402);
+    return { direct: false, framed: true, dark: s.dark, src: '?app',
+      stageSt: { height: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: s.dark ? '#141517' : '#E6E7EA', transition: 'background .3s' },
+      boxSt: { width: Math.round(402 * k), height: Math.round(874 * k), flex: 'none' },
+      scaleSt: { width: 402, height: 874, transform: `scale(${k})`, transformOrigin: '0 0' } };
+  }
 }
 </script>
 </body>
