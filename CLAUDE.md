@@ -170,9 +170,8 @@ Una segunda app, para los entrenadores y **sobre todo para el preparador físico
 | `Max Tracking Panel.dc.html` | **El motor del panel del preparador** (desde el 06-10-2026; ver «La otra app»). |
 | `Max Tracking Escritorio.dc.html` | **El motor de la app del deportista (~620 KB)**: ordenador, iPad y, desde el 09-10-2026, teléfono. Casi todo el trabajo se hace aquí. |
 | `Max Tracking - Móvil.dc.html` | Página del **teléfono** (desde el 09-10-2026, con el motor nuevo). En un móvil, la app a pantalla completa; en el Mac, el marco de iPhone con la app dentro (ver «Versión de teléfono»). Las mismas props que «Ordenador». |
-| `Max Tracking - Móvil antigua.dc.html` + `Max Tracking.dc.html` | Versión móvil **antigua** (diseño y modelo de datos antiguos), solo hasta que se apruebe la nueva; se abre desde el matraz. No la toques. |
 | `support.js` | Runtime de los `.dc.html` (no editar). |
-| `ios-frame.jsx` | Marco de iPhone (`IOSDevice`) que usan la página «Móvil» y la versión móvil antigua. |
+| `ios-frame.jsx` | Marco de iPhone (`IOSDevice`) que usa la página «Móvil» en el Mac. |
 | `uploads/` | Capturas antiguas. |
 
 - Hay repo git y el usuario hace sus commits. **No hagas commit si no te lo pide.**
@@ -253,11 +252,11 @@ Una segunda app, para los entrenadores y **sobre todo para el preparador físico
   - «Bienestar en el formulario (mes)» (`wemSim`: Escenario / Bajada / Zona baja);
   - «Simular cuestionarios sin responder» (`simOverdue`);
   - «Simular: la sesión empieza sin ajuste del preparador» (`simNoDec`: la orientación, con la sugerencia según el escenario);
-  - abrir la versión móvil (no sale en el teléfono), la versión móvil antigua y el panel del preparador, y ocultar el botón.
+  - abrir la versión móvil (no sale en el teléfono) y el panel del preparador, y ocultar el botón.
 
 ## Versión de teléfono (en curso, desde el 09-10-2026)
 
-Plan aprobado el 09-10-2026. En el Drive, la versión 2, con las decisiones del 9 y el 10 de octubre: «App del deportista en el móvil: plan · versión 2 (10 oct 2026)» (01 Planificació, id `1nBO7C3Ha0jdtZJMOsigmxKPm-K2dSUrdoSgH8yc4JRQ`). La versión 1 se conserva con «sustituida» en el título. Es «la misma app en una columna»: mismos bloques, textos, datos, reglas e IA; solo cambia cómo se colocan. El diseño sigue congelado: si un bloque no cabe sin quitar algo, pregunta antes.
+Plan aprobado el 09-10-2026. En el Drive, la versión 3, con las decisiones del 9 y el 10 de octubre y el repaso final: «App del deportista en el móvil: plan · versión 3 (10 oct 2026)» (01 Planificació, id `1Ve2zlBUVtDvnaosCqyLAAIudoDV868tPEy3NEZy4SWo`). Las versiones 1 y 2 se conservan con «sustituida» en el título. Es «la misma app en una columna»: mismos bloques, textos, datos, reglas e IA; solo cambia cómo se colocan. El diseño sigue congelado: si un bloque no cabe sin quitar algo, pregunta antes.
 - **Decisiones del usuario:** navegación A (barra abajo con Hoy · Semana · Mes · Evolución; Privacidad y Ajustes desde la inicial, arriba a la derecha); «Esta semana» de Hoy con las tarjetas que se deslizan (elegida el 10-10-2026 entre dos versiones; la otra, «Fila», se borró); los teléfonos 024 y 112 **no** se pueden tocar para llamar (función por decidir).
 - **Lo que pidió al probarlo en su móvil (09-10-2026):**
   - que la página **nunca se mueva de lado** (era el globo escondido de «Basado en…», de 440 px);
@@ -272,7 +271,7 @@ Plan aprobado el 09-10-2026. En el Drive, la versión 2, con las decisiones del 
   - la notificación del entrenador, más pequeña y desde arriba.
 
   En el ordenador y el iPad no cambia nada.
-- **Fases:** 0 base (**hecha el 09-10-2026**, con las correcciones de arriba), 1 Hoy (**hecha el 09-10-2026**; «Esta semana» con la versión Deslizar desde el 10-10-2026), 2 Semana, 3 Mes y 4 Evolución (**la parte de arriba, las cifras y los gráficos, hechos el 10-10-2026**; falta su opinión), 5 Privacidad, Ajustes y chat, 6 repaso final (escenarios, idiomas, claro y oscuro, tamaños, girado; después, borrar la versión móvil antigua y poner al día el plan v2). Cada fase acaba con capturas y espera el okay del usuario.
+- **Fases:** 0 base (**hecha el 09-10-2026**, con las correcciones de arriba), 1 Hoy (**hecha el 09-10-2026**; «Esta semana» con la versión Deslizar desde el 10-10-2026), 2 Semana, 3 Mes y 4 Evolución (**la parte de arriba, las cifras y los gráficos, hechos el 10-10-2026**; falta su opinión), 5 Privacidad, Ajustes y chat (**Privacidad, hecha el 10-10-2026**; Ajustes y el chat ya se veían bien), 6 cierre (**el 10-10-2026, el usuario confirmó borrar la versión móvil antigua y se borró**: `Max Tracking.dc.html`, el motor de la versión móvil antigua, y su página `Max Tracking - Móvil antigua.dc.html`, además del enlace del matraz. Siguen en git, commit `ed26be1`, por si hiciera falta mirar algo. Ya no hay «dos motores»; **repaso final hecho el 10-10-2026**, ver más abajo). Cada fase acaba con capturas y espera el okay del usuario.
 - **El ordenador y el iPad no pueden cambiar.** Todo lo del teléfono va detrás de `phone()`. Para comprobarlo: capturas de antes y después (1440, 1024 y 820 px, con la caché del navegador desactivada) que salgan idénticas.
 - **En el motor:**
   - `phone()`: menos de 700 px de ancho, o táctil (`COARSE`) y de menos de 500 px de alto (móvil girado). `geom()` devuelve entonces `{ pad: 16, cw: min(ancho − 32, 640), stack: true, phone: true }`.
@@ -302,6 +301,11 @@ Plan aprobado el 09-10-2026. En el Drive, la versión 2, con las decisiones del 
     - En el ordenador no existe: la página `habits` muestra Hoy.
     - Lo que dice cada hábito no cambió (área, acción y motivo de la IA). Explicarlo más (cómo, cuándo) obligaría a cambiar lo que se le pide a la IA y no está decidido.
     - La propuesta del preparador se queda como estaba, porque el usuario la ve compacta, clara y funciona.
+  - Privacidad (`pagePriv`, 10-10-2026): la tabla de 4 columnas no cabía (los títulos se pisaban y «Con código» se salía). En el móvil va arriba quién es cada uno, en una línea por rol. Debajo, cada dato con su nombre y tres píldoras, una por rol: ✓ si lo ve, — si no lo ve y el código si es con código. **El contenido es el mismo**: qué se comparte sigue pendiente de que lo valide Oriol.
+  - Semana › El detalle › Salud (`healthDays`, 10-10-2026): con una lesión, las fichas de los días iban en dos filas de cinco, demasiado estrechas («For / mul / ari»). En el móvil van en una sola fila de fichas de 94 px que se desliza (`WeekSwipe` con `end`, que se abre por el final: los últimos días y la revisión). Con dos problemas, cada uno tiene su fila y se abren alineadas.
+  - **Repaso final (10-10-2026):** 4 idiomas × 360, 375 y 402 px, más el móvil girado, son 16 combinaciones. Cada una recorre 54 estados (8 escenarios × 4 pantallas, los 3 periodos de Evolución, Privacidad, Ajustes, las simulaciones del matraz, el aviso de salud mental desplegado y el chat pequeño y grande). Mira que la página no se mueva de lado, que nada salga de la pantalla (salvo las filas que se deslizan) y que no salga «undefined», «NaN» o «[object»: sin ningún problema en la versión final. Apareció un fallo, que se corrigió: la etiqueta «Tu cuerpo va más cansado desde hace N días» de «Tú vs tu cuerpo» (`feelStripEl`, `pillT`) se salía 10 px en castellano a 360 px; en el móvil ahora pasa a dos líneas.
+    - Para repetirlo, una prueba con Chrome headless por CDP: por cada combinación, recorrer los escenarios del matraz y las 4 pestañas y comparar `main.scrollWidth` con `clientWidth`. **Cuidado al lanzar varias combinaciones desde un bucle:** en zsh, `for a in "ca 360"; do node x.mjs $a` no separa los argumentos, y todas las pruebas salen iguales; usa un script con `bash` y haz que la prueba rechace argumentos inválidos.
+    - **El usuario confirmó el 10-10-2026 que ya no hay otra sesión editando el motor.** Mientras la había, aparecieron cambios que no eran de esta sesión (columnas de Privacidad en ordenador e iPad, fechas de «Semana a semana», «Cara a cara», ancho de las fichas de salud). Como el motor se había tocado por dos sitios, se comprobó con `git diff` qué era de cada una, y no se revirtió nada.
   - Notificación del entrenador (`CoachToast` con `ph`): compacta (el título y, debajo, lo que le dijiste ≠ el estado de tus datos, con iconos) y entra desde arriba, debajo de la barra (`mtToastDn` / `mtToastUp`).
   - Chat, primera vista: la ventana pequeña mide lo justo (como mucho 440 px), las sugerencias y la bienvenida son más pequeñas y el cuadro para escribir es de una línea, con un texto corto (`chatPhS`).
   - «Esta semana» (`weekNowPh`): la versión «Deslizar», elegida el 10-10-2026; la «Fila» y su selector del matraz se borraron. Son las tarjetas de siempre en `WeekSwipe`, que se abre con hoy a la vista y difumina los bordes, con los nombres de los datos quietos a la izquierda.
@@ -398,6 +402,14 @@ Plan aprobado el 09-10-2026. En el Drive, la versión 2, con las decisiones del 
 - No hay puntos que laten en ninguna página: `pingEl` no dibuja nada.
 
 **Privacidad**, **Ajustes**: existen. Ya no nombran el APSQ (04-10-2026).
+
+**Arreglos de maqueta del 10-10-2026** (ordenador, iPad y teléfono; comprobados con un análisis de textos que se salen o se pisan, en los 4 idiomas y de 360 a 1440 px):
+- Privacidad, tabla (ordenador e iPad): la columna del dato pasa de 2,2 a 1,5 partes. El código «MT-07» y los iconos nunca se parten.
+- Semana › Salud (`healthDays`): el ancho mínimo de las fichas se mide con la palabra más larga del idioma (`textW`, con canvas): «Malament», «Aujourd'hui». Si no caben en una fila, se reparten en filas iguales (5 + 5).
+- Semana › «Lo que dijiste vs tus datos»:
+  - la etiqueta de la derecha («Marcaste un problema de salud», «No cuadra 2 días») baja debajo del nombre si no cabe;
+  - cada parte va en tres filas compartidas: un nombre largo («FC en reposo y HRV») pasa a dos líneas y las palabras grandes quedan a la misma altura.
+- `stepEl` («Semana a semana», «Mes a mes»): la fecha pasa a dos líneas si no cabe, también en el ordenador.
 
 **Mes** (`pageMes`, oficial desde el 02-10-2026; el Mes antiguo, con el APSQ, el texto libre y el informe en tarjetas, se borró). Hecho con el plan del Drive «Pantalla Mes: plan de diseño (2 oct 2026)», que sustituye a la sección 8 del plan v2. Maquetas: https://claude.ai/artifact/JvG3jDXCxxJwRjd5a6tWQk. Se abre en el último mes respondido: el que falta sale en discontinuo, con el aviso «Sin responder» (`monthPendEl`).
 - **Solo habla del formulario mensual:** las 7 frases de bienestar (escala corta de Warwick-Edinburgh, 1–5, total 7–35). El APSQ y el texto libre nunca llegan a la app ni a la IA. «Tú vs tu cuerpo» y lo del entrenador se quitaron.
@@ -498,5 +510,5 @@ Plan aprobado el 09-10-2026. En el Drive, la versión 2, con las decisiones del 
   - El ciclo menstrual no se puede usar todavía: el formulario pregunta cuánto duró la regla, no cuándo empezó.
 - **Protocolo para las respuestas de riesgo de salud mental** (autolesión o pensamientos suicidas en el formulario semanal): la app no avisa a nadie. Hay que decidir quién las revisa y qué se hace.
 - H3: aviso temprano de cansancio acumulado (quizá por correo).
-- **Versión de teléfono:** fases 1 a 6 (ver «Versión de teléfono»).
+- **Versión de teléfono:** el 10-10-2026 el usuario dio por terminados los cambios y se borró la versión antigua. Queda poner al día en el Drive el plan v2 de la app del deportista (fila «Versión móvil: aplazada» y la página de hábitos de Hoy en el móvil): con el conector hay que crear una versión nueva (v3) y renombrar la anterior con «sustituida».
 - Quitar el matraz cuando acabe la fase de prototipo.

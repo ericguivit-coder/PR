@@ -1872,6 +1872,8 @@ Reply ONLY with this JSON: {"text": "your answer", "blocs": [], "basat": ["data 
     }[name];
     return h('svg', { width: size, height: size, viewBox: '0 0 24 24', fill: 'none', stroke: 'currentColor', strokeWidth: sw || 1.7, strokeLinecap: 'round', strokeLinejoin: 'round', style: { display: 'block', flex: 'none' } }, kids);
   }
+  // L'amplada d'un text amb la lletra de l'estil (per donar a les fitxes l'amplada justa en cada idioma).
+  textW(s, px, wt = 600) { const c = this._cv || (this._cv = document.createElement('canvas').getContext('2d')); c.font = `${wt} ${px}px ${this.SANS}`; return c.measureText(String(s)).width; }
   dot(col, size, border) { return h('span', { style: { width: size, height: size, borderRadius: this.G.dot, background: col, border: border || 'none', boxSizing: 'border-box', flex: 'none', display: 'inline-block' } }); }
   badge(n, on, size) { const s = size || 22, C = this.C; return h('span', { key: 'bg' + n, style: { width: s, height: s, flex: 'none', borderRadius: this.G.badge, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', boxSizing: 'border-box', fontSize: s < 20 ? 10.5 : 12, fontWeight: 600, fontVariantNumeric: 'tabular-nums', border: `1px solid ${on ? C.ink : this.ov(.2)}`, background: on ? C.ink : 'transparent', color: on ? C.bg : C.ink2, transition: 'background .15s, color .15s, border-color .15s' } }, String(n)); }
   tag(t, key) { const C = this.C; return h('span', { key: key || 'tg', style: { display: 'inline-flex', alignItems: 'center', fontSize: 12, color: C.ink3, padding: '3px 8px', border: `1px solid ${C.line2}`, borderRadius: this.G.tag, whiteSpace: 'nowrap', flex: 'none' } }, t); }
@@ -2912,7 +2914,7 @@ Reply ONLY with this JSON: {"text": "your answer", "blocs": [], "basat": ["data 
       h('div', { style: { flex: '1 1 280px', minWidth: 0 } },
         h('div', { style: { display: 'flex', alignItems: 'flex-start', gap: 10, fontSize: this.phone() ? 15 : 16, fontWeight: 500, lineHeight: 1.4, color: C.ink, textWrap: 'pretty' } },
           h('span', { style: { color: col, display: 'flex', marginTop: 1 } }, this.icon(M.lvl === 'good' ? 'check' : 'alert', 18, 2.4)), h('span', null, M.text)),
-        pillT ? h('span', { style: { marginTop: 8, marginLeft: 28, display: 'inline-flex', alignItems: 'center', gap: 6, padding: '3px 10px', borderRadius: this.G.tag, background: AC.chip, boxShadow: `inset 0 0 0 1px ${AC.chipBd}`, fontSize: 12.5, fontWeight: 600, color: C.ink, whiteSpace: 'nowrap' } }, this.dot(col, 7), pillT) : null,
+        pillT ? h('span', { style: { marginTop: 8, marginLeft: 28, display: 'inline-flex', alignItems: 'center', gap: 6, padding: '3px 10px', borderRadius: this.G.tag, background: AC.chip, boxShadow: `inset 0 0 0 1px ${AC.chipBd}`, fontSize: 12.5, fontWeight: 600, color: C.ink, ...(this.phone() ? { maxWidth: 'calc(100% - 28px)', boxSizing: 'border-box', whiteSpace: 'normal', lineHeight: 1.3, borderRadius: this.G.tag > 14 ? 14 : this.G.tag, padding: '4px 10px' } : { whiteSpace: 'nowrap' }) } }, this.dot(col, 7), pillT) : null,
         // Amb el dit, el gràfic és per mirar (un toc ensenya el dia): per anar a Evolució hi ha aquest enllaç.
         h('div', { style: { marginTop: 10, marginLeft: 28 } }, h('button', { className: 'mt-sg', onClick: () => this.goFeel(), style: { display: 'inline-flex', alignItems: 'center', gap: 4, padding: 0, border: 'none', background: 'transparent', color: C.ink2, fontFamily: 'inherit', fontSize: 13, fontWeight: 500, cursor: 'pointer', whiteSpace: 'nowrap' } }, this.t('fvGoEvo'), this.icon('right', 11, 2.2)))),
       h('div', { role: 'link', tabIndex: 0, className: 'mt-fvp', 'aria-label': this.t('fvSeeEvo'), onPointerDown: e => { this._fvPt = e.pointerType; }, onClick: () => { if (this._fvPt && this._fvPt !== 'mouse') return; this.goFeel(); }, onKeyDown: e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); this.goFeel(); } },
@@ -3095,10 +3097,10 @@ Reply ONLY with this JSON: {"text": "your answer", "blocs": [], "basat": ["data 
       h('div', { style: { flex: 'none', width: 80, display: 'grid', gridTemplateRows: rowsT, rowGap: 10, alignItems: 'center' } }, labels),
       h(this.WeekSwipe, { key: 'ws' + sc, today: 3, colW: 88, gap: 8 }, h('div', { style: { display: 'grid', gridTemplateColumns: 'repeat(7, 88px)', gridTemplateRows: rowsT, columnGap: 8, rowGap: 10, alignItems: 'center', width: 'max-content', paddingRight: 14 } }, kids))));
   }
-  // La fila que llisca de costat: s'obre amb avui a la vista (a la dreta), amb el dia d'abans tallat perquè es vegi que llisca.
+  // La fila que llisca de costat: s'obre amb avui a la vista (a la dreta), amb el dia d'abans tallat perquè es vegi que llisca. Amb «end», pel final.
   WeekSwipe = p => {
     const ref = React.useRef(null);
-    React.useLayoutEffect(() => { const el = ref.current; if (el) el.scrollLeft = Math.max(0, (p.today + 1) * (p.colW + p.gap) - el.clientWidth + 6); }, []);
+    React.useLayoutEffect(() => { const el = ref.current; if (el) el.scrollLeft = p.end ? el.scrollWidth : Math.max(0, (p.today + 1) * (p.colW + p.gap) - el.clientWidth + 6); }, []);
     const fade = 'linear-gradient(to right, transparent, #000 16px, #000 calc(100% - 16px), transparent)';
     return h('div', { ref, className: 'mt-hs', style: { flex: 1, minWidth: 0, overflowX: 'auto', overflowY: 'hidden', overscrollBehaviorX: 'contain', scrollSnapType: 'x proximity', WebkitOverflowScrolling: 'touch', scrollbarWidth: 'none', WebkitMaskImage: fade, maskImage: fade, paddingLeft: 10 } }, p.children);
   };
@@ -3260,7 +3262,8 @@ Reply ONLY with this JSON: {"text": "your answer", "blocs": [], "basat": ["data 
   vsVerdict(r) {
     const C = this.C; if (r.m == null) return this.missChip(this.t(this.data(this.state.scenario).band ? 'noReg' : 'calculating'));
     // Has marcat un problema de salut al formulari: sense veredicte, amb la creu del bloc Salut.
-    if (r.m === 'pb') return h('span', { style: { display: 'inline-flex', alignItems: 'center', gap: 6, flex: 'none', fontSize: 13.5, fontWeight: 600, color: C.ink, whiteSpace: 'nowrap' } },
+    // Si no hi cap al costat del nom (telèfon, francès), baixa a la línia de sota i, si cal, en dues línies; mai fora de la targeta.
+    if (r.m === 'pb') return h('span', { style: { display: 'inline-flex', alignItems: 'center', gap: 6, flex: '0 1 auto', minWidth: 0, fontSize: 13.5, fontWeight: 600, lineHeight: 1.3, color: C.ink } },
       h('span', { style: { width: 18, height: 18, flex: 'none', borderRadius: this.G.badge, background: this.ov(.12), color: C.ink, display: 'inline-flex', alignItems: 'center', justifyContent: 'center' } }, this.icon('plus', 11, 2.6)), this.t('vsPb'));
     const ok = r.m === 'ok', txt = r.k === 'coach' ? (ok ? this.t('vsCoachOk') : this.t('vsCoachNo', r.cs.mis)) : this.t(ok ? 'vsMatch' : r.m === 'worse' ? 'vsWorse' : 'vsBetter');
     return h('span', { style: { display: 'inline-flex', alignItems: 'center', gap: 6, flex: 'none', fontSize: 13.5, fontWeight: 600, color: C.ink, whiteSpace: 'nowrap' } },
@@ -3294,19 +3297,21 @@ Reply ONLY with this JSON: {"text": "your answer", "blocs": [], "basat": ["data 
   // (≈ si coincideixen però queden a tocar d'un nivell diferent). A sota de cada paraula, la seva xifra. L'entrenador, dia a dia; cap frase a sota.
   wkVsEl(sc, D, W) {
     const C = this.C, g = this.geom(), R = this.vsRows(sc, D, W);
-    const side = (lab, lv, col, det, empty) => h('div', { style: { minWidth: 0 } },
-      h('div', { style: { fontSize: 13, fontWeight: 500, color: C.ink, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' } }, lab),
-      lv ? h('div', { style: { marginTop: 4, fontFamily: this.G.display, fontSize: 26, fontWeight: 600, letterSpacing: '-.015em', lineHeight: 1.15, color: col } }, this.COACH[lv].t) : h('div', { style: { marginTop: 8 } }, empty),
-      lv && det ? h('div', { style: { marginTop: 4, fontSize: 13, lineHeight: 1.4, color: C.ink, textWrap: 'pretty' } }, det) : null);
-    const sym = r => { if (r.m == null || r.m === 'pb') return h('span'); const ok = r.m === 'ok';
-      return h('span', { style: { textAlign: 'center', fontSize: 30, fontWeight: 300, lineHeight: 1, color: this.tone(ok ? .9 : .47) } }, ok ? (this.vsLvl(r.f) === this.vsLvl(r.d) ? '=' : '≈') : '≠'); };
+    // Cada part en tres files compartides (nom, paraula, xifra): si un nom no hi cap en una línia («FC en repòs i HRV» al telèfon) passa a dues
+    // en lloc de quedar tallat, i les dues paraules grans continuen a la mateixa altura.
+    const side = (c, lab, lv, col, det, empty) => [
+      h('div', { key: 'l' + c, style: { gridColumn: c, gridRow: 1, alignSelf: 'end', minWidth: 0, fontSize: 13, fontWeight: 500, lineHeight: 1.3, color: C.ink, overflowWrap: 'break-word' } }, lab),
+      lv ? h('div', { key: 'v' + c, style: { gridColumn: c, gridRow: 2, minWidth: 0, fontFamily: this.G.display, fontSize: 26, fontWeight: 600, letterSpacing: '-.015em', lineHeight: 1.15, color: col } }, this.COACH[lv].t) : h('div', { key: 'v' + c, style: { gridColumn: c, gridRow: 2, minWidth: 0, marginTop: 4 } }, empty),
+      lv && det ? h('div', { key: 'd' + c, style: { gridColumn: c, gridRow: 3, minWidth: 0, fontSize: 13, lineHeight: 1.4, color: C.ink, textWrap: 'pretty' } }, det) : null];
+    const sym = r => { if (r.m == null || r.m === 'pb') return null; const ok = r.m === 'ok';
+      return h('span', { key: 'sym', style: { gridColumn: 2, gridRow: '1 / 4', alignSelf: 'center', textAlign: 'center', fontSize: 30, fontWeight: 300, lineHeight: 1, color: this.tone(ok ? .9 : .47) } }, ok ? (this.vsLvl(r.f) === this.vsLvl(r.d) ? '=' : '≈') : '≠'); };
     const tile = (r, j) => h('div', { key: r.k, style: { minWidth: 0, padding: '14px 16px 16px', borderRadius: this.G.inner || 8, background: C.bg, border: `1px solid ${C.line2}`, animation: `mtIn .4s cubic-bezier(.2,.7,.2,1) ${(.1 + j * .06).toFixed(2)}s both` } },
-      h('div', { style: { display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10, minHeight: 20 } }, h('span', { style: { fontSize: 15.5, fontWeight: 600, color: C.ink } }, r.name), this.vsVerdict(r)),
+      h('div', { style: { display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '6px 10px', minHeight: 20 } }, h('span', { style: { fontSize: 15.5, fontWeight: 600, color: C.ink } }, r.name), this.vsVerdict(r)),
       r.k === 'coach' ? h('div', { style: { marginTop: 20 } }, this.vsDaysEl(sc, D, W))
-        : h('div', { style: { marginTop: 14, display: 'grid', gridTemplateColumns: 'minmax(0,1fr) 36px minmax(0,1fr)', alignItems: 'center', gap: 10 } },
-          side(this.t('fvYou'), this.vsLvl(r.f), r.fcol, [r.said, r.word ? ` · ${r.word}` : ''].join('')),
+        : h('div', { style: { marginTop: 14, display: 'grid', gridTemplateColumns: 'minmax(0,1fr) 36px minmax(0,1fr)', gridTemplateRows: 'auto auto auto', alignItems: 'start', columnGap: 10, rowGap: 4 } },
+          side(1, this.t('fvYou'), this.vsLvl(r.f), r.fcol, [r.said, r.word ? ` · ${r.word}` : ''].join('')),
           sym(r),
-          side(r.data, this.vsLvl(r.d), r.d != null ? this.tone(r.d) : null, r.dval, this.missChip(this.t(D.band ? 'noReg' : 'calculating')))),
+          side(3, r.data, this.vsLvl(r.d), r.d != null ? this.tone(r.d) : null, r.dval, this.missChip(this.t(D.band ? 'noReg' : 'calculating')))),
       r.miss > 0 && r.d != null ? h('div', { style: { marginTop: 12 } }, this.missChip(this.t('vsMiss', r.miss))) : null);
     return this.box({ id: 'mt-wk-vs', title: this.t('vsTitle'), st: { padding: 16 } }, h('div', { style: { display: 'grid', gridTemplateColumns: g.stack ? 'minmax(0,1fr)' : 'repeat(2, minmax(0,1fr))', gap: 12 } }, R.map(tile)));
   }
@@ -3500,13 +3505,18 @@ Reply ONLY with this JSON: {"text": "your answer", "blocs": [], "basat": ["data 
         h('div', { style: { marginTop: 10, display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: '4px 6px', fontSize: 13, fontWeight: 600, lineHeight: 1.25, color: late ? rc : C.ink } }, late ? this.dot(rc, 8) : this.icon('form', 14, 2), h('span', { style: { minWidth: 0, overflowWrap: 'break-word' } }, this.t(late ? 'overdueL' : 'hpReview')))); };
     // Una fila contínua de dies (del primer dia fins avui o fins que s'acaba) i la revisió just al final. Amb dos problemes comparteixen les dates:
     // els mateixos dies queden un sobre l'altre i el que va començar després comença més a la dreta. Si no hi caben, continuen a la fila de sota.
-    const g = this.geom(), s0 = Math.min(...HL.map(x => x.st)), e0 = Math.max(...HL.map(x => x.end)), nDays = e0 - s0 + 1, N = nDays + (HL.some(x => x.next != null) ? 1 : 0);
-    const cols = Math.min(N, Math.max(5, Math.floor((g.cw - 40 + 8) / 96))), pos = k => ({ gridColumn: (k % cols) + 1, gridRow: Math.floor(k / cols) + 1, minWidth: 0, display: 'grid' });
+    // Al telèfon (10-10-2026), tots els dies en una sola fila de fitxes d'amplada fixa que llisca de costat i s'obre pel final (els últims dies i la revisió).
+    const g = this.geom(), ph = !!g.phone, s0 = Math.min(...HL.map(x => x.st)), e0 = Math.max(...HL.map(x => x.end)), nDays = e0 - s0 + 1, N = nDays + (HL.some(x => x.next != null) ? 1 : 0);
+    // Amplada mínima d'una fitxa (10-10-2026): la paraula més llarga d'aquest idioma hi ha de cabre («Malament», «Aujourd'hui» sortien de la vora).
+    // Si no hi caben totes en una fila, es reparteixen en files iguals (5 + 5, no 9 + 1).
+    const tw = Math.ceil(27 + 2 + Math.max(...['evGood', 'evMid', 'evBad'].map(k => 14 + this.textW(this.t(k), 14)), ...HL.flatMap(x => x.pts).map(q => this.textW(q.i === 41 ? this.t('today') : this.cap(this.dShort(q.i)), 13.5))));
+    const fit = Math.min(N, Math.max(4, Math.floor((g.cw - 40 + 8) / (Math.max(88, tw) + 8))));
+    const cols = ph ? N : Math.ceil(N / Math.ceil(N / fit)), pos = k => ({ gridColumn: (k % cols) + 1, gridRow: Math.floor(k / cols) + 1, minWidth: 0, display: 'grid' });
     const one = (HI, j) => { const nD = HI.days.length;
       return h('div', { key: 'p' + j, style: j ? { marginTop: 20, paddingTop: 20, borderTop: `1px solid ${C.line}` } : null }, this.healthHead(HI), this.pbPrevEl(HI),
-        h('div', { key: 'ds', style: { marginTop: 16, display: 'grid', gridTemplateColumns: `repeat(${cols}, minmax(0,1fr))`, gap: 8 } },
+        (grid => (ph ? h('div', { key: 'dsw', style: { marginTop: 16 } }, h(this.WeekSwipe, { key: 'sw' + j, end: true }, grid)) : grid))(h('div', { key: 'ds', style: { marginTop: ph ? 0 : 16, display: 'grid', gridTemplateColumns: ph ? `repeat(${cols}, ${Math.max(94, tw)}px)` : `repeat(${cols}, minmax(0,1fr))`, gap: 8, ...(ph ? { width: 'max-content', paddingRight: 14 } : {}) } },
           HI.pts.map((q, k) => h('div', { key: 'c' + q.i, style: pos(q.i - s0) }, tileOf(HI, nD)(q, k))),
-          HI.next != null ? h('div', { key: 'rv', style: pos(nDays) }, review({ i: HI.next }, nD)) : null),
+          HI.next != null ? h('div', { key: 'rv', style: pos(nDays) }, review({ i: HI.next }, nD)) : null)),
         HI.k === 'on' && this.WEEKS.indexOf(W) === this.lastWi() ? h('div', { key: 'go', style: { marginTop: 12, display: 'flex', justifyContent: 'flex-end' } },
           h('button', { className: 'mt-sg', onClick: () => { this.setState({ trkSel: j }); this.go('avui'); setTimeout(() => this.flashTo('mt-trk'), 220); }, style: { display: 'inline-flex', alignItems: 'center', gap: 4, padding: 0, border: 'none', background: 'transparent', color: C.ink, fontFamily: 'inherit', fontSize: 13.5, fontWeight: 600, cursor: 'pointer', whiteSpace: 'nowrap' } }, this.t('trkGo'), this.icon('right', 11, 2.2))) : null); };
     return this.box({ id: 'mt-wk-ost', title: this.t('wkHealthT'), st: { padding: '18px 20px 20px' } }, HL.map(one));
@@ -3843,7 +3853,8 @@ Reply ONLY with this JSON: {"text": "your answer", "blocs": [], "basat": ["data 
       nodes.map((x, j) => h(x.onClick ? 'button' : 'div', { key: x.key, onClick: x.onClick, 'aria-pressed': x.onClick ? !!x.sel : undefined, style: { position: 'relative', flex: '1 1 0', minWidth: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6, padding: 0, border: 'none', background: 'transparent', fontFamily: 'inherit', color: 'inherit', cursor: x.onClick ? 'pointer' : 'default', animation: `mtIn .4s cubic-bezier(.2,.7,.2,1) ${(.05 + j * .04).toFixed(2)}s both` } },
         h('span', { style: { height: 26, display: 'flex', alignItems: 'center' } }, dotOf(x)),
         h('span', { style: { fontSize: 13, fontWeight: x.sel ? 700 : 500, color: x.sel ? C.ink : x.dash ? C.ink3 : C.ink2, whiteSpace: 'nowrap', fontVariantNumeric: 'tabular-nums' } }, x.lab),
-        x.sub ? h('span', { style: { maxWidth: '100%', fontSize: ph ? 11 : 12, fontWeight: 500, lineHeight: ph ? 1.25 : undefined, textAlign: ph ? 'center' : undefined, color: x.subCol || C.ink2, whiteSpace: ph ? 'normal' : 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', fontVariantNumeric: 'tabular-nums' } }, x.sub) : null)));
+        // La data, en dues línies si no hi cap (abans, a l'ordinador, «31 ago – 6 set» quedava tallat).
+        x.sub ? h('span', { style: { maxWidth: '100%', fontSize: ph ? 11 : 12, fontWeight: 500, lineHeight: 1.25, textAlign: 'center', color: x.subCol || C.ink2, whiteSpace: 'normal', overflow: 'hidden', textOverflow: 'ellipsis', fontVariantNumeric: 'tabular-nums' } }, x.sub) : null)));
   }
   // Setmana.
   pageSetmana(sc, D, g) {
@@ -4134,19 +4145,32 @@ Reply ONLY with this JSON: {"text": "your answer", "blocs": [], "basat": ["data 
 
   // ── Pàgina: Privacitat ───────────────────────────────────────────────
   pagePriv(sc, D, g) {
-    const C = this.C, w = this.who(sc), gtc = 'minmax(0,2.2fr) repeat(3, minmax(0,1fr))';
-    const cell = (r, j) => r === 'yes' ? h('span', { key: j, style: { display: 'flex', alignItems: 'center', gap: 7, fontSize: 13.5 } }, h('span', { style: { color: C.ink } }, this.icon('check', 15)), this.t(j === 0 ? 'youSee' : 'sees'))
-      : r === 'code' ? h('span', { key: j, style: { display: 'flex', alignItems: 'center', gap: 7, fontSize: 13.5, color: C.ink2 } }, h('span', { style: { fontFamily: this.MONO, fontSize: 11.5, padding: '2px 6px', border: `1px solid ${C.line2}`, borderRadius: 5 } }, w.code), this.t('withCode'))
-      : h('span', { key: j, style: { display: 'flex', alignItems: 'center', gap: 7, fontSize: 13.5, color: C.ink3 } }, this.icon('minus', 15), this.t('notSee'));
+    // Columnes (10-10-2026): la del nom de la dada era massa ampla i a l'iPad les altres tres quedaven estretes («MT-07» partit en dues
+    // línies, «Amb codi» partit, «No ho veu» tocant la vora). El codi i la icona no es parteixen mai.
+    const C = this.C, w = this.who(sc), gtc = 'minmax(0,1.5fr) repeat(3, minmax(0,1fr))';
+    const cell = (r, j) => r === 'yes' ? h('span', { key: j, style: { display: 'flex', alignItems: 'center', gap: 7, fontSize: 13.5, minWidth: 0 } }, h('span', { style: { flex: 'none', display: 'inline-flex', color: C.ink } }, this.icon('check', 15)), this.t(j === 0 ? 'youSee' : 'sees'))
+      : r === 'code' ? h('span', { key: j, style: { display: 'flex', alignItems: 'center', gap: 7, fontSize: 13.5, minWidth: 0, color: C.ink2 } }, h('span', { style: { flex: 'none', whiteSpace: 'nowrap', fontFamily: this.MONO, fontSize: 11.5, padding: '2px 6px', border: `1px solid ${C.line2}`, borderRadius: 5 } }, w.code), this.t('withCode'))
+      : h('span', { key: j, style: { display: 'flex', alignItems: 'center', gap: 7, fontSize: 13.5, minWidth: 0, color: C.ink3 } }, h('span', { style: { flex: 'none', display: 'inline-flex' } }, this.icon('minus', 15)), this.t('notSee'));
     const table = h('div', { style: this.card({ padding: '6px 24px 8px' }) },
       h('div', { style: { display: 'grid', gridTemplateColumns: gtc, gap: 20, padding: '16px 0 14px' } }, h('span', { style: { fontSize: 13, color: C.ink3 } }, this.t('dataH')),
         this.ROLES.map(r => h('div', { key: r.t }, h('div', { style: { fontSize: 14, fontWeight: 600 } }, r.t), h('div', { style: { marginTop: 3, fontSize: 12, color: C.ink3, lineHeight: 1.35 } }, r.d)))),
       this.PRIV.map((p, i) => h('div', { key: p.t, className: 'mt-row', style: { display: 'grid', gridTemplateColumns: gtc, gap: 20, alignItems: 'center', padding: '14px 0', borderTop: `1px solid ${C.line}`, animation: `mtIn .4s cubic-bezier(.2,.7,.2,1) ${(.1 + i * .04).toFixed(2)}s both` } },
         h('div', { style: { minWidth: 0 } }, h('div', { style: { fontSize: 14.5 } }, p.t), h('div', { style: { marginTop: 3, fontSize: 12.5, color: C.ink3 } }, p.s)), p.r.map(cell))));
+    // Telèfon (10-10-2026): la taula de 4 columnes no hi cabia (els noms es trepitjaven i «Amb codi» sortia de la targeta). El mateix contingut,
+    // posat d'una altra manera: a dalt, qui és cadascú (una línia) i, per a cada dada, el seu nom i tres píndoles, una per qui (✓ ho veu, — no, o amb el codi).
+    const chipPh = (r, j) => { const R0 = this.ROLES[j], st = { display: 'inline-flex', alignItems: 'center', gap: 5, padding: '3px 9px', borderRadius: this.G.tag, border: `1px solid ${C.line2}`, fontSize: 12.5, fontWeight: 600, whiteSpace: 'nowrap' };
+      return r === 'yes' ? h('span', { key: j, title: this.t(j === 0 ? 'youSee' : 'sees'), style: { ...st, color: C.ink } }, this.icon('check', 13), R0.t)
+        : r === 'code' ? h('span', { key: j, title: this.t('withCode'), style: { ...st, color: C.ink } }, R0.t, h('span', { style: { fontFamily: this.MONO, fontSize: 11, fontWeight: 500, color: C.ink2 } }, w.code))
+        : h('span', { key: j, title: this.t('notSee'), style: { ...st, color: C.ink3, borderColor: C.line } }, this.icon('minus', 13), R0.t); };
+    const tablePh = g.phone ? h('div', { style: this.card({ padding: '4px 16px 6px' }) },
+      h('div', { key: 'rl', style: { padding: '12px 0', display: 'grid', gap: 5 } }, this.ROLES.map(r => h('div', { key: r.t, style: { fontSize: 12.5, lineHeight: 1.4, color: C.ink3 } }, h('span', { style: { fontWeight: 600, color: C.ink } }, r.t), ` · ${r.d}`))),
+      this.PRIV.map((p, i) => h('div', { key: p.t, style: { padding: '12px 0', borderTop: `1px solid ${C.line}`, animation: `mtIn .4s cubic-bezier(.2,.7,.2,1) ${(.1 + i * .04).toFixed(2)}s both` } },
+        h('div', { style: { fontSize: 14.5, fontWeight: 500 } }, p.t), h('div', { style: { marginTop: 2, fontSize: 12.5, color: C.ink3 } }, p.s),
+        h('div', { style: { marginTop: 8, display: 'flex', flexWrap: 'wrap', gap: 6 } }, p.r.map(chipPh))))) : null;
     const ident = h('div', { style: this.card({ padding: '20px 24px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 24, flexWrap: 'wrap' }) },
       h('div', null, h('div', { style: { fontSize: 15, fontWeight: 600 } }, this.t('studyAs')), h('div', { style: { marginTop: 4, fontSize: 13, color: C.ink3 } }, this.t('codesNever'))),
       h('div', { style: { display: 'flex', alignItems: 'center', gap: 14, fontSize: 16 } }, h('span', { style: { color: C.ink3, textDecoration: 'line-through', textDecorationColor: this.fg(.5) } }, w.name), h('span', { style: { color: C.ink3 } }, '→'), h('span', { style: { fontFamily: this.MONO, fontSize: 15, padding: '5px 10px', border: `1px solid ${C.line2}`, borderRadius: 7 } }, w.code)));
-    return this.stack([this.headEl(this.t('privacy'), null), table, ident]);
+    return this.stack([this.headEl(this.t('privacy'), null), tablePh || table, ident]);
   }
 
   // ── Pàgina: Ajustos ──────────────────────────────────────────────────
@@ -4675,8 +4699,6 @@ Reply ONLY with this JSON: {"text": "your answer", "blocs": [], "basat": ["data 
       h('button', { className: 'mt-pr', onClick: () => this.setState(st => ({ simOverdue: !st.simOverdue })), style: { ...foot, color: s.simOverdue ? C.ink : C.ink2 } }, h('span', null, 'Simular cuestionarios sin responder'), h('span', null, s.simOverdue ? this.icon('check', 13) : '')),
       h('button', { className: 'mt-pr', onClick: () => this.setState(st => ({ simNoDec: !st.simNoDec })), style: { ...foot, color: s.simNoDec ? C.ink : C.ink2 } }, h('span', null, 'Simular: la sesión empieza sin ajuste del preparador'), h('span', null, s.simNoDec ? this.icon('check', 13) : '')),
       ph ? null : h('a', { className: 'mt-pr', href: './Max%20Tracking%20-%20M%C3%B3vil.dc.html', target: '_blank', rel: 'noopener', style: foot }, h('span', null, 'Abrir versión móvil'), h('span', null, '↗')),
-      // La versió mòbil antiga (disseny i dades antics), fins que s'aprovi la nova.
-      h('a', { className: 'mt-pr', href: './Max%20Tracking%20-%20M%C3%B3vil%20antigua.dc.html', target: '_blank', rel: 'noopener', style: foot }, h('span', null, 'Abrir versión móvil antigua'), h('span', null, '↗')),
       h('a', { className: 'mt-pr', href: './Max%20Tracking%20-%20Preparador.dc.html', target: '_blank', rel: 'noopener', style: foot }, h('span', null, 'Abrir el panel del preparador'), h('span', null, '↗')),
       h('button', { className: 'mt-pr', onClick: () => this.setProtoHidden(true), style: foot }, h('span', null, 'Ocultar botón'), h('span', { style: { fontFamily: this.MONO, fontSize: 10, padding: '2px 5px', border: `1px solid ${C.line2}`, borderRadius: 4, color: C.ink3 } }, 'E'))) : null;
     const btn = h('button', { key: 'pb', className: 'mt-pb', 'data-open': s.pOpen ? '' : undefined, title: 'Escenario del prototipo · E para ocultar', onClick: () => this.setState({ pOpen: !s.pOpen }),
