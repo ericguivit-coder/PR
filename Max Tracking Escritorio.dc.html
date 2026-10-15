@@ -775,6 +775,11 @@ class Component extends DCLogic {
       ajChg: { ca: 'El que canvia avui', es: 'Lo que cambia hoy', fr: "Ce qui change aujourd'hui", en: 'What changes today' },
       btnXls: { ca: 'Instruccions i vídeos', es: 'Instrucciones y vídeos', fr: 'Instructions et vidéos', en: 'Instructions and videos' },
       btnTP: { ca: 'Veure a TrainingPeaks', es: 'Ver en TrainingPeaks', fr: 'Voir dans TrainingPeaks', en: 'Open in TrainingPeaks' },
+      // La sessió adaptada que t'ha preparat el preparador (l'enllaç que enganxa al seu panell, des del 15-10-2026).
+      ajOwn: { ca: (tp, rest) => (rest ? `Avui no entrenes amb el grup: la teva sessió de recuperació és a ${tp ? 'TrainingPeaks' : "l'Excel"}.` : `La teva sessió adaptada és a ${tp ? 'TrainingPeaks' : "l'Excel"}.`),
+        es: (tp, rest) => (rest ? `Hoy no entrenas con el grupo: tu sesión de recuperación está en ${tp ? 'TrainingPeaks' : 'el Excel'}.` : `Tu sesión adaptada está en ${tp ? 'TrainingPeaks' : 'el Excel'}.`),
+        fr: (tp, rest) => (rest ? `Pas d'entraînement avec le groupe aujourd'hui : ta séance de récupération est dans ${tp ? 'TrainingPeaks' : "l'Excel"}.` : `Ta séance adaptée est dans ${tp ? 'TrainingPeaks' : "l'Excel"}.`),
+        en: (tp, rest) => (rest ? `No training with the group today: your recovery session is in ${tp ? 'TrainingPeaks' : 'the Excel'}.` : `Your adapted session is in ${tp ? 'TrainingPeaks' : 'the Excel'}.`) },
       prepAt: { ca: x => `Avui, ${x}`, es: x => `Hoy, ${x}`, fr: x => `Aujourd'hui, ${x}`, en: x => `Today, ${x}` },
       sesLinkPending: { ca: 'Enllaç de la sessió pendent', es: 'Enlace de la sesión pendiente', fr: 'Lien de la séance à venir', en: 'Session link not set yet' },
       sentToday: { ca: 'rebut avui', es: 'recibido hoy', fr: "reçu aujourd'hui", en: 'received today' }, sentYest: { ca: 'rebut ahir', es: 'recibido ayer', fr: 'reçu hier', en: 'received yesterday' },
@@ -2567,7 +2572,10 @@ Reply ONLY with this JSON: {"text": "your answer", "blocs": [], "basat": ["data 
     if (!aj && me && me.auto) aj = { v: me.auto, auto: true };
     const v = aj ? aj.v : null, noDec = !aj && (s.simNoDec || (me && me.st === 'nodec'));
     const own = me && me.chg && (v === 'R' || v === 'A') ? me.chg[v] : null;
-    const chg = own && own.length ? own : v === 'R' || v === 'A' ? (P.chg[v][S.t] || []) : v === 'D' ? P.chg.D : [];
+    // Si el preparador t'ha posat l'enllaç a una sessió adaptada (Excel o TrainingPeaks, des del 15-10-2026), el botó porta a aquesta sessió i la frase
+    // ho diu, en lloc de les línies de la plantilla (que podrien no coincidir amb el que hi ha a l'enllaç).
+    const lnk = aj && aj.url && v && v !== 'N' ? aj.url : null, lnkTP = !!lnk && /trainingpeaks\.com/i.test(lnk);
+    const chg = lnk ? [this.t('ajOwn', lnkTP, v === 'D')] : own && own.length ? own : v === 'R' || v === 'A' ? (P.chg[v][S.t] || []) : v === 'D' ? P.chg.D : [];
     const sug = me && me.st === 'nodec' ? me.sug : (() => { const st = this.dayState(sc, 41); return st === 'rec' ? 'R' : st === 'prec' ? 'A' : st ? 'N' : null; })();
     const AC = this.alertC(this.tone(.47));
     const orient = noDec ? h('div', { style: { marginTop: 14, padding: '12px 14px', borderRadius: this.G.inner || 8, border: `1px solid ${AC.bd}`, background: `linear-gradient(${AC.bg}, ${AC.bg}), ${C.s1}`, display: 'grid', gridTemplateColumns: '26px minmax(0,1fr)', gap: 10, alignItems: 'start' } },
@@ -2597,7 +2605,8 @@ Reply ONLY with this JSON: {"text": "your answer", "blocs": [], "basat": ["data 
           h('span', { style: { width: 6, height: 6, flex: 'none', marginTop: 8, borderRadius: '50%', background: C.ink } }), h('span', { style: { minWidth: 0, textWrap: 'pretty' } }, x))),
         aj && aj.note ? h('span', { style: { display: 'block', marginTop: chg.length ? 12 : 0, fontSize: 14, lineHeight: 1.5, color: C.ink, textWrap: 'pretty' } }, `«${aj.note}»`) : null) : null,
       h('div', { style: { display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 260px), 1fr))', gap: 8, marginTop: 14 } },
-        v === 'D' ? null : link(this.props.sessionExcel, this.t('btnXls'), 'sheet', true, 'x'), link(this.props.sessionTP, this.t('btnTP'), 'link', v === 'D', 'tp')));
+        lnk ? link(lnk, this.t(lnkTP ? 'btnTP' : 'btnXls'), lnkTP ? 'link' : 'sheet', true, 'own')
+          : [v === 'D' ? null : link(this.props.sessionExcel, this.t('btnXls'), 'sheet', true, 'x'), link(this.props.sessionTP, this.t('btnTP'), 'link', v === 'D', 'tp')]));
   }
 
   toggleDone(key) { this.setState(st => { const nx = { ...(st.done || {}) }; if (nx[key]) delete nx[key]; else nx[key] = 1; try { localStorage.setItem('mt-desk-done', JSON.stringify(nx)); } catch (e) {} return { done: nx }; }); }
