@@ -2567,8 +2567,13 @@ Reply ONLY with this JSON: {"text": "your answer", "blocs": [], "basat": ["data 
   // suggeriment de la IA del panell («Parla amb el teu preparador abans de començar»), no una sessió nova. Al matràs es pot simular sense el panell
   // (suggeriment segons l'escenari).
   prepSesEl(sc, aj) {
-    const C = this.C, s = this.state, P = this.L().PREP, code = this.who(sc).code, g = this.PREP_G[code] || 'A', S = P.ses[g];
+    const C = this.C, s = this.state, P = this.L().PREP, code = this.who(sc).code, g = this.PREP_G[code] || 'A';
     const me = (s.prepDay && s.prepDay.ath && s.prepDay.ath[code]) || null;
+    // Des del 16-10-2026 el preparador planifica al panell: si el panell publica la sessió d'avui (sx), surt la seva (el nom, l'hora, el lloc i
+    // l'enllaç a l'Excel o a TrainingPeaks); si no, la d'aquí.
+    const sx = me && me.sx, pk = v => (v && typeof v === 'object' ? v[s.lang] ?? v.ca : v || '');
+    const S = sx ? { t: sx.t, h: String(sx.h || '').split('–')[0], name: pk(sx.n), place: pk(sx.pl) } : P.ses[g];
+    const sxTP = !!(sx && sx.url) && /trainingpeaks\.com/i.test(sx.url), urlX = sx && sx.url && !sxTP ? sx.url : this.props.sessionExcel, urlTP = sxTP ? sx.url : this.props.sessionTP;
     if (!aj && me && me.auto) aj = { v: me.auto, auto: true };
     const v = aj ? aj.v : null, noDec = !aj && (s.simNoDec || (me && me.st === 'nodec'));
     const own = me && me.chg && (v === 'R' || v === 'A') ? me.chg[v] : null;
@@ -2595,7 +2600,7 @@ Reply ONLY with this JSON: {"text": "your answer", "blocs": [], "basat": ["data 
       h('div', { style: { display: 'grid', gridTemplateColumns: '40px minmax(0,1fr)', gap: 14, alignItems: 'start' } },
         h('span', { style: { width: 40, height: 40, boxSizing: 'border-box', borderRadius: this.G.inner || 12, background: C.bg, border: `1px solid ${C.line2}`, color: C.ink, display: 'inline-flex', alignItems: 'center', justifyContent: 'center' } }, this.icon(S.t === 'fuerza' ? 'load' : 'move', 19, 1.9)),
         h('span', { style: { minWidth: 0 } },
-          h('span', { style: { display: 'block', fontSize: 12, fontWeight: 600, letterSpacing: '.01em', color: C.ink } }, `${this.t('planPrev1')} · ${S.h} · ${S.place}`),
+          h('span', { style: { display: 'block', fontSize: 12, fontWeight: 600, letterSpacing: '.01em', color: C.ink } }, [this.t('planPrev1'), S.h, S.place].filter(Boolean).join(' · ')),
           h('span', { style: { display: 'block', marginTop: 3, fontSize: 17, fontWeight: 600, lineHeight: 1.3, color: C.ink, textWrap: 'pretty' } }, S.name),
           v ? h('span', { style: { display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: 8, marginTop: 8 } }, pill, v !== 'N' ? h('span', { style: { fontSize: 13.5, color: C.ink } }, this.t('ajAdj')) : null) : null)),
       orient,
@@ -2606,7 +2611,7 @@ Reply ONLY with this JSON: {"text": "your answer", "blocs": [], "basat": ["data 
         aj && aj.note ? h('span', { style: { display: 'block', marginTop: chg.length ? 12 : 0, fontSize: 14, lineHeight: 1.5, color: C.ink, textWrap: 'pretty' } }, `«${aj.note}»`) : null) : null,
       h('div', { style: { display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 260px), 1fr))', gap: 8, marginTop: 14 } },
         lnk ? link(lnk, this.t(lnkTP ? 'btnTP' : 'btnXls'), lnkTP ? 'link' : 'sheet', true, 'own')
-          : [v === 'D' ? null : link(this.props.sessionExcel, this.t('btnXls'), 'sheet', true, 'x'), link(this.props.sessionTP, this.t('btnTP'), 'link', v === 'D', 'tp')]));
+          : [v === 'D' ? null : link(urlX, this.t('btnXls'), 'sheet', true, 'x'), link(urlTP, this.t('btnTP'), 'link', v === 'D', 'tp')]));
   }
 
   toggleDone(key) { this.setState(st => { const nx = { ...(st.done || {}) }; if (nx[key]) delete nx[key]; else nx[key] = 1; try { localStorage.setItem('mt-desk-done', JSON.stringify(nx)); } catch (e) {} return { done: nx }; }); }
